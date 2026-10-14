@@ -1,40 +1,68 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { CustomerResponseModel } from '@/features/customers/models/CustomerResponseModel.ts';
 import './AllCustomers.css';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { getAllCustomers } from '@/features/customers/api/getAllCustomers.ts';
 import { deleteCustomer } from '@/features/customers/api/deleteCustomer.ts';
 import { IsVet } from '@/context/UserContext';
+import { provincesOfCanada } from '@/features/customers/utils/provinces.ts';
+import {
+  CustomerFilter,
+  filterCustomers,
+  filterFromSearchParams,
+  hasActiveFilters,
+} from '@/features/customers/utils/customerFilter.ts';
+
+const TEXT_FILTERS: { key: keyof CustomerFilter; label: string }[] = [
+  { key: 'customerId', label: 'Customer ID' },
+  { key: 'firstName', label: 'First Name' },
+  { key: 'lastName', label: 'Last Name' },
+  { key: 'address', label: 'Address' },
+  { key: 'city', label: 'City' },
+  { key: 'telephone', label: 'Telephone' },
+];
 
 const AllCustomers: React.FC = (): JSX.Element => {
-  interface FilterModel {
-    [key: string]: string;
-    firstName: string;
-    lastName: string;
-    address: string;
-    city: string;
-    province: string;
-    telephone: string;
-  }
-
   const isVet = IsVet();
   const [customers, setCustomers] = useState<CustomerResponseModel[]>([]);
-  const [filter, setFilter] = useState<FilterModel>({
-    firstName: '',
-    lastName: '',
-    address: '',
-    city: '',
-    province: '',
-    telephone: '',
-  });
-
   const [isFilterVisible, setFilterVisible] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const filter = useMemo(
+    () => filterFromSearchParams(searchParams),
+    [searchParams]
+  );
+
+  const updateFilter = (key: keyof CustomerFilter, value: string): void => {
+    setSearchParams(
+      prev => {
+        const next = new URLSearchParams(prev);
+        if (value) next.set(key, value);
+        else next.delete(key);
+        return next;
+      },
+      { replace: true }
+    );
+  };
+
+  const clearFilters = (): void => {
+    setSearchParams({}, { replace: true });
+  };
 
   useEffect(() => {
     const getCustomers = async (): Promise<void> => {
-      const fetchedCustomers = await getAllCustomers();
-      setCustomers(fetchedCustomers);
+      try {
+        const fetchedCustomers = await getAllCustomers();
+        setCustomers(fetchedCustomers);
+      } catch (error) {
+        console.error('Failed to load customers:', error);
+        setLoadError('Unable to load customers. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     getCustomers();
@@ -55,100 +83,46 @@ const AllCustomers: React.FC = (): JSX.Element => {
       alert('Customer deletion canceled.');
     }
   };
+  const filteredCustomers = useMemo(
+    () => filterCustomers(customers, filter),
+    [customers, filter]
+  );
 
-  function isKeyOfCustomerResponseModel(
-    key: string
-  ): key is keyof CustomerResponseModel {
-    return [
-      'firstName',
-      'lastName',
-      'address',
-      'city',
-      'province',
-      'telephone',
-    ].includes(key);
-  }
+  const renderResults = (): JSX.Element => {
+    if (isLoading) {
+      return (
+        <p className="customers-state" role="status">
+          Loading customers…
+        </p>
+      );
+    }
 
-  const filteredCustomers = customers.filter(customer => {
-    return Object.keys(filter).every(key => {
-      if (!filter[key]) return true;
-      if (!isKeyOfCustomerResponseModel(key)) return true;
-      const customerValue = customer[key];
-      if (customerValue === undefined || customerValue === null) return false;
-      return customerValue
-        .toString()
-        .toLowerCase()
-        .includes(filter[key].toLowerCase());
-    });
-  });
+    if (loadError) {
+      return (
+        <p className="customers-state text-danger" role="alert">
+          {loadError}
+        </p>
+      );
+    }
 
-  return (
-    <div>
-      <NavBar />
+    if (customers.length === 0) {
+      return (
+        <p className="customers-state" role="status">
+          No customers registered.
+        </p>
+      );
+    }
 
-      <div className="customers-container">
-        <h1>Customers</h1>
+    if (filteredCustomers.length === 0) {
+      return (
+        <p className="customers-state" role="status">
+          No customers match your filters.
+        </p>
+      );
+    }
 
-        {isFilterVisible && (
-          <div className="filter-container">
-            <button
-              className="btn btn-primary filter-toggle"
-              onClick={() => setFilterVisible(!isFilterVisible)}
-            >
-              {isFilterVisible ? 'Hide Filter' : 'Show Filter'}
-            </button>
-            <input
-              type="text"
-              placeholder="First Name"
-              value={filter.firstName}
-              onChange={e =>
-                setFilter({ ...filter, firstName: e.target.value })
-              }
-            />
-            <input
-              type="text"
-              placeholder="Last Name"
-              value={filter.lastName}
-              onChange={e => setFilter({ ...filter, lastName: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Address"
-              value={filter.address}
-              onChange={e => setFilter({ ...filter, address: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="City"
-              value={filter.city}
-              onChange={e => setFilter({ ...filter, city: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Province"
-              value={filter.province}
-              onChange={e => setFilter({ ...filter, province: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Telephone"
-              value={filter.telephone}
-              onChange={e =>
-                setFilter({ ...filter, telephone: e.target.value })
-              }
-            />
-          </div>
-        )}
-
-        {!isFilterVisible && (
-          <button
-            className="btn btn-primary filter-toggle"
-            onClick={() => setFilterVisible(!isFilterVisible)}
-          >
-            {isFilterVisible ? 'Hide Filter' : 'Show Filter'}
-          </button>
-        )}
-
+    return (
+      <div className="customers-table-wrapper">
         <table>
           <thead>
             <tr>
@@ -201,7 +175,81 @@ const AllCustomers: React.FC = (): JSX.Element => {
               </tr>
             ))}
           </tbody>
-        </table>
+        </table>{' '}
+      </div>
+    );
+  };
+
+  return (
+    <div>
+      <NavBar />
+
+      <div className="customers-container">
+        <h1>Customers</h1>
+        <div className="customers-filter-bar">
+          <button
+            type="button"
+            className="btn btn-primary customers-filter-toggle"
+            onClick={() => setFilterVisible(!isFilterVisible)}
+            aria-expanded={isFilterVisible}
+            aria-controls="customer-filters"
+          >
+            {isFilterVisible ? 'Hide Filter' : 'Show Filter'}
+          </button>
+
+          {isFilterVisible && (
+            <div id="customer-filters" className="customers-filters">
+              {TEXT_FILTERS.map(({ key, label }) => (
+                <Fragment key={key}>
+                  <label htmlFor={`filter-${key}`} className="visually-hidden">
+                    {label}
+                  </label>
+                  <input
+                    id={`filter-${key}`}
+                    type="text"
+                    placeholder={label}
+                    value={filter[key]}
+                    onChange={e => updateFilter(key, e.target.value)}
+                  />
+                </Fragment>
+              ))}
+
+              <label htmlFor="filter-province" className="visually-hidden">
+                Province
+              </label>
+              <select
+                id="filter-province"
+                value={filter.province}
+                onChange={e => updateFilter('province', e.target.value)}
+              >
+                <option value="">All provinces</option>
+                {provincesOfCanada.map(province => (
+                  <option key={province} value={province}>
+                    {province}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+        {!isLoading && !loadError && (
+          <div className="customers-filter-summary">
+            <span role="status" aria-live="polite">
+              Showing {filteredCustomers.length} of {customers.length} customers
+            </span>
+            {hasActiveFilters(filter) && (
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={clearFilters}
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        )}
+
+        {renderResults()}
       </div>
     </div>
   );

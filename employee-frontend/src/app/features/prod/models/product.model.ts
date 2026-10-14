@@ -23,6 +23,8 @@ export interface Product {
   image?: FileDetails | null;
   productName: string;
   productDescription: string;
+  productNameFr?: string | null;
+  productDescriptionFr?: string | null;
   productSalePrice: number;
   averageRating?: number;
   requestCount?: number;
@@ -39,6 +41,8 @@ export interface ProductRequest {
   image?: FileDetails;
   productName: string;
   productDescription: string;
+  productNameFr?: string | null;
+  productDescriptionFr?: string | null;
   productSalePrice: number;
   productQuantity: number;
   isUnlisted: boolean;

@@ -648,6 +648,61 @@ public class CartServiceClientTest {
                                 .verifyComplete();
         }
 
+        @Test
+        void testUpdateShippingMethod_Success() throws InterruptedException {
+                String cartId = "cart-shipping";
+                String responseBody = """
+                        {
+                                "cartId": "cart-shipping",
+                                "shippingMethod": "STANDARD",
+                                "shippingCost": 9.99
+                        }
+                        """;
+
+                prepareResponse(response -> response
+                                .setHeader("Content-Type", "application/json")
+                                .setBody(responseBody)
+                                .setResponseCode(200));
+
+                Mono<CartResponseDTO> result = mockCartServiceClient.updateShippingMethod(cartId, "STANDARD");
+
+                StepVerifier.create(result)
+                                .assertNext(cart -> {
+                                        assertEquals(cartId, cart.getCartId());
+                                        assertEquals("STANDARD", cart.getShippingMethod());
+                                        assertEquals(9.99, cart.getShippingCost());
+                                })
+                                .verifyComplete();
+
+                var recordedRequest = mockWebServer.takeRequest();
+                assertEquals("PUT", recordedRequest.getMethod());
+                assertEquals("/api/v1/carts/" + cartId + "/shipping", recordedRequest.getPath());
+                assertThat(recordedRequest.getBody().readUtf8()).contains("\"shippingMethod\":\"STANDARD\"");
+        }
+
+        @Test
+        void testUpdateShippingMethod_InvalidInput() {
+                String responseBody = """
+                        {
+                                "message": "Invalid shipping method. Allowed values are PICKUP, STANDARD, EXPRESS"
+                        }
+                        """;
+
+                prepareResponse(response -> response
+                                .setHeader("Content-Type", "application/json")
+                                .setBody(responseBody)
+                                .setResponseCode(422));
+
+                Mono<CartResponseDTO> result = mockCartServiceClient.updateShippingMethod("cart-shipping", "OVERNIGHT");
+
+                StepVerifier.create(result)
+                                .expectErrorSatisfies(throwable -> {
+                                        assertThat(throwable).isInstanceOf(InvalidInputException.class);
+                                        assertThat(throwable.getMessage()).contains("Invalid shipping method");
+                                })
+                                .verify();
+        }
+
     @Test
     void testAddProductToCart_InvalidInput_ErrorFromResponse() {
         String cartId = "98f7b33a-d62a-420a-a84a-05a27c85fc91";
@@ -1375,5 +1430,174 @@ public class CartServiceClientTest {
                 .expectNextMatches(List::isEmpty)
                 .verifyComplete();
     }
+
+    @Test
+    void testGetOrdersByCustomerId_Success() throws InterruptedException {
+        // Arrange
+        String customerId = "customer-123";
+
+        String responseBody = """
+                [
+                    {
+                        "orderId": "order-123",
+                        "customerId": "customer-123",
+                        "customerName": "Test Customer",
+                        "orderDate": "2026-10-11T14:30:00",
+                        "products": [
+                            {
+                                "productId": "product-123",
+                                "productName": "Dog Food",
+                                "productSalePrice": 50.0,
+                                "quantityInCart": 2
+                            }
+                        ],
+                        "subtotal": 100.0,
+                        "promoPercent": null,
+                        "tvq": 9.98,
+                        "tvc": 5.0,
+                        "total": 114.98,
+                        "invoiceId": null
+                    }
+                ]
+                """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(responseBody));
+
+        // Act & Assert
+        StepVerifier.create(
+                        mockCartServiceClient.getOrdersByCustomerId(customerId)
+                )
+                .assertNext(order -> {
+                    assertEquals("order-123", order.getOrderId());
+                    assertEquals(customerId, order.getCustomerId());
+                    assertEquals("Test Customer", order.getCustomerName());
+                    assertEquals(1, order.getProducts().size());
+                    assertEquals("Dog Food",
+                            order.getProducts().get(0).getProductName());
+                    assertEquals(100.0, order.getSubtotal(), 0.001);
+                    assertEquals(9.98, order.getTvq(), 0.001);
+                    assertEquals(5.0, order.getTvc(), 0.001);
+                    assertEquals(114.98, order.getTotal(), 0.001);
+                })
+                .verifyComplete();
+
+        var request = mockWebServer.takeRequest();
+
+        assertEquals("GET", request.getMethod());
+        assertEquals(
+                "/api/v1/orders/customer/" + customerId,
+                request.getPath()
+        );
+    }
+
+    @Test
+    void testGetOrdersByCustomerId_MultipleOrders() {
+        // Arrange
+        String customerId = "customer-123";
+
+        String responseBody = """
+                [
+                    {
+                        "orderId": "order-123",
+                        "customerId": "customer-123",
+                        "total": 114.98
+                    },
+                    {
+                        "orderId": "order-456",
+                        "customerId": "customer-123",
+                        "total": 50.0
+                    }
+                ]
+                """;
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(responseBody));
+
+        // Act & Assert
+        StepVerifier.create(
+                        mockCartServiceClient.getOrdersByCustomerId(customerId)
+                )
+                .expectNextMatches(order ->
+                        order.getOrderId().equals("order-123") &&
+                                order.getCustomerId().equals(customerId))
+                .expectNextMatches(order ->
+                        order.getOrderId().equals("order-456") &&
+                                order.getCustomerId().equals(customerId))
+                .verifyComplete();
+    }
+
+    @Test
+    void testGetOrdersByCustomerId_NoOrders_ReturnsEmpty() {
+        // Arrange
+        String customerId = "customer-no-orders";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody("[]"));
+
+        // Act & Assert
+        StepVerifier.create(
+                        mockCartServiceClient.getOrdersByCustomerId(customerId)
+                )
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void testGetOrdersByCustomerId_NotFound_ThrowsException() {
+        // Arrange
+        String customerId = "customer-missing";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody("""
+                        {
+                            "message": "Customer not found"
+                        }
+                        """));
+
+        // Act & Assert
+        StepVerifier.create(
+                        mockCartServiceClient.getOrdersByCustomerId(customerId)
+                )
+                .expectErrorMatches(error ->
+                        error instanceof WebClientResponseException &&
+                                ((WebClientResponseException) error)
+                                        .getStatusCode().value() == 404)
+                .verify();
+    }
+
+    @Test
+    void testGetOrdersByCustomerId_ServerError_ThrowsException() {
+        // Arrange
+        String customerId = "customer-123";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("""
+                        {
+                            "message": "Internal Server Error"
+                        }
+                        """));
+
+        // Act & Assert
+        StepVerifier.create(
+                        mockCartServiceClient.getOrdersByCustomerId(customerId)
+                )
+                .expectErrorMatches(error ->
+                        error instanceof WebClientResponseException &&
+                                ((WebClientResponseException) error)
+                                        .getStatusCode().value() == 500)
+                .verify();
+    }
+
 
 }

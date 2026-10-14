@@ -1,5 +1,10 @@
+import { useTranslation } from 'react-i18next';
+import {
+  localizedProduct,
+  normalizeProductSearch,
+} from '@/features/products/utils/localizedProduct';
 import * as React from 'react';
-import { useState, useEffect, useCallback, JSX } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, JSX } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
 import './ProductList.css';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
@@ -12,8 +17,12 @@ import './components/StarRating.css';
 import { getAllProductBundles } from './api/getAllProductBundles';
 import { ProductBundleModel } from './models/ProductModels/ProductBundleModel';
 import ProductBundle from './components/ProductBundle';
+import './components/Image.css';
 //import ProductSearch from './components/ProductSearch';
 import Reveal from '@/shared/components/animations/Reveal';
+import { loadRecentlyViewed } from './utils/recentlyViewed';
+
+const CATALOG_PAGE_SIZE = 8;
 
 interface ProductsListProps {
   searchQuery: string;
@@ -36,6 +45,8 @@ const ProductList = function Productlist({
   filters,
   sortCriteria,
 }: ProductsListProps): JSX.Element {
+  const { t, i18n } = useTranslation('products');
+  const language = i18n.resolvedLanguage || i18n.language || 'en';
   const [productList, setProductList] = useState<ProductModel[]>([]);
   const [bundleList, setBundleList] = useState<ProductBundleModel[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -44,6 +55,18 @@ const ProductList = function Productlist({
     ProductModel[]
   >([]);
   const [filteredList, setFilteredList] = useState<ProductModel[]>([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const catalogRef = useRef<HTMLDivElement>(null);
+
+  const handlePageChange = (direction: number): void => {
+    setCurrentPage(page => page + direction);
+    catalogRef.current?.scrollIntoView({
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'instant'
+        : 'smooth',
+      block: 'start',
+    });
+  };
 
   const fetchProducts = useCallback(async (): Promise<void> => {
     setIsLoading(true);
@@ -77,11 +100,18 @@ const ProductList = function Productlist({
 
   useEffect(() => {
     fetchProducts();
-    const saved = localStorage.getItem(
-      `recentlyClickedProducts_${user.userId}`
-    );
-    if (saved) setRecentlyClickedProducts(JSON.parse(saved));
-  }, [fetchProducts, user.userId]);
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setRecentlyClickedProducts([]);
+    void loadRecentlyViewed(user.userId).then(products => {
+      if (!cancelled) setRecentlyClickedProducts(products);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [user.userId]);
 
   useEffect(() => {
     const sorted = [...productList];
@@ -106,16 +136,42 @@ const ProductList = function Productlist({
     if (searchQuery === '') {
       setFilteredList(sorted);
     } else {
-      const query = searchQuery.toLowerCase();
+      const query = normalizeProductSearch(searchQuery);
       setFilteredList(
         sorted.filter(
           p =>
-            p.productName.toLowerCase().includes(query) ||
-            p.productType?.toLowerCase().includes(query)
+            normalizeProductSearch(localizedProduct(p, language).name).includes(
+              query
+            ) ||
+            normalizeProductSearch(
+              t(`types.${(p.productType || '').toUpperCase()}`, {
+                defaultValue: p.productType || '',
+              })
+            ).includes(query)
         )
       );
     }
-  }, [sortCriteria, productList, searchQuery]);
+  }, [sortCriteria, productList, searchQuery, language, t]);
+
+  const totalPages = Math.ceil(filteredList.length / CATALOG_PAGE_SIZE);
+  const firstVisibleProduct = currentPage * CATALOG_PAGE_SIZE + 1;
+  const lastVisibleProduct = Math.min(
+    (currentPage + 1) * CATALOG_PAGE_SIZE,
+    filteredList.length
+  );
+
+  const paginatedProducts = useMemo(() => {
+    const startIndex = currentPage * CATALOG_PAGE_SIZE;
+    return filteredList.slice(startIndex, startIndex + CATALOG_PAGE_SIZE);
+  }, [currentPage, filteredList]);
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [filters, searchQuery, sortCriteria]);
+
+  useEffect(() => {
+    setCurrentPage(page => Math.min(page, Math.max(totalPages - 1, 0)));
+  }, [totalPages]);
 
   const handleProductClick = (product: ProductModel): void => {
     setRecentlyClickedProducts(prev => {
@@ -133,7 +189,7 @@ const ProductList = function Productlist({
   const RecentlyViewedProducts = (): JSX.Element => (
     <Reveal delay={80}>
       <div className="products-section-container ">
-        <h2 className="section-title category-title">Recently Seen</h2>
+        <h2 className="section-title category-title">{t('recent')}</h2>
         <div className="recently-viewed-flex">
           {recentlyClickedProducts.length > 0 ? (
             recentlyClickedProducts
@@ -144,36 +200,93 @@ const ProductList = function Productlist({
                 </Reveal>
               ))
           ) : (
-            <p>No Recently Seen Items.</p>
+            <p>{t('noRecent')}</p>
           )}
         </div>
       </div>
     </Reveal>
   );
-
   return (
     <div className="product-list-container">
       <div className="main-content">
         {view === 'catalog' && (
           <Reveal delay={80}>
-            <div className="products-section-container ">
-              <h2 className="section-title category-title">Catalog</h2>
+            <div ref={catalogRef} className="products-section-container ">
+              <h2 className="section-title category-title">{t('catalog')}</h2>
               {isLoading ? (
-                <p>Loading items...</p>
+                <div className="products-loading-state">
+                  <span
+                    className="image-loading-spinner"
+                    role="status"
+                    aria-label={t('loading')}
+                  />
+                </div>
               ) : filteredList.length > 0 ? (
-                <div className="grid">
-                  {filteredList.map((p, i) => (
+                <div className="grid catalog-grid">
+                  {paginatedProducts.map((p, i) => (
                     <Reveal key={p.productId} delay={i * 60 + 120}>
                       <div onClick={() => handleProductClick(p)}>
-                        <Product product={p} />
+                        <Product
+                          product={
+                            productList.find(
+                              current => current.productId === p.productId
+                            ) ?? p
+                          }
+                        />
                       </div>
                     </Reveal>
                   ))}
                 </div>
               ) : (
                 <p style={{ textAlign: 'center', margin: '40px 0' }}>
-                  No items found.
+                  {t('noItems')}
                 </p>
+              )}
+              {!isLoading && filteredList.length > 0 && (
+                <div className="catalog-pagination-container">
+                  <nav
+                    className="catalog-pagination"
+                    aria-label="Product pages"
+                  >
+                    <button
+                      type="button"
+                      className="catalog-pagination-button"
+                      onClick={() => handlePageChange(-1)}
+                      disabled={currentPage === 0}
+                      aria-label="Previous product page"
+                      title="Previous page"
+                    >
+                      <span aria-hidden="true">&lsaquo;</span>
+                    </button>
+
+                    <span
+                      className="catalog-page-number active"
+                      aria-current="page"
+                      aria-label={`Current product page ${currentPage + 1}`}
+                    >
+                      {currentPage + 1}
+                    </span>
+
+                    <button
+                      type="button"
+                      className="catalog-pagination-button"
+                      onClick={() => handlePageChange(1)}
+                      disabled={currentPage + 1 >= totalPages}
+                      aria-label="Next product page"
+                      title="Next page"
+                    >
+                      <span aria-hidden="true">&rsaquo;</span>
+                    </button>
+                  </nav>
+
+                  <span
+                    className="catalog-pagination-status"
+                    aria-live="polite"
+                  >
+                    {firstVisibleProduct}&ndash;{lastVisibleProduct} /{' '}
+                    {filteredList.length}
+                  </span>
+                </div>
               )}
             </div>
           </Reveal>
@@ -183,7 +296,7 @@ const ProductList = function Productlist({
           <>
             <Reveal delay={80}>
               <div className="products-section-container ">
-                <h2 className="section-title">Bundles</h2>
+                <h2 className="section-title">{t('bundles')}</h2>
                 <div className="grid product-bundles-grid">
                   {bundleList.length > 0 ? (
                     bundleList.map((b, i) => (
@@ -192,7 +305,7 @@ const ProductList = function Productlist({
                       </Reveal>
                     ))
                   ) : (
-                    <p>No Bundles Available</p>
+                    <p>{t('noBundles')}</p>
                   )}
                 </div>
               </div>

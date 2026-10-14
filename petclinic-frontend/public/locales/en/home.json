@@ -13,29 +13,37 @@
     "listView": "List View",
     "calendarView": "Calendar View",
     "mySchedule": "My Schedule",
-    "inventories": "Inventories",
     "promos": "Promos",
     "shop": "Shop",
     "carts": "Carts",
     "signup": "Signup",
+    "login": "Login",
+    "profile": "Profile",
+    "editProfile": "Edit Profile",
+    "logout": "Logout",
+    "privacy": "Privacy Policy",
+    "contact": "Contact",
     "loadingCart": "Loading cart...",
     "viewCart": "View Cart",
     "shoppingCart": "Shopping Cart",
     "cartHasItems": "Cart has {{count}} items",
-    "login": "Login",
-    "profile": "Profile",
-    "editProfile": "Edit Profile",
     "adminPanel": "Admin Panel",
-    "receptionistPanel": "Receptionist Panel",
-    "logout": "Logout",
-    "privacy": "Privacy Policy",
-    "contact": "Contact"
+    "receptionistPanel": "Receptionist Panel"
   },
   "highlights": {
     "ariaLabel": "Highlights",
-    "rating": {"title":  "4.9/5 average rating", "label": "from pet parents"},
-    "team": {"title": "Experienced team", "label": "Board-certified vets"},
-    "sameDay": {"title": "Same-day appointments", "label": "When available"}
+    "rating": {
+      "title": "4.9/5 average rating",
+      "label": "from pet parents"
+    },
+    "team": {
+      "title": "Experienced team",
+      "label": "Board-certified vets"
+    },
+    "sameDay": {
+      "title": "Same-day appointments",
+      "label": "When available"
+    }
   },
   "loading": "Loading...",
   "intro": {
@@ -78,7 +86,7 @@
   "featuredVets": {
     "ariaLabel": "Featured veterinarians",
     "title": "Featured Veterinarians"
-   },
+  },
   "faq": {
     "ariaLabel": "FAQ",
     "title": "FAQ",
@@ -90,7 +98,6 @@
     "messageAway": "Our team is just a message away.",
     "buttonContact": "Contact Us",
     "buttonBook": "Book Appointment"
-
   },
   "allRightsReserved": "Champlain Pet Clinic. All rights reserved.",
   "explore": "Explore",
@@ -104,5 +111,4 @@
     },
     "closed": "Closed"
   }
-
 }

@@ -12,7 +12,9 @@ import { ProductModel } from '../models/ProductModel';
 import './cart-shared.css';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
-import { FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart, FaHeart, FaRegHeart } from 'react-icons/fa';
+import { useAddToWishlist } from '../api/addToWishlistFromProducts';
+import { useRemoveFromWishlistByIcon } from '../api/removeProductFromWishlist';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
 import getErrorMessage from '@/shared/api/getErrorMessage';
@@ -20,7 +22,9 @@ import { formatPrice } from '../utils/formatPrice';
 import {
   applyPromo,
   clearPromo,
+  updateShippingMethod,
   type CartDetailsModel,
+  type ShippingMethod,
 } from '@/shared/api/cart';
 import {
   IsAdmin,
@@ -37,6 +41,8 @@ import {
 } from '../api/cartEvent';
 import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
+import { getCustomerOrders } from '../api/getCustomerOrders';
+import type { OrderModel } from '../models/OrderModel';
 interface ProductAPIResponse {
   productId: string;
   imageId?: string;
@@ -91,8 +97,39 @@ const UserCart: React.FC = () => {
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const [movingAll, setMovingAll] = useState<boolean>(false);
+  const [orders, setOrders] = useState<OrderModel[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
+  const [shippingMethod, setShippingMethod] =
+    useState<ShippingMethod>('PICKUP');
+  const [shippingCost, setShippingCost] = useState<number>(0);
+
+  const fetchOrders = useCallback(async (): Promise<void> => {
+    if (!customerId) {
+      setOrders([]);
+      setOrdersLoading(false);
+      return;
+    }
+
+    setOrdersLoading(true);
+    setOrdersError(null);
+
+    try {
+      const data = await getCustomerOrders(customerId);
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      setOrdersError(t('orders.loadFailed'));
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, [customerId, t]);
+
+  useEffect(() => {
+    void fetchOrders();
+  }, [fetchOrders]);
 
   const toProductModel = useCallback(
     (product: ProductAPIResponse): ProductModel => ({
@@ -188,6 +225,10 @@ const UserCart: React.FC = () => {
       setPromoPercent(
         typeof cartData.promoPercent === 'number' ? cartData.promoPercent : null
       );
+      setShippingMethod(cartData.shippingMethod ?? 'PICKUP');
+      setShippingCost(
+        typeof cartData.shippingCost === 'number' ? cartData.shippingCost : 0
+      );
 
       emitCartMessage(
         typeof cartData.message === 'string' ? cartData.message : undefined,
@@ -260,6 +301,34 @@ const UserCart: React.FC = () => {
         'error'
       );
     }
+  };
+
+  const { addToWishlist: addRecommendationToWishlist } = useAddToWishlist();
+  const { removeFromWishlistByIcon } = useRemoveFromWishlistByIcon();
+
+  const isInWishlist = (productId: string): boolean =>
+    wishlistItems.some(p => p.productId === productId);
+
+  const toggleRecommendationWishlist = async (
+    productId: string
+  ): Promise<void> => {
+    let success;
+    if (isInWishlist(productId)) {
+      success = await removeFromWishlistByIcon(productId);
+    } else {
+      success = await addRecommendationToWishlist(productId, 1);
+    }
+
+    if (!success) {
+      showToast(t('errors.updateWishlistFailed'), 'error');
+      return;
+    }
+
+    const { data } = await axiosInstance.get<CartDetailsModel>(
+      `/carts/${cartId}`,
+      { useV2: false }
+    );
+    syncCartState(data);
   };
 
   // Recommendation purchases state
@@ -347,12 +416,16 @@ const UserCart: React.FC = () => {
   const promoDiscount =
     promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
   const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
+  const effectiveShippingCost = cartItems.length > 0 ? shippingCost : 0;
+  const taxableSubtotal = roundToCents(
+    discountedSubtotal + effectiveShippingCost
+  );
   const resolvedTaxLines = computeTaxes(
-    discountedSubtotal,
+    taxableSubtotal,
     billingInfo?.province
   ).map(line => ({
     ...line,
-    amount: line.amount ?? roundToCents(discountedSubtotal * line.rate),
+    amount: line.amount ?? roundToCents(taxableSubtotal * line.rate),
   }));
   const totalTax = roundToCents(
     resolvedTaxLines.reduce((acc, line) => acc + (line.amount ?? 0), 0)
@@ -360,7 +433,7 @@ const UserCart: React.FC = () => {
 
   const effectiveDiscount = promoDiscount;
 
-  const total = roundToCents(discountedSubtotal + totalTax);
+  const total = roundToCents(taxableSubtotal + totalTax);
 
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
@@ -567,6 +640,25 @@ const UserCart: React.FC = () => {
       showToast(t('toasts.promoRemoved'), 'success');
     } catch (err: unknown) {
       showToast(apiErrorMessage(err, t('errors.removePromoFailed')), 'error');
+    }
+  };
+
+  const onShippingMethodChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ): Promise<void> => {
+    if (blockIfReadOnly()) return;
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
+
+    const nextShippingMethod = event.target.value as ShippingMethod;
+    try {
+      const updatedCart = await updateShippingMethod(
+        existingCartId,
+        nextShippingMethod
+      );
+      syncCartState(updatedCart, t('shipping.updated'));
+    } catch (err: unknown) {
+      showToast(apiErrorMessage(err, t('shipping.updateFailed')), 'error');
     }
   };
 
@@ -861,13 +953,20 @@ const UserCart: React.FC = () => {
       );
       const invoiceSubtotal = invoiceSubtotalCents / 100;
       const usedBilling = billing ?? billingInfo ?? null;
+      const shippingCents = Math.round(effectiveShippingCost * 100);
+      const discountCents = Math.round(effectiveDiscount * 100);
+      const invoiceTaxableSubtotalCents = Math.max(
+        0,
+        invoiceSubtotalCents - discountCents + shippingCents
+      );
+      const invoiceTaxableSubtotal = invoiceTaxableSubtotalCents / 100;
 
       const invoiceTaxLines = computeTaxes(
-        invoiceSubtotal,
+        invoiceTaxableSubtotal,
         usedBilling?.province
       ).map(line => ({
         ...line,
-        amount: line.amount ?? roundToCents(invoiceSubtotal * line.rate),
+        amount: line.amount ?? roundToCents(invoiceTaxableSubtotal * line.rate),
       }));
       const invoiceTaxCents = invoiceTaxLines.map(line =>
         Math.round((line.amount ?? 0) * 100)
@@ -876,9 +975,8 @@ const UserCart: React.FC = () => {
         (sum, cents) => sum + cents,
         0
       );
-      const discountCents = Math.round(effectiveDiscount * 100);
       const invoiceTotalCents =
-        invoiceSubtotalCents + invoiceTaxTotalCents - discountCents;
+        invoiceTaxableSubtotalCents + invoiceTaxTotalCents;
       const invoiceTvq = (invoiceTaxCents[0] ?? 0) / 100;
       const invoiceTvc =
         invoiceTaxCents.slice(1).reduce((sum, cents) => sum + cents, 0) / 100;
@@ -900,9 +998,12 @@ const UserCart: React.FC = () => {
         date: new Date().toISOString(),
         items: invoiceItemsForFull,
         subtotal: invoiceSubtotal,
+        taxableSubtotal: invoiceTaxableSubtotal,
         tvq: invoiceTvq,
         tvc: invoiceTvc,
         discount: effectiveDiscount,
+        shippingMethod,
+        shippingCost: effectiveShippingCost,
         total: invoiceTotal,
       };
       setLastInvoice(newInvoice);
@@ -910,10 +1011,27 @@ const UserCart: React.FC = () => {
       setCheckoutMessage(t('toasts.checkoutSuccess'));
       setCartItems([]);
       setCartItemCount(0);
+      setShippingMethod('PICKUP');
+      setShippingCost(0);
       setIsCheckoutModalOpen(false);
 
       // Reset LS so navbar badge = 0 without API
       setCartCountInLS(0);
+
+      // Refresh cart data to retrieve the newly created order
+
+      await fetchOrders();
+
+      try {
+        const { data } = await axiosInstance.get<CartDetailsModel>(
+          `/carts/${cartId}`,
+          { useV2: false }
+        );
+
+        syncCartState(data);
+      } catch (err) {
+        console.error('Failed to refresh orders after checkout:', err);
+      }
 
       // Fetch recent purchases after checkout
       if (customerId) {
@@ -996,6 +1114,12 @@ const UserCart: React.FC = () => {
   const hasMovableWishlistItems = wishlistItems.some(
     item => item.productQuantity == null || item.productQuantity > 0
   );
+
+  const displayAddToCartOrPurchaseAgain = (productId: string): string => {
+    return recentPurchasesList.some(item => item.productId === productId)
+      ? t('buttons.purchaseAgain')
+      : t('buttons.addToCart');
+  };
 
   return (
     <div>
@@ -1125,10 +1249,46 @@ const UserCart: React.FC = () => {
                 )}
               </div>
 
+              {cartItems.length > 0 && (
+                <div className="voucher-code-section" style={{ marginTop: 12 }}>
+                  <label htmlFor="shipping-method">{t('shipping.label')}</label>
+                  <select
+                    id="shipping-method"
+                    value={shippingMethod}
+                    onChange={onShippingMethodChange}
+                    className="shipping-method-select"
+                  >
+                    <option value="PICKUP">
+                      {t('shipping.pickup', { price: formatPrice(0) })}
+                    </option>
+                    <option value="STANDARD">
+                      {t('shipping.standard', { price: formatPrice(9.99) })}
+                    </option>
+                    <option value="EXPRESS">
+                      {t('shipping.express', { price: formatPrice(19.99) })}
+                    </option>
+                  </select>
+                </div>
+              )}
+
               <div className="CartSummary">
                 <h3>{t('summary.title')}</h3>
                 <p className="summary-item">
-                  {t('summary.subtotal')} {formatPrice(subtotal)}
+                  {t('summary.itemsSubtotal')} {formatPrice(subtotal)}
+                </p>
+                <p className="summary-item">
+                  {promoPercent != null
+                    ? t('summary.discountWithPercent', {
+                        percent: promoPercent,
+                      })
+                    : t('summary.discount')}{' '}
+                  {formatPrice(effectiveDiscount)}
+                </p>
+                <p className="summary-item">
+                  {t('summary.shipping')} {formatPrice(effectiveShippingCost)}
+                </p>
+                <p className="summary-item">
+                  {t('summary.subtotal')} {formatPrice(taxableSubtotal)}
                 </p>
                 {resolvedTaxLines.map(line => (
                   <p key={`${line.name}-${line.rate}`} className="summary-item">
@@ -1141,14 +1301,6 @@ const UserCart: React.FC = () => {
                     {t('summary.totalTaxes')} {formatPrice(totalTax)}
                   </p>
                 )}
-                <p className="summary-item">
-                  {promoPercent != null
-                    ? t('summary.discountWithPercent', {
-                        percent: promoPercent,
-                      })
-                    : t('summary.discount')}{' '}
-                  {formatPrice(effectiveDiscount)}
-                </p>
                 <p className="total-price summary-item">
                   {t('summary.total')} {formatPrice(total)}
                 </p>
@@ -1180,6 +1332,97 @@ const UserCart: React.FC = () => {
           )}
         </div>
 
+        {/* Previous Orders */}
+        <div className="orders-section cart-panel cart-panel--padded">
+          <h2>{t('orders.title')}</h2>
+
+          {ordersLoading ? (
+            <p>{t('orders.loading')}</p>
+          ) : ordersError ? (
+            <p className="error">{ordersError}</p>
+          ) : orders.length === 0 ? (
+            <p>{t('orders.empty')}</p>
+          ) : (
+            <div className="orders-list">
+              {orders.map(order => (
+                <div key={order.orderId} className="order-card cart-card">
+                  <div className="order-header">
+                    <h3>{t('orders.orderNumber', { id: order.orderId })}</h3>
+
+                    <p>
+                      {t('orders.placedOn')}{' '}
+                      {new Date(order.orderDate).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <div className="order-products">
+                    {order.products.map(item => (
+                      <div key={item.productId} className="order-product">
+                        <div
+                          className="recent-purchase-image"
+                          onClick={() =>
+                            redirectToProductPageOnClick(item.productId)
+                          }
+                        >
+                          <ImageContainer
+                            productId={item.productId}
+                            imageId={item.imageId}
+                          />
+                        </div>
+
+                        <div className="order-product-details">
+                          <h4>{item.productName}</h4>
+
+                          <p>
+                            {t('orders.quantity')} {item.quantityInCart}
+                          </p>
+
+                          <p>
+                            {t('orders.each', {
+                              price: formatPrice(item.productSalePrice),
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="order-footer">
+                    <span>
+                      {t('orders.subtotal')} {formatPrice(order.subtotal)}
+                    </span>
+                    <span>
+                      {order.shippingMethod
+                        ? t('orders.shippingWithMethod', {
+                            method: order.shippingMethod,
+                          })
+                        : t('orders.shipping')}{' '}
+                      {formatPrice(order.shippingCost ?? 0)}
+                    </span>
+                    <span>
+                      {t('orders.tvq')} {formatPrice(order.tvq)}
+                    </span>
+                    <span>
+                      {t('orders.tvc')} {formatPrice(order.tvc)}
+                    </span>
+
+                    {order.promoPercent != null && (
+                      <span>
+                        {t('orders.promo', { percent: order.promoPercent })}
+                      </span>
+                    )}
+
+                    <strong>
+                      {t('orders.total')} {formatPrice(order.total)}
+                    </strong>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Recent purchases*/}
         <div className="recent-purchases-section cart-panel cart-panel--padded">
           <h2>{t('recent.title')}</h2>
           <div className="recent-purchases-list cart-scroll-strip">
@@ -1250,7 +1493,7 @@ const UserCart: React.FC = () => {
 
         {/* Wishlist */}
         <div className="wishlist-section cart-panel cart-panel--padded">
-          {/* Header with Move All button */}
+          {/* Header with Add All button */}
           <div
             className="wishlist-header"
             style={{
@@ -1350,6 +1593,18 @@ const UserCart: React.FC = () => {
                   key={item.productId}
                   className="recommendation-purchase-card cart-card"
                 >
+                  <button
+                    className="wishlist-heart-btn"
+                    title="Add to Wishlist"
+                    onClick={() => toggleRecommendationWishlist(item.productId)}
+                  >
+                    {isInWishlist(item.productId) && (
+                      <FaHeart style={{ color: '#e11d48' }} />
+                    )}
+                    {!isInWishlist(item.productId) && (
+                      <FaRegHeart style={{ color: '#000' }} />
+                    )}
+                  </button>
                   <div className="recent-purchase-image-container">
                     <div
                       onClick={() =>
@@ -1367,7 +1622,7 @@ const UserCart: React.FC = () => {
                     {item.productName}
                   </div>
                   <div className="recommendation-product-price recent-purchase-price">
-                    ${formatPrice(item.productSalePrice)}
+                    {formatPrice(item.productSalePrice)}
                   </div>
                   <div className="recommendation-qty-row recent-purchase-qty-row">
                     <label
@@ -1396,7 +1651,7 @@ const UserCart: React.FC = () => {
                     className="purchase-again-btn cart-button cart-button--brand"
                     onClick={() => handlePurchaseRecommendation(item)}
                   >
-                    {t('buttons.purchaseAgain')}
+                    {displayAddToCartOrPurchaseAgain(item.productId)}
                   </button>
                   <div className="recommendation-total recent-purchase-total">
                     {t('summary.total')} $

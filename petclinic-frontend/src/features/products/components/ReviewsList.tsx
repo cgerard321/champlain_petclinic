@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { JSX, useEffect, useState } from 'react';
 import { RatingModel } from '@/features/products/models/ProductModels/RatingModel.ts';
 import { getUserRatingsForProduct } from '@/features/products/api/getUserRatingsForProduct.ts';
@@ -17,6 +18,7 @@ import { Reveal } from '@/shared/components';
 import { MdClear } from 'react-icons/md';
 import './ReviewsList.css';
 import Stack from 'react-bootstrap/Stack';
+import { likeReview } from '@/features/products/api/likeReview.ts';
 
 interface ReviewListProps {
   productId: string | undefined;
@@ -35,6 +37,7 @@ export function ReviewsList({
   onModifyReviews,
   currentProduct,
 }: ReviewListProps): JSX.Element {
+  const { t } = useTranslation('products');
   const [productReviews, setProductReviews] = useState<RatingModel[]>([]);
   const [currentUserReview, setCurrentUserReview] = useState<RatingModel>({
     rating: 0,
@@ -63,7 +66,17 @@ export function ReviewsList({
   const fetchReviews = async (): Promise<void> => {
     if (!productId) return;
     try {
-      const reviews = await getUserRatingsForProduct(productId);
+      let reviews: RatingModel[];
+      try {
+        reviews = await getUserRatingsForProduct(productId, isAuthenticated);
+      } catch (err) {
+        if (!isAuthenticated) throw err;
+        console.warn(
+          'Personalized ratings unavailable, using public list',
+          err
+        );
+        reviews = await getUserRatingsForProduct(productId);
+      }
       setProductReviews(reviews.filter((r: RatingModel) => r.review !== ''));
     } catch (err) {
       console.error('Failed to fetch product ratings', err);
@@ -140,6 +153,27 @@ export function ReviewsList({
     setShowDeleteModal(true);
   };
 
+  const handleLikeReview = async (review: RatingModel): Promise<void> => {
+    if (!productId || !review.customerId) return;
+    if (!isAuthenticated) {
+      navigate(AppRoutePaths.Login);
+      return;
+    }
+
+    const result = await likeReview(productId, review.customerId);
+    setProductReviews(currentReviews =>
+      currentReviews.map(currentReview =>
+        currentReview.customerId === review.customerId
+          ? {
+              ...currentReview,
+              likeCount: result.likeCount,
+              likedByCurrentUser: result.likedByCurrentUser,
+            }
+          : currentReview
+      )
+    );
+  };
+
   const confirmDeleteReview = async (): Promise<void> => {
     if (!productId) return;
     try {
@@ -156,7 +190,7 @@ export function ReviewsList({
   return (
     <div className="review-section-container">
       <div className="reviewproduct-container">
-        <h2>Customer Review</h2>
+        <h2>{t('customerReview')}</h2>
 
         <div className="rating-summary-container">
           <div className="rating-left">
@@ -173,8 +207,7 @@ export function ReviewsList({
                 </div>
               </div>
               <p className="review-count">
-                Based on {productReviews.length} review
-                {productReviews.length !== 1 ? 's' : ''}
+                {t('basedOn', { count: productReviews.length })}
               </p>
             </div>
           </div>
@@ -189,9 +222,6 @@ export function ReviewsList({
                   ? (count / productReviews.length) * 100
                   : 0;
 
-              const ratingLabel = star === 1 ? 'star' : 'stars';
-              const reviewLabel = count === 1 ? 'review' : 'reviews';
-
               return (
                 <button
                   key={star}
@@ -201,10 +231,10 @@ export function ReviewsList({
                   }`}
                   onClick={() => handleRatingFilter(star)}
                   aria-pressed={selectedRating === star}
-                  aria-label={`${star} ${ratingLabel}, ${count} ${reviewLabel}`}
+                  aria-label={`${t('stars', { count: star })}, ${t('reviewCount', { count })}`}
                 >
                   <span className="star-label">
-                    {star} {ratingLabel}
+                    {t('stars', { count: star })}
                   </span>
                   <span className="rating-bar">
                     <span
@@ -225,8 +255,12 @@ export function ReviewsList({
         <div className="review-action-row">
           <div className="reviews-heading-container">
             <h3 className="reviews-heading">
-              Reviews ({ratingFilteredReviews.length}
-              {selectedRating !== null ? ` of ${productReviews.length}` : ''})
+              {selectedRating !== null
+                ? t('filteredReviewsHeading', {
+                    count: ratingFilteredReviews.length,
+                    total: productReviews.length,
+                  })
+                : t('reviewsHeading', { count: ratingFilteredReviews.length })}
             </h3>
             {selectedRating !== null && (
               <button
@@ -234,7 +268,7 @@ export function ReviewsList({
                 className="clear-rating-filter"
                 onClick={() => setSelectedRating(null)}
               >
-                Clear {selectedRating}-star filter
+                {t('clearRatingFilter', { count: selectedRating })}
               </button>
             )}
           </div>
@@ -249,7 +283,7 @@ export function ReviewsList({
             }}
             disabled={isStaff || currentUserReview.rating > 0}
           >
-            Write a Review
+            {t('writeReview')}
           </Button>
         </div>
 
@@ -260,20 +294,22 @@ export function ReviewsList({
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value.trimStart())}
-                placeholder="Search for a review..."
+                placeholder={t('searchReviews')}
                 className="search-input"
               />
               <Button
                 onClick={() => setSearchQuery('')}
-                aria-label="Clear search"
+                aria-label={t('clearReviewSearch')}
               >
                 <MdClear />
               </Button>
             </Stack>
             {filteredReviews.length > 0 && searchQuery !== '' && (
               <span className="reviews-search-result-count">
-                Showing {filteredReviews.length} of{' '}
-                {ratingFilteredReviews.length} review(s)
+                {t('reviewSearchCount', {
+                  count: filteredReviews.length,
+                  total: ratingFilteredReviews.length,
+                })}
               </span>
             )}
           </div>
@@ -318,18 +354,24 @@ export function ReviewsList({
                 }
                 onEdit={handleEditReview}
                 onDelete={handleDeleteReview}
+                canLike={
+                  !isAuthenticated ||
+                  !currentUserReview.customerId ||
+                  currentUserReview.customerId !== rating.customerId
+                }
+                onLike={() => handleLikeReview(rating)}
                 searchQuery={searchQuery}
               />
             </Reveal>
           ))
         ) : productReviews.length === 0 ? (
-          <p role="status">This item does not have any reviews yet!</p>
+          <p role="status">{t('noReviews')}</p>
         ) : ratingFilteredReviews.length === 0 ? (
           <p role="status">
-            This item does not have any {selectedRating}-star reviews.
+            {t('noReviewsWithRating', { count: selectedRating })}
           </p>
         ) : (
-          <p>No results were found</p>
+          <p>{t('noReviewResults')}</p>
         )}
       </div>
     </div>

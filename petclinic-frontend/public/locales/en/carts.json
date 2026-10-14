@@ -8,7 +8,7 @@
     "clear": "Clear",
     "clearCart": "Clear Cart",
     "continueShopping": "Continue Shopping",
-    "moveAllToCart": "Move All to Cart",
+    "moveAllToCart": "Add All to Cart",
     "no": "No",
     "outOfStock": "Out of Stock",
     "purchaseAgain": "Purchase Again",
@@ -32,20 +32,48 @@
     "totalTaxes": "Total taxes:",
     "discount": "Discount:",
     "discountWithPercent": "Discount ({{percent}}%):",
-    "total": "Total:"
+    "total": "Total:",
+    "itemsSubtotal": "Items subtotal:",
+    "shipping": "Shipping:",
+    "shippingWithMethod": "Shipping ({{method}}):"
+  },
+  "shipping": {
+    "label": "Shipping method",
+    "pickup": "Pickup - {{price}}",
+    "standard": "Standard - {{price}}",
+    "express": "Express - {{price}}",
+    "updated": "Shipping method updated.",
+    "updateFailed": "Failed to update shipping method."
+  },
+  "orders": {
+    "title": "Your Orders",
+    "loading": "Loading your orders...",
+    "empty": "You have not placed any orders yet.",
+    "loadFailed": "Could not load previous orders.",
+    "orderNumber": "Order #{{id}}",
+    "placedOn": "Placed on:",
+    "quantity": "Qty:",
+    "each": "{{price}} each",
+    "subtotal": "Subtotal:",
+    "tvq": "TVQ:",
+    "tvc": "TVC:",
+    "promo": "Promo: {{percent}}%",
+    "total": "Total:",
+    "shipping": "Shipping:",
+    "shippingWithMethod": "Shipping ({{method}}):"
   },
   "recent": {
     "title": "Recent Purchases",
-    "quantity": "Qty:",
+    "quantity": "Quantity:",
     "empty": "No recent purchases found."
   },
   "wishlist": {
     "title": "Your Wishlist",
-    "moving": "Moving…",
+    "moving": "Adding…",
     "empty": "No products in the wishlist.",
-    "staffReadOnly": "Read-only: staff/admin cannot move wishlist items",
+    "staffReadOnly": "Read-only: staff/admin cannot add wishlist items",
     "allOutOfStock": "All wishlist items are out of stock",
-    "moveAllTitle": "Move all wishlist items to cart"
+    "moveAllTitle": "Add all wishlist items to cart"
   },
   "recommendations": {
     "title": "Your Recommendations",
@@ -64,10 +92,10 @@
     "clearCartMessage": "Are you sure you want to clear the cart?",
     "removeWishlistTitle": "Remove from wishlist",
     "removeWishlistMessage": "Remove \"{{name}}\" from wishlist?",
-    "moveAllTitle": "Move all from wishlist",
-    "moveAllMessage": "Move {{movable}} item(s) to your cart?",
-    "moveAllMessageBlocked": "Move {{movable}} in-stock item(s) to your cart? {{blocked}} item(s) are out of stock and will remain in your wishlist.",
-    "moveAllConfirm": "Move all"
+    "moveAllTitle": "Add all to cart",
+    "moveAllMessage": "Add {{movable}} item(s) to your cart?",
+    "moveAllMessageBlocked": "Add {{movable}} in-stock item(s) to your cart? {{blocked}} item(s) are out of stock and will remain in your wishlist.",
+    "moveAllConfirm": "Add all"
   },
   "toasts": {
     "readOnly": "Read-only mode: staff/admin cannot modify carts.",
@@ -80,9 +108,9 @@
     "addedToCart": "{{name}} has been added to your cart!",
     "outOfStock": "{{name}} is out of stock and cannot be added to the cart.",
     "wishlistAllOutOfStock": "All wishlist items are currently out of stock.",
-    "noEligible": "No wishlist items are eligible to move.",
-    "movedBlocked": "Moved {{movable}} item(s) to your cart. {{blocked}} item(s) stayed in your wishlist because they are out of stock.",
-    "moved": "Moved {{movable}} item(s) from wishlist to cart.",
+    "noEligible": "No wishlist items are eligible to add.",
+    "movedBlocked": "Added {{movable}} item(s) to your cart. {{blocked}} item(s) stayed in your wishlist because they are out of stock.",
+    "moved": "Added {{movable}} wishlist item(s) to cart.",
     "purchaseAdded": "{{name}} (x{{quantity}}) added to cart!",
     "checkoutSuccess": "Checkout successful! Your order is being processed.",
     "staffCheckout": "Staff/Admin cannot perform checkout."
@@ -102,10 +130,11 @@
     "addToWishlistFailed": "Failed to add item to wishlist.",
     "addToCartFailed": "Failed to add item to cart.",
     "removeFromWishlistFailed": "Could not remove item from wishlist.",
-    "moveFailed": "Unexpected error while moving wishlist items.",
+    "moveFailed": "Unexpected error while adding wishlist items.",
     "addProductFailed": "Failed to add {{name}} to cart.",
     "checkoutFailed": "Checkout failed: {{message}}",
-    "unexpected": "Unexpected error"
+    "unexpected": "Unexpected error",
+    "updateWishlistFailed": "Could not update wishlist."
   },
   "item": {
     "lowStock": "Only {{count}} items left in stock.",

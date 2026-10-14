@@ -8,7 +8,7 @@
     "clear": "Effacer",
     "clearCart": "Vider le panier",
     "continueShopping": "Continuer mes achats",
-    "moveAllToCart": "Tout déplacer au panier",
+    "moveAllToCart": "Tout ajouter au panier",
     "no": "Non",
     "outOfStock": "Rupture de stock",
     "purchaseAgain": "Acheter à nouveau",
@@ -32,20 +32,48 @@
     "totalTaxes": "Total des taxes :",
     "discount": "Rabais :",
     "discountWithPercent": "Rabais ({{percent}} %) :",
-    "total": "Total :"
+    "total": "Total :",
+    "itemsSubtotal": "Sous-total des articles :",
+    "shipping": "Livraison :",
+    "shippingWithMethod": "Livraison ({{method}}) :"
+  },
+  "shipping": {
+    "label": "Mode de livraison",
+    "pickup": "Ramassage - {{price}}",
+    "standard": "Standard - {{price}}",
+    "express": "Express - {{price}}",
+    "updated": "Mode de livraison mis à jour.",
+    "updateFailed": "Échec de la mise à jour du mode de livraison."
+  },
+  "orders": {
+    "title": "Vos commandes",
+    "loading": "Chargement de vos commandes...",
+    "empty": "Vous n'avez encore passé aucune commande.",
+    "loadFailed": "Impossible de charger les commandes précédentes.",
+    "orderNumber": "Commande n° {{id}}",
+    "placedOn": "Passée le :",
+    "quantity": "Qté :",
+    "each": "{{price}} chacun",
+    "subtotal": "Sous-total :",
+    "tvq": "TVQ :",
+    "tvc": "TVC :",
+    "promo": "Promo : {{percent}} %",
+    "total": "Total :",
+    "shipping": "Livraison :",
+    "shippingWithMethod": "Livraison ({{method}}) :"
   },
   "recent": {
     "title": "Achats récents",
-    "quantity": "Qté :",
+    "quantity": "Quantité :",
     "empty": "Aucun achat récent trouvé."
   },
   "wishlist": {
     "title": "Votre liste de souhaits",
-    "moving": "Déplacement…",
+    "moving": "Ajout…",
     "empty": "Aucun produit dans la liste de souhaits.",
-    "staffReadOnly": "Lecture seule : le personnel et les administrateurs ne peuvent pas déplacer les articles de la liste de souhaits",
+    "staffReadOnly": "Lecture seule : le personnel et les administrateurs ne peuvent pas ajouter d'articles de la liste de souhaits",
     "allOutOfStock": "Tous les articles de la liste de souhaits sont en rupture de stock",
-    "moveAllTitle": "Déplacer tous les articles de la liste de souhaits au panier"
+    "moveAllTitle": "Ajouter tous les articles de la liste de souhaits au panier"
   },
   "recommendations": {
     "title": "Vos recommandations",
@@ -64,10 +92,10 @@
     "clearCartMessage": "Voulez-vous vraiment vider le panier?",
     "removeWishlistTitle": "Retirer de la liste de souhaits",
     "removeWishlistMessage": "Retirer « {{name}} » de la liste de souhaits?",
-    "moveAllTitle": "Tout déplacer depuis la liste de souhaits",
-    "moveAllMessage": "Déplacer {{movable}} article(s) au panier?",
-    "moveAllMessageBlocked": "Déplacer {{movable}} article(s) en stock au panier? {{blocked}} article(s) en rupture de stock resteront dans votre liste de souhaits.",
-    "moveAllConfirm": "Tout déplacer"
+    "moveAllTitle": "Tout ajouter au panier",
+    "moveAllMessage": "Ajouter {{movable}} article(s) à votre panier?",
+    "moveAllMessageBlocked": "Ajouter {{movable}} article(s) en stock à votre panier? {{blocked}} article(s) en rupture de stock resteront dans votre liste de souhaits.",
+    "moveAllConfirm": "Tout ajouter"
   },
   "toasts": {
     "readOnly": "Mode lecture seule : le personnel et les administrateurs ne peuvent pas modifier les paniers.",
@@ -80,9 +108,9 @@
     "addedToCart": "{{name}} a été ajouté à votre panier!",
     "outOfStock": "{{name}} est en rupture de stock et ne peut pas être ajouté au panier.",
     "wishlistAllOutOfStock": "Tous les articles de la liste de souhaits sont actuellement en rupture de stock.",
-    "noEligible": "Aucun article de la liste de souhaits ne peut être déplacé.",
-    "movedBlocked": "{{movable}} article(s) déplacé(s) au panier. {{blocked}} article(s) sont restés dans votre liste de souhaits, car ils sont en rupture de stock.",
-    "moved": "{{movable}} article(s) déplacé(s) de la liste de souhaits au panier.",
+    "noEligible": "Aucun article de la liste de souhaits n'est admissible à l'ajout.",
+    "movedBlocked": "{{movable}} article(s) ajouté(s) à votre panier. {{blocked}} article(s) sont restés dans votre liste de souhaits, car ils sont en rupture de stock.",
+    "moved": "{{movable}} article(s) de la liste de souhaits ajouté(s) au panier.",
     "purchaseAdded": "{{name}} (x{{quantity}}) ajouté au panier!",
     "checkoutSuccess": "Commande réussie! Votre commande est en cours de traitement.",
     "staffCheckout": "Le personnel et les administrateurs ne peuvent pas passer de commande."
@@ -102,10 +130,11 @@
     "addToWishlistFailed": "Échec de l'ajout de l'article à la liste de souhaits.",
     "addToCartFailed": "Échec de l'ajout de l'article au panier.",
     "removeFromWishlistFailed": "Impossible de retirer l'article de la liste de souhaits.",
-    "moveFailed": "Erreur inattendue lors du déplacement des articles de la liste de souhaits.",
+    "moveFailed": "Erreur inattendue lors de l'ajout des articles de la liste de souhaits.",
     "addProductFailed": "Échec de l'ajout de {{name}} au panier.",
     "checkoutFailed": "Échec de la commande : {{message}}",
-    "unexpected": "Erreur inattendue"
+    "unexpected": "Erreur inattendue",
+    "updateWishlistFailed": "Impossible de mettre à jour la liste de souhaits."
   },
   "item": {
     "lowStock": "Il ne reste que {{count}} articles en stock.",
