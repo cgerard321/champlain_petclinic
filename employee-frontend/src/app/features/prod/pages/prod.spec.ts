@@ -293,6 +293,6 @@ describe('Prod', () => {
     fixture.componentInstance['saveReviewSettings']();
 
     expect(updateReviewSettings).not.toHaveBeenCalled();
-    expect(fixture.componentInstance['settingsError']()).toContain('at least 1 hour');
+    expect(fixture.componentInstance['settingsError']()).toContain('zero or greater');
   });
 });

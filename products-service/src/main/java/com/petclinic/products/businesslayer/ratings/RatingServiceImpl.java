@@ -124,8 +124,8 @@ public class RatingServiceImpl implements RatingService {
                                                        if (existingRating.getCreatedAt() == null) {
                                                            return Mono.error(new InvalidInputException("Review creation time is unavailable"));
                                                        }
-                                                       if (settings.getEditPeriodHours() == null || settings.getEditPeriodHours() < 1) {
-                                                           return Mono.error(new InvalidInputException("Edit period must be at least 1 hour"));
+                                                       if (settings.getEditPeriodHours() == null || settings.getEditPeriodHours() < 0) {
+                                                           return Mono.error(new InvalidInputException("Edit period must be zero or greater"));
                                                        }
                                                        LocalDateTime deadline = existingRating.getCreatedAt()
                                                                .plusHours(settings.getEditPeriodHours());

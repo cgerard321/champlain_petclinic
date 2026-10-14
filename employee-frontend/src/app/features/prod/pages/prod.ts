@@ -120,7 +120,7 @@ export class Prod implements OnInit {
     const hours = this.reviewEditPeriodHours();
 
     if (!Number.isInteger(hours) || hours < 0) {
-      this.settingsError.set('The edit period must be at least 1 hour');
+      this.settingsError.set('The edit period must be at least zero or greater');
       return;
     }
     this.isSavingSettings.set(true);
