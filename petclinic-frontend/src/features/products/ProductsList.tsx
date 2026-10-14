@@ -205,7 +205,7 @@ const ProductList = function Productlist({
       </div>
     </Reveal>
   );
- return (
+  return (
     <div className="product-list-container">
       <div className="main-content">
         {view === 'catalog' && (
@@ -230,7 +230,7 @@ const ProductList = function Productlist({
                     </Reveal>
                   ))}
                 </div>
-                           ) : (
+              ) : (
                 <p style={{ textAlign: 'center', margin: '40px 0' }}>
                   {t('noItems')}
                 </p>
