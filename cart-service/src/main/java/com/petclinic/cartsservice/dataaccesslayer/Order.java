@@ -29,6 +29,8 @@ public class Order {
     private double tvq;
     private double tvc;
     private double total;
+    private ShippingMethod shippingMethod;
+    private double shippingCost;
     private String invoiceId;
     private LocalDateTime orderDate;
 }
