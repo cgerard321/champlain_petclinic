@@ -9,6 +9,8 @@ import { Status } from '@features/vist/models/Status';
 import { TimeSlot } from '@features/vist/models/TimeSlot';
 import { Visit } from '@features/vist/models/Visit';
 import { VisitResponseModel } from '@features/vist/models/VisitResponseModel';
+import { Pet } from '@features/cust/models/customer.model';
+import { Customer } from '@features/cust/models/customer.model';
 
 @Injectable({ providedIn: 'root' })
 export class VisitService {
@@ -82,5 +84,13 @@ export class VisitService {
       status: Status.UPCOMING,
       isEmergency: false,
     });
+  }
+
+  getPetById(petId: string): Observable<Pet> {
+    return this.http.get<Pet>(`/api/gateway/pets/${petId}`);
+  }
+
+  getCustomerById(customerId: string): Observable<Customer> {
+    return this.http.get<Customer>(`/api/gateway/customers/${customerId}`);
   }
 }

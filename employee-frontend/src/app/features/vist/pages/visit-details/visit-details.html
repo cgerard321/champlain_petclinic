@@ -1,38 +1,46 @@
-<a routerLink="/vist" i18n>Back to visits</a>
+<a routerLink="/vist">{{ labels.back }}</a>
 
-<h1 i18n>Visit Details</h1>
+<h1>{{ labels.title }}</h1>
 
 @if (isLoading()) {
-  <p i18n>Loading visit details...</p>
+<p>{{ labels.loading }}</p>
 } @else if (errorMessage()) {
-  <p role="alert">{{ errorMessage() }}</p>
+<p role="alert">{{ errorMessage() }}</p>
 } @else if (visit(); as details) {
-  <section>
-    <h2 i18n>Visit Information</h2>
-    <p><strong i18n>Visit ID:</strong> {{ details.visitId }}</p>
-    <p><strong i18n>Description:</strong> {{ details.description }}</p>
-    <p><strong i18n>Start:</strong> {{ details.visitDate | date: 'medium' }}</p>
-    <p><strong i18n>End:</strong> <span i18n>Not available</span></p>
-    <p><strong i18n>Status:</strong> {{ details.status }}</p>
-  </section>
+<section>
+  <h2>{{ labels.visitInfo }}</h2>
+  <p><strong>{{ labels.visitId }}:</strong> {{ details.visitId }}</p>
+  <p><strong>{{ labels.description }}:</strong> {{ details.description }}</p>
+  <p><strong>{{ labels.start }}:</strong> {{ details.visitDate | date: 'medium' }}</p>
+  <p><strong>{{ labels.end }}:</strong> {{ details.visitEndDate ? (details.visitEndDate | date: 'medium') : labels.notAvailable }}</p>
+  <p><strong>{{ labels.status }}:</strong> {{ details.status }}</p>
+</section>
 
-  <section>
-    <h2 i18n>Pet Information</h2>
-    <p><strong i18n>Name:</strong> {{ details.petName }}</p>
-    <p><strong i18n>Birth Date:</strong> {{ details.petBirthDate | date: 'mediumDate' }}</p>
-  </section>
+<section>
+  <h2>{{ labels.petInfo }}</h2>
+  <p><strong>{{ labels.name }}:</strong> {{ details.petName }}</p>
+  <p><strong>{{ labels.birthDate }}:</strong> {{ details.petBirthDate | date: 'mediumDate' }}</p>
+</section>
 
-  <section>
-    <h2 i18n>Veterinarian Information</h2>
-    <p><strong i18n>Name:</strong> {{ details.vetFirstName }} {{ details.vetLastName }}</p>
-    <p><strong i18n>Email:</strong> {{ details.vetEmail }}</p>
-    <p><strong i18n>Phone:</strong> {{ details.vetPhoneNumber }}</p>
-  </section>
+<section>
+  <h2>{{ labels.vetInfo }}</h2>
+  <p><strong>{{ labels.name }}:</strong> {{ details.vetFirstName }} {{ details.vetLastName }}</p>
+  <p><strong>{{ labels.email }}:</strong> {{ details.vetEmail }}</p>
+  <p><strong>{{ labels.phone }}:</strong> {{ details.vetPhoneNumber }}</p>
+</section>
 
-  <section>
-    <h2 i18n>Customer Information</h2>
-    <p><strong i18n>Name:</strong> {{ details.ownerFirstName }} {{ details.ownerLastName }}</p>
-    <p><strong i18n>Email:</strong> <span i18n>Not available</span></p>
-    <p><strong i18n>Phone:</strong> <span i18n>Not available</span></p>
-  </section>
+<section>
+  <h2>{{ labels.customerInfo }}</h2>
+  @if (customer(); as client) {
+  <p><strong>{{ labels.name }}:</strong> {{ client.firstName }} {{ client.lastName }}</p>
+  <p><strong>{{ labels.phone }}:</strong> {{ client.telephone || labels.notAvailable }}</p>
+  <p><strong>Address:</strong> {{ client.address || labels.notAvailable }}</p>
+  <p><strong>City:</strong> {{ client.city || labels.notAvailable }}</p>
+  } @else {
+  <p><strong>{{ labels.name }}:</strong> {{ labels.notAvailable }}</p>
+  <p><strong>{{ labels.phone }}:</strong> {{ labels.notAvailable }}</p>
+  <p><strong>Address:</strong> {{ labels.notAvailable }}</p>
+  <p><strong>City:</strong> {{ labels.notAvailable }}</p>
+  }
+</section>
 }

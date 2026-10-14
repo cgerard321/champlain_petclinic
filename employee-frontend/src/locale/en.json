@@ -70,6 +70,43 @@
         "slotsError": "Could not load available times.",
         "scheduleError": "Could not schedule the follow-up.",
         "confirmation": "The follow-up visit was scheduled."
+      },
+      "title": "List of Visits",
+      "visitId": "Visit ID",
+      "veterinarianFullName": "Veterinarian full name",
+      "petName": "Pet name",
+      "description": "Description",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "status": "Status",
+      "statusScheduled": "Scheduled",
+      "statusCompleted": "Completed",
+      "statusCancelled": "Cancelled",
+      "statusConfirmed": "Confirmed",
+      "statusUpcoming": "Upcoming",
+      "statusArchived": "Archived",
+      "statusOutOfStatus": "Out of status",
+      "details": {
+        "back": "Back to visits",
+        "title": "Visit Details",
+        "loading": "Loading visit details...",
+        "visitInfo": "Visit Information",
+        "visitId": "Visit ID",
+        "description": "Description",
+        "start": "Start",
+        "end": "End",
+        "status": "Status",
+        "petInfo": "Pet Information",
+        "name": "Name",
+        "birthDate": "Birth Date",
+        "vetInfo": "Veterinarian Information",
+        "email": "Email",
+        "phone": "Phone",
+        "customerInfo": "Customer Information",
+        "notAvailable": "Not available",
+        "noVisitId": "No visit ID was provided.",
+        "notFound": "Visit not found.",
+        "loadError": "Unable to load visit details."
       }
     },
     "vets": {
@@ -132,23 +169,6 @@
         "heading": "Specialties",
         "description": "Discover the clinic's different areas of care."
       }
-    },
-    "visits": {
-      "title": "List of Visits",
-      "visitId": "Visit ID",
-      "veterinarianFullName": "Veterinarian full name",
-      "petName": "Pet name",
-      "description": "Description",
-      "startDate": "Start date",
-      "endDate": "End date",
-      "status": "Status",
-      "statusScheduled": "Scheduled",
-      "statusCompleted": "Completed",
-      "statusCancelled": "Cancelled",
-      "statusConfirmed": "Confirmed",
-      "statusUpcoming": "Upcoming",
-      "statusArchived": "Archived",
-      "statusOutOfStatus": "Out of status"
     }
   }
 }
