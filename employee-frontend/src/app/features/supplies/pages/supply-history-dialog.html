@@ -13,8 +13,9 @@
         <li>
           <strong>{{ entry.action.replace('_', ' ') }}</strong>
           <span>
-            {{ entry.previousQuantity }} → {{ entry.newQuantity }}
-            ({{ entry.quantityChange > 0 ? '+' : '' }}{{ entry.quantityChange }})
+            {{ entry.previousQuantity }} → {{ entry.newQuantity }} ({{
+              entry.quantityChange > 0 ? '+' : ''
+            }}{{ entry.quantityChange }})
           </span>
           <span>{{ entry.changedAt | date: 'medium' }}</span>
           <span>By {{ entry.changedBy }}</span>
