@@ -7,8 +7,6 @@ import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.r2dbc.repository.support.R2dbcRepositoryFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
@@ -19,8 +17,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
 @Testcontainers
 class ProductTranslationMigrationTest {
+
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine");
 
@@ -80,6 +82,7 @@ class ProductTranslationMigrationTest {
                 assertEquals("Nourriture sèche de qualité supérieure pour chiens adultes", rows.getString("product_description_fr"));
                 assertEquals(44, rows.getInt("product_quantity"));
             }
+            awaitFrenchTranslation(connection, "Senior Dog Joint Supplement");
             try (var rows = sql.executeQuery("SELECT * FROM products WHERE product_id='b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7001'")) {
                 assertTrue(rows.next());
                 assertEquals("Supplément articulaire pour chiens âgés", rows.getString("product_name_fr"));
@@ -89,7 +92,7 @@ class ProductTranslationMigrationTest {
             sql.execute("UPDATE products SET product_name_fr='Nom personnalisé', product_description_fr='' WHERE product_name='Dog Food'");
             sql.execute(schema);
             loader.run();
-            awaitFrenchTranslation(connection, "Dog Food", "Nom personnalisÃ©");
+            awaitFrenchTranslation(connection, "Dog Food");
             try (var rows = sql.executeQuery("SELECT * FROM products WHERE product_name='Dog Food'")) {
                 assertTrue(rows.next());
                 assertEquals("Nom personnalisé", rows.getString("product_name_fr"));
@@ -112,7 +115,7 @@ class ProductTranslationMigrationTest {
                     "SELECT product_name_fr FROM products WHERE product_name=?")) {
                 statement.setString(1, productName);
                 try (var rows = statement.executeQuery()) {
-                    if (rows.next() && expectedName.equals(rows.getString(1))) {
+                    if (rows.next() && (expectedName == null || expectedName.equals(rows.getString(1)))) {
                         return;
                     }
                 }
@@ -120,5 +123,9 @@ class ProductTranslationMigrationTest {
             Thread.sleep(50);
         }
         fail("Timed out waiting for French translation of " + productName);
+    }
+
+    private void awaitFrenchTranslation(java.sql.Connection connection, String productName) throws Exception {
+        awaitFrenchTranslation(connection, productName, null);
     }
 }
