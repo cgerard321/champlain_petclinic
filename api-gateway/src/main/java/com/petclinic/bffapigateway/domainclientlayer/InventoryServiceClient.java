@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -143,33 +144,46 @@ public class InventoryServiceClient {
     }
 
 
-    public Mono<ProductResponseDTO> updateProductInInventory(ProductRequestDTO model, String inventoryId, String productId){
-
-
-        return webClient
-                .put()
+    public Mono<ProductResponseDTO> updateProductInInventory(
+            ProductRequestDTO model,
+            String inventoryId,
+            String productId,
+            String changedBy
+    ) {
+        return webClient.put()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
-                .body(Mono.just(model),ProductRequestDTO.class)
+                .header("X-Actor-Username", changedBy)
+                .body(Mono.just(model), ProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(s -> s.value() == 422, resp ->
-                        rethrower.rethrow(resp, ex ->
-                                new InvalidInputsInventoryException(ex.get("message").toString(), UNPROCESSABLE_ENTITY)))
-                .onStatus(s -> s.value() == 404, resp ->
-                        rethrower.rethrow(resp, ex ->
-                                new InvalidInputsInventoryException(ex.get("message").toString(), NOT_FOUND)))
-                .onStatus(HttpStatusCode::is4xxClientError, resp ->
-                        rethrower.rethrow(resp, ex ->
-                                new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
+                .onStatus(status -> status.value() == 422,
+                        response -> rethrower.rethrow(response, ex ->
+                                new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), UNPROCESSABLE_ENTITY)))
+                .onStatus(status -> status.value() == 404,
+                        response -> rethrower.rethrow(response, ex ->
+                                new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), NOT_FOUND)))
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        response -> rethrower.rethrow(response, ex ->
+                                new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(ProductResponseDTO.class);
     }
 
-    public Mono<Void> deleteProductInInventory(final String inventoryId, final String productId){
+    public Mono<Void> deleteProductInInventory(
+            String inventoryId,
+            String productId,
+            String changedBy
+    ) {
         return webClient.delete()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
+                .header("X-Actor-Username", changedBy)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                        response -> rethrower.rethrow(response, ex ->
+                                new ProductListNotFoundException(
+                                        ex.get("message").toString(), NOT_FOUND)))
                 .bodyToMono(Void.class);
     }
 
@@ -397,33 +411,45 @@ public class InventoryServiceClient {
                         resp -> Mono.error(new InventoryNotFoundException("No products found in inventory: " + inventoryId + " that match the search criteria", HttpStatus.NOT_FOUND)))
                 .bodyToFlux(ProductResponseDTO.class);
     }
-    public Mono<ProductResponseDTO> addSupplyToInventory(final ProductRequestDTO model, final String inventoryId){
 
+    public Mono<ProductResponseDTO> addSupplyToInventory(
+            final ProductRequestDTO model,
+            final String inventoryId,
+            final String changedBy
+    ) {
         return webClient.post()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products", inventoryId)
-                .body(Mono.just(model),ProductRequestDTO.class)
+                .header("X-Actor-Username", changedBy)
+                .body(Mono.just(model), ProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(s -> s.value() == 422,
-                        resp -> rethrower.rethrow(resp,
+                .onStatus(status -> status.value() == 422,
+                        response -> rethrower.rethrow(response,
                                 ex -> new InventoryProductUnprocessableEntityException(
                                         ex.get("message").toString(), HttpStatus.UNPROCESSABLE_ENTITY)))
                 .onStatus(status -> status.value() == 404,
-                        resp -> rethrower.rethrow(resp,
+                        response -> rethrower.rethrow(response,
                                 ex -> new NotFoundException(ex.get("message").toString())))
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
+                        response -> rethrower.rethrow(response,
+                                ex -> new InvalidInputsInventoryException(
+                                        ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(ProductResponseDTO.class);
     }
 
-    public Mono<ProductResponseDTO> consumeProduct(String inventoryId, String productId) {
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryId}/products/{productId}/consume");
-
+    public Mono<ProductResponseDTO> consumeProduct(
+            String inventoryId,
+            String productId,
+            String changedBy
+    ) {
         return webClient.patch()
-                .uri(uriBuilder.buildAndExpand(inventoryId, productId).toUri())
+                .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}/consume",
+                        inventoryId, productId)
+                .header("X-Actor-Username", changedBy)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> Mono.error(new InventoryNotFoundException("Product not found in inventory: " + inventoryId, NOT_FOUND)))
+                        response -> Mono.error(new InventoryNotFoundException(
+                                "Product not found in inventory: " + inventoryId, NOT_FOUND)))
                 .bodyToMono(ProductResponseDTO.class);
     }
 
@@ -483,18 +509,43 @@ public class InventoryServiceClient {
                 .bodyToFlux(InventoryResponseDTO.class);
     }
 
-    public Mono<ProductResponseDTO> restockLowStockProduct(final String inventoryId, final String productId, final Integer productQuantity) {
+    public Mono<ProductResponseDTO> restockLowStockProduct(
+            final String inventoryId,
+            final String productId,
+            final Integer productQuantity,
+            final String changedBy
+    ) {
         return webClient.put()
                 .uri(uriBuilder -> uriBuilder
                         .path("/{inventoryId}/products/{productId}/restockProduct")
-                        .queryParam("productQuantity", productQuantity)  // Add the productQuantity as a query param
+                        .queryParam("productQuantity", productQuantity)
                         .build(inventoryId, productId))
+                .header("X-Actor-Username", changedBy)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> Mono.error(new NotFoundException("Product: " + productId + " not found in inventory: " + inventoryId)))
+                        response -> Mono.error(new NotFoundException(
+                                "Product: " + productId
+                                        + " not found in inventory: " + inventoryId)))
                 .bodyToMono(ProductResponseDTO.class);
     }
+
+    public Flux<Map<String, Object>> getSupplyHistory(
+            String inventoryId,
+            String productId
+    ) {
+        return webClient.get()
+                .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}/history",
+                        inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        response -> rethrower.rethrow(response, ex ->
+                                new InventoryNotFoundException(
+                                        ex.get("message").toString(), NOT_FOUND)))
+                .bodyToFlux(new ParameterizedTypeReference<Map<String, Object>>() {});
+    }
+
 
 }
 

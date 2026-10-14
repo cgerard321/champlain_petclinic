@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>History: {{ data.supplyName }}</h2>
+
+<mat-dialog-content>
+  @if (loading()) {
+    <p role="status">Loading history...</p>
+  } @else if (error()) {
+    <p role="alert">Unable to load supply history.</p>
+  } @else if (entries().length === 0) {
+    <p>No audit history is available for this supply.</p>
+  } @else {
+    <ol class="history-list">
+      @for (entry of entries(); track entry.id) {
+        <li>
+          <strong>{{ entry.action.replace('_', ' ') }}</strong>
+          <span>
+            {{ entry.previousQuantity }} → {{ entry.newQuantity }}
+            ({{ entry.quantityChange > 0 ? '+' : '' }}{{ entry.quantityChange }})
+          </span>
+          <span>{{ entry.changedAt | date: 'medium' }}</span>
+          <span>By {{ entry.changedBy }}</span>
+        </li>
+      }
+    </ol>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button type="button" (click)="close()">Close</button>
+</mat-dialog-actions>
