@@ -1,6 +1,7 @@
 package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
+import com.petclinic.customersservice.customersExceptions.exceptions.FailedDependencyException;
 import com.petclinic.customersservice.data.Customer;
 import com.petclinic.customersservice.data.CustomerRepo;
 import com.petclinic.customersservice.domainclientlayer.CartServiceClient;
@@ -276,6 +277,26 @@ class CustomerServiceImplTest {
         inOrder.verify(repo).save(argThat(customer ->
                 Boolean.FALSE.equals(customer.getIsActive()) && customer.getPhotoId() == null));
         verify(repo, never()).deleteById(anyString());
+    }
+
+    @Test
+    void softDeleteCustomerByCustomerId_WhenPhotoDeletionFails_ShouldNotDeactivateCustomerOrDeleteCart() {
+        String customerId = "customerId-123";
+        String photoId = "photo-999";
+        Customer existingCustomer = buildCustomer();
+        existingCustomer.setPhotoId(photoId);
+        existingCustomer.setIsActive(true);
+
+        when(repo.findCustomerByCustomerId(customerId)).thenReturn(Mono.just(existingCustomer));
+        when(filesServiceClient.deleteFile(photoId))
+                .thenReturn(Mono.error(new FailedDependencyException("Failed to delete file from Files Service")));
+
+        StepVerifier.create(customerService.softDeleteCustomerByCustomerId(customerId))
+                .expectError(FailedDependencyException.class)
+                .verify();
+
+        verify(cartServiceClient, never()).deleteCartByCustomerId(anyString());
+        verify(repo, never()).save(any(Customer.class));
     }
 
     @Test

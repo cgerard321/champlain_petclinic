@@ -90,17 +90,13 @@ public class CustomerServiceImpl implements CustomerService {
                     String photoId = found.getPhotoId();
                     Mono<Void> deletePhoto = Mono.empty();
                     if (photoId != null && !photoId.isEmpty()) {
-                        deletePhoto = filesServiceClient.deleteFile(photoId)
-                                .onErrorResume(e -> {
-                                    log.error("Error deleting photo file {}: {}", photoId, e.getMessage());
-                                    return Mono.empty();
-                                });
+                        deletePhoto = filesServiceClient.deleteFile(photoId);
                     }
                     found.setPhotoId(null);
                     found.setIsActive(false);
                     return deletePhoto
-                            .then(cartServiceClient.deleteCartByCustomerId(found.getCustomerId()))
-                            .then(customerRepo.save(found));
+                            .then(Mono.defer(() -> cartServiceClient.deleteCartByCustomerId(found.getCustomerId())))
+                            .then(Mono.defer(() -> customerRepo.save(found)));
                 })
                 .map(EntityDTOUtil::toCustomerReponseDTO);
     }
