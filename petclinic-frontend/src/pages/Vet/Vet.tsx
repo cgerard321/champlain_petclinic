@@ -55,8 +55,10 @@ export default function Vet(): JSX.Element {
     fetchAllVets();
   }, []);
 
-  const handleSearch = (): void => {
-    if (!searchQuery) {
+  const handleSearch = (query: string): void => {
+    const trimmed = query.trim();
+
+    if (!trimmed) {
       setResults(allVets);
       setIsSearchActive(false);
       return;
@@ -65,11 +67,16 @@ export default function Vet(): JSX.Element {
     const filteredVets = allVets.filter(vet =>
       `${vet.firstName} ${vet.lastName}`
         .toLowerCase()
-        .includes(searchQuery.toLowerCase())
+        .includes(trimmed.toLowerCase())
     );
 
     setResults(filteredVets);
     setIsSearchActive(true);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    setSearchQuery(e.target.value);
+    handleSearch(e.target.value);
   };
 
   const handleClear = (): void => {
@@ -85,13 +92,10 @@ export default function Vet(): JSX.Element {
         <input
           type="text"
           value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
+          onChange={handleInputChange}
           placeholder="Search by first name, last name or both names"
           style={{ marginRight: '10px' }}
         />
-        <button onClick={handleSearch} style={{ marginRight: '5px' }}>
-          Search
-        </button>
         <button onClick={handleClear}>Clear</button>
       </div>
 
