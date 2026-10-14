@@ -61,9 +61,6 @@ class DataLoaderServiceTest {
         dataLoaderService.ratingRepository = ratingRepository;
         dataLoaderService.productTypeRepository = productTypeRepository;
 
-        when(productRepository.backfillFrenchName(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString())).thenReturn(Mono.just(0));
-        when(productRepository.backfillFrenchDescription(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString())).thenReturn(Mono.just(0));
-
         product = Product.builder()
                 .productId(PRODUCT_ID)
                 .imageId(IMAGE_ID)
@@ -109,17 +106,9 @@ class DataLoaderServiceTest {
     @Test
     void freshCatalogIncludesFrenchNamesAndDescriptionsForEverySeed() throws Exception {
         when(productRepository.findAll()).thenReturn(Flux.empty());
-        when(productBundleRepository.findAll()).thenReturn(Flux.empty());
-        when(imageRepository.findAll()).thenReturn(Flux.empty());
-        when(ratingRepository.findAll()).thenReturn(Flux.empty());
-        when(productTypeRepository.findAll()).thenReturn(Flux.empty());
         when(productRepository.save(org.mockito.ArgumentMatchers.any(Product.class)))
                 .thenAnswer(call -> Mono.just(call.getArgument(0)));
-        when(productBundleRepository.save(org.mockito.ArgumentMatchers.any()))
-                .thenAnswer(call -> Mono.just(call.getArgument(0)));
         when(imageRepository.save(org.mockito.ArgumentMatchers.any()))
-                .thenAnswer(call -> Mono.just(call.getArgument(0)));
-        when(ratingRepository.save(org.mockito.ArgumentMatchers.any()))
                 .thenAnswer(call -> Mono.just(call.getArgument(0)));
         when(productTypeRepository.save(org.mockito.ArgumentMatchers.any()))
                 .thenAnswer(call -> Mono.just(call.getArgument(0)));

@@ -9,8 +9,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
 import java.sql.DriverManager;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Testcontainers
@@ -40,6 +46,27 @@ class ProductTranslationMigrationTest {
             var repository = new R2dbcRepositoryFactory(template).getRepository(ProductRepository.class);
             var loader = new DataLoaderService();
             ReflectionTestUtils.setField(loader, "productRepository", repository);
+            // The migration test exercises the real product repository, while the
+            // unrelated seed repositories are mocked so seeding can reach the
+            // translation backfill without requiring a complete fixture database.
+            var productTypeRepository = mock(ProductTypeRepository.class);
+            when(productTypeRepository.findByProductTypeId(anyString())).thenReturn(Mono.empty());
+            when(productTypeRepository.save(any())).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+            var imageRepository = mock(com.petclinic.products.datalayer.images.ImageRepository.class);
+            when(imageRepository.findImageByImageId(anyString()))
+                    .thenReturn(Mono.just(com.petclinic.products.datalayer.images.Image.builder().build()));
+            var ratingRepository = mock(com.petclinic.products.datalayer.ratings.RatingRepository.class);
+            when(ratingRepository.findRatingByCustomerIdAndProductId(anyString(), anyString()))
+                    .thenReturn(Mono.empty());
+            when(ratingRepository.save(any())).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+            var bundleRepository = mock(ProductBundleRepository.class);
+            when(bundleRepository.findAllByProductIdsContaining(anyString())).thenReturn(Flux.empty());
+            when(bundleRepository.findByBundleId(anyString())).thenReturn(Mono.empty());
+            when(bundleRepository.save(any())).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+            ReflectionTestUtils.setField(loader, "productTypeRepository", productTypeRepository);
+            ReflectionTestUtils.setField(loader, "imageRepository", imageRepository);
+            ReflectionTestUtils.setField(loader, "ratingRepository", ratingRepository);
+            ReflectionTestUtils.setField(loader, "productBundleRepository", bundleRepository);
             // Schema only adds columns; the loader owns translation data.
             try (var rows = sql.executeQuery("SELECT product_name_fr FROM products WHERE product_name='Dog Food'")) {
                 assertTrue(rows.next());
