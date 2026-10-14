@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 
 @Service
-@Slf4j
 public class CartServiceImpl implements CartService {
     private final CartRepository cartRepository;
     private final ProductClient productClient;
