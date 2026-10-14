@@ -230,11 +230,7 @@ const ProductList = function Productlist({
                     </Reveal>
                   ))}
                 </div>
-              ) : (
-                <p style={{ textAlign: 'center', margin: '40px 0' }}>
-                  {t('noItems')}
-                </p>
-              )}
+                           ) : (
                 <p style={{ textAlign: 'center', margin: '40px 0' }}>
                   {t('noItems')}
                 </p>
