@@ -38,15 +38,15 @@ const EditReviewModal = ({
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleSubmit = async () => {
     if (localRating === 0) {
-      setError('Please select a rating before updating.');
+      setError('updateRatingRequired');
       return;
     }
     if (!reviewText.trim()) {
-      setError('Please write a review before updating.');
+      setError('updateReviewRequired');
       return;
     }
     if (reviewText.length > 10000) {
-      setError('Review cannot exceed 10000 characters!');
+      setError('reviewTooLong');
       return;
     }
 
@@ -67,11 +67,9 @@ const EditReviewModal = ({
         responseError.response?.data?.message ===
         'This review is no longer editable'
       ) {
-        setError(
-          'The review editing period has ended. You can no longer edit this review.'
-        );
+        setError('reviewEditPeriodEnded');
       } else {
-        setError('Failed to update review. Please try again.');
+        setError('updateFailed');
       }
 
       console.error('Failed to update review:', err);
