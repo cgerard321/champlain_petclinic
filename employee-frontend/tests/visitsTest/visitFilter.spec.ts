@@ -105,8 +105,10 @@ test('filters visits, preserves choices when the sidebar is toggled, and transla
 }) => {
   await openVisitsPage(page);
 
+  await expect(page.getByRole('complementary', { name: 'Filtres de visite' })).toBeVisible();
   await page.getByRole('button', { name: 'Filtrer Par' }).click();
   const menu = page.locator('#visit-status-menu');
+  await expect(page.getByRole('list', { name: 'Statuts de visite' })).toBeVisible();
   await expectAllStatusesChecked(page, 'french');
 
   const statusesToKeep = ['SCHEDULED', 'UPCOMING'];
@@ -131,7 +133,7 @@ test('filters visits, preserves choices when the sidebar is toggled, and transla
   await expect(page.getByRole('row')).toHaveCount(2);
   await expect(page.getByRole('cell', { name: 'Complétée', exact: true })).toHaveCount(1);
 
-  await page.getByRole('button', { name: 'Hide filters' }).click();
+  await page.getByRole('button', { name: 'Masquer les filtres' }).click();
   const showFilters = page.getByRole('button', { name: 'Afficher les filtres' });
   await expect(showFilters).toBeVisible();
   await showFilters.click();
@@ -157,10 +159,12 @@ test('filters visits, preserves choices when the sidebar is toggled, and transla
   const englishCatalogResponse = await englishCatalogRequest;
   expect(englishCatalogResponse.ok()).toBe(true);
 
+  await expect(page.getByRole('complementary', { name: 'Visit filters' })).toBeVisible();
   const englishFilterButton = page.getByRole('button', { name: 'Filter By' });
   await expect(englishFilterButton).toBeVisible();
   await englishFilterButton.click();
   const englishMenu = page.locator('#visit-status-menu');
+  await expect(page.getByRole('list', { name: 'Visit statuses' })).toBeVisible();
   await expectAllStatusesChecked(page, 'english');
   await expect(englishMenu.getByLabel('Completed', { exact: true })).toBeChecked();
 
