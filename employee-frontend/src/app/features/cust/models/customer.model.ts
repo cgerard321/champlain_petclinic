@@ -6,3 +6,16 @@ export interface Customer {
   address: string;
   city: string;
 }
+export interface Pet {
+  customerId: string;
+  petId: string;
+  name: string;
+  birthDate: Date;
+  petTypeId: string;
+  isActive: string;
+  weight: string;
+}
+export interface PetType {
+  petTypeId: string;
+  name: string;
+}

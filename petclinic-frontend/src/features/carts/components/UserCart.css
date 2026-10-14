@@ -557,6 +557,17 @@
 
 .recommendation-purchase-card {
   text-align: center;
+  position: relative;
+}
+
+.recommendation-purchase-card .wishlist-heart-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.3rem;
 }
 
 .recommendation-qty-row {

@@ -23,6 +23,7 @@ import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 import { object, array, string, func } from 'prop-types';
 import type { Validator } from 'prop-types';
 import UpdatePetForm from './UpdatePetForm';
+import { useTranslation } from 'react-i18next';
 
 interface CustomerProfilePageProps {
   customer: CustomerResponseModel;
@@ -57,6 +58,7 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
 }): JSX.Element => {
   const { user, logout } = useUser();
   const navigate = useNavigate();
+  const { t } = useTranslation('customers');
 
   const [error, setError] = useState<string | null>(null);
   const [isAddPetModalOpen, setIsAddPetModalOpen] = useState<boolean>(false);
@@ -244,7 +246,7 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
       await deletePetPhoto(petId);
       setPetImageUrls(prev => ({
         ...prev,
-        [petId]: getPetTypeImage(pet.petTypeId, petTypes),
+        [petId]: getPetTypeImage(pet.petTypeId, petTypes, t),
       }));
 
       if (customer) {
@@ -294,7 +296,7 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
                   onClick={handleOpenUploadPhotoModal}
                   className="pet-photo-change"
                 >
-                  Upload Photo
+                  {t('buttons.uploadPhoto')}
                 </button>
 
                 {profilePicUrl && (
@@ -302,49 +304,52 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
                     onClick={() => setIsDeletePhotoModalOpen(true)}
                     className="photo-button delete"
                   >
-                    Delete Photo
+                    {t('buttons.deletePhoto')}
                   </button>
                 )}
               </div>
             </div>
 
             <h1>
-              {customer.firstName} {customer.lastName}&apos;s Profile
+              {t('customerProfile.title', {
+                name: customer.firstName + ' ' + customer.lastName,
+              })}
             </h1>
           </div>
 
           <div className="customers-profile-info">
             <p>
-              <strong>Username:</strong> {userDetails.username || 'Loading...'}
+              <strong>{t('fields.username')}</strong>{' '}
+              {userDetails.username || 'Loading...'}
             </p>
             <p>
-              <strong>First Name:</strong> {customer.firstName}
+              <strong>{t('fields.firstName')}</strong> {customer.firstName}
             </p>
             <p>
-              <strong>Last Name:</strong> {customer.lastName}
+              <strong>{t('fields.lastName')}</strong> {customer.lastName}
             </p>
             <p>
-              <strong>Address:</strong> {customer.address}
+              <strong>{t('fields.address')}</strong> {customer.address}
             </p>
             <p>
-              <strong>City:</strong> {customer.city}
+              <strong>{t('fields.city')}</strong> {customer.city}
             </p>
             <p>
-              <strong>Province:</strong> {customer.province}
+              <strong>{t('fields.province')}</strong> {customer.province}
             </p>
             <p>
-              <strong>Telephone:</strong> {customer.telephone}
+              <strong>{t('fields.telephone')}</strong> {customer.telephone}
             </p>
           </div>
 
           <div className="customers-pets-section">
             <div className="customers-pets-header">
-              <h3>Customer Pets</h3>
+              <h3>{t('pets.profileTitle')}</h3>
               <button
                 className="customers-add-pet-button"
                 onClick={handleAddPet}
               >
-                Add Pet
+                {t('pets.buttons.add')}
               </button>
             </div>
 
@@ -367,7 +372,7 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
                         <img
                           src={
                             petImageUrls[pet.petId] ||
-                            getPetTypeImage(pet.petTypeId, petTypes)
+                            getPetTypeImage(pet.petTypeId, petTypes, t)
                           }
                           alt={`${pet.name} profile`}
                           className="pet-profile-picture"
@@ -377,15 +382,17 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
                           <h4 className="customers-pet-name">{pet.name}</h4>
                           <div className="customers-pet-details">
                             <span className="customers-pet-detail">
-                              <strong>Type:</strong>{' '}
-                              {getPetTypeName(pet.petTypeId, petTypes)}
+                              <strong>{t('pets.fields.type')}:</strong>{' '}
+                              {getPetTypeName(pet.petTypeId, petTypes, t)}
                             </span>
                             <span className="customers-pet-detail">
-                              <strong>Weight:</strong> {pet.weight}kg
+                              <strong>{t('pets.fields.weight')}:</strong>{' '}
+                              {pet.weight}
                             </span>
                             <span className="customers-pet-detail">
-                              <strong>Age:</strong>{' '}
-                              {calculateAge(pet.birthDate)} years
+                              <strong>{t('pets.fields.age')}:</strong>{' '}
+                              {calculateAge(pet.birthDate)}{' '}
+                              {t('pets.fields.year')}
                             </span>
                           </div>
                         </div>
@@ -396,30 +403,30 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
                           className="customers-edit-pet-button"
                           onClick={() => handleEditPet(pet.petId)}
                         >
-                          Edit Pet
+                          {t('pets.buttons.update')}
                         </button>
 
                         {(!petImageUrls[pet.petId] ||
                           petImageUrls[pet.petId] ===
-                            getPetTypeImage(pet.petTypeId, petTypes)) && (
+                            getPetTypeImage(pet.petTypeId, petTypes, t)) && (
                           <button
                             className="pet-photo-change"
                             onClick={() =>
                               handleOpenUploadPetPhotoModal(pet.petId)
                             }
                           >
-                            Add Photo
+                            {t('pets.buttons.addPhoto')}
                           </button>
                         )}
 
                         {petImageUrls[pet.petId] &&
                           petImageUrls[pet.petId] !==
-                            getPetTypeImage(pet.petTypeId, petTypes) && (
+                            getPetTypeImage(pet.petTypeId, petTypes, t) && (
                             <button
                               className="customers-delete-photo-button"
                               onClick={() => handleDeletePetPhoto(pet.petId)}
                             >
-                              Delete Photo
+                              {t('pets.buttons.deletePhoto')}
                             </button>
                           )}
 
@@ -427,7 +434,7 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
                           className="customers-delete-pet-button"
                           onClick={() => handleDeletePet(pet.petId)}
                         >
-                          Delete Pet
+                          {t('pets.buttons.delete')}
                         </button>
                       </div>
                     </div>
@@ -436,8 +443,10 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
               </div>
             ) : (
               <div className="customers-no-pets">
-                <p>No pets found.</p>
-                <p className="customers-no-pets-subtitle">Add your first pet</p>
+                <p>{t('pets.errors.notFound')}</p>
+                <p className="customers-no-pets-subtitle">
+                  {t('pets.errors.recommendation')}
+                </p>
               </div>
             )}
           </div>
@@ -446,7 +455,7 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
             className="customers-updateButton"
             onClick={onUpdateProfileClick}
           >
-            Update Profile
+            {t('buttons.update')}
           </button>
           <button
             className="customers-delete-pet-button"
