@@ -440,4 +440,21 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .then();
     }
 
+    public Flux<OrderResponseDTO> getOrdersByCustomerId(String customerId) {
+
+            String ordersServiceUrl = cartServiceUrl.replace(
+                    "/api/v1/carts",
+                    "/api/v1/orders"
+            );
+
+            return webClientBuilder.build()
+                    .get()
+                    .uri(
+                            ordersServiceUrl + "/customer/{customerId}",
+                            customerId
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToFlux(OrderResponseDTO.class);
+        }
 }

@@ -1,0 +1,31 @@
+<section class="vet-list-page">
+  <a class="back-link" routerLink="/vets" i18n="@@vets.list.back">Retour aux vétérinaires</a>
+
+  <header class="page-heading">
+    <p class="eyebrow" i18n="@@vets.eyebrow">Équipe vétérinaire</p>
+    <h1 i18n="@@vets.list.title">Répertoire des vétérinaires</h1>
+    <p class="page-description" i18n="@@vets.list.description">
+      Découvrez les profils, les spécialités et les horaires de notre équipe.
+    </p>
+  </header>
+
+  <aside class="preview-notice" aria-labelledby="preview-title">
+    <h2 id="preview-title" i18n="@@vets.list.preview_title">Aperçu · Profils fictifs</h2>
+    <p i18n="@@vets.list.preview_description">
+      Ces exemples présentent la mise en page. Les coordonnées et les horaires sont fictifs. La
+      consultation des profils réels et leur modification seront disponibles ultérieurement.
+    </p>
+  </aside>
+
+  <ul
+    class="profile-grid"
+    aria-label="Exemples de profils vétérinaires"
+    i18n-aria-label="@@vets.list.profiles_label"
+  >
+    @for (vet of vets; track vet.vetId) {
+      <li><app-vet-profile-card [vet]="vet" /></li>
+    } @empty {
+      <li class="empty-state" i18n="@@vets.list.empty">Aucun profil à afficher.</li>
+    }
+  </ul>
+</section>

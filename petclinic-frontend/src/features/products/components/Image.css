@@ -7,3 +7,52 @@
   border-radius: 4px;
   margin-bottom: 12px;
 }
+
+.image-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100px;
+}
+
+.image-container > img {
+  max-width: 100%;
+}
+
+.image-container > img.image-loading {
+  opacity: 0;
+}
+
+.products-loading-state {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 180px;
+}
+
+.image-loading-spinner {
+  position: absolute;
+  z-index: 1;
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid rgba(37, 99, 235, 0.2);
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: image-spinner 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image-loading-spinner {
+    animation-duration: 2s;
+  }
+}
+
+@keyframes image-spinner {
+  to {
+    transform: rotate(360deg);
+  }
+}
