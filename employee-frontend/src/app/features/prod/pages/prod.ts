@@ -105,6 +105,11 @@ export class Prod implements OnInit {
     }
   }
 
+  protected setReviewEditPeriodHours(value: number | string | null): void {
+    const parsedValue = value === null || value === '' ? NaN : Number(value);
+    this.reviewEditPeriodHours.set(parsedValue);
+  }
+
   protected loadReviewSettings(): void {
     this.reviewSettingsService.getSettings().subscribe({
       next: (settings) => {
@@ -117,7 +122,7 @@ export class Prod implements OnInit {
   }
 
   protected saveReviewSettings(): void {
-    const hours = this.reviewEditPeriodHours();
+    const hours = Number(this.reviewEditPeriodHours());
 
     if (!Number.isInteger(hours) || hours < 0) {
       this.settingsError.set('The edit period must be at least zero or greater');

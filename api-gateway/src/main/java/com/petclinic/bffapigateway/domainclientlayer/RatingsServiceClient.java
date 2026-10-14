@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel;
 import com.petclinic.bffapigateway.dtos.Ratings.ReviewSettingsModel;
 import com.petclinic.bffapigateway.dtos.Ratings.ReviewLikeResponseModel;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
+import com.petclinic.bffapigateway.exceptions.HttpErrorInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -82,6 +83,16 @@ public class RatingsServiceClient {
                 .uri(baseURL + "/" + productId + "/" + customerId)
                 .body(requestModel, RatingResponseModel.class)
                 .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        response -> response.bodyToMono(HttpErrorInfo.class)
+                                .flatMap(error -> Mono.error(
+                                        new GenericHttpException(
+                                                error.getMessage(),
+                                                HttpStatus.valueOf(response.statusCode().value())
+                                        )
+                                ))
+                )
                 .bodyToMono(RatingResponseModel.class);
     }
 
