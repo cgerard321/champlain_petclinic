@@ -59,7 +59,7 @@ public class VetController {
 
 
     //Ratings
-    @GetMapping("{vetId}/ratings")
+    @GetMapping(value = "{vetId}/ratings", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
         return ratingService.getAllRatingsByVetId(EntityDtoUtil.verifyId(vetId))
                 .doOnNext(rating -> log.info("Rating ID: {}, Vet ID: {}, Rating: {}, Customer Name: {}, Experience: {}",
@@ -108,7 +108,7 @@ public class VetController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping("{vetId}/ratings/date")
+    @GetMapping(value = "{vetId}/ratings/date", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(@PathVariable String vetId, @RequestParam Map<String,String> queryParams) {
         if (queryParams.containsKey("year")) {
             String year = queryParams.get("year");
@@ -126,7 +126,7 @@ public class VetController {
 
 
 
-    @GetMapping("topVets")
+    @GetMapping(value = "topVets", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
         return ratingService.getTopThreeVetsWithHighestAverageRating();
     }
@@ -150,7 +150,7 @@ public class VetController {
 
 
     //Vets
-    @GetMapping()
+    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VetResponseDTO> getAllVets() {
         return vetService.getAll();
     }
@@ -175,13 +175,13 @@ public class VetController {
     }
 
 
-    @GetMapping("/active")
+    @GetMapping(value = "/active", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VetResponseDTO> getActiveVets() {
         return vetService.getVetByIsActive(true);
     }
 
 
-    @GetMapping("/inactive")
+    @GetMapping(value = "/inactive", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VetResponseDTO> getInactiveVets() {
         return vetService.getVetByIsActive(false);
     }
@@ -198,7 +198,7 @@ public class VetController {
 
     @PutMapping("{vetId}")
     public Mono<ResponseEntity<VetResponseDTO>> updateVetByVetId(@PathVariable String vetId, @RequestBody Mono<VetRequestDTO> vetRequestDTOMono) {
-    return vetService.updateVet(EntityDtoUtil.verifyId(vetId), vetRequestDTOMono)
+        return vetService.updateVet(EntityDtoUtil.verifyId(vetId), vetRequestDTOMono)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -213,7 +213,7 @@ public class VetController {
 
 
     //Education
-    @GetMapping("{vetId}/educations")
+    @GetMapping(value = "{vetId}/educations", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<EducationResponseDTO> getAllEducationsByVetId(@PathVariable String vetId) {
         return educationService.getAllEducationsByVetId(EntityDtoUtil.verifyId(vetId));
     }
@@ -293,10 +293,10 @@ public class VetController {
                 .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()));
     }
 
- @PostMapping(
-        value = "{vetId}/albums/photos/{photoName}",
-        consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
+    @PostMapping(
+            value = "{vetId}/albums/photos/{photoName}",
+            consumes = MediaType.APPLICATION_OCTET_STREAM_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
     )
     public Mono<ResponseEntity<Album>> addAlbumPhotoOctet(
             @PathVariable String vetId,
@@ -309,9 +309,9 @@ public class VetController {
     }
 
     @PostMapping(
-        value = "{vetId}/albums/photos",
-        consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
-        produces = MediaType.APPLICATION_JSON_VALUE
+            value = "{vetId}/albums/photos",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
     )
     public Mono<ResponseEntity<Album>> addAlbumPhotoMultipart(
             @PathVariable String vetId,
@@ -365,7 +365,7 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("{vetId}/albums")
+    @GetMapping(value = "{vetId}/albums", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<Album> getAllAlbumsByVetId(@PathVariable String vetId) {
         return albumService.getAllAlbumsByVetId(vetId)
                 .doOnNext(album -> log.info("Album ID: {}, Vet ID: {}, Filename: {}, ImgType: {}",
