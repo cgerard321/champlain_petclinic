@@ -8,6 +8,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { AuthState } from '@core/services/auth-state';
 import { FollowUpVisitDialog } from '@features/vist/components/FollowUpVisit/FollowUpVisitDialog';
 import { Status } from '@features/vist/models/Status';
+import { visitStatusLabel } from '@features/vist/models/status-label';
 import { Visit } from '@features/vist/models/Visit';
 import { VisitService } from '@features/vist/services/visit-service';
 import { Roles } from '@shared/models/roles';
@@ -25,6 +26,7 @@ export class VistListTable implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
   private readonly untilDestroyed = takeUntilDestroyed<Visit>();
   protected readonly visit = signal<Visit[]>([]);
+  protected readonly statusLabel = visitStatusLabel;
   readonly selectedStatuses = input<Status[]>(Object.values(Status));
   protected readonly visibleVisits = computed(() => {
     const selectedStatuses = new Set(this.selectedStatuses());
@@ -33,25 +35,6 @@ export class VistListTable implements OnInit {
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly canScheduleFollowUp = this.authState.hasRole(Roles.vet);
-
-  protected statusLabel(status: Status): string {
-    switch (status) {
-      case Status.SCHEDULED:
-        return $localize`:@@visits.statusScheduled:Planifiée`;
-      case Status.COMPLETED:
-        return $localize`:@@visits.statusCompleted:Complétée`;
-      case Status.CANCELLED:
-        return $localize`:@@visits.statusCancelled:Annulée`;
-      case Status.CONFIRMED:
-        return $localize`:@@visits.statusConfirmed:Confirmée`;
-      case Status.UPCOMING:
-        return $localize`:@@visits.statusUpcoming:À venir`;
-      case Status.ARCHIVED:
-        return $localize`:@@visits.statusArchived:Archivée`;
-      case Status.OUT_OF_STATUS:
-        return $localize`:@@visits.statusOutOfStatus:Hors statut`;
-    }
-  }
 
   ngOnInit(): void {
     this.visitService

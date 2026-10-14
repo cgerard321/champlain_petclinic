@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { JSX, useEffect, useRef, useState } from 'react';
 import {
   Alert,
@@ -30,6 +31,7 @@ function ReviewBox({
   updateFunc: (newReview: string) => void;
   rating: RatingModel;
 }): JSX.Element {
+  const { t } = useTranslation('products');
   const [reviewText, setReviewText] = useState<string>(rating.review);
   const [isError, setError] = useState<string | null>(null);
   const [previewToggle, setPreviewToggle] = useState<boolean>(true);
@@ -42,9 +44,7 @@ function ReviewBox({
   }, [rating.review]);
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleLocalChange = (text: string) => {
-    setError(
-      text.length > 10000 ? 'Review cannot exceed 10000 characters!' : null
-    );
+    setError(text.length > 10000 ? 'reviewTooLong' : null);
     updateFunc(text);
     setReviewText(text);
   };
@@ -171,12 +171,12 @@ function ReviewBox({
           value="1"
           onChange={e => setPreviewToggle(e.target.checked)}
         >
-          {previewToggle ? 'Hide preview' : 'Show preview'}
+          {previewToggle ? t('hidePreview') : t('showPreview')}
         </ToggleButton>
         <ButtonGroup>
           <Button
             variant="light"
-            aria-label="Apply bold to selection"
+            aria-label={t('boldSelection')}
             onMouseDown={e => {
               e.preventDefault();
               handleToolbarButtonClick('**', '**');
@@ -186,7 +186,7 @@ function ReviewBox({
           </Button>
           <Button
             variant="light"
-            aria-label="Apply strikethrough to selection"
+            aria-label={t('strikeSelection')}
             onMouseDown={e => {
               e.preventDefault();
               handleToolbarButtonClick('~', '~');
@@ -196,7 +196,7 @@ function ReviewBox({
           </Button>
           <Button
             variant="light"
-            aria-label="Apply underline to selection"
+            aria-label={t('underlineSelection')}
             onMouseDown={e => {
               e.preventDefault();
               handleToolbarButtonClick('++', '++');
@@ -206,7 +206,7 @@ function ReviewBox({
           </Button>
           <Button
             variant="light"
-            aria-label="Apply italic to selection"
+            aria-label={t('italicSelection')}
             onMouseDown={e => {
               e.preventDefault();
               handleToolbarButtonClick('*', '*');
@@ -216,7 +216,7 @@ function ReviewBox({
           </Button>
           <Button
             variant="light"
-            aria-label="Make selection a link"
+            aria-label={t('linkSelection')}
             onMouseDown={e => {
               e.preventDefault();
               handleToolbarButtonClick('[', '](https://yourlink.com)');
@@ -226,7 +226,7 @@ function ReviewBox({
           </Button>
           <Button
             variant="light"
-            aria-label="Make selection a list"
+            aria-label={t('listSelection')}
             onMouseDown={e => {
               e.preventDefault();
               handleToolbarButtonClick('- ', '', true);
@@ -236,7 +236,7 @@ function ReviewBox({
           </Button>
           <Button
             variant="light"
-            aria-label="Make selection a numbered list"
+            aria-label={t('numberedListSelection')}
             onMouseDown={e => {
               e.preventDefault();
               handleToolbarButtonClick('1. ', '', true);
@@ -246,7 +246,7 @@ function ReviewBox({
           </Button>
           <Button
             variant="light"
-            aria-label="Put the selection in a blockquote"
+            aria-label={t('quoteSelection')}
             onMouseDown={e => {
               e.preventDefault();
               handleToolbarButtonClick('> ', '', true);
@@ -256,7 +256,7 @@ function ReviewBox({
           </Button>
           <Button
             variant="light"
-            aria-label="Make the selection a header"
+            aria-label={t('headingSelection')}
             onMouseDown={e => {
               e.preventDefault();
               handleToolbarButtonClick('# ', '', true);
@@ -266,7 +266,7 @@ function ReviewBox({
           </Button>
           <Button
             variant="light"
-            aria-label="Make the selection a sub-header"
+            aria-label={t('subheadingSelection')}
             onMouseDown={e => {
               e.preventDefault();
               handleToolbarButtonClick('## ', '', true);
@@ -276,7 +276,7 @@ function ReviewBox({
           </Button>
           <Button
             variant="light"
-            aria-label="Make the selection a sub-sub header"
+            aria-label={t('subsubheadingSelection')}
             onMouseDown={e => {
               e.preventDefault();
               handleToolbarButtonClick('### ', '', true);
@@ -286,14 +286,14 @@ function ReviewBox({
           </Button>
         </ButtonGroup>
       </div>
-      {isError && <Alert variant="warning">{isError}</Alert>}
+      {isError && <Alert variant="warning">{t(isError)}</Alert>}
       <div className="reviewbox-input-container">
         <Stack direction="horizontal" gap={3}>
           <Form.Control
             as="textarea"
             ref={textAreaRef}
             className={`review-box-textarea ${!previewToggle ? 'full' : ''}`}
-            placeholder="Leave your review here..."
+            placeholder={t('reviewPlaceholder')}
             value={reviewText}
             onChange={e => handleLocalChange(e.target.value)}
             onSelect={e => {
@@ -310,9 +310,7 @@ function ReviewBox({
           {previewToggle && (
             <div className="reviewbox-preview-body">
               <MarkdownReviewBody>
-                {reviewText != ''
-                  ? reviewText
-                  : '**Your preview will appear here**, ++markdown is supported++'}
+                {reviewText != '' ? reviewText : t('reviewPreviewHint')}
               </MarkdownReviewBody>
             </div>
           )}

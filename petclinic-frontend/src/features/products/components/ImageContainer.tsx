@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useRef, useState } from 'react';
 import defaultProductImage from '@/assets/Products/defaultProductImage.svg';
 import { FileDetails } from '@/shared/models/FileDetails';
@@ -22,6 +23,7 @@ export default function ImageContainer({
   productId,
   imageUrl,
 }: ImageContainerProps): JSX.Element {
+  const { t } = useTranslation('products');
   const [imageName, setImageName] = useState<string | null>(
     image?.fileName ?? null
   );
@@ -170,7 +172,7 @@ export default function ImageContainer({
         <span
           className="image-loading-spinner"
           role="status"
-          aria-label="Loading image"
+          aria-label={t('loading')}
         />
       )}
       <img

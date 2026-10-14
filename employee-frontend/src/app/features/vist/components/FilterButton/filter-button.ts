@@ -1,6 +1,7 @@
 import { Component, input, output, signal } from '@angular/core';
 
 import { Status } from '@features/vist/models/Status';
+import { visitStatusLabel } from '@features/vist/models/status-label';
 
 @Component({
   selector: 'app-filter-button',
@@ -8,9 +9,9 @@ import { Status } from '@features/vist/models/Status';
   templateUrl: './filter-button.html',
   styleUrl: './filter-button.css',
 })
-
 export class FilterButton {
   protected readonly statuses = Object.values(Status) as Status[];
+  protected readonly statusLabel = visitStatusLabel;
   readonly selectedStatuses = input.required<Status[]>();
   protected readonly isMenuOpen = signal(false);
   readonly statusSelectionChange = output<Status[]>();
@@ -31,25 +32,6 @@ export class FilterButton {
       return selected.has(candidate);
     }
 
-    this.statusSelectionChange.emit(this.statuses.filter(isSelected));  }
-
-
-  protected statusLabel(status: Status): string {
-    switch (status) {
-      case Status.SCHEDULED:
-        return $localize`:@@visits.statusScheduled:Planifiée`;
-      case Status.COMPLETED:
-        return $localize`:@@visits.statusCompleted:Complétée`;
-      case Status.CANCELLED:
-        return $localize`:@@visits.statusCancelled:Annulée`;
-      case Status.CONFIRMED:
-        return $localize`:@@visits.statusConfirmed:Confirmée`;
-      case Status.UPCOMING:
-        return $localize`:@@visits.statusUpcoming:À venir`;
-      case Status.ARCHIVED:
-        return $localize`:@@visits.statusArchived:Archivée`;
-      case Status.OUT_OF_STATUS:
-        return $localize`:@@visits.statusOutOfStatus:Hors statut`;
-    }
+    this.statusSelectionChange.emit(this.statuses.filter(isSelected));
   }
 }
