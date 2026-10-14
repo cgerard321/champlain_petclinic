@@ -751,7 +751,8 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.save(any(Product.class)))
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
-        StepVerifier.create(productInventoryService.updateProductInInventory(Mono.just(request), inventoryId, productId))
+        StepVerifier.create(productInventoryService.updateProductInInventory(
+                        Mono.just(request), inventoryId, productId, "test-user"))
                 .assertNext(response -> assertEquals("New Supplier", response.getSupplierName()))
                 .verifyComplete();
         verify(productRepository).save(argThat(savedProduct ->
@@ -974,7 +975,8 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.save(any(Product.class)))
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
-        StepVerifier.create(productInventoryService.addSupplyToInventory(Mono.just(request), inventoryId))
+        StepVerifier.create(productInventoryService.addSupplyToInventory(
+                        Mono.just(request), inventoryId, "test-user"))
                 .assertNext(response -> assertEquals("Clinic Supplier", response.getSupplierName()))
                 .verifyComplete();
         verify(productRepository).save(argThat(savedProduct ->
@@ -997,7 +999,8 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.existsByInventoryIdAndProductNameIgnoreCase(inventoryId, request.getProductName()))
                 .thenReturn(Mono.just(false));
 
-        StepVerifier.create(productInventoryService.addSupplyToInventory(Mono.just(request), inventoryId))
+        StepVerifier.create(productInventoryService.addSupplyToInventory(
+                        Mono.just(request), inventoryId, "test-user"))
                 .expectErrorSatisfies(error -> {
                     assertTrue(error instanceof InvalidInputException);
                     assertEquals("Supplier name cannot be empty.", error.getMessage());
