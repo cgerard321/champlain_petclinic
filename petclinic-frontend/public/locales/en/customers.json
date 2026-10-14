@@ -10,6 +10,13 @@
     "update": "Update Profile"
 
   },
+  "deleteAccount": {
+    "title": "Delete Account",
+    "message": "Are you sure you want to delete your account? Your profile photo will be permanently removed and you will be logged out.",
+    "confirm": "Delete Account",
+    "cancel": "Cancel",
+    "failed": "Failed to delete your account. Please try again."
+  },
 
     "uploadPetPhotoModal": {
       "title": "Upload Pet Photo",

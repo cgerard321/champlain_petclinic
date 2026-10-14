@@ -189,13 +189,10 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
     if (!user.userId) return;
 
     const confirmed = await confirm({
-      title: 'Delete Account',
-      message:
-        'Are you sure you want to delete your account? Your profile photo will be permanently removed and you will be logged out.',
-      confirmText: 'Delete Account',
-      cancelText: 'Cancel',
-      variant: 'danger',
-      destructive: true,
+      title: t('deleteAccount.title'),
+      message: t('deleteAccount.message'),
+      confirmText: t('deleteAccount.confirm'),
+      cancelText: t('deleteAccount.cancel'),
     });
 
     if (!confirmed) return;
@@ -206,7 +203,7 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
       navigate(AppRoutePaths.Login);
     } catch (error) {
       console.error('Error deleting account:', error);
-      alert('Failed to delete your account. Please try again.');
+      alert(t('deleteAccount.failed'));
     }
   };
 
@@ -462,7 +459,7 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
             style={{ alignSelf: 'flex-end', marginTop: '8px' }}
             onClick={handleDeleteAccount}
           >
-            Delete Account
+            {t('buttons.deleteAccount')}
           </button>
         </div>
       </div>
