@@ -178,7 +178,7 @@ class CustomerControllerIntegrationTest {
     }
 
     @Test
-    void softDeleteCustomerByCustomerId_WhenAlreadyInactive_ShouldReturnNotFound() {
+    void softDeleteCustomerByCustomerId_WhenAlreadyInactive_ShouldStillReturnNoContent() {
         StepVerifier.create(repo.deleteAll()).verifyComplete();
 
         String testCustomerId = "33333333-3333-4333-8333-333333333333";
@@ -199,13 +199,30 @@ class CustomerControllerIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
 
+        when(cartServiceClient.deleteCartByCustomerId(testCustomerId)).thenReturn(Mono.empty());
+
         client.delete().uri("/customers/" + testCustomerId + "/soft")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        StepVerifier.create(repo.findCustomerByCustomerId(testCustomerId))
+                .expectNextMatches(saved -> Boolean.FALSE.equals(saved.getIsActive()))
+                .verifyComplete();
+    }
+
+    @Test
+    void softDeleteCustomerByCustomerId_WhenCustomerDoesNotExist_ShouldReturnNotFound() {
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
+
+        String missingCustomerId = "44444444-4444-4444-8444-444444444444";
+
+        client.delete().uri("/customers/" + missingCustomerId + "/soft")
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Customer id not found: " + testCustomerId);
+                .jsonPath("$.message").isEqualTo("Customer id not found: " + missingCustomerId);
 
-        verify(cartServiceClient, never()).deleteCartByCustomerId(testCustomerId);
+        verify(cartServiceClient, never()).deleteCartByCustomerId(missingCustomerId);
     }
 
     @Test

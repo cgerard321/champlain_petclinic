@@ -316,22 +316,21 @@ class CustomerServiceImplTest {
     }
 
     @Test
-    void softDeleteCustomerByCustomerId_WhenAlreadyInactive_ShouldThrowNotFound() {
+    void softDeleteCustomerByCustomerId_WhenAlreadyInactive_ShouldStillSucceed() {
         String customerId = "customerId-123";
         Customer inactiveCustomer = buildCustomer();
-        inactiveCustomer.setPhotoId("photo-999");
         inactiveCustomer.setIsActive(false);
 
         when(repo.findCustomerByCustomerId(customerId)).thenReturn(Mono.just(inactiveCustomer));
+        when(cartServiceClient.deleteCartByCustomerId(customerId)).thenReturn(Mono.empty());
+        when(repo.save(any(Customer.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         StepVerifier.create(customerService.softDeleteCustomerByCustomerId(customerId))
-                .expectErrorMatches(error -> error instanceof NotFoundException &&
-                        error.getMessage().equals("Customer id not found: " + customerId))
-                .verify();
+                .consumeNextWith(response -> assertEquals(customerId, response.getCustomerId()))
+                .verifyComplete();
 
         verify(filesServiceClient, never()).deleteFile(anyString());
-        verify(cartServiceClient, never()).deleteCartByCustomerId(anyString());
-        verify(repo, never()).save(any(Customer.class));
+        verify(repo).save(argThat(customer -> Boolean.FALSE.equals(customer.getIsActive())));
     }
 
     @Test

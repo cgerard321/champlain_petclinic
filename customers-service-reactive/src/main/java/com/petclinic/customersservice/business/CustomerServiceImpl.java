@@ -84,7 +84,6 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Mono<CustomerResponseDTO> softDeleteCustomerByCustomerId(String customerId) {
         return customerRepo.findCustomerByCustomerId(customerId)
-                .filter(found -> !Boolean.FALSE.equals(found.getIsActive()))
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Customer id not found: " + customerId))))
                 .flatMap(found -> {
                     String photoId = found.getPhotoId();
