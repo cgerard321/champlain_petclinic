@@ -38,6 +38,8 @@ import {
 } from '../api/cartEvent';
 import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
+import { getCustomerOrders } from '../api/getCustomerOrders';
+import type { OrderModel } from '../models/OrderModel';
 interface ProductAPIResponse {
   productId: string;
   imageId?: string;
@@ -91,8 +93,36 @@ const UserCart: React.FC = () => {
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const [movingAll, setMovingAll] = useState<boolean>(false);
+  const [orders, setOrders] = useState<OrderModel[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
+
+  const fetchOrders = useCallback(async (): Promise<void> => {
+    if (!customerId) {
+      setOrders([]);
+      setOrdersLoading(false);
+      return;
+    }
+
+    setOrdersLoading(true);
+    setOrdersError(null);
+
+    try {
+      const data = await getCustomerOrders(customerId);
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      setOrdersError('Could not load previous orders.');
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, [customerId]);
+
+  useEffect(() => {
+    void fetchOrders();
+  }, [fetchOrders]);
 
   const toProductModel = useCallback(
     (product: ProductAPIResponse): ProductModel => ({
@@ -781,12 +811,12 @@ const UserCart: React.FC = () => {
     const blockedCount = wishlistItems.length - movableItems.length;
 
     const ok = await confirm({
-      title: 'Move all from wishlist',
+      title: 'Add all to cart',
       message:
         blockedCount > 0
-          ? `Move ${movableItems.length} in-stock item(s) to your cart? ${blockedCount} item(s) are out of stock and will remain in your wishlist.`
-          : `Move ${movableItems.length} item(s) to your cart?`,
-      confirmText: 'Move all',
+          ? `Add ${movableItems.length} in-stock item(s) to your cart? ${blockedCount} item(s) are out of stock and will remain in your wishlist.`
+          : `Add ${movableItems.length} item(s) to your cart?`,
+      confirmText: 'Add all',
       cancelText: 'Cancel',
     });
     if (!ok) return;
@@ -800,7 +830,7 @@ const UserCart: React.FC = () => {
     );
 
     if (productIds.length === 0) {
-      showToast('No wishlist items are eligible to move.', 'info');
+      showToast('No wishlist items are eligible to add.', 'info');
       return;
     }
 
@@ -820,13 +850,13 @@ const UserCart: React.FC = () => {
 
       const fallback =
         blockedCount > 0
-          ? `Moved ${movableItems.length} item(s) to your cart. ${blockedCount} item(s) stayed in your wishlist because they are out of stock.`
-          : `Moved ${movableItems.length} item(s) from wishlist to cart.`;
+          ? `Added ${movableItems.length} item(s) to your cart. ${blockedCount} item(s) stayed in your wishlist because they are out of stock.`
+          : `Added ${movableItems.length} wishlist item(s) to cart.`;
       syncCartState(data, fallback);
     } catch (e) {
       console.error(e);
       showToast(
-        apiErrorMessage(e, 'Unexpected error while moving wishlist items.'),
+        apiErrorMessage(e, 'Unexpected error while adding wishlist items.'),
         'error'
       );
     } finally {
@@ -934,6 +964,21 @@ const UserCart: React.FC = () => {
 
       // Reset LS so navbar badge = 0 without API
       setCartCountInLS(0);
+
+      // Refresh cart data to retrieve the newly created order
+
+      await fetchOrders();
+
+      try {
+        const { data } = await axiosInstance.get<CartDetailsModel>(
+          `/carts/${cartId}`,
+          { useV2: false }
+        );
+
+        syncCartState(data);
+      } catch (err) {
+        console.error('Failed to refresh orders after checkout:', err);
+      }
 
       // Fetch recent purchases after checkout
       if (customerId) {
@@ -1196,6 +1241,73 @@ const UserCart: React.FC = () => {
           )}
         </div>
 
+        {/* Previous Orders */}
+        <div className="orders-section cart-panel cart-panel--padded">
+          <h2>Your Orders</h2>
+
+          {ordersLoading ? (
+            <p>Loading your orders...</p>
+          ) : ordersError ? (
+            <p className="error">{ordersError}</p>
+          ) : orders.length === 0 ? (
+            <p>You have not placed any orders yet.</p>
+          ) : (
+            <div className="orders-list">
+              {orders.map(order => (
+                <div key={order.orderId} className="order-card cart-card">
+                  <div className="order-header">
+                    <h3>Order #{order.orderId}</h3>
+
+                    <p>
+                      Placed on:{' '}
+                      {new Date(order.orderDate).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <div className="order-products">
+                    {order.products.map(item => (
+                      <div key={item.productId} className="order-product">
+                        <div
+                          className="recent-purchase-image"
+                          onClick={() =>
+                            redirectToProductPageOnClick(item.productId)
+                          }
+                        >
+                          <ImageContainer
+                            productId={item.productId}
+                            imageId={item.imageId}
+                          />
+                        </div>
+
+                        <div className="order-product-details">
+                          <h4>{item.productName}</h4>
+
+                          <p>Qty: {item.quantityInCart}</p>
+
+                          <p>{formatPrice(item.productSalePrice)} each</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="order-footer">
+                    <span>Subtotal: {formatPrice(order.subtotal)}</span>
+                    <span>TVQ: {formatPrice(order.tvq)}</span>
+                    <span>TVC: {formatPrice(order.tvc)}</span>
+
+                    {order.promoPercent != null && (
+                      <span>Promo: {order.promoPercent}%</span>
+                    )}
+
+                    <strong>Total: {formatPrice(order.total)}</strong>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Recent purchases*/}
         <div className="recent-purchases-section cart-panel cart-panel--padded">
           <h2>Recent Purchases</h2>
           <div className="recent-purchases-list cart-scroll-strip">
@@ -1266,7 +1378,7 @@ const UserCart: React.FC = () => {
 
         {/* Wishlist */}
         <div className="wishlist-section cart-panel cart-panel--padded">
-          {/* Header with Move All button */}
+          {/* Header with Add All button */}
           <div
             className="wishlist-header"
             style={{
@@ -1285,13 +1397,13 @@ const UserCart: React.FC = () => {
                 aria-disabled={isStaff || movingAll || !hasMovableWishlistItems}
                 title={
                   isStaff
-                    ? 'Read-only: staff/admin cannot move wishlist items'
+                    ? 'Read-only: staff/admin cannot add wishlist items'
                     : !hasMovableWishlistItems
                       ? 'All wishlist items are out of stock'
-                      : 'Move all wishlist items to cart'
+                      : 'Add all wishlist items to cart'
                 }
               >
-                {movingAll ? 'Moving…' : 'Move All to Cart'}
+                {movingAll ? 'Adding…' : 'Add All to Cart'}
               </button>
             )}
           </div>

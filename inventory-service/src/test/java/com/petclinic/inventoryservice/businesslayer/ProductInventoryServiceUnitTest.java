@@ -661,6 +661,7 @@ class ProductInventoryServiceUnitTest {
                 .inventoryId(inventoryId)
                 .productId(productId)
                 .productName("Original Product Name")
+                .supplierName("Original Supplier")
                 .productPrice(50.0)
                 .productQuantity(10)
                 .productSalePrice(10.10)
@@ -703,6 +704,42 @@ class ProductInventoryServiceUnitTest {
                     return true;
                 })
                 .verifyComplete();
+        verify(productRepository).save(argThat(savedProduct ->
+                "Original Supplier".equals(savedProduct.getSupplierName())));
+    }
+
+    @Test
+    void updateProductInInventory_WithSupplierName_ShouldSaveAndReturnTrimmedSupplierName() {
+        String inventoryId = "1";
+        String productId = UUID.randomUUID().toString();
+        ProductRequestDTO request = ProductRequestDTO.builder()
+                .productName("Updated Product Name")
+                .productDescription("Description")
+                .productPrice(99.99)
+                .productQuantity(20)
+                .productSalePrice(15.99)
+                .supplierName("  New Supplier  ")
+                .build();
+        Product existingProduct = Product.builder()
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Original Product Name")
+                .supplierName("Original Supplier")
+                .build();
+
+        when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+                .thenReturn(Mono.just(Inventory.builder().inventoryId(inventoryId).build()));
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.just(existingProduct));
+        when(productRepository.existsByInventoryIdAndProductNameIgnoreCaseAndProductIdNot(
+                inventoryId, request.getProductName(), productId)).thenReturn(Mono.just(false));
+        when(productRepository.save(any(Product.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(productInventoryService.updateProductInInventory(Mono.just(request), inventoryId, productId))
+                .assertNext(response -> assertEquals("New Supplier", response.getSupplierName()))
+                .verifyComplete();
+        verify(productRepository).save(argThat(savedProduct ->
+                "New Supplier".equals(savedProduct.getSupplierName())));
     }
 
     @Test
@@ -896,6 +933,57 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
         Mockito.verify(productRepository, Mockito.times(1)).save(any(Product.class));
     }
+
+    @Test
+    void addSupplyToInventory_WithSupplierName_ShouldSaveAndReturnTrimmedSupplierName() {
+        String inventoryId = "1";
+        ProductRequestDTO request = ProductRequestDTO.builder()
+                .productName("Bandages")
+                .productDescription("Sterile bandages")
+                .productPrice(10.00)
+                .productQuantity(20)
+                .productSalePrice(12.00)
+                .supplierName("  Clinic Supplier  ")
+                .build();
+
+        when(inventoryRepository.findInventoryByInventoryId(inventoryId)).thenReturn(Mono.just(inventory));
+        when(productRepository.existsByInventoryIdAndProductNameIgnoreCase(inventoryId, request.getProductName()))
+                .thenReturn(Mono.just(false));
+        when(productRepository.save(any(Product.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(productInventoryService.addSupplyToInventory(Mono.just(request), inventoryId))
+                .assertNext(response -> assertEquals("Clinic Supplier", response.getSupplierName()))
+                .verifyComplete();
+        verify(productRepository).save(argThat(savedProduct ->
+                "Clinic Supplier".equals(savedProduct.getSupplierName())));
+    }
+
+    @Test
+    void addSupplyToInventory_WithBlankSupplierName_ShouldRejectWithoutSaving() {
+        String inventoryId = "1";
+        ProductRequestDTO request = ProductRequestDTO.builder()
+                .productName("Bandages")
+                .productDescription("Sterile bandages")
+                .productPrice(10.00)
+                .productQuantity(20)
+                .productSalePrice(12.00)
+                .supplierName("   ")
+                .build();
+
+        when(inventoryRepository.findInventoryByInventoryId(inventoryId)).thenReturn(Mono.just(inventory));
+        when(productRepository.existsByInventoryIdAndProductNameIgnoreCase(inventoryId, request.getProductName()))
+                .thenReturn(Mono.just(false));
+
+        StepVerifier.create(productInventoryService.addSupplyToInventory(Mono.just(request), inventoryId))
+                .expectErrorSatisfies(error -> {
+                    assertTrue(error instanceof InvalidInputException);
+                    assertEquals("Supplier name cannot be empty.", error.getMessage());
+                })
+                .verify();
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
     @Test
     void addSupplyToInventory_ShouldFail_WhenProductNameExists() {
         String inventoryId = "1";
@@ -1220,8 +1308,6 @@ class ProductInventoryServiceUnitTest {
         // Given
         String testType = "Internal";
         String testDescription = "Medication for procedures";
-=======
->>>>>>> d1e75733 (fixing a bit of code because of the quodana requirement)
 
 
 
@@ -2059,10 +2145,34 @@ class ProductInventoryServiceUnitTest {
     public void CreateSupplyPdfThrowsDocumentException() throws DocumentException {
         String inventoryId = "valid-id";
 
-        // Create mock Product objects with correct parameters for Product constructor
-Product product1 = new Product("1", "P001", inventoryId, "Product1", "Description1", 10, 5.99, 7.99, product.getProductProfit(), Status.AVAILABLE, LocalDateTime.now(), null, null, null);
+        // Build test products without depending on the generated constructor's field order.
+        Product product1 = Product.builder()
+                .id("1")
+                .productId("P001")
+                .inventoryId(inventoryId)
+                .productName("Product1")
+                .productDescription("Description1")
+                .productQuantity(10)
+                .productPrice(5.99)
+                .productSalePrice(7.99)
+                .productProfit(product.getProductProfit())
+                .status(Status.AVAILABLE)
+                .lastUpdatedAt(LocalDateTime.now())
+                .build();
 
-Product product2 = new Product("2", "P002", inventoryId, "Product2", "Description2", 20, 10.99, 12.99, product.getProductProfit(), Status.RE_ORDER, LocalDateTime.now(), null, null, null);
+        Product product2 = Product.builder()
+                .id("2")
+                .productId("P002")
+                .inventoryId(inventoryId)
+                .productName("Product2")
+                .productDescription("Description2")
+                .productQuantity(20)
+                .productPrice(10.99)
+                .productSalePrice(12.99)
+                .productProfit(product.getProductProfit())
+                .status(Status.RE_ORDER)
+                .lastUpdatedAt(LocalDateTime.now())
+                .build();
         // Mock the repository to return a Flux of products
         when(productRepository.findAllProductsByInventoryId(inventoryId))
                 .thenReturn(Flux.just(product1, product2));
