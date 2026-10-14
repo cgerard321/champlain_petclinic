@@ -740,6 +740,7 @@ class ProductInventoryServiceUnitTest {
                 .inventoryId(inventoryId)
                 .productId(productId)
                 .productName("Original Product Name")
+                .productQuantity(10)
                 .supplierName("Original Supplier")
                 .build();
 
