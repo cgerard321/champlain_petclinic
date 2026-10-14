@@ -95,10 +95,6 @@
     <script src="scripts/vet-form/vet-form.controller.js"></script>
     <script src="scripts/vet-form/vet-form.component.js"></script>
 
-    <script src="scripts/auth/signup/signup-form.js"></script>
-    <script src="scripts/auth/signup/signup-form.controller.js"></script>
-    <script src="scripts/auth/signup/signup-form.component.js"></script>
-
     <script src="scripts/auth/manager-form/manager-form.js"></script>
     <script src="scripts/auth/manager-form/manager-form.controller.js"></script>
     <script src="scripts/auth/manager-form/manager-form.component.js"></script>
@@ -144,11 +140,9 @@
     <script src="scripts/bill-update-form/bill-update-form.controller.js"></script>
     <script src="scripts/bill-update-form/bill-update-form.component.js"></script>
 
-
     <script src="scripts/inventories-list/inventories-list.js"></script>
     <script src="scripts/inventories-list/inventories-list.controller.js"></script>
     <script src="scripts/inventories-list/inventories-list.component.js"></script>
-
 
     <script src="scripts/inventories-form/inventories-form.js"></script>
     <script src="scripts/inventories-form/inventories-form.controller.js"></script>
@@ -228,7 +222,6 @@
 
     <script src="scripts/inventories-list/inventories-service.js"></script>
 
-
     <script src="scripts/pet-type-list/pet-type-list.js"></script>
     <script src="scripts/pet-type-list/pet-type-list.controller.js"></script>
     <script src="scripts/pet-type-list/pet-type-list.component.js"></script>
@@ -238,13 +231,9 @@
     <script src="scripts/auth/update-role-form/role-update.controller.js"></script>
     <script src="scripts/auth/update-role-form/role-update.component.js"></script>
 
-
-
     <script src="scripts/pet-details/pet-details.js"></script>
     <script src="scripts/pet-details/pet-details.controller.js"></script>
     <script src="scripts/pet-details/pet-details.component.js"></script>
-
-
 </head>
 
 <body id="bg">
@@ -255,6 +244,23 @@
     </div>
 </div>
 <layout-footer></layout-footer>
+
+<!-- Confirmation Modal Backdrop & Container -->
+<div id="confirmationBackdrop" class="confirmation-modal-backdrop modalOff">
+    <div class="confirmation-modal">
+        <div class="confirmation-modal-header">
+            <h5 id="confirmationModalTitle">Notification</h5>
+        </div>
+        <div class="modal-body">
+            <p id="confirmationModalBody"></p>
+        </div>
+        <div class="confirmation-modal-footer">
+            <button id="confirmationModalCancelBtn" type="button" class="btn btn-secondary">Close</button>
+            <button id="confirmationModalConfirmBtn" type="button" class="btn btn-primary">Confirm</button>
+        </div>
+    </div>
+</div>
+
 </body>
 
 </html>
