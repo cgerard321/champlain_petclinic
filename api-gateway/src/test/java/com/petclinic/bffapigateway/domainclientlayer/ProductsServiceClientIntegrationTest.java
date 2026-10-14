@@ -862,4 +862,37 @@ class ProductsServiceClientIntegrationTest {
                 .verify();
     }
 
+
+    @Test
+    void catalogPreservesBothLanguagesInResponse() {
+        mockWebServer.enqueue(new MockResponse().setHeader("Content-Type", "text/event-stream")
+                .setBody("data:{\"productId\":\"sample\",\"productName\":\"Cat Litter\","
+                        + "\"productDescription\":\"Clumping litter\",\"productNameFr\":\"Litière\","
+                        + "\"productDescriptionFr\":\"Contrôle des odeurs\"}\n\n"));
+        StepVerifier.create(productsServiceClient.getAllProducts(null, null, null, null, null, null, null))
+                .assertNext(product -> {
+                    assertEquals("Cat Litter", product.getProductName());
+                    assertEquals("Litière", product.getProductNameFr());
+                    assertEquals("Contrôle des odeurs", product.getProductDescriptionFr());
+                }).verifyComplete();
+    }
+
+
+    @Test
+    void updateForwardsFrenchFieldsWithoutReplacingEnglish() throws Exception {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) { }
+        mockWebServer.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
+                .setBody("{\"productId\":\"sample\"}"));
+        ProductRequestDTO request = ProductRequestDTO.builder().productName("Cat Litter")
+                .productDescription("Clumping litter").productNameFr("Litière pour chats")
+                .productDescriptionFr("Litière agglomérante").build();
+        StepVerifier.create(productsServiceClient.updateProduct("sample", request))
+                .expectNextCount(1).verifyComplete();
+        RecordedRequest sent = mockWebServer.takeRequest(5, TimeUnit.SECONDS);
+        org.junit.jupiter.api.Assertions.assertNotNull(sent);
+        var json = objectMapper.readTree(sent.getBody().readUtf8());
+        assertEquals("Cat Litter", json.get("productName").asText());
+        assertEquals("Litière pour chats", json.get("productNameFr").asText());
+        assertEquals("Litière agglomérante", json.get("productDescriptionFr").asText());
+    }
 }
