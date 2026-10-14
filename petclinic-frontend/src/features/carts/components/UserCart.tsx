@@ -811,12 +811,12 @@ const UserCart: React.FC = () => {
     const blockedCount = wishlistItems.length - movableItems.length;
 
     const ok = await confirm({
-      title: 'Move all from wishlist',
+      title: 'Add all to cart',
       message:
         blockedCount > 0
-          ? `Move ${movableItems.length} in-stock item(s) to your cart? ${blockedCount} item(s) are out of stock and will remain in your wishlist.`
-          : `Move ${movableItems.length} item(s) to your cart?`,
-      confirmText: 'Move all',
+          ? `Add ${movableItems.length} in-stock item(s) to your cart? ${blockedCount} item(s) are out of stock and will remain in your wishlist.`
+          : `Add ${movableItems.length} item(s) to your cart?`,
+      confirmText: 'Add all',
       cancelText: 'Cancel',
     });
     if (!ok) return;
@@ -830,7 +830,7 @@ const UserCart: React.FC = () => {
     );
 
     if (productIds.length === 0) {
-      showToast('No wishlist items are eligible to move.', 'info');
+      showToast('No wishlist items are eligible to add.', 'info');
       return;
     }
 
@@ -850,13 +850,13 @@ const UserCart: React.FC = () => {
 
       const fallback =
         blockedCount > 0
-          ? `Moved ${movableItems.length} item(s) to your cart. ${blockedCount} item(s) stayed in your wishlist because they are out of stock.`
-          : `Moved ${movableItems.length} item(s) from wishlist to cart.`;
+          ? `Added ${movableItems.length} item(s) to your cart. ${blockedCount} item(s) stayed in your wishlist because they are out of stock.`
+          : `Added ${movableItems.length} wishlist item(s) to cart.`;
       syncCartState(data, fallback);
     } catch (e) {
       console.error(e);
       showToast(
-        apiErrorMessage(e, 'Unexpected error while moving wishlist items.'),
+        apiErrorMessage(e, 'Unexpected error while adding wishlist items.'),
         'error'
       );
     } finally {
@@ -1378,7 +1378,7 @@ const UserCart: React.FC = () => {
 
         {/* Wishlist */}
         <div className="wishlist-section cart-panel cart-panel--padded">
-          {/* Header with Move All button */}
+          {/* Header with Add All button */}
           <div
             className="wishlist-header"
             style={{
@@ -1397,13 +1397,13 @@ const UserCart: React.FC = () => {
                 aria-disabled={isStaff || movingAll || !hasMovableWishlistItems}
                 title={
                   isStaff
-                    ? 'Read-only: staff/admin cannot move wishlist items'
+                    ? 'Read-only: staff/admin cannot add wishlist items'
                     : !hasMovableWishlistItems
                       ? 'All wishlist items are out of stock'
-                      : 'Move all wishlist items to cart'
+                      : 'Add all wishlist items to cart'
                 }
               >
-                {movingAll ? 'Moving…' : 'Move All to Cart'}
+                {movingAll ? 'Adding…' : 'Add All to Cart'}
               </button>
             )}
           </div>

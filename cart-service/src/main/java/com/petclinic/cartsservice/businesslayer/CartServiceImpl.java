@@ -371,14 +371,6 @@ public class CartServiceImpl implements CartService {
                                     cart.getProducts().add(cartProduct);
                                 }
 
-                                List<CartProduct> wishlist = cart.getWishListProducts();
-                                if (wishlist != null && !wishlist.isEmpty()) {
-                                    List<CartProduct> updatedWishlist = new ArrayList<>(wishlist);
-                                    if (updatedWishlist.removeIf(p -> productId.equals(p.getProductId()))) {
-                                        cart.setWishListProducts(updatedWishlist);
-                                    }
-                                }
-
                                 return cartRepository.save(cart)
                                         .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
                             });
@@ -522,7 +514,7 @@ public class CartServiceImpl implements CartService {
         List<CartProduct> wishlist = removeDuplicateWishlistProducts(cart.getWishListProducts());
         if (wishlist.isEmpty()) {
             CartResponseModel resp = EntityModelUtil.toCartResponseModel(cart, cart.getProducts());
-            resp.setMessage("No items in wishlist to move.");
+            resp.setMessage("No items in wishlist to add.");
             return Mono.just(resp);
         }
 
@@ -553,7 +545,7 @@ public class CartServiceImpl implements CartService {
         if (distinctProductIds.isEmpty()) {
             if (moveAll) {
                 CartResponseModel resp = EntityModelUtil.toCartResponseModel(cart, cart.getProducts());
-                resp.setMessage("No wishlist items were eligible to move.");
+                resp.setMessage("No wishlist items were eligible to add.");
                 return Mono.just(resp);
             }
             return Mono.error(new NotFoundException("No wishlist items matched the requested product IDs."));
@@ -594,7 +586,7 @@ public class CartServiceImpl implements CartService {
             }
         });
 
-        List<CartProduct> updatedWishlist = new ArrayList<>();
+        List<CartProduct> updatedWishlist = new ArrayList<>(wishlist);
         int movedCount = 0;
         int skippedCount = 0;
         Set<String> skippedNames = new LinkedHashSet<>();
@@ -609,7 +601,6 @@ public class CartServiceImpl implements CartService {
             }
 
             if (!selected) {
-                updatedWishlist.add(item);
                 continue;
             }
 
@@ -617,7 +608,6 @@ public class CartServiceImpl implements CartService {
                 int requestedQty = safeQuantity(item.getQuantityInCart());
                 skippedCount += requestedQty;
                 skippedNames.add(valueOrEmpty(item.getProductName()));
-                updatedWishlist.add(item);
                 continue;
             }
 
@@ -627,7 +617,6 @@ public class CartServiceImpl implements CartService {
             if (allocated <= 0) {
                 skippedCount += requestedQty;
                 skippedNames.add(availability.resolveNameOrDefault(item.getProductName()));
-                updatedWishlist.add(item);
                 continue;
             }
 
@@ -655,17 +644,6 @@ public class CartServiceImpl implements CartService {
 
             int remainder = requestedQty - allocated;
             if (remainder > 0) {
-                CartProduct remainderItem = CartProduct.builder()
-                        .productId(item.getProductId())
-                        .imageId(item.getImageId())
-                        .productName(item.getProductName())
-                        .productDescription(item.getProductDescription())
-                        .productSalePrice(item.getProductSalePrice())
-                        .averageRating(item.getAverageRating())
-                        .quantityInCart(remainder)
-                        .productQuantity(availability.getAvailableStock())
-                        .build();
-                updatedWishlist.add(remainderItem);
                 skippedCount += remainder;
                 skippedNames.add(availability.resolveNameOrDefault(item.getProductName()));
             }
@@ -686,7 +664,7 @@ public class CartServiceImpl implements CartService {
                     CartResponseModel resp = EntityModelUtil.toCartResponseModel(saved, saved.getProducts());
                     StringBuilder message = new StringBuilder();
                     if (finalMoved > 0) {
-                        message.append("Moved ").append(finalMoved).append(" item(s) from wishlist to cart.");
+                        message.append("Added ").append(finalMoved).append(" wishlist item(s) to cart.");
                     }
                     if (finalSkipped > 0) {
                         if (!message.isEmpty()) {
@@ -699,7 +677,7 @@ public class CartServiceImpl implements CartService {
                         }
                     }
                     if (message.isEmpty()) {
-                        message.append("No wishlist items were moved.");
+                        message.append("No wishlist items were added.");
                     }
                     resp.setMessage(message.toString());
                     return resp;
