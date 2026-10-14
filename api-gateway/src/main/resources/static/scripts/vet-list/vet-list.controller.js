@@ -17,10 +17,18 @@ angular.module('vetList')
             modalTitle.textContent = title;
             modalBody.textContent = body;
 
+            if (!confirmCallback) {
+                confirmBtn.style.display = "none";
+            } else {
+                confirmBtn.style.display = "inline-block";
+            }
+
             const hideModal = () => {
                 backdrop.classList.remove("modalOn");
                 backdrop.classList.add("modalOff");
                 backdrop.onclick = null;
+                confirmBtn.onclick = null;
+                cancelBtn.onclick = null;
             };
 
             backdrop.onclick = (e) => {
@@ -32,10 +40,10 @@ angular.module('vetList')
             cancelBtn.onclick = hideModal;
 
             confirmBtn.onclick = () => {
+                hideModal();
                 if (confirmCallback) {
                     confirmCallback();
                 }
-                hideModal();
             };
 
             backdrop.classList.remove("modalOff");
@@ -85,25 +93,23 @@ angular.module('vetList')
         });
 
         function getAverageRating(vet) {
-            console.log("Hello " + vet.vetId);
             $http.get('api/gateway/vets/' + vet.vetId + "/ratings/average").then(function (resp) {
-                console.log(resp.data);
                 vet.showRating = true;
-                vet.rating = parseFloat(resp.data.toFixed(1));
+                let val = parseFloat(resp.data);
+                vet.rating = isNaN(val) ? 0 : parseFloat(val.toFixed(1));
             });
         }
 
         function getTopThreeVetsWithHighestRating(vet){
             $http.get('api/gateway/vets/topVets').then(function (resp) {
-                console.log(resp.data);
                 vet.showRating = true;
-                vet.rating = parseFloat(resp.data.toFixed(1));
+                let val = parseFloat(resp.data);
+                vet.rating = isNaN(val) ? 0 : parseFloat(val.toFixed(1));
             });
         }
 
         function getCountOfRatings(vet) {
             $http.get('api/gateway/vets/' + vet.vetId + "/ratings/count").then(function (resp) {
-                console.log(resp.data);
                 vet.count = resp.data;
             });
         }
@@ -115,28 +121,44 @@ angular.module('vetList')
 
                 function successCallback(response) {
                     $scope.errors = [];
-                    self.showConfirmationModal(
-                        "Success",
-                        vetId + " Deleted Successfully!",
-                        null
-                    );
-                    console.log(response, 'res');
-                    // refresh list
+
                     $http.get('api/gateway/vets').then(function (resp) {
                         self.vetList = resp.data;
                         arr = resp.data;
                         $scope.vetList = resp.data;
+
+                        angular.forEach($scope.vetList, function(vet) {
+                            getCountOfRatings(vet);
+                            getAverageRating(vet);
+                            getTopThreeVetsWithHighestRating(vet);
+                        });
+
+                        setTimeout(() => {
+                            self.showConfirmationModal(
+                                "Success",
+                                vetId + " Deleted Successfully!",
+                                null
+                            );
+                        }, 150);
                     });
                 }
 
                 function errorCallback(error) {
-                    let errorMsg = (error.data && error.data.errors) ? error.data.errors : "Could not delete vet.";
-                    self.showConfirmationModal(
-                        "Error",
-                        errorMsg,
-                        null
-                    );
-                    console.log(error, 'can not get data.');
+                    let errorMsg = "Could not delete vet.";
+                    if (error.status === 403) {
+                        errorMsg = "Access Denied (403 Forbidden): You do not have permission to delete veterinarians.";
+                    } else if (error.data && error.data.errors) {
+                        errorMsg = error.data.errors;
+                    }
+
+                    setTimeout(() => {
+                        self.showConfirmationModal(
+                            "Error",
+                            errorMsg,
+                            null
+                        );
+                    }, 150);
+                    console.log(error, 'Error deleting vet.');
                 }
             };
 
@@ -164,6 +186,7 @@ angular.module('vetList')
             $http.get(url).then(function (resp) {
                 self.vetList = resp.data;
                 arr = resp.data;
+                $scope.vetList = resp.data;
                 angular.forEach(self.vetList, function(vet) {
                     getAverageRating(vet);
                     getCountOfRatings(vet);
