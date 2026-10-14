@@ -42,10 +42,10 @@
       "back": "Back to home"
     },
     "footer": {
-      "brand": "PetClinic Employee Portal",
+      "description": "Providing compassionate veterinary care to keep your pets healthy and happy.",
+      "contact": "Contact Us",
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
-      "support": "Support",
       "copyright": "© 2026 Champlain Pet Clinic. All rights reserved."
     },
     "visits": {
@@ -92,6 +92,23 @@
         "heading": "Specialties",
         "description": "Discover the clinic's different areas of care."
       }
+    },
+    "visits": {
+      "title": "List of Visits",
+      "visitId": "Visit ID",
+      "veterinarianFullName": "Veterinarian full name",
+      "petName": "Pet name",
+      "description": "Description",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "status": "Status",
+      "statusScheduled": "Scheduled",
+      "statusCompleted": "Completed",
+      "statusCancelled": "Cancelled",
+      "statusConfirmed": "Confirmed",
+      "statusUpcoming": "Upcoming",
+      "statusArchived": "Archived",
+      "statusOutOfStatus": "Out of status"
     }
   }
 }
