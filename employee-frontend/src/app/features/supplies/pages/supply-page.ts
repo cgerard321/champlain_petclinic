@@ -26,6 +26,7 @@ import { Roles } from '@shared/models/roles';
 // The shape of the modal's form: the editable Supply fields plus the photo control.
 interface SupplyFormValue {
   productName: string;
+  supplierName: string;
   productDescription: string;
   productPrice: number;
   productQuantity: number;
@@ -49,16 +50,22 @@ export class SupplyPage {
   protected readonly inventoryId = this.route.snapshot.paramMap.get('inventoryId');
 
   protected readonly supplies = signal<Supply[]>([]);
-  protected readonly filters = signal({ productName: '', productDescription: '', status: '' });
+  protected readonly filters = signal({
+    productName: '',
+    supplierName: '',
+    productDescription: '',
+    status: '',
+  });
   protected readonly hasActiveFilters = computed(() =>
     Object.values(this.filters()).some((value) => value.trim().length > 0),
   );
 
   protected readonly filteredSupplies = computed(() => {
-    const { productName, productDescription, status } = this.filters();
+    const { productName, supplierName, productDescription, status } = this.filters();
     return this.supplies().filter(
       (supply) =>
         supply.productName.toLowerCase().includes(productName.trim().toLowerCase()) &&
+        this.supplierLabel(supply).toLowerCase().includes(supplierName.trim().toLowerCase()) &&
         supply.productDescription.toLowerCase().includes(productDescription.trim().toLowerCase()) &&
         (!status || this.effectiveStatus(supply) === status),
     );
@@ -81,13 +88,16 @@ export class SupplyPage {
     });
   }
 
-  protected setFilter(field: 'productName' | 'productDescription' | 'status', event: Event): void {
+  protected setFilter(
+    field: 'productName' | 'supplierName' | 'productDescription' | 'status',
+    event: Event,
+  ): void {
     const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
     this.filters.update((filters) => ({ ...filters, [field]: value }));
   }
 
   protected clearFilters(): void {
-    this.filters.set({ productName: '', productDescription: '', status: '' });
+    this.filters.set({ productName: '', supplierName: '', productDescription: '', status: '' });
   }
 
   // Only the initial fetch replaces the table; refreshes keep existing rows visible.
@@ -111,6 +121,11 @@ export class SupplyPage {
   // Formatting and actions stay here so the shared table has no supply-specific logic.
   protected readonly columns = computed<TableColumn<Supply>[]>(() => [
     { id: 'name', header: 'Name', template: this.nameCell() },
+    {
+      id: 'supplier',
+      header: 'Supplier',
+      value: (supply) => this.supplierLabel(supply),
+    },
     { id: 'description', header: 'Description', value: (supply) => supply.productDescription },
     { id: 'price', header: 'Cost Price', template: this.priceCell() },
     { id: 'quantity', header: 'Quantity', value: (supply) => supply.productQuantity },
@@ -120,6 +135,10 @@ export class SupplyPage {
       ? [{ id: 'actions', header: 'Actions', template: this.actionsCell() }]
       : []),
   ]);
+
+  private supplierLabel(supply: Supply): string {
+    return supply.supplierName?.trim() || 'Not recorded';
+  }
 
   protected readonly canManageSupplies = computed(() => {
     const roles = this.auth.roles();
@@ -177,6 +196,21 @@ export class SupplyPage {
 
     return [
       { key: 'productName', label: 'Name', type: 'string', required: true },
+      {
+        key: 'supplierName',
+        label: 'Supplier name',
+        type: 'string',
+        required: !supply || Boolean(supply.supplierName?.trim()),
+        validators: [
+          (control) =>
+            typeof control.value === 'string' &&
+            control.value.length > 0 &&
+            control.value.trim().length === 0
+              ? { whitespace: true }
+              : null,
+        ],
+        errorMessages: { whitespace: 'Supplier name cannot be only whitespace.' },
+      },
       { key: 'productDescription', label: 'Description', type: 'string', required: true },
       {
         key: 'productPrice',
@@ -229,6 +263,7 @@ export class SupplyPage {
         initialValue: supply
           ? {
               productName: supply.productName,
+              supplierName: supply.supplierName ?? '',
               productDescription: supply.productDescription,
               productPrice: supply.productPrice,
               productQuantity: supply.productQuantity,
@@ -237,6 +272,7 @@ export class SupplyPage {
             }
           : {
               productName: '',
+              supplierName: '',
               productDescription: '',
               productPrice: 0,
               productQuantity: 1,
@@ -483,8 +519,13 @@ export class SupplyPage {
   }
 
   private async buildSupplyRequest(value: SupplyFormValue): Promise<SupplyRequest> {
-    const { photo, expirationDate, ...fields } = value;
-    const request: SupplyRequest = { ...fields, expirationDate: expirationDate || null };
+    const { photo, expirationDate, supplierName, ...fields } = value;
+    const normalizedSupplierName = supplierName.trim();
+    const request: SupplyRequest = {
+      ...fields,
+      expirationDate: expirationDate || null,
+      ...(normalizedSupplierName ? { supplierName: normalizedSupplierName } : {}),
+    };
 
     switch (photo.action) {
       case 'replace':

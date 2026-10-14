@@ -38,7 +38,7 @@
     <div class="filter-heading">
       <div>
         <h2>Find a supply</h2>
-        <p>Filter by name, description, or status.</p>
+        <p>Filter by name, supplier, description, or status.</p>
       </div>
       <button
         class="clear-filters-button"
@@ -57,6 +57,15 @@
           placeholder="Search by name"
           [value]="filters().productName"
           (input)="setFilter('productName', $event)"
+        />
+      </label>
+      <label class="filter-field">
+        <span>Supplier name</span>
+        <input
+          type="search"
+          placeholder="Search by supplier"
+          [value]="filters().supplierName"
+          (input)="setFilter('supplierName', $event)"
         />
       </label>
       <label class="filter-field">
