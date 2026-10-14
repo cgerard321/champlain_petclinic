@@ -1361,8 +1361,9 @@ const UserCart: React.FC = () => {
                   <div className="order-footer">
                     <span>Subtotal: {formatPrice(order.subtotal)}</span>
                     <span>
-                      Shipping{order.shippingMethod ? ` (${order.shippingMethod})` : ''}:{' '}
-                      {formatPrice(order.shippingCost ?? 0)}
+                      Shipping
+                      {order.shippingMethod ? ` (${order.shippingMethod})` : ''}
+                      : {formatPrice(order.shippingCost ?? 0)}
                     </span>
                     <span>TVQ: {formatPrice(order.tvq)}</span>
                     <span>TVC: {formatPrice(order.tvc)}</span>
