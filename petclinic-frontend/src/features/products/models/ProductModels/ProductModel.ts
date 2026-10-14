@@ -7,6 +7,8 @@ export interface ProductModel {
   image?: FileDetails | null;
   productName: string;
   productDescription: string;
+  productNameFr?: string | null;
+  productDescriptionFr?: string | null;
   productSalePrice: number;
   averageRating: number;
   productQuantity: number;
