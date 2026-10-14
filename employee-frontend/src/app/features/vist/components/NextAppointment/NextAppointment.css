@@ -18,7 +18,7 @@ table {
 
 th {
   background: #111;
-  color: #9e6b06;
+  color: #d1b606;
   text-align: left;
   padding: 14px 16px;
   font-size: 14px;
@@ -41,5 +41,5 @@ tr:last-child td {
 }
 
 tr:hover td {
-  background: #8e8e8e;
+  background: #f5f5f5;
 }
