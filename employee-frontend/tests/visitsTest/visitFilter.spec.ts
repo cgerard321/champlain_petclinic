@@ -150,9 +150,12 @@ test('filters visits, preserves choices when the sidebar is toggled, and transla
   }
   await expect.poll(() => getDisplayedStatuses(page)).toEqual(['Complétée']);
 
-  const englishLoaded = page.waitForLoadState('load');
+  const englishCatalogRequest = page.waitForResponse((response) =>
+    response.url().endsWith('/locale/en.json'),
+  );
   await page.getByRole('button', { name: 'EN', exact: true }).click();
-  await englishLoaded;
+  const englishCatalogResponse = await englishCatalogRequest;
+  expect(englishCatalogResponse.ok()).toBe(true);
 
   const englishFilterButton = page.getByRole('button', { name: 'Filter By' });
   await expect(englishFilterButton).toBeVisible();
