@@ -952,6 +952,47 @@ class CartControllerUnitTest {
     }
 
     @Test
+    void updateShippingMethod_success() {
+        String cartId = VALID_CART_ID;
+        CartResponseModel response = CartResponseModel.builder()
+                .cartId(cartId)
+                .shippingMethod(com.petclinic.cartsservice.dataaccesslayer.ShippingMethod.STANDARD)
+                .shippingCost(9.99)
+                .build();
+
+        when(cartService.updateShippingMethod(cartId, "STANDARD")).thenReturn(Mono.just(response));
+
+        webTestClient.put()
+                .uri("/api/v1/carts/" + cartId + "/shipping")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new CartShippingRequestModel("STANDARD"))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseModel.class)
+                .value(result -> {
+                    assertEquals(cartId, result.getCartId());
+                    assertEquals(com.petclinic.cartsservice.dataaccesslayer.ShippingMethod.STANDARD, result.getShippingMethod());
+                    assertEquals(9.99, result.getShippingCost());
+                });
+
+        verify(cartService).updateShippingMethod(cartId, "STANDARD");
+    }
+
+    @Test
+    void updateShippingMethod_missingMethod_returns422() {
+        webTestClient.put()
+                .uri("/api/v1/carts/" + VALID_CART_ID + "/shipping")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new CartShippingRequestModel(null))
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectBody(CartResponseModel.class)
+                .value(result -> assertEquals("shippingMethod must be provided", result.getMessage()));
+
+        verify(cartService, never()).updateShippingMethod(anyString(), any());
+    }
+
+    @Test
     void getAllCartsAsJson_withNegativePage_returns422() {
         webTestClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/api/v1/carts")

@@ -12,6 +12,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { Subscription, finalize, switchMap, take, tap, toArray } from 'rxjs';
 
 import { isApiError } from '@core/models/api-error';
@@ -23,6 +24,26 @@ import { CreateBill } from '@features/bill/components/createBill/create-bill';
 import { BillRecord, PaymentRequest } from '@features/bill/models/bill.model';
 import { BillService } from '@features/bill/services/bill-service';
 import { Roles } from '@shared/models/roles';
+
+interface BillFilters {
+  customerId: string;
+  customerName: string;
+  vetName: string;
+  visitType: string;
+  status: string;
+  year: string;
+  month: string;
+}
+
+const emptyFilters: BillFilters = {
+  customerId: '',
+  customerName: '',
+  vetName: '',
+  visitType: '',
+  status: '',
+  year: '',
+  month: '',
+};
 
 @Component({
   selector: 'app-bill',
@@ -65,6 +86,125 @@ export class Bill implements OnInit {
   protected readonly canViewBillList = computed(
     () => this.canViewBills() || this.canViewOwnBills() || this.canPayBill(),
   );
+
+  protected readonly currency = signal<'CAD' | 'USD'>('CAD');
+  protected readonly filters = signal<BillFilters>({ ...emptyFilters });
+
+  protected readonly updatingInterestId = signal<string | null>(null);
+  protected readonly downloadingPdfId = signal<string | null>(null);
+  protected readonly billActionError = signal<string | null>(null);
+  protected readonly billActionSuccess = signal<string | null>(null);
+
+  protected toggleInterestExemption(bill: BillRecord): void {
+    if (!this.canViewBills() || this.updatingInterestId() !== null) {
+      return;
+    }
+
+    const exempt = !bill.interestExempt;
+    let exemptionSaved = false;
+
+    this.updatingInterestId.set(bill.billId);
+    this.billActionError.set(null);
+    this.billActionSuccess.set(null);
+
+    this.billService
+      .setInterestExempt(bill.billId, exempt)
+      .pipe(
+        tap(() => {
+          exemptionSaved = true;
+        }),
+        switchMap(() => this.billService.getBillById(bill.billId)),
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.updatingInterestId.set(null)),
+      )
+      .subscribe({
+        next: (updatedBill) => {
+          this.bills.update((currentBills) =>
+            currentBills.map((item) => (item.billId === updatedBill.billId ? updatedBill : item)),
+          );
+
+          this.billActionSuccess.set(
+            exempt ? 'Interest exemption applied.' : 'Interest exemption removed.',
+          );
+        },
+        error: () => {
+          this.billActionError.set(
+            exemptionSaved
+              ? 'The exemption was saved, but the bill could not be refreshed. Reload the bill list.'
+              : 'Unable to update interest exemption. Please try again.',
+          );
+        },
+      });
+  }
+
+  protected downloadPdf(bill: BillRecord): void {
+    if (!this.canViewDetails() || this.downloadingPdfId() !== null) {
+      return;
+    }
+
+    const currency = this.currency();
+
+    this.downloadingPdfId.set(bill.billId);
+    this.billActionError.set(null);
+    this.billActionSuccess.set(null);
+
+    this.billService
+      .downloadBillPdf(bill.billId, currency)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.downloadingPdfId.set(null)),
+      )
+      .subscribe({
+        next: (pdf) => {
+          const url = URL.createObjectURL(pdf);
+          const link = document.createElement('a');
+
+          link.href = url;
+          link.download = `bill-${bill.billId}-${currency}.pdf`;
+          document.body.appendChild(link);
+
+          try {
+            link.click();
+          } finally {
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+          }
+
+          this.billActionSuccess.set('Bill PDF download started.');
+        },
+        error: () => {
+          this.billActionError.set('Unable to download the PDF. Please try again.');
+        },
+      });
+  }
+
+  protected readonly visitTypes = computed(() =>
+    [...new Set(this.bills().map((bill) => bill.visitType))]
+      .filter((visitType) => visitType.trim().length > 0)
+      .sort((a, b) => a.localeCompare(b)),
+  );
+
+  protected updateFilter(key: keyof BillFilters, value: string): void {
+    this.filters.update((current) => ({
+      ...current,
+      [key]: value,
+    }));
+  }
+
+  protected clearFilters(): void {
+    this.filters.set({ ...emptyFilters });
+  }
+
+  protected setCurrency(value: string): void {
+    if (value === 'CAD' || value === 'USD') {
+      this.currency.set(value);
+    }
+  }
+
+  protected convertAmount(amount: number): number {
+    // Matches the existing backend PDF conversion rate.
+    return this.currency() === 'USD' ? amount * 0.73 : amount;
+  }
 
   protected readonly canCreateBill = computed(() => this.auth.hasRole(Roles.vet));
 
@@ -279,9 +419,31 @@ export class Bill implements OnInit {
       return this.bills();
     }
 
-    return this.bills().filter((bill) =>
-      this.showArchivedBills() ? bill.archive === true : bill.archive !== true,
-    );
+    const filters = this.filters();
+
+    const matchesText = (value: string | null, search: string): boolean =>
+      (value ?? '').toLowerCase().includes(search.trim().toLowerCase());
+
+    return this.bills().filter((bill) => {
+      const matchesArchive = this.showArchivedBills()
+        ? bill.archive === true
+        : bill.archive !== true;
+
+      const customerName = `${bill.customerFirstName ?? ''} ${bill.customerLastName ?? ''}`.trim();
+
+      const vetName = `${bill.vetFirstName ?? ''} ${bill.vetLastName ?? ''}`.trim();
+
+      return (
+        matchesArchive &&
+        matchesText(bill.customerId, filters.customerId) &&
+        matchesText(customerName, filters.customerName) &&
+        matchesText(vetName, filters.vetName) &&
+        (!filters.visitType || bill.visitType === filters.visitType) &&
+        (!filters.status || bill.billStatus === filters.status) &&
+        (!filters.year || bill.date.getFullYear() === Number(filters.year)) &&
+        (!filters.month || bill.date.getMonth() + 1 === Number(filters.month))
+      );
+    });
   });
 
   protected openPayment(bill: BillRecord, template: TemplateRef<unknown>): void {

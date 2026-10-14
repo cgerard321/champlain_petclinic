@@ -101,6 +101,111 @@
         </div>
       }
 
+      @if (canViewBills()) {
+        <div class="bill-filters">
+          <label>
+            Customer ID
+            <input
+              type="text"
+              [ngModel]="filters().customerId"
+              (ngModelChange)="updateFilter('customerId', $event)"
+            />
+          </label>
+
+          <label>
+            Customer name
+            <input
+              type="text"
+              [ngModel]="filters().customerName"
+              (ngModelChange)="updateFilter('customerName', $event)"
+            />
+          </label>
+
+          <label>
+            Veterinarian name
+            <input
+              type="text"
+              [ngModel]="filters().vetName"
+              (ngModelChange)="updateFilter('vetName', $event)"
+            />
+          </label>
+
+          <label>
+            Visit type
+            <select
+              [ngModel]="filters().visitType"
+              (ngModelChange)="updateFilter('visitType', $event)"
+            >
+              <option value="">All visit types</option>
+              @for (visitType of visitTypes(); track visitType) {
+                <option [value]="visitType">{{ visitType }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            Status
+            <select [ngModel]="filters().status" (ngModelChange)="updateFilter('status', $event)">
+              <option value="">All statuses</option>
+              <option value="PAID">Paid</option>
+              <option value="UNPAID">Unpaid</option>
+              <option value="OVERDUE">Overdue</option>
+            </select>
+          </label>
+
+          <label>
+            Creation year
+            <input
+              #yearFilter
+              type="number"
+              min="1"
+              step="1"
+              [value]="filters().year"
+              (input)="updateFilter('year', yearFilter.value)"
+            />
+          </label>
+
+          <label>
+            Creation month
+            <select [ngModel]="filters().month" (ngModelChange)="updateFilter('month', $event)">
+              <option value="">All months</option>
+              <option value="1">January</option>
+              <option value="2">February</option>
+              <option value="3">March</option>
+              <option value="4">April</option>
+              <option value="5">May</option>
+              <option value="6">June</option>
+              <option value="7">July</option>
+              <option value="8">August</option>
+              <option value="9">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+          </label>
+
+          <label>
+            Currency
+            <select [ngModel]="currency()" (ngModelChange)="setCurrency($event)">
+              <option value="CAD">CAD</option>
+              <option value="USD">USD</option>
+            </select>
+          </label>
+
+          <button class="bill-secondary-action" type="button" (click)="clearFilters()">
+            Clear Filters
+          </button>
+        </div>
+      }
+
+      @if (billActionError(); as message) {
+        <p role="alert">{{ message }}</p>
+      }
+
+      @if (billActionSuccess(); as message) {
+        <p role="status">{{ message }}</p>
+      }
+
       @if (errorMessage()) {
         <div class="bill-empty-state" role="alert">
           <p>{{ errorMessage() }}</p>
@@ -116,6 +221,7 @@
                   <th scope="col">Customer</th>
                   <th scope="col">Veterinarian</th>
                   <th scope="col">Amount</th>
+                  <th scope="col">Interest</th>
                   <th scope="col">Status</th>
                   <th scope="col">Archived</th>
                   <th scope="col">Actions</th>
@@ -125,9 +231,9 @@
               <tbody>
                 @for (bill of displayedBills(); track bill.billId) {
                   <tr>
-                    <td>{{ bill.billId }}</td>
+                    <td data-label="Bill ID">{{ bill.billId }}</td>
 
-                    <td>
+                    <td data-label="Customer">
                       @if (bill.customerFirstName || bill.customerLastName) {
                         {{ bill.customerFirstName }}
                         {{ bill.customerLastName }}
@@ -136,18 +242,30 @@
                       }
                     </td>
 
-                    <td>
+                    <td data-label="Veterinarian">
                       {{ bill.vetFirstName }}
                       {{ bill.vetLastName }}
                     </td>
 
-                    <td>
-                      {{ bill.totalAmount ?? bill.amount | currency: 'CAD' }}
+                    <td data-label="Amount">
+                      {{
+                        convertAmount(bill.totalAmount ?? bill.amount)
+                          | currency: currency() : 'code' : '1.2-2'
+                      }}
                     </td>
 
-                    <td>{{ bill.billStatus }}</td>
+                    <td data-label="Interest">
+                      {{
+                        convertAmount(bill.interest ?? 0) | currency: currency() : 'code' : '1.2-2'
+                      }}
+                      @if (bill.interestExempt) {
+                        <span> (Exempt)</span>
+                      }
+                    </td>
 
-                    <td>
+                    <td data-label="Status">{{ bill.billStatus }}</td>
+
+                    <td data-label="Archived">
                       <span
                         class="bill-archive-status"
                         [class.bill-archive-status--archived]="bill.archive"
@@ -156,7 +274,7 @@
                       </span>
                     </td>
 
-                    <td>
+                    <td data-label="Actions">
                       <div class="bill-row-actions">
                          @if (canViewDetails()) {
                         <button
@@ -167,6 +285,17 @@
                           Details
                         </button>
                       }
+                        <button
+                          type="button"
+                          class="bill-table-button bill-table-button--outline"
+                          [disabled]="downloadingPdfId() !== null"
+                          (click)="downloadPdf(bill)"
+                        >
+                          {{
+                            downloadingPdfId() === bill.billId ? 'Downloading...' : 'Download PDF'
+                          }}
+                        </button>
+
                         @if (canViewBills()) {
                           <button
                             type="button"
@@ -174,6 +303,21 @@
                             (click)="openBillUpdate(bill)"
                           >
                             Update
+                          </button>
+                          <button
+                            type="button"
+                            class="bill-table-button bill-table-button--outline"
+                            [disabled]="updatingInterestId() !== null"
+                            [attr.aria-pressed]="bill.interestExempt === true"
+                            (click)="toggleInterestExemption(bill)"
+                          >
+                            {{
+                              updatingInterestId() === bill.billId
+                                ? 'Saving...'
+                                : bill.interestExempt
+                                  ? 'Remove Interest Exemption'
+                                  : 'Exempt Interest'
+                            }}
                           </button>
                         }
                          @if (canPayBill() && bill.billStatus === 'UNPAID' && !bill.archive) {

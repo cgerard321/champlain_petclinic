@@ -30,14 +30,20 @@ export class BillService {
   private readonly auth = inject(AuthState);
 
   private readonly baseUrl = '/api/gateway/bills';
-  createBill(body: BillRequestModel): Observable<BillRecord> {
+  createBill(
+    body: BillRequestModel,
+    sendEmail = false,
+    currency: 'CAD' | 'USD' = 'CAD',
+  ): Observable<BillRecord> {
     const request = {
       ...body,
       date: formatDate(body.date, 'yyyy-MM-dd', 'en-US'),
     };
 
     return this.http
-      .post<BillApiRecord>(this.baseUrl, request)
+      .post<BillApiRecord>(this.baseUrl, request, {
+        params: { sendEmail, currency },
+      })
       .pipe(map((bill) => this.toBillRecord(bill)));
   }
   getVetByVetId(vetId: string): Observable<Veterinarian> {
@@ -104,6 +110,20 @@ export class BillService {
         payment,
       )
       .pipe(map((result) => this.toBillRecord(result)));
+
+  setInterestExempt(billId: string, exempt: boolean): Observable<void> {
+    return this.http.patch<void>(
+      `/api/v2/gateway/bills/${encodeURIComponent(billId)}/exempt-interest`,
+      null,
+      { params: { exempt } },
+    );
+  }
+
+  downloadBillPdf(billId: string, currency: 'CAD' | 'USD' = 'CAD'): Observable<Blob> {
+    return this.http.get(`/api/v2/gateway/bills/${encodeURIComponent(billId)}/pdf`, {
+      params: { currency },
+      responseType: 'blob',
+    });
   }
 
   private getBillsFromUrl(url: string): Observable<BillRecord> {

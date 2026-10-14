@@ -5,14 +5,22 @@ const TEST_ADMIN_EMAIL = process.env['TEST_ADMIN_EMAIL'] || 'admin@admin.com';
 const TEST_ADMIN_PASSWORD = process.env['TEST_ADMIN_PASSWORD'] || 'pwd';
 
 test.describe('Homepage Tests', () => {
-  test('should authenticate and display welcome title, introduction, and clinic logo', async ({ page }) => {
+  test('should authenticate and display welcome title, introduction, and clinic logo', async ({
+    page,
+  }) => {
     // 1. Navigate to login route
     await page.goto('/users/login');
 
     // 2. Perform authentication
-    const emailInput = page.locator('input[formcontrolname="email"], input[id="email"], input').nth(0);
-    const passwordInput = page.locator('input[formcontrolname="password"], input[type="password"], input').nth(1);
-    const loginButton = page.locator('button[type="submit"], button:has-text("Login"), button:has-text("Sign in")').first();
+    const emailInput = page
+      .locator('input[formcontrolname="email"], input[id="email"], input')
+      .nth(0);
+    const passwordInput = page
+      .locator('input[formcontrolname="password"], input[type="password"], input')
+      .nth(1);
+    const loginButton = page
+      .locator('button[type="submit"], button:has-text("Login"), button:has-text("Sign in")')
+      .first();
 
     await emailInput.fill(TEST_ADMIN_EMAIL);
     await passwordInput.fill(TEST_ADMIN_PASSWORD);
@@ -29,7 +37,9 @@ test.describe('Homepage Tests', () => {
 
     // 6. Assert short introduction text
     await expect(
-      page.getByText('At Champlain Pet Clinic, we offer a wide range of services to ensure the health')
+      page.getByText(
+        'At Champlain Pet Clinic, we offer a wide range of services to ensure the health',
+      ),
     ).toBeVisible();
 
     // 7. Assert clinic logo brand emblem and exact brand title
@@ -45,9 +55,15 @@ test.describe('Homepage Tests', () => {
 
     await page.goto('/users/login');
 
-    const emailInput = page.locator('input[formcontrolname="email"], input[id="email"], input').nth(0);
-    const passwordInput = page.locator('input[formcontrolname="password"], input[type="password"], input').nth(1);
-    const loginButton = page.locator('button[type="submit"], button:has-text("Login"), button:has-text("Sign in")').first();
+    const emailInput = page
+      .locator('input[formcontrolname="email"], input[id="email"], input')
+      .nth(0);
+    const passwordInput = page
+      .locator('input[formcontrolname="password"], input[type="password"], input')
+      .nth(1);
+    const loginButton = page
+      .locator('button[type="submit"], button:has-text("Login"), button:has-text("Sign in")')
+      .first();
 
     await emailInput.fill(TEST_ADMIN_EMAIL);
     await passwordInput.fill(TEST_ADMIN_PASSWORD);

@@ -181,6 +181,23 @@ public class CartController {
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @PutMapping("/{cartId}/shipping")
+    public Mono<ResponseEntity<CartResponseDTO>> updateShippingMethod(
+            @PathVariable String cartId,
+            @RequestBody(required = false) CartShippingRequestDTO request) {
+        String shippingMethod = request != null ? request.getShippingMethod() : null;
+
+        return cartServiceClient.updateShippingMethod(cartId, shippingMethod)
+                .map(ResponseEntity::ok)
+                .onErrorResume(InvalidInputException.class, e -> {
+                    CartResponseDTO errorResponse = new CartResponseDTO();
+                    errorResponse.setMessage(e.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+                })
+                .onErrorResume(WebClientResponseException.class, ex -> Mono.just(ResponseEntity.status(ex.getStatusCode()).build()));
+    }
+
 
     @GetMapping("/customer/{customerId}")
     public Mono<ResponseEntity<CartResponseDTO>> getCartByCustomerId(@PathVariable String customerId) {
