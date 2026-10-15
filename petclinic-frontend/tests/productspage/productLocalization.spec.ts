@@ -254,7 +254,7 @@ test('recent history fetches bilingual data independently of the catalog and ski
         userId: 'review-user',
         username: 'Reviewer',
         email: 'review@example.com',
-        roles: ['OWNER'],
+        roles: ['CUST'],
       },
     })
   );
@@ -319,7 +319,7 @@ test('merged Markdown reviews keep French labels, formatting and validation', as
         userId: 'reader',
         username: 'Reader',
         email: 'reader@example.com',
-        roles: ['OWNER'],
+        roles: ['CUST'],
       },
     })
   );

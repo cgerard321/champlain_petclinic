@@ -373,7 +373,7 @@ public class CartControllerV1 {
         ));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PutMapping("/{cartId}/shipping")
     public Mono<ResponseEntity<CartResponseDTO>> updateShippingMethod(
         @PathVariable String cartId,
