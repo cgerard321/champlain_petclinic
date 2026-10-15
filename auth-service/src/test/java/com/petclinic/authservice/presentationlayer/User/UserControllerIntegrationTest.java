@@ -19,6 +19,8 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -655,7 +657,7 @@ class UserControllerIntegrationTest {
         RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
                 .roles(Collections.singleton("OWNER"))
                 .build();
-        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        String token = jwtTokenUtil.generateToken(userRepo.findByEmail("admin@admin.com").get());
 
         webTestClient
                 .patch()
@@ -685,7 +687,7 @@ class UserControllerIntegrationTest {
         RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
                 .roles(Collections.singleton("OWNER"))
                 .build();
-        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        String token = jwtTokenUtil.generateToken(userRepo.findByEmail("admin@admin.com").get());
         String invalidUserId = "invalidId";
 
         webTestClient
@@ -722,7 +724,7 @@ class UserControllerIntegrationTest {
                 .roles(Collections.singleton("OWNER"))
                 .build();
 
-        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        String token = jwtTokenUtil.generateToken(userRepo.findByEmail("admin@admin.com").get());
 
         webTestClient
                 .patch()
@@ -735,12 +737,29 @@ class UserControllerIntegrationTest {
                 .expectStatus().isBadRequest();
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"george@email.com", "reception@reception.com", "inventory@email.com"})
+    void updateUserRole_nonAdminCaller_returnsForbidden(String callerEmail) {
+        String token = jwtTokenUtil.generateToken(userRepo.findByEmail(callerEmail).get());
+        RolesChangeRequestDTO body = RolesChangeRequestDTO.builder()
+                .roles(Collections.singleton("ADMIN"))
+                .build();
+
+        webTestClient.patch()
+                .uri("/users/" + VALID_USER_ID)   // Owner10 (carlos), not one of the callers
+                .cookie("Bearer", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(body)
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
     @Test
     void updateUserRole_invalidRole() {
         RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
                 .roles(Collections.singleton("NOT_OWNER"))
                 .build();
-        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        String token = jwtTokenUtil.generateToken(userRepo.findByEmail("admin@admin.com").get());
 
         webTestClient
                 .patch()

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -50,6 +51,7 @@ describe('VistListTable', () => {
     await TestBed.configureTestingModule({
       imports: [VistListTable],
       providers: [
+        provideRouter([]),
         { provide: VisitService, useValue: { getAllVisits: () => of(completedVisit) } },
         { provide: AuthState, useValue: { hasRole: (value: string) => value === role } },
       ],
