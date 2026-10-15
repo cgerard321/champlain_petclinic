@@ -72,7 +72,7 @@ test('Get User By Id works and connected customer link works and right info', as
   await expect(page.getByText('User ID: e6c7398e-8ac4-4e10-')).toBeVisible();
   await expect(page.getByText('Email: betty@email.com')).toBeVisible();
   await expect(page.getByText('Verified: Yes')).toBeVisible();
-  await expect(page.getByText('Roles: Customer')).toBeVisible();
+  await expect(page.getByText('Roles: OWNER')).toBeVisible();
   await page.getByRole('button', { name: 'Connected Customer Info' }).click();
   await expect(
     page.getByRole('heading', { name: 'Customer Details for Betty' })
