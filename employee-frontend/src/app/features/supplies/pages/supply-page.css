@@ -11,6 +11,7 @@
   --text-secondary: #66766d;
   --border: rgb(36 75 63 / 14%);
   --shadow-sm: 0 2px 6px rgb(28 61 51 / 6%), 0 1px 2px rgb(28 61 51 / 5%);
+
   display: block;
 }
 
@@ -74,11 +75,26 @@
   font-weight: 600;
 }
 
-.status-badge.available { background: #e8f5e9; color: #1b5e20; }
-.status-badge.re-order, .expiration-badge.expiring-soon { background: #fff1cc; color: #765000; }
-.status-badge.out-of-stock, .expiration-badge.expired { background: #ffebee; color: #b71c1c; }
+.status-badge.available {
+  background: #e8f5e9;
+  color: #1b5e20;
+}
 
-.no-expiration { color: var(--text-secondary); }
+.status-badge.re-order,
+.expiration-badge.expiring-soon {
+  background: #fff1cc;
+  color: #765000;
+}
+
+.status-badge.out-of-stock,
+.expiration-badge.expired {
+  background: #ffebee;
+  color: #b71c1c;
+}
+
+.no-expiration {
+  color: var(--text-secondary);
+}
 
 .state-message {
   padding: 1.5rem;
@@ -89,7 +105,9 @@
 }
 
 .error-message,
-.field-error { color: #b00020; }
+.field-error {
+  color: #b00020;
+}
 
 .field-error {
   margin: -6px 0 0;
@@ -144,7 +162,9 @@
   white-space: nowrap;
 }
 
-.delete-button:hover { background: rgb(142 0 0 / 100%); }
+.delete-button:hover {
+  background: rgb(142 0 0 / 100%);
+}
 
 .add-supply-button:hover,
 .edit-button:hover,
@@ -185,7 +205,9 @@
   gap: 12px;
 }
 
-.mobile-actions-button { display: none; }
+.mobile-actions-button {
+  display: none;
+}
 
 .dialog-cancel-button {
   padding: 10px 18px;
@@ -195,7 +217,9 @@
   font-size: 0.875rem;
 }
 
-.dialog-cancel-button:hover { background: var(--sage-50); }
+.dialog-cancel-button:hover {
+  background: var(--sage-50);
+}
 
 .download-pdf-button {
   display: inline-flex;
@@ -230,7 +254,9 @@
   opacity: 1;
 }
 
-.download-pdf-button:hover:not(:disabled) { background: var(--sage-50); }
+.download-pdf-button:hover:not(:disabled) {
+  background: var(--sage-50);
+}
 
 .supply-details {
   display: flex;
@@ -309,7 +335,9 @@
   font-weight: 650;
 }
 
-.filter-field > span { color: var(--forest-700); }
+.filter-field > span {
+  color: var(--forest-700);
+}
 
 .filter-field input,
 .filter-field select {
@@ -327,7 +355,9 @@
   transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
 
-.filter-field input::placeholder { color: var(--text-muted); }
+.filter-field input::placeholder {
+  color: var(--text-muted);
+}
 
 .filter-field input:hover,
 .filter-field select:hover:not(:disabled) {
@@ -372,31 +402,58 @@
 }
 
 @media (width <= 1100px) {
-  .desktop-action-button { display: none; }
-  .mobile-actions-button { display: inline-block; }
+  .desktop-action-button {
+    display: none;
+  }
+
+  .mobile-actions-button {
+    display: inline-block;
+  }
 }
 
 @media (width <= 850px) {
-  .supply-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .supply-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (width <= 700px) {
-  .supply-page { padding: 2rem 1rem 3rem; }
-  .page-header { flex-direction: column; align-items: stretch; }
+  .supply-page {
+    padding: 2rem 1rem 3rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 @media (width <= 600px) {
-  .supply-filters { padding: 1.1rem; border-radius: 16px; }
-  .supply-filter-grid { grid-template-columns: 1fr; gap: 0.85rem; }
-  .filter-heading { align-items: flex-start; }
+  .supply-filters {
+    padding: 1.1rem;
+    border-radius: 16px;
+  }
+
+  .supply-filter-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .filter-heading {
+    align-items: flex-start;
+  }
 }
 
 @media (width <= 420px) {
-  .filter-heading { flex-direction: column; }
+  .filter-heading {
+    flex-direction: column;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .download-label { transition: none; }
+  .download-label {
+    transition: none;
+  }
 }
 
 :host-context(.dark-mode) {
@@ -411,9 +468,28 @@
   --text-secondary: #a3b8ac;
   --border: rgb(36 75 63 / 12%);
 
-  .supply-page { background: none; }
-  .state-message { background: var(--mat-sys-surface); border: none; box-shadow: none; }
-  .add-supply-button, .edit-button, .clear-filters-button { color: #111; }
-  .filter-field input, .filter-field select { border-color: var(--sage-400); }
-  .filter-field select { color: #7f958a; }
+  .supply-page {
+    background: none;
+  }
+
+  .state-message {
+    background: var(--mat-sys-surface);
+    border: none;
+    box-shadow: none;
+  }
+
+  .add-supply-button,
+  .edit-button,
+  .clear-filters-button {
+    color: #111;
+  }
+
+  .filter-field input,
+  .filter-field select {
+    border-color: var(--sage-400);
+  }
+
+  .filter-field select {
+    color: #7f958a;
+  }
 }
