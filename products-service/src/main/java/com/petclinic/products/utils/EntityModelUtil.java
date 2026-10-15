@@ -1,5 +1,8 @@
 package com.petclinic.products.utils;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductBundle;
@@ -15,8 +18,6 @@ import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
-
 public class EntityModelUtil {
 
     public static ProductResponseModel toProductResponseModel(Product product, String productType) {
@@ -31,6 +32,8 @@ public class EntityModelUtil {
                 .productId(generateUUIDString())
                 .productName(productRequestModel.getProductName())
                 .productDescription(productRequestModel.getProductDescription())
+                .productNameFr(productRequestModel.getProductNameFr())
+                .productDescriptionFr(productRequestModel.getProductDescriptionFr())
                 .productSalePrice(productRequestModel.getProductSalePrice())
                 //.productType(productRequestModel.getProductType())
                 .productTypeId(productRequestModel.getProductTypeId())
@@ -54,6 +57,7 @@ public class EntityModelUtil {
                 .customerId(customerId)
                 .rating(requestModel.getRating())
                 .review(requestModel.getReview() != null ? requestModel.getReview() : "")
+                .createdAt(LocalDateTime.now())
                 .build();
     }
 

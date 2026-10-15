@@ -12,6 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -728,6 +729,28 @@ public class CustomerServiceClientIntegrationTest {
         RecordedRequest request = server.takeRequest();
         assertEquals("/customers/" + CUSTOMER_ID, request.getPath());
         assertEquals("DELETE", request.getMethod());
+    }
+
+    @Test
+    void whenSoftDeleteCustomer_thenCallSoftEndpointAndComplete() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(204));
+
+        StepVerifier.create(customersServiceClient.softDeleteCustomer(CUSTOMER_ID))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/customers/" + CUSTOMER_ID + "/soft", request.getPath());
+        assertEquals("DELETE", request.getMethod());
+    }
+
+    @Test
+    void whenSoftDeleteCustomer_withCustomerNotFound_thenThrowNotFoundException() {
+        server.enqueue(new MockResponse().setResponseCode(404));
+
+        StepVerifier.create(customersServiceClient.softDeleteCustomer(CUSTOMER_ID))
+                .expectErrorMatches(error -> error instanceof NotFoundException &&
+                        error.getMessage().equals("Customer id not found: " + CUSTOMER_ID))
+                .verify();
     }
 
     @Test

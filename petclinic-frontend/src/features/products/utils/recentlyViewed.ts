@@ -2,6 +2,8 @@
 // individual products and bundles.
 import type { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 
+import { getProduct } from '../api/getProduct';
+
 const MAX_RECENT = 5;
 
 export function getRecentlyViewed(userId?: string): ProductModel[] {
@@ -29,5 +31,35 @@ export function addProductToRecentlyViewed(
     localStorage.setItem(key, JSON.stringify(updated));
   } catch (e) {
     console.error('Could not update recently viewed', e);
+  }
+}
+
+// Local storage identifies history; the API supplies current bilingual content.
+export async function loadRecentlyViewed(
+  userId?: string
+): Promise<ProductModel[]> {
+  if (!userId) return [];
+  try {
+    const saved: unknown = JSON.parse(
+      localStorage.getItem(`recentlyClickedProducts_${userId}`) || '[]'
+    );
+    if (!Array.isArray(saved)) return [];
+    const ids = [
+      ...new Set(
+        saved.flatMap(item =>
+          item && typeof item.productId === 'string' && item.productId.trim()
+            ? [item.productId as string]
+            : []
+        )
+      ),
+    ].slice(0, MAX_RECENT);
+    const products = await Promise.all(
+      ids.map(id => getProduct(id, true).catch(() => null))
+    );
+    return products.filter(
+      (p): p is ProductModel => !!p && !!p.productId && !p.isUnlisted
+    );
+  } catch {
+    return [];
   }
 }

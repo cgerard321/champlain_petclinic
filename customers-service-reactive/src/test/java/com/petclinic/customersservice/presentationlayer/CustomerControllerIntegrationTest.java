@@ -137,7 +137,104 @@ class CustomerControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("Customer id not found: " + nonExistentCustomerId);
     }
 
+    @Test
+    void softDeleteCustomerByCustomerId_ShouldReturnNoContentAndKeepCustomerInDatabase() {
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
 
+        String testCustomerId = "22222222-2222-4222-8222-222222222222";
+        String photoId = "photo-999";
+
+        Customer customerEntity = Customer.builder()
+                .id("24")
+                .customerId(testCustomerId)
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .province("province")
+                .telephone("telephone")
+                .photoId(photoId)
+                .isActive(true)
+                .build();
+
+        StepVerifier.create(repo.save(customerEntity))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        when(filesServiceClient.deleteFile(photoId)).thenReturn(Mono.empty());
+        when(cartServiceClient.deleteCartByCustomerId(testCustomerId)).thenReturn(Mono.empty());
+
+        client.delete().uri("/customers/" + testCustomerId + "/soft")
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        StepVerifier.create(repo.findCustomerByCustomerId(testCustomerId))
+                .expectNextMatches(saved -> Boolean.FALSE.equals(saved.getIsActive()) && saved.getPhotoId() == null)
+                .verifyComplete();
+
+        verify(filesServiceClient).deleteFile(photoId);
+        verify(cartServiceClient).deleteCartByCustomerId(testCustomerId);
+    }
+
+    @Test
+    void softDeleteCustomerByCustomerId_WhenAlreadyInactive_ShouldStillReturnNoContent() {
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
+
+        String testCustomerId = "33333333-3333-4333-8333-333333333333";
+
+        Customer inactiveCustomer = Customer.builder()
+                .id("25")
+                .customerId(testCustomerId)
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .province("province")
+                .telephone("telephone")
+                .isActive(false)
+                .build();
+
+        StepVerifier.create(repo.save(inactiveCustomer))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        when(cartServiceClient.deleteCartByCustomerId(testCustomerId)).thenReturn(Mono.empty());
+
+        client.delete().uri("/customers/" + testCustomerId + "/soft")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        StepVerifier.create(repo.findCustomerByCustomerId(testCustomerId))
+                .expectNextMatches(saved -> Boolean.FALSE.equals(saved.getIsActive()))
+                .verifyComplete();
+    }
+
+    @Test
+    void softDeleteCustomerByCustomerId_WhenCustomerDoesNotExist_ShouldReturnNotFound() {
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
+
+        String missingCustomerId = "44444444-4444-4444-8444-444444444444";
+
+        client.delete().uri("/customers/" + missingCustomerId + "/soft")
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Customer id not found: " + missingCustomerId);
+
+        verify(cartServiceClient, never()).deleteCartByCustomerId(missingCustomerId);
+    }
+
+    @Test
+    void softDeleteCustomerByCustomerId_WithInvalidId_ShouldReturnUnprocessableEntity() {
+        String invalidCustomerId = "not-a-valid-id";
+
+        client.delete().uri("/customers/" + invalidCustomerId + "/soft")
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Customer id: " + invalidCustomerId + " is invalid");
+    }
 
     @Test
     void getTotalNumberOfCustomers(){

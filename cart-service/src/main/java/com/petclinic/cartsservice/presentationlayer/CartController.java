@@ -294,4 +294,23 @@ public class CartController {
                 .thenReturn(ResponseEntity.noContent().build());
     }
 
+    @PutMapping("/{cartId}/shipping")
+    public Mono<ResponseEntity<CartResponseModel>> updateShippingMethod(
+            @PathVariable String cartId,
+            @RequestBody(required = false) CartShippingRequestModel shippingRequest) {
+        if (shippingRequest == null || shippingRequest.getShippingMethod() == null) {
+            CartResponseModel errorResponse = new CartResponseModel();
+            errorResponse.setMessage("shippingMethod must be provided");
+            return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+        }
+
+        return cartService.updateShippingMethod(cartId, shippingRequest.getShippingMethod())
+                .map(ResponseEntity::ok)
+                .onErrorResume(InvalidInputException.class, e -> {
+                    CartResponseModel errorResponse = new CartResponseModel();
+                    errorResponse.setMessage(e.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+                });
+    }
+
 }

@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.petclinic.bffapigateway.dtos.Bills.*;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -19,10 +20,8 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -43,7 +42,8 @@ class BillServiceClientIntegrationTest {
                 server.getHostName(),
                 String.valueOf(server.getPort())
         );
-        mapper = new ObjectMapper();
+        mapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule());
     }
 
     @AfterEach
@@ -64,9 +64,9 @@ class BillServiceClientIntegrationTest {
             .customerId("1")
             .vetId("1")
             .visitType("Check up")
-            .date( null)
+            .date( LocalDate.of(2026, 1,1))
             .billStatus(BillStatus.PAID)
-            .dueDate(null)
+            .dueDate(LocalDate.of(2026, 2,15))
             .build();
 
     private final BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
@@ -76,9 +76,9 @@ class BillServiceClientIntegrationTest {
             .customerId("2")
             .vetId("2")
             .visitType("Check up")
-            .date(null)
+            .date(LocalDate.of(2026, 1,1))
             .billStatus(BillStatus.UNPAID)
-            .dueDate(null)
+            .dueDate(LocalDate.of(2026, 2,15))
             .build();
 
     private final BillResponseDTO billResponseDTO3 = BillResponseDTO.builder()
@@ -88,9 +88,33 @@ class BillServiceClientIntegrationTest {
             .customerId("3")
             .vetId("3")
             .visitType("Check up")
-            .date(null)
+            .date(LocalDate.of(2026, 1,1))
             .billStatus(BillStatus.OVERDUE)
-            .dueDate(null)
+            .dueDate(LocalDate.of(2026, 2,15))
+            .build();
+
+    private final BillResponseDTO billResponseDTO4 = BillResponseDTO.builder()
+            .billId("4")
+            .amount(new BigDecimal("250.0"))
+            .taxedAmount(new BigDecimal("287.5"))
+            .customerId("1")
+            .vetId("3")
+            .visitType("Check up")
+            .date(LocalDate.of(2024, 6, 1))
+            .billStatus(BillStatus.OVERDUE)
+            .dueDate(LocalDate.of(2024, 7, 15))
+            .build();
+
+    private final BillResponseDTO billResponseDTO5 = BillResponseDTO.builder()
+            .billId("4")
+            .amount(new BigDecimal("250.0"))
+            .taxedAmount(new BigDecimal("287.5"))
+            .customerId("1")
+            .vetId("3")
+            .visitType("Check up")
+            .date(LocalDate.of(2024, 7, 1))
+            .billStatus(BillStatus.OVERDUE)
+            .dueDate(LocalDate.of(2024, 8, 15))
             .build();
 
     private BillResponseDTO bill(String id, String customerId, BillStatus status) {
@@ -1304,4 +1328,91 @@ class BillServiceClientIntegrationTest {
                 .verify();
     }
 
+    //Customer Bill Controllers
+    @Test
+    void getBillsByAmountRange_Success() throws JsonProcessingException{
+        List<BillResponseDTO> billResponseList = Arrays.asList(
+                billResponseDTO, billResponseDTO2, billResponseDTO3
+        );
+
+        String body = mapper.writeValueAsString(billResponseList);
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        BigDecimal minAmount = new BigDecimal("100");
+        BigDecimal maxAmount = new BigDecimal("300");
+
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient
+                .getBillsByAmountRange("1", minAmount, maxAmount);
+
+        StepVerifier.create(billResponseFlux.collectList())
+                .expectNextMatches(returnedBillList -> {
+                    assertEquals(3, returnedBillList.size());
+                    assertTrue(returnedBillList.stream().anyMatch(bill -> "1".equals(bill.getCustomerId())));
+                    assertTrue(returnedBillList.stream().anyMatch(bill -> bill.getAmount().compareTo(minAmount) >= 0
+                            && bill.getAmount().compareTo(maxAmount) <= 0));
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByDateRange_Success() throws JsonProcessingException{
+        List<BillResponseDTO> billResponseList = Arrays.asList(
+                billResponseDTO, billResponseDTO2, billResponseDTO3, billResponseDTO4, billResponseDTO5
+        );
+
+        String body = mapper.writeValueAsString(billResponseList);
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        LocalDate minDate = LocalDate.of(2024, 1, 1);
+        LocalDate maxDate = LocalDate.of(2024, 12, 31);
+
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient
+                .getBillsByDateRange("1", minDate, maxDate);
+
+        StepVerifier.create(billResponseFlux.collectList())
+                .expectNextMatches(returnedBillList -> {
+                    assertEquals(5, returnedBillList.size());
+                    assertTrue(returnedBillList.stream().anyMatch(bill -> "1".equals(bill.getCustomerId())));
+                    assertTrue(returnedBillList.stream().anyMatch(bill -> !bill.getDate().isBefore(minDate)
+                            && !bill.getDate().isAfter(maxDate)));
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getBillsByDueDateRange_Success() throws JsonProcessingException{
+        List<BillResponseDTO> billResponseList = Arrays.asList(
+                billResponseDTO, billResponseDTO2, billResponseDTO3, billResponseDTO4, billResponseDTO5
+        );
+
+        String body = mapper.writeValueAsString(billResponseList);
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        LocalDate minDate = LocalDate.of(2024, 1, 1);
+        LocalDate maxDate = LocalDate.of(2024, 12, 31);
+
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient
+                .getBillsByDueDateRange("1", minDate, maxDate);
+
+        StepVerifier.create(billResponseFlux.collectList())
+                .expectNextMatches(returnedBillList -> {
+                    assertEquals(5, returnedBillList.size());
+                    assertTrue(returnedBillList.stream().anyMatch(bill -> "1".equals(bill.getCustomerId())));
+                    assertTrue(returnedBillList.stream().anyMatch(bill -> !bill.getDueDate().isBefore(minDate)
+                            && !bill.getDate().isAfter(maxDate)));
+                    return true;
+                })
+                .verifyComplete();
+    }
 }

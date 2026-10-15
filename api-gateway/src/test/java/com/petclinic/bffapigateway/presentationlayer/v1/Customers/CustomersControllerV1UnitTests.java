@@ -560,16 +560,6 @@ public class CustomersControllerV1UnitTests {
         verify(customersServiceClient, times(1)).deleteCustomerPhoto(customerId);
     }
 
-    @Test
-    void whenDeleteCustomerPhoto_withNonExistentCustomer_thenReturnNotFound() {
-        when(customersServiceClient.deleteCustomerPhoto(customerId)).thenReturn(Mono.empty());
-
-        client.delete()
-                .uri("/api/gateway/customers/{customerId}/photo", customerId)
-                .exchange()
-                .expectStatus().isNotFound();
-        verify(customersServiceClient, times(1)).deleteCustomerPhoto(customerId);
-    }
 
     @Test
     void whenDeletePetPhoto_withValidPet_thenReturnOk() {
@@ -661,6 +651,16 @@ public class CustomersControllerV1UnitTests {
                 .expectStatus().isBadRequest();
 
         verify(customersServiceClient, times(1)).createPetForCustomer(customerId, petRequest);
+    }
+    @Test
+    void whenDeleteCustomerPhoto_andServiceReturnsNoContent_thenReturnNoContent() {
+        when(customersServiceClient.deleteCustomerPhoto(customerId)).thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/gateway/customers/{customerId}/photo", customerId)
+                .exchange()
+                .expectStatus().isNoContent();
+        verify(customersServiceClient, times(1)).deleteCustomerPhoto(customerId);
     }
 
     @Test

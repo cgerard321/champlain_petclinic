@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Modal, Button } from 'react-bootstrap';
 import './DeleteReviewModal.css';
 
@@ -13,6 +14,7 @@ const DeleteReviewModal = ({
   onConfirm,
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 }: DeleteReviewModalProps) => {
+  const { t } = useTranslation('products');
   return (
     <Modal
       show={show}
@@ -24,17 +26,14 @@ const DeleteReviewModal = ({
         ×
       </button>
       <Modal.Body className="delete-modal-body">
-        <h4>Delete Review</h4>
-        <p>
-          Are you sure you want to delete your review? This action cannot be
-          undone.
-        </p>
+        <h4>{t('deleteReview')}</h4>
+        <p>{t('deleteConfirm')}</p>
         <div className="delete-modal-buttons">
           <Button className="cancel-btn" onClick={onClose}>
-            Cancel
+            {t('cancel')}
           </Button>
           <Button variant="danger" className="delete-btn" onClick={onConfirm}>
-            Delete
+            {t('delete')}
           </Button>
         </div>
       </Modal.Body>

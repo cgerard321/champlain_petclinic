@@ -90,3 +90,10 @@ export function averageCanadianCombinedTaxRate(): number {
   // round to 4 decimal places to avoid excessive floating precision downstream
   return Math.round((sum / rates.length) * 10000) / 10000;
 }
+
+// label for fr qc
+export function taxLabelKey(name: string, province?: string): string {
+  if (name === 'PST' && province?.trim().toUpperCase() === 'QC') return 'QST';
+  if (name === 'Estimated Taxes') return 'ESTIMATED';
+  return name;
+}
