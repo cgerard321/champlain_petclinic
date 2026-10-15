@@ -72,7 +72,7 @@ public class VisitsControllerV1 {
     // Only the owner of the visit's pet can read the vet note
     private Mono<VisitResponseDTO> hideVetNoteFromOtherOwners(VisitResponseDTO visit, TokenResponseDTO user) {
         boolean isOwner = user != null && user.getRoles() != null
-                && user.getRoles().stream().anyMatch(role -> role.contains(Roles.OWNER.toString()));
+                && user.getRoles().stream().anyMatch(role -> role.contains(Roles.CUST.toString()));
         if (visit.getVetNote() == null || !isOwner) {
             return Mono.just(visit);
         }
@@ -140,6 +140,8 @@ public class VisitsControllerV1 {
                 .map(ResponseEntity::ok)
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
+
+
 
 
     @DeleteMapping("/{visitId}")
