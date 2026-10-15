@@ -72,7 +72,7 @@ public class VisitsControllerV1 {
     // Only the owner of the visit's pet can read the vet note
     private Mono<VisitResponseDTO> hideVetNoteFromOtherOwners(VisitResponseDTO visit, TokenResponseDTO user) {
         boolean isOwner = user != null && user.getRoles() != null
-                && user.getRoles().stream().anyMatch(role -> role.contains(Roles.OWNER.toString()));
+                && user.getRoles().stream().anyMatch(role -> role.contains(Roles.CUST.toString()));
         if (visit.getVetNote() == null || !isOwner) {
             return Mono.just(visit);
         }
@@ -102,7 +102,7 @@ public class VisitsControllerV1 {
         return visitsServiceClient.getVisitByPractitionerId(practitionerId);
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.CUST, Roles.VET})
     @PostMapping(value =
             "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTO,
@@ -130,7 +130,7 @@ public class VisitsControllerV1 {
                         .defaultIfEmpty(ResponseEntity.notFound().build())); // Return 404 if not found
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.CUST})
     @PatchMapping("/{visitId}/status/{status}")
     public Mono<ResponseEntity<VisitResponseDTO>> updateStatusForVisitByVisitId(
             @PathVariable String visitId,
@@ -140,6 +140,8 @@ public class VisitsControllerV1 {
                 .map(ResponseEntity::ok)
                 .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()));
     }
+
+
 
 
     @DeleteMapping("/{visitId}")
@@ -176,7 +178,7 @@ public class VisitsControllerV1 {
     ///////////////////////////////////////////
 
 
-//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.OWNER})
+//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.CUST})
 //    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
 //    @GetMapping(value = "/owners/{ownerId}/visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
 //    public Flux<VisitResponseDTO> getVisitsByOwnerId(@PathVariable String ownerId){
@@ -216,7 +218,7 @@ public class VisitsControllerV1 {
 
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PostMapping(value = "/reviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ReviewResponseDTO>> PostReview(@RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono){
         return visitsServiceClient.createReview(reviewRequestDTOMono)
@@ -240,7 +242,7 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST, Roles.ADMIN})
     @DeleteMapping(value="/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ReviewResponseDTO>> deleteReview(@PathVariable String reviewId) {
         return Mono.just(reviewId)
@@ -250,7 +252,7 @@ public class VisitsControllerV1 {
     }
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.CUST})
     @DeleteMapping(value="/owners/{ownerId}/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ReviewResponseDTO>> deleteCustomerReview(
             @PathVariable String ownerId,
@@ -276,13 +278,13 @@ public class VisitsControllerV1 {
 ///////////Availability Methods//////////////////
 ///////////////////////////////////////////
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.CUST, Roles.VET})
     @GetMapping(value = "/availability/vets", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Flux<VetResponseDTO>> getAllVetsForAvailability() {
         return ResponseEntity.ok().body(visitsServiceClient.getAllVetsForAvailability());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.CUST, Roles.VET})
     @GetMapping(value = "/availability/vets/{vetId}/slots", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Flux<TimeSlotDTO>> getAvailableTimeSlots(
             @PathVariable String vetId,
@@ -290,7 +292,7 @@ public class VisitsControllerV1 {
         return ResponseEntity.ok().body(visitsServiceClient.getAvailableTimeSlots(vetId, date));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.CUST, Roles.VET})
     @GetMapping(value = "/availability/vets/{vetId}/dates", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Flux<String>> getAvailableDates(
             @PathVariable String vetId,
@@ -299,7 +301,7 @@ public class VisitsControllerV1 {
         return ResponseEntity.ok().body(visitsServiceClient.getAvailableDates(vetId, startDate, endDate));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER, Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.CUST, Roles.VET})
     @GetMapping(value = "/availability/vets/{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> getVeterinarianAvailability(@PathVariable String vetId) {
         return visitsServiceClient.getVeterinarianAvailability(vetId)
@@ -328,7 +330,7 @@ public class VisitsControllerV1 {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.CUST})
     @GetMapping(value = "/{visitId}/prescription/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<byte[]>> downloadPrescriptionPdf(
             @PathVariable String visitId) {
@@ -338,7 +340,7 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.CUST})
     @PatchMapping(value = "/{visitId}/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> cancelVisit(@PathVariable String visitId, @RequestBody CancellationRequestDTO cancellationRequestDTO) {
 

@@ -60,7 +60,7 @@ public class MockServerConfigAuthService {
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json("{\"token\":\"valid-test-token\",\"userId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"roles\":[\"OWNER\"]}"))
+                                .withBody(json("{\"token\":\"valid-test-token\",\"userId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"roles\":[\"CUST\"]}"))
                 );
 
         mockServerClient_AuthService
@@ -73,7 +73,7 @@ public class MockServerConfigAuthService {
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json("{\"token\":\"valid-test-token\",\"userId\":\"invalid-owner-id\",\"roles\":[\"OWNER\"]}"))
+                                .withBody(json("{\"token\":\"valid-test-token\",\"userId\":\"invalid-owner-id\",\"roles\":[\"CUST\"]}"))
                 );
     }
     public void registerValidateTokenForCustomerEndpoint() {
@@ -90,7 +90,7 @@ public class MockServerConfigAuthService {
                                 .withBody(json(
                                         "{\"token\":\"valid-test-token-for-customer-one\"," +
                                                 "\"userId\":\"1\"," +
-                                                "\"roles\":[\"OWNER\"]}"
+                                                "\"roles\":[\"CUST\"]}"
                                 ))
                 );
     }
@@ -148,9 +148,9 @@ public class MockServerConfigAuthService {
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json("[{\"name\":\"OWNER\"}, {\"name\":\"ADMIN\"}]"))
+                                .withBody(json("[{\"name\":\"CUST\"}, {\"name\":\"ADMIN\"}]"))
           
-                                .withBody(json("[{\"id\":\"1\", \"name\":\"ADMIN\"}, {\"id\":\"2\", \"name\":\"OWNER\"}]"))
+                                .withBody(json("[{\"id\":\"1\", \"name\":\"ADMIN\"}, {\"id\":\"2\", \"name\":\"CUST\"}]"))
                 );
     }
 
@@ -178,12 +178,12 @@ public class MockServerConfigAuthService {
                                 .withMethod("PATCH")
                                 .withPath("/users/e6248486-d3df-47a5-b2e0-84d31c47533a")
                                 .withCookie("Bearer", jwtTokenForValidAdmin)
-                                .withBody(json("{\"roles\":[\"OWNER\",\"ADMIN\"]}"))
+                                .withBody(json("{\"roles\":[\"CUST\",\"ADMIN\"]}"))
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json("{\"id\":1,\"username\":\"Admin\",\"password\":null,\"email\":\"admin@admin.com\",\"verified\":true,\"roles\":[{\"id\":1,\"name\":\"ADMIN\"},{\"id\":2,\"name\":\"OWNER\"}]}"))
+                                .withBody(json("{\"id\":1,\"username\":\"Admin\",\"password\":null,\"email\":\"admin@admin.com\",\"verified\":true,\"roles\":[{\"id\":1,\"name\":\"ADMIN\"},{\"id\":2,\"name\":\"CUST\"}]}"))
                 );
     }
 
@@ -193,7 +193,7 @@ public class MockServerConfigAuthService {
                         request()
                                 .withMethod("POST")
                                 .withPath("/users")
-                                .withBody(json("{\"userId\":null,\"email\":\"test@example.com\",\"username\":\"testuser\",\"defaultRole\":\"OWNER\",\"password\":\"password123\",\"owner\":{\"firstName\":\"testuser\",\"lastName\":\"\",\"address\":\"\",\"city\":\"\",\"province\":\"\",\"telephone\":\"\"}}"))
+                                .withBody(json("{\"userId\":null,\"email\":\"test@example.com\",\"username\":\"testuser\",\"defaultRole\":\"CUST\",\"password\":\"password123\",\"owner\":{\"firstName\":\"testuser\",\"lastName\":\"\",\"address\":\"\",\"city\":\"\",\"province\":\"\",\"telephone\":\"\"}}"))
                 )
                 .respond(
                         response()
