@@ -9,7 +9,7 @@ export const customerRedirectGuard: CanActivateFn = () => {
   const auth = inject(AuthState);
 
   // This can accidently target a user with an employee role
-  // We will keep it this way since no user should have an OWNER role if they are an employee
+  // We will keep it this way since no user should have a CUST role if they are an employee
   const roles = auth.roles();
   const isCustomer = CUSTOMER_ROLES.some((role) => roles.includes(role));
 

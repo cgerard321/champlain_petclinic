@@ -49,11 +49,25 @@
             "noSpaceNoAt": "No spaces or \"@\"",
             "noTrailing": "Doesn't end with an underscore, and no two in a row"
           }
+        },
+        "password": {
+          "title": "Password",
+          "intro": "Get a link by email to choose a new password.",
+          "label": "Email",
+          "send": "Send the link",
+          "retryIn": "New link in",
+          "sent": "If this email matches an account, a reset link has been sent."
         }
       },
       "display": {
         "title": "Display",
         "toggle": "Toggle Theme"
+      },
+      "leave": {
+        "title": "Unsaved changes",
+        "message": "Your changes are not saved. Do you want to leave this page?",
+        "confirm": "Leave",
+        "cancel": "Stay"
       }
     },
     "role": {
@@ -80,18 +94,7 @@
       "terms": "Terms of Service",
       "copyright": "© 2026 Champlain Pet Clinic. All rights reserved."
     },
-    "visit": {
-      "pages": {
-        "buttonName": "Show filters"
-      },
-      "components": {
-        "filterbutton": "Filter By"
-      }
-    },
     "visits": {
-      "nextappointement": {
-        "title": "Next upcoming visit"
-      },
       "showFilters": "Show filters",
       "filterButton": "Filter By",
       "hideFilters": "Hide filters",
@@ -99,10 +102,6 @@
       "statusMenuLabel": "Visit statuses",
       "listLabel": "Visit list",
       "title": "List of Visits",
-      "nextAppointmentTitle": "Next appointment",
-      "nextAppointmentLoading": "Loading next appointment...",
-      "nextAppointmentError": "Could not load the next appointment.",
-      "noUpcomingAppointment": "No upcoming appointments.",
       "visitId": "Visit ID",
       "veterinarianFullName": "Veterinarian full name",
       "petName": "Pet name",
@@ -138,43 +137,6 @@
         "slotsError": "Could not load available times.",
         "scheduleError": "Could not schedule the follow-up.",
         "confirmation": "The follow-up visit was scheduled."
-      },
-      "title": "List of Visits",
-      "visitId": "Visit ID",
-      "veterinarianFullName": "Veterinarian full name",
-      "petName": "Pet name",
-      "description": "Description",
-      "startDate": "Start date",
-      "endDate": "End date",
-      "status": "Status",
-      "statusScheduled": "Scheduled",
-      "statusCompleted": "Completed",
-      "statusCancelled": "Cancelled",
-      "statusConfirmed": "Confirmed",
-      "statusUpcoming": "Upcoming",
-      "statusArchived": "Archived",
-      "statusOutOfStatus": "Out of status",
-      "details": {
-        "back": "Back to visits",
-        "title": "Visit Details",
-        "loading": "Loading visit details...",
-        "visitInfo": "Visit Information",
-        "visitId": "Visit ID",
-        "description": "Description",
-        "start": "Start",
-        "end": "End",
-        "status": "Status",
-        "petInfo": "Pet Information",
-        "name": "Name",
-        "birthDate": "Birth Date",
-        "vetInfo": "Veterinarian Information",
-        "email": "Email",
-        "phone": "Phone",
-        "customerInfo": "Customer Information",
-        "notAvailable": "Not available",
-        "noVisitId": "No visit ID was provided.",
-        "notFound": "Visit not found.",
-        "loadError": "Unable to load visit details."
       }
     },
     "vets": {

@@ -2,7 +2,7 @@
 
 angular.module('userModule').service('UserService', [function() {
     this.getAvailableRoles = function() {
-        return ['ADMIN', 'VET', 'OWNER'];
+        return ['ADMIN', 'VET', 'CUST'];
     };
 
 }]);

@@ -73,7 +73,7 @@ class UserControllerV1UnitTest {
     private final String EXISTING_USER_ID_1 = "be08dfa1-25d4-4352-92df-5dc37c2464c7";
     private final String EXISTING_USER_ID_2 = "be08dfa1-25d4-4352-92df-5dc37c2464c7";
     private final String NON_EXISTING_USER_ID = "be08dfa1-25d4-4352-92df-5dc37c246md8";
-    private final List<String> ROLES_LIST = List.of("OWNER");
+    private final List<String> ROLES_LIST = List.of("CUST");
 
     private final String UPDATED_USERNAME = "updatedTestUser";
 
