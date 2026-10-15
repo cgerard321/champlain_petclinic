@@ -1,4 +1,5 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUser } from '@/context/UserContext';
 import { getCustomer } from '@/features/customers/api/getCustomer';
 import { getUserDetails } from '@/features/customers/api/getUserDetails';
@@ -60,6 +61,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
   onSubmit,
 }) => {
   const { user } = useUser();
+  const { t } = useTranslation('carts');
   const [billing, setBilling] = useState<BillingInfo>({
     fullName: '',
     email: '',
@@ -141,17 +143,17 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
 
     const rawCardNumber = billing.cardNumber.replace(/\s+/g, '');
     if (!/^\d{16}$/.test(rawCardNumber)) {
-      setError('Credit card number must be 16 digits.');
+      setError(t('billing.cardInvalid'));
       setLoading(false);
       return;
     }
     if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(billing.expiry)) {
-      setError('Expiration must be in MM/YY format.');
+      setError(t('billing.expiryInvalid'));
       setLoading(false);
       return;
     }
     if (!/^\d{3,4}$/.test(billing.cvv)) {
-      setError('CVV must be 3 or 4 digits.');
+      setError(t('billing.cvvInvalid'));
       setLoading(false);
       return;
     }
@@ -162,7 +164,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
 
   const handleConfirm = (): void => {
     setShowConfirm(false);
-    setSuccess('Checkout successful! (mocked, no backend yet)');
+    setSuccess(t('billing.success'));
     onSubmit(billing);
     setBilling({
       fullName: '',
@@ -189,11 +191,11 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
         <button
           className="cart-billing-modal-close"
           onClick={onClose}
-          aria-label="Close billing form"
+          aria-label={t('billing.close')}
         >
           ✕
         </button>
-        <h2>Billing Information</h2>
+        <h2>{t('billing.title')}</h2>
 
         {error && <div className="error">{error}</div>}
         {success && <div className="success">{success}</div>}
@@ -203,7 +205,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
             <input
               type="text"
               name="fullName"
-              placeholder="Full Name"
+              placeholder={t('billing.fullName')}
               value={billing.fullName}
               onChange={handleChange}
               required
@@ -211,7 +213,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
             <input
               type="email"
               name="email"
-              placeholder="Email"
+              placeholder={t('billing.email')}
               value={billing.email}
               onChange={handleChange}
               required
@@ -219,7 +221,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
             <input
               type="tel"
               name="phoneNumber"
-              placeholder="Telephone"
+              placeholder={t('billing.telephone')}
               value={billing.phoneNumber}
               onChange={handleChange}
               autoComplete="tel"
@@ -228,7 +230,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
             <input
               type="text"
               name="address"
-              placeholder="Address"
+              placeholder={t('billing.address')}
               value={billing.address}
               onChange={handleChange}
               required
@@ -236,7 +238,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
             <input
               type="text"
               name="city"
-              placeholder="City"
+              placeholder={t('billing.city')}
               value={billing.city}
               onChange={handleChange}
               required
@@ -247,17 +249,19 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
               onChange={handleSelectChange}
               required
             >
-              <option value="">Select Province</option>
+              <option value="">{t('billing.selectProvince')}</option>
               {provinces.map(province => (
                 <option key={province.code} value={province.code}>
-                  {province.name}
+                  {t(`billing.provinces.${province.code}`, {
+                    defaultValue: province.name,
+                  })}
                 </option>
               ))}
             </select>
             <input
               type="text"
               name="postalCode"
-              placeholder="Postal Code"
+              placeholder={t('billing.postalCode')}
               value={billing.postalCode}
               onChange={handleChange}
               required
@@ -265,7 +269,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
             <input
               type="text"
               name="cardNumber"
-              placeholder="Card Number"
+              placeholder={t('billing.cardNumber')}
               value={billing.cardNumber}
               onChange={handleChange}
               required
@@ -275,7 +279,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
                 <input
                   type="text"
                   name="expiry"
-                  placeholder="MM/YY"
+                  placeholder={t('billing.expiryPlaceholder')}
                   value={billing.expiry}
                   onChange={handleChange}
                   required
@@ -299,7 +303,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
             className="cart-button cart-button--brand cart-button--block cart-button--tall cart-button--disabled-muted"
             disabled={loading}
           >
-            {loading ? 'Processing...' : 'Submit Payment'}
+            {loading ? t('billing.processing') : t('billing.submit')}
           </button>
         </form>
       </div>
@@ -307,20 +311,20 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
       {showConfirm && (
         <div className="confirm-modal-backdrop">
           <div className="confirm-modal-content cart-panel cart-panel--padded">
-            <h2>Confirm Checkout</h2>
-            <p>Are you sure you want to checkout?</p>
+            <h2>{t('checkoutModal.title')}</h2>
+            <p>{t('checkoutModal.message')}</p>
             <div className="confirm-modal-buttons">
               <button
                 className="cart-button cart-button--brand cart-button--tall"
                 onClick={handleConfirm}
               >
-                Yes
+                {t('buttons.yes')}
               </button>
               <button
                 className="cart-button cart-button--danger cart-button--tall"
                 onClick={handleCancel}
               >
-                No
+                {t('buttons.no')}
               </button>
             </div>
           </div>

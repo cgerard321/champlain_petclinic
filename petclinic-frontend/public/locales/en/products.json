@@ -83,6 +83,7 @@
   "updateRatingRequired": "Please select a rating before updating.",
   "updateReviewRequired": "Please write a review before updating.",
   "updateFailed": "Failed to update review. Please try again.",
+  "reviewEditPeriodEnded": "The review editing period has ended. You can no longer edit this review.",
   "reviewTooLong": "Review cannot exceed 10000 characters!",
   "reviewPlaceholder": "Leave your review here...",
   "noImage": "No image available",
