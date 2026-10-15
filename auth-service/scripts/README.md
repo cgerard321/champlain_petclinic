@@ -1,4 +1,13 @@
-# Manual AUTH customer role update
+# AUTH customer role update
+
+AUTH startup automatically renames OWNER to CUST before the loader's existing-data
+check, preserving role IDs and memberships. CUST-only is a no-op; fresh databases
+still seed CUST. Both roles cause startup failure: an operator must reconcile the
+conflict before retrying; no roles are merged/deleted. Persistence failures also
+abort startup. Existing OWNER sessions require logout/login for new CUST tokens.
+The scripts below remain a manual fallback; unlike startup, they reject neither-role
+databases. Coordinate older writers during rollout and bootstrap empty databases
+with one AUTH instance first.
 
 These scripts are intentionally outside `src/main/resources` and are never run
 at startup. AUTH currently has a bootstrap schema, not a migration framework.
@@ -96,7 +105,4 @@ successfully and its absence confirmed. The reproducible fixture harness is
 and Docker available. It creates only a uniquely named disposable container and
 writes a local JSON evidence report. MariaDB results remain supplemental.
 
-**No application database has been migrated.** No local application Compose
-`mysql-auth` container existed at the latest inspection. Existing databases still
-require the reviewed backup/update/verification sequence above, and old OWNER
-sessions require logout/login after migration to obtain CUST roles.
+**No application database has been migrated by these disposable validations.**
