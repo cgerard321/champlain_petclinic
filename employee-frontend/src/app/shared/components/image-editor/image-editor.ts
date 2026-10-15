@@ -26,6 +26,16 @@ export class ImageEditor implements OnDestroy {
   protected readonly selectedPreview = signal<string | null>(null);
   protected readonly removed = signal(false);
   protected readonly error = signal('');
+  protected readonly changeLabel = $localize`:@@image.actions.change:Changer l'image`;
+  protected readonly addLabel = $localize`:@@image.actions.add:Ajouter une image`;
+
+  protected chooseLabel(): string {
+    return $localize`:@@image.actions.choose:Choisir ${this.label()}:label:`;
+  }
+
+  protected previewAlt(): string {
+    return $localize`:@@image.previewAlt:Aperçu de ${this.label()}:label:`;
+  }
 
   protected readonly preview = computed(() =>
     this.removed() ? null : (this.selectedPreview() ?? this.currentImage()),
@@ -41,13 +51,15 @@ export class ImageEditor implements OnDestroy {
     this.error.set('');
 
     if (!(ALLOWED_IMAGE_TYPES as readonly string[]).includes(file.type)) {
-      this.error.set('Choose a JPG, PNG, or WebP image.');
+      this.error.set($localize`:@@image.errors.type:Choisissez une image JPG, PNG ou WebP.`);
       return;
     }
 
     // A provisional frontend limit; align it with the backend later.
     if (file.size > this.limit()) {
-      this.error.set(`Choose an image smaller than ${this.limitLabel()}.`);
+      this.error.set(
+        $localize`:@@image.errors.size:Choisissez une image de moins de ${this.limitLabel()}:limit:.`,
+      );
       return;
     }
 
