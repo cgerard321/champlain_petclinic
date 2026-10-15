@@ -8,12 +8,15 @@ import { vi } from 'vitest';
 import { AuthState } from '@core/services/auth-state';
 import { DeliveryType, Product, ProductStatus } from '@features/prod/models/product.model';
 import { ProductService } from '@features/prod/services/product.service';
+import { ReviewSettingsService } from '@features/prod/services/review-settings.service';
 import { Roles } from '@shared/models/roles';
 
 import { Prod } from './prod';
 
 describe('Prod', () => {
   let getProducts: ReturnType<typeof vi.fn>;
+  let getReviewSettings: ReturnType<typeof vi.fn>;
+  let updateReviewSettings: ReturnType<typeof vi.fn>;
   let deleteProduct: ReturnType<typeof vi.fn>;
   let dialogOpen: ReturnType<typeof vi.fn>;
   const product: Product = {
@@ -33,12 +36,18 @@ describe('Prod', () => {
     vi.useFakeTimers();
     getProducts = vi.fn().mockReturnValue(of([product]));
     deleteProduct = vi.fn().mockReturnValue(of(product));
+    getReviewSettings = vi.fn().mockReturnValue(of({ editPeriodHours: 48 }));
+    updateReviewSettings = vi.fn().mockReturnValue(of({ editPeriodHours: 72 }));
     dialogOpen = vi.fn().mockReturnValue({ afterClosed: () => of(undefined) });
     TestBed.configureTestingModule({
       imports: [Prod],
       providers: [
         { provide: ProductService, useValue: { getProducts, deleteProduct } },
         { provide: AuthState, useValue: { roles: signal([Roles.admin]) } },
+        {
+          provide: ReviewSettingsService,
+          useValue: { getSettings: getReviewSettings, updateSettings: updateReviewSettings },
+        },
       ],
     });
     TestBed.overrideProvider(MatDialog, { useValue: { open: dialogOpen } });
@@ -147,7 +156,7 @@ describe('Prod', () => {
       'button',
     ) as NodeListOf<HTMLButtonElement>;
     const deleteButton = Array.from(buttons).find(
-      (button) => button.textContent.trim() === 'Delete',
+      (button) => button.textContent?.trim() === 'Delete',
     );
 
     expect(deleteButton).toBeTruthy();
@@ -162,7 +171,7 @@ describe('Prod', () => {
       'button',
     ) as NodeListOf<HTMLButtonElement>;
     const deleteButton = Array.from(buttons).find(
-      (button) => button.textContent.trim() === 'Delete',
+      (button) => button.textContent?.trim() === 'Delete',
     );
 
     expect(deleteButton).toBeUndefined();
@@ -243,5 +252,47 @@ describe('Prod', () => {
     expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
       'Product not found: product-1',
     );
+  });
+
+  it('loads review settings for an admin', () => {
+    const fixture = TestBed.createComponent(Prod);
+    fixture.detectChanges();
+
+    expect(getReviewSettings).toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('Review Settings');
+  });
+
+  it('saves the review edit period', () => {
+    const fixture = TestBed.createComponent(Prod);
+    fixture.detectChanges();
+
+    fixture.componentInstance['reviewEditPeriodHours'].set(72);
+    fixture.componentInstance['saveReviewSettings']();
+
+    expect(updateReviewSettings).toHaveBeenCalledWith({
+      editPeriodHours: 72,
+    });
+  });
+
+  it('does not load review settings for a non-admin', () => {
+    TestBed.overrideProvider(AuthState, {
+      useValue: { roles: signal([Roles.vet]) },
+    });
+
+    const fixture = TestBed.createComponent(Prod);
+    fixture.detectChanges();
+
+    expect(getReviewSettings).not.toHaveBeenCalled();
+  });
+
+  it('rejects a negative edit period', () => {
+    const fixture = TestBed.createComponent(Prod);
+    fixture.detectChanges();
+
+    fixture.componentInstance['reviewEditPeriodHours'].set(-1);
+    fixture.componentInstance['saveReviewSettings']();
+
+    expect(updateReviewSettings).not.toHaveBeenCalled();
+    expect(fixture.componentInstance['settingsError']()).toContain('zero or greater');
   });
 });

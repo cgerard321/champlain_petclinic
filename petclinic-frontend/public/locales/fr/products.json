@@ -83,6 +83,7 @@
   "updateRatingRequired": "Veuillez sélectionner une note avant d’enregistrer.",
   "updateReviewRequired": "Veuillez rédiger un avis avant d’enregistrer.",
   "updateFailed": "Impossible de modifier l’avis. Veuillez réessayer.",
+  "reviewEditPeriodEnded": "La période de modification de l’avis est terminée. Vous ne pouvez plus modifier cet avis.",
   "reviewTooLong": "L’avis ne peut pas dépasser 10 000 caractères !",
   "reviewPlaceholder": "Rédigez votre avis ici…",
   "noImage": "Aucune image disponible",
