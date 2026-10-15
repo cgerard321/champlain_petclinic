@@ -164,7 +164,9 @@ const UserDetails: FC = () => {
           </p>
           <p>
             <strong>Roles: </strong>
-            {user.roles.map(role => role.name).join(', ')}
+            {user.roles
+              .map(role => (role.name === 'CUST' ? 'Customer' : role.name))
+              .join(', ')}
           </p>
         </div>
       </div>
@@ -185,12 +187,12 @@ const UserDetails: FC = () => {
         <button className="user-details-button" onClick={handleBackClick}>
           Back to All Users
         </button>
-        {user.roles.some(role => role.name === 'OWNER') && (
+        {user.roles.some(role => role.name === 'CUST') && (
           <button
             className="user-details-button"
             onClick={handleOwnerInfoClick}
           >
-            Connected Owner Info
+            Connected Customer Info
           </button>
         )}
         <button
@@ -221,7 +223,7 @@ const UserDetails: FC = () => {
                         checked={userRoles.has(role.name)}
                         onChange={() => handleCheckboxChange(role.name)}
                       />
-                      {role.name}
+                      {role.name === 'CUST' ? 'Customer' : role.name}
                     </label>
                   </div>
                 ))}

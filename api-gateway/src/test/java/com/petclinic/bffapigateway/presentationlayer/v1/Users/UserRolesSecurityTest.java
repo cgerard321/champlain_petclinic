@@ -51,7 +51,7 @@ class UserRolesSecurityTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"OWNER", "VET", "RECEPTIONIST", "INVENTORY_MANAGER"})
+    @ValueSource(strings = {"CUST", "VET", "RECEPTIONIST", "INVENTORY_MANAGER"})
     void nonAdminCannotChangeRoles(String role) {
         loggedInAs(role);
         patchRoles().expectStatus().isForbidden();
