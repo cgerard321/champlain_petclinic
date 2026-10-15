@@ -5,8 +5,8 @@ import { MatIcon } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 
-import { Display } from '@features/settings/components/display/display';
 import { HasUnsavedChanges } from '@core/models/has-unsaved-changes';
+import { Display } from '@features/settings/components/display/display';
 import { PasswordReset } from '@features/settings/components/password-reset/password-reset';
 import { UsernameForm } from '@features/settings/components/username-form/username-form';
 import { SettingsFormState } from '@features/settings/services/settings-form-state';
@@ -22,7 +22,7 @@ type SettingsSection = 'security' | 'display';
     MatIcon,
     Display,
     PasswordReset,
-    UsernameForm
+    UsernameForm,
   ],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
