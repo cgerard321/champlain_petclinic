@@ -1,21 +1,36 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, DestroyRef, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
-import { Subscription, finalize } from 'rxjs';
+import { Subscription, finalize, firstValueFrom } from 'rxjs';
 
 import { isApiError, ApiError } from '@core/models/api-error';
 import { AuthState } from '@core/services/auth-state';
 import {
   Inventory,
   InventoryFilters,
+  InventoryRequest,
   InventoryType,
 } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
+import { ModalForm } from '@shared/components/modal-form/modal-form';
+import {
+  ModalFormData,
+  ModalFormField,
+  ModalFormResult,
+} from '@shared/components/modal-form/modal-form-models';
+import { getInventoryPermissions } from '@shared/models/inventory-permissions';
 import { Roles } from '@shared/models/roles';
+
+interface InventoryFormValue {
+  inventoryName: string;
+  inventoryType: string;
+  inventoryDescription: string;
+}
 
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
@@ -27,11 +42,18 @@ export class InventoryList implements OnInit, OnDestroy {
   private readonly inventoryService = inject(InventoryService);
   private readonly auth = inject(AuthState);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly dialog = inject(MatDialog);
 
   private inventorySubscription?: Subscription;
   private inventoryTypesSubscription?: Subscription;
   private readonly quantitySubscriptions = new Set<Subscription>();
   private filterTimer?: ReturnType<typeof setTimeout>;
+
+  protected readonly can = computed(() => getInventoryPermissions(this.auth.roles()));
+
+  protected readonly canManageFavorites = computed(
+    () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager),
+  );
 
   protected readonly currentPage = signal(0);
   protected readonly pageSize = 8;
@@ -53,13 +75,17 @@ export class InventoryList implements OnInit, OnDestroy {
     importantOnly: false,
   });
 
-  protected readonly canManageFavorites = computed(
-    () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager),
-  );
-
   protected readonly isSavingAnyFavorite = computed(() =>
     Object.values(this.savingFavorites()).some(Boolean),
   );
+
+  protected get inventoryTypesDropdown(): string[] {
+    return this.inventoryTypes().map((t) => t.type);
+  }
+
+  protected readonly savingInventory = signal(false);
+  protected readonly formError = signal<string | null>(null);
+  protected readonly deleteError = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadInventories();
@@ -187,6 +213,144 @@ export class InventoryList implements OnInit, OnDestroy {
       });
   }
 
+  protected openAddDialog(): void {
+    if (!this.can().canCreateInventory) return;
+
+    void this.openInventoryDialog();
+  }
+
+  protected editInventory(inventory: Inventory): void {
+    if (!this.can().canUpdateInventory) return;
+
+    void this.openInventoryDialog(inventory);
+  }
+
+  private inventoryFields(): readonly ModalFormField[] {
+    return [
+      { key: 'inventoryName', label: 'Name', type: 'string', required: true },
+      {
+        key: 'inventoryType',
+        label: 'Type',
+        type: 'enum',
+        required: true,
+        options: this.inventoryTypes().map((type) => ({ value: type.type, label: type.type })),
+      },
+      { key: 'inventoryDescription', label: 'Description', type: 'string', required: true },
+    ];
+  }
+
+  private async openInventoryDialog(inventory?: Inventory): Promise<void> {
+    this.formError.set(null);
+
+    if (this.inventoryTypesLoading() || this.inventoryTypes().length === 0) {
+      this.formError.set(
+        this.inventoryTypesError() ?? 'Inventory types are still loading. Try again in a moment.',
+      );
+      return;
+    }
+
+    const dialogRef = this.dialog.open<
+      ModalForm<InventoryFormValue>,
+      ModalFormData<InventoryFormValue>,
+      ModalFormResult<InventoryFormValue>
+    >(ModalForm, {
+      data: {
+        title: inventory ? 'Edit Inventory' : 'Add Inventory',
+        submitLabel: inventory ? 'Save Changes' : 'Add Inventory',
+        fields: this.inventoryFields(),
+        initialValue: inventory
+          ? {
+              inventoryName: inventory.inventoryName,
+              inventoryType: inventory.inventoryType,
+              inventoryDescription: inventory.inventoryDescription,
+            }
+          : { inventoryName: '', inventoryType: '', inventoryDescription: '' },
+      },
+      ariaLabel: inventory ? 'Edit inventory' : 'Add inventory',
+      width: '480px',
+      maxWidth: '95vw',
+    });
+
+    // The dialog closes with undefined when the user cancels.
+    const result = await firstValueFrom(dialogRef.afterClosed());
+
+    const allowed = inventory ? this.can().canUpdateInventory : this.can().canCreateInventory;
+
+    if (!result || !allowed) return;
+
+    await this.saveInventory(result.value, inventory?.inventoryId ?? null);
+  }
+
+  private async saveInventory(value: InventoryFormValue, editingId: string | null): Promise<void> {
+    if (this.savingInventory()) return;
+
+    this.savingInventory.set(true);
+    this.formError.set(null);
+
+    try {
+      const body = this.toInventoryRequest(value);
+
+      await firstValueFrom(
+        editingId
+          ? this.inventoryService.updateInventory(editingId, body)
+          : this.inventoryService.createInventory(body),
+      );
+
+      this.loadInventories(this.currentPage());
+    } catch {
+      this.formError.set(editingId ? 'Unable to update inventory.' : 'Unable to create inventory.');
+    } finally {
+      this.savingInventory.set(false);
+    }
+  }
+
+  private toInventoryRequest(value: InventoryFormValue): InventoryRequest {
+    return {
+      inventoryName: value.inventoryName,
+      inventoryType: value.inventoryType,
+      inventoryDescription: value.inventoryDescription,
+    };
+  }
+
+  protected deleteInventoryAction(inventory: Inventory): void {
+    if (!this.can().canDeleteInventory) return;
+
+    this.deleteError.set(null);
+
+    const dialogRef = this.dialog.open<
+      ModalForm<Record<string, never>>,
+      ModalFormData<Record<string, never>>,
+      ModalFormResult<Record<string, never>>
+    >(ModalForm, {
+      data: {
+        title: 'Delete Inventory',
+        message: `Are you sure you want to delete ${inventory.inventoryName}?`,
+        fields: [],
+        initialValue: {},
+        submitLabel: 'Delete',
+        destructive: true,
+      },
+      ariaLabel: 'Delete inventory',
+      width: '440px',
+      maxWidth: '95vw',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result || !this.can().canDeleteInventory) return;
+
+      this.inventoryService.deleteInventory(inventory.inventoryId).subscribe({
+        next: () => {
+          this.inventories.update((current) =>
+            current.filter((inv) => inv.inventoryId !== inventory.inventoryId),
+          );
+        },
+        error: () => {
+          this.deleteError.set('Unable to delete inventory.');
+        },
+      });
+    });
+  }
+
   private loadInventoryTypes(): void {
     this.inventoryTypesLoading.set(true);
     this.inventoryTypesError.set(null);
@@ -231,6 +395,11 @@ export class InventoryList implements OnInit, OnDestroy {
   }
 
   private loadInventories(page = this.currentPage()): void {
+    if (!this.can().hasAnyAccess) {
+      this.isLoading.set(false);
+      return;
+    }
+
     const requestedPage = page;
 
     this.inventorySubscription?.unsubscribe();

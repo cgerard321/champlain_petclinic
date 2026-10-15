@@ -759,8 +759,8 @@ public class BillsControllerUnitTest {
                 .uri(uriBuilder -> uriBuilder.path(baseBillURL + "/bills-filtered-count")
                         .queryParam("billId", "1")
                         .queryParam("customerId", "123")
-                        .queryParam("ownerFirstName", "John")
-                        .queryParam("ownerLastName", "Doe")
+                        .queryParam("customerFirstName", "John")
+                        .queryParam("customerLastName", "Doe")
                         .queryParam("visitType", "Checkup")
                         .queryParam("vetId", "456")
                         .queryParam("vetFirstName", "Jane")
@@ -775,4 +775,279 @@ public class BillsControllerUnitTest {
         verify(billServiceClient, times(1))
                 .getTotalNumberOfBillsWithFilters("1", "123", "John", "Doe", "Checkup", "456", "Jane", "Smith");
     }
+
+    @Test
+    void createBill_NullCustomerId_ShouldThrowBadRequest() {
+        // Arrange
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setCustomerId(null);
+        billRequestDTO.setVetId("67890");
+        billRequestDTO.setVisitType("Adoption");
+        billRequestDTO.setDate(LocalDate.now().plusDays(1)); // Updated to a future date
+        billRequestDTO.setAmount(new BigDecimal("600"));
+        billRequestDTO.setBillStatus(BillStatus.PAID);
+        billRequestDTO.setDueDate(LocalDate.now().plusDays(30)); // Ensure dueDate is also valid
+
+        // Act & Assert
+        client.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/bills")
+                        .queryParam("sendEmail", false)
+                        .queryParam("currency", "CAD")
+                        .build())
+                .cookie("Bearer", "JWTToken") // Ensure the token is valid
+                .body(Mono.just(billRequestDTO), BillRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Must have a customer Id");
+        verifyNoInteractions(billServiceClient);
+    }
+
+    @Test
+    void createBill_NullVetId_ShouldThrowBadRequest() {
+        // Arrange
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setCustomerId("12345");
+        billRequestDTO.setVetId(null);
+        billRequestDTO.setVisitType("Adoption");
+        billRequestDTO.setDate(LocalDate.now().plusDays(1)); // Updated to a future date
+        billRequestDTO.setAmount(new BigDecimal("600"));
+        billRequestDTO.setBillStatus(BillStatus.PAID);
+        billRequestDTO.setDueDate(LocalDate.now().plusDays(30)); // Ensure dueDate is also valid
+
+        // Act & Assert
+        client.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/bills")
+                        .queryParam("sendEmail", false)
+                        .queryParam("currency", "CAD")
+                        .build())
+                .cookie("Bearer", "JWTToken") // Ensure the token is valid
+                .body(Mono.just(billRequestDTO), BillRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Must have a vet Id");
+        verifyNoInteractions(billServiceClient);
+    }
+
+    @Test
+    void createBill_NullAmount_ShouldThrowBadRequest() {
+        // Arrange
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setCustomerId("12345");
+        billRequestDTO.setVetId("67890");
+        billRequestDTO.setVisitType("Adoption");
+        billRequestDTO.setDate(LocalDate.now().plusDays(1)); // Updated to a future date
+        billRequestDTO.setAmount(null);
+        billRequestDTO.setBillStatus(BillStatus.PAID);
+        billRequestDTO.setDueDate(LocalDate.now().plusDays(30)); // Ensure dueDate is also valid
+
+        // Act & Assert
+        client.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/bills")
+                        .queryParam("sendEmail", false)
+                        .queryParam("currency", "CAD")
+                        .build())
+                .cookie("Bearer", "JWTToken") // Ensure the token is valid
+                .body(Mono.just(billRequestDTO), BillRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Amount must be greater than 0");
+        verifyNoInteractions(billServiceClient);
+    }
+
+    @Test
+    void createBill_DateBeforeNow_ShouldThrowBadRequest() {
+        // Arrange
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setCustomerId("12345");
+        billRequestDTO.setVetId("67890");
+        billRequestDTO.setVisitType("Adoption");
+        billRequestDTO.setDate(LocalDate.now().minusDays(1)); // Reduce day by one
+        billRequestDTO.setAmount(new BigDecimal("600"));
+        billRequestDTO.setBillStatus(BillStatus.PAID);
+        billRequestDTO.setDueDate(LocalDate.now().plusDays(30)); // Ensure dueDate is also valid
+
+        // Act & Assert
+        client.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/bills")
+                        .queryParam("sendEmail", false)
+                        .queryParam("currency", "CAD")
+                        .build())
+                .cookie("Bearer", "JWTToken") // Ensure the token is valid
+                .body(Mono.just(billRequestDTO), BillRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Date must be today or after");
+        verifyNoInteractions(billServiceClient);
+    }
+
+    @Test
+    void createBill_StatusOVERDUE_ShouldThrowBadRequest() {
+        // Arrange
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setCustomerId("12345");
+        billRequestDTO.setVetId("67890");
+        billRequestDTO.setVisitType("Adoption");
+        billRequestDTO.setDate(LocalDate.now().plusDays(1)); // Reduce day by one
+        billRequestDTO.setAmount(new BigDecimal("600"));
+        billRequestDTO.setBillStatus(BillStatus.OVERDUE);
+        billRequestDTO.setDueDate(LocalDate.now().plusDays(30)); // Ensure dueDate is also valid
+
+        // Act & Assert
+        client.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/bills")
+                        .queryParam("sendEmail", false)
+                        .queryParam("currency", "CAD")
+                        .build())
+                .cookie("Bearer", "JWTToken") // Ensure the token is valid
+                .body(Mono.just(billRequestDTO), BillRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Bill must not be OVERDUE on creation");
+        verifyNoInteractions(billServiceClient);
+    }
+
+    @Test
+    void createBill_NullStatus_ShouldCreateBill() {
+        // Arrange
+        BillResponseDTO billResponseDTO = new BillResponseDTO();
+        billResponseDTO.setBillId("9");
+        billResponseDTO.setCustomerId("12345");
+        billResponseDTO.setVetId("67890");
+        billResponseDTO.setVisitType("Adoption");
+        billResponseDTO.setDate(LocalDate.now().plusDays(1)); // Updated to a future date
+        billResponseDTO.setAmount(new BigDecimal("600"));
+        billResponseDTO.setBillStatus(BillStatus.UNPAID);
+        billResponseDTO.setDueDate(LocalDate.now().plusDays(30)); // Ensure dueDate is also valid
+
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setCustomerId("12345");
+        billRequestDTO.setVetId("67890");
+        billRequestDTO.setVisitType("Adoption");
+        billRequestDTO.setDate(LocalDate.now().plusDays(1)); // Updated to a future date
+        billRequestDTO.setAmount(new BigDecimal("600"));
+        billRequestDTO.setBillStatus(null);
+        billRequestDTO.setDueDate(LocalDate.now().plusDays(30)); // Ensure dueDate is also valid
+
+        when(billServiceClient.createBill(any(BillRequestDTO.class), eq(false), eq("CAD"), eq("JWTToken")))
+                .thenReturn(Mono.just(billResponseDTO));
+
+        // Act & Assert
+        client.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/bills")
+                        .queryParam("sendEmail", false)
+                        .queryParam("currency", "CAD")
+                        .build())
+                .cookie("Bearer", "JWTToken") // Ensure the token is valid
+                .body(Mono.just(billRequestDTO), BillRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.billId").isEqualTo("9")
+                .jsonPath("$.customerId").isEqualTo("12345")
+                .jsonPath("$.vetId").isEqualTo("67890")
+                .jsonPath("$.visitType").isEqualTo("Adoption")
+                .jsonPath("$.date").isEqualTo(LocalDate.now().plusDays(1).toString()) // Match updated date
+                .jsonPath("$.amount").isEqualTo(600)
+                .jsonPath("$.billStatus").isEqualTo("UNPAID")
+                .jsonPath("$.dueDate").isEqualTo(LocalDate.now().plusDays(30).toString()); // Match updated dueDate
+
+        assertEquals(billResponseDTO.getBillId(), "9");
+    }
+
+    @Test
+    void createBill_NullDate_ShouldCreateBill() {
+        // Arrange
+        BillResponseDTO billResponseDTO = new BillResponseDTO();
+        billResponseDTO.setBillId("9");
+        billResponseDTO.setCustomerId("12345");
+        billResponseDTO.setVetId("67890");
+        billResponseDTO.setVisitType("Adoption");
+        billResponseDTO.setDate(LocalDate.now());
+        billResponseDTO.setAmount(new BigDecimal("600"));
+        billResponseDTO.setBillStatus(BillStatus.UNPAID);
+        billResponseDTO.setDueDate(LocalDate.now().plusDays(45)); // Ensure dueDate is also valid
+
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setCustomerId("12345");
+        billRequestDTO.setVetId("67890");
+        billRequestDTO.setVisitType("Adoption");
+        billRequestDTO.setDate(null); // Updated to a future date
+        billRequestDTO.setAmount(new BigDecimal("600"));
+        billRequestDTO.setBillStatus(BillStatus.UNPAID);
+        billRequestDTO.setDueDate(null); // Ensure dueDate is also valid
+
+        when(billServiceClient.createBill(any(BillRequestDTO.class), eq(false), eq("CAD"), eq("JWTToken")))
+                .thenReturn(Mono.just(billResponseDTO));
+
+        // Act & Assert
+        client.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/bills")
+                        .queryParam("sendEmail", false)
+                        .queryParam("currency", "CAD")
+                        .build())
+                .cookie("Bearer", "JWTToken") // Ensure the token is valid
+                .body(Mono.just(billRequestDTO), BillRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.billId").isEqualTo("9")
+                .jsonPath("$.customerId").isEqualTo("12345")
+                .jsonPath("$.vetId").isEqualTo("67890")
+                .jsonPath("$.visitType").isEqualTo("Adoption")
+                .jsonPath("$.date").isEqualTo(LocalDate.now().toString()) // Match updated date
+                .jsonPath("$.amount").isEqualTo(600)
+                .jsonPath("$.billStatus").isEqualTo("UNPAID")
+                .jsonPath("$.dueDate").isEqualTo(LocalDate.now().plusDays(45).toString()); // Match updated dueDate
+
+        assertEquals(billResponseDTO.getBillId(), "9");
+    }
+
+    @Test
+    void getBillsByMonth(){
+        int month = LocalDate.now().getMonthValue();
+        int year = LocalDate.now().getYear();
+
+        when(billServiceClient.getBillsByMonth(year, month))
+                .thenReturn(Flux.just(billresponse, billresponse2));
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(baseBillURL + "/month")
+                        .queryParam("year", year)
+                        .queryParam("month", month)
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .hasSize(2)
+                .contains(billresponse, billresponse2);
+
+        verify(billServiceClient, times(1))
+                .getBillsByMonth(year, month);
+    }
+
 }

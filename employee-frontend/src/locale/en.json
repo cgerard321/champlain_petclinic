@@ -1,0 +1,204 @@
+{
+  "locale": "en",
+  "translations": {
+    "login": {
+      "title": "Login",
+      "username": "Username or email",
+      "password": "Password",
+      "submit": "Sign in"
+    },
+    "navbar": {
+      "home": "Home",
+      "veterinarians": "Veterinarians",
+      "customers": "Customers",
+      "bills": "Bills",
+      "visits": "Visits",
+      "inventory": "Inventory",
+      "products": "Products",
+      "promos": "Promos",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
+    "settings": {
+      "title": "Settings",
+      "save": "Save",
+      "cancel": "Cancel",
+      "close": "Close settings",
+      "saved": "Changes saved",
+      "security": {
+        "title": "Security",
+        "account": {
+          "title": "Account",
+          "username": "Username",
+          "role": "Role"
+        },
+        "username": {
+          "title": "Change your username",
+          "label": "New username",
+          "preview": "You will sign in with",
+          "sameAsCurrent": "This username is the same as the current one",
+          "reserved": "This username is reserved",
+          "suggestions": "Suggestions",
+          "tryInstead": "Try instead",
+          "saved": "Username changed",
+          "saveFailed": "This username could not be saved. It may already be taken, try another one.",
+          "rules": {
+            "length": "3 to 30 characters",
+            "startsAlpha": "Starts with a letter",
+            "charset": "Only letters without accents, numbers or underscore",
+            "noSpaceNoAt": "No spaces or \"@\"",
+            "noTrailing": "Doesn't end with an underscore, and no two in a row"
+          }
+        }
+      },
+      "display": {
+        "title": "Display"
+      }
+    },
+    "role": {
+      "admin": "Administrator",
+      "vet": "Veterinarian",
+      "receptionist": "Receptionist",
+      "inventoryManager": "Inventory Manager",
+      "unknown": "Employee"
+    },
+    "notFound": {
+      "title": "Page Not Found",
+      "message": "The page you are looking for does not exist.",
+      "back": "Back to home"
+    },
+    "forbidden": {
+      "title": "Access Denied",
+      "message": "You do not have permission to access this page.",
+      "back": "Back to home"
+    },
+    "footer": {
+      "description": "Providing compassionate veterinary care to keep your pets healthy and happy.",
+      "contact": "Contact Us",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "copyright": "© 2026 Champlain Pet Clinic. All rights reserved."
+    },
+    "visit": {
+      "pages": {
+        "buttonName": "Show filters"
+      },
+      "components": {
+        "filterbutton": "Filter By"
+      }
+    },
+    "visits": {
+      "nextappointement": {
+        "title": "Next upcoming visit"
+      },
+      "showFilters": "Show filters",
+      "filterButton": "Filter By",
+      "hideFilters": "Hide filters",
+      "sidebarLabel": "Visit filters",
+      "statusMenuLabel": "Visit statuses",
+      "listLabel": "Visit list",
+      "title": "List of Visits",
+      "nextAppointmentTitle": "Next appointment",
+      "nextAppointmentLoading": "Loading next appointment...",
+      "nextAppointmentError": "Could not load the next appointment.",
+      "noUpcomingAppointment": "No upcoming appointments.",
+      "visitId": "Visit ID",
+      "veterinarianFullName": "Veterinarian full name",
+      "petName": "Pet name",
+      "description": "Description",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "status": "Status",
+      "statusScheduled": "Scheduled",
+      "statusCompleted": "Completed",
+      "statusCancelled": "Cancelled",
+      "statusConfirmed": "Confirmed",
+      "statusUpcoming": "Upcoming",
+      "statusArchived": "Archived",
+      "statusOutOfStatus": "Out of status",
+      "followUp": {
+        "actions": "Actions",
+        "button": "Schedule follow-up",
+        "title": "Schedule a follow-up visit",
+        "close": "Close",
+        "pet": "Pet",
+        "veterinarian": "Veterinarian",
+        "date": "Date",
+        "time": "Available time",
+        "description": "Description",
+        "loadingSlots": "Loading available times...",
+        "noSlots": "No available times for this date.",
+        "cancel": "Cancel",
+        "schedule": "Schedule",
+        "dateRequired": "Date is required",
+        "timeRequired": "Time is required",
+        "descriptionRequired": "Description is required",
+        "descriptionInvalid": "Description must contain text",
+        "slotsError": "Could not load available times.",
+        "scheduleError": "Could not schedule the follow-up.",
+        "confirmation": "The follow-up visit was scheduled."
+      }
+    },
+    "vets": {
+      "eyebrow": "Veterinary team",
+      "title": "Veterinarians",
+      "description": "The people behind every healthy pet.",
+      "directory": {
+        "heading": "Get to know your veterinary team.",
+        "description": "Explore veterinarian profiles and discover their areas of expertise.",
+        "sample_preview": "Sample profiles · Design preview",
+        "button": "Explore directory",
+        "preview_note": "Veterinarian directory coming soon.",
+        "layout_preview_note": "Explore the layout with fictional profiles."
+      },
+      "list": {
+        "back": "Back to veterinarians",
+        "title": "Veterinarian directory",
+        "description": "Explore our team's profiles, specialties, and working hours.",
+        "preview_title": "Preview · Fictional profiles",
+        "preview_description": "These examples demonstrate the layout. Contact details and working hours are fictional. Viewing and editing real profiles will be available later.",
+        "profiles_label": "Sample veterinarian profiles",
+        "empty": "No profiles to display."
+      },
+      "profile": {
+        "role": "Veterinarian",
+        "active": "Active profile",
+        "inactive": "Inactive profile",
+        "specialties": "Specialties",
+        "no_specialties": "No specialties provided.",
+        "about": "About",
+        "no_biography": "No biography provided.",
+        "contact": "Contact details",
+        "email": "Email",
+        "phone": "Phone",
+        "no_email": "Email not provided",
+        "no_phone": "Phone number not provided",
+        "hours": "Working hours",
+        "no_hours": "No working hours provided."
+      },
+      "preview": {
+        "general_medicine": "General medicine",
+        "preventive_care": "Preventive care",
+        "surgery": "Surgery",
+        "dentistry": "Dentistry",
+        "dermatology": "Dermatology",
+        "alex_biography": "Supports families with their pets' everyday care, from prevention to health checkups.",
+        "alex_days": "Monday, Wednesday, and Friday",
+        "alex_hours": "9 am – 5 pm",
+        "julie_biography": "Focuses on surgical and dental care, with particular attention to animals' comfort and recovery.",
+        "julie_days": "Tuesday and Thursday",
+        "julie_hours": "8 am – 4 pm",
+        "sam_biography": "Helps animals with skin conditions and supports their families with ongoing care."
+      },
+      "working_hours": {
+        "heading": "Working hours",
+        "description": "The team's weekly schedule, all in one place."
+      },
+      "coming_soon": "Coming soon",
+      "specialties": {
+        "heading": "Specialties",
+        "description": "Discover the clinic's different areas of care."
+      }
+    }
+  }
+}

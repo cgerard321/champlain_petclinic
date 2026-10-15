@@ -14,7 +14,7 @@ import java.util.Date;
 public class PetDTO {
 
     private String id;
-    private String ownerId;
+    private String customerId;
     private String name;
     private Date birthDate;
     private String petTypeId;

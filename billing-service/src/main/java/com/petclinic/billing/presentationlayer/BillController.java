@@ -4,7 +4,6 @@ import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -134,8 +133,8 @@ public class BillController {
             @RequestParam Optional<Integer> size,
             @RequestParam(required = false) String billId,
             @RequestParam(required = false) String customerId,
-            @RequestParam(required = false) String ownerFirstName,
-            @RequestParam(required = false) String ownerLastName,
+            @RequestParam(required = false) String customerFirstName,
+            @RequestParam(required = false) String customerLastName,
             @RequestParam(required = false) String visitType,
             @RequestParam(required = false) String vetId,
             @RequestParam(required = false) String vetFirstName,
@@ -158,8 +157,8 @@ public class BillController {
                 PageRequest.of(pageNumber, pageSize),
                 billId,
                 customerId,
-                ownerFirstName,
-                ownerLastName,
+                customerFirstName,
+                customerLastName,
                 visitType,
                 vetId,
                 vetFirstName,
@@ -172,8 +171,8 @@ public class BillController {
     public Flux<BillResponseDTO> getAllBillsStream(
             @RequestParam(required = false) String billId,
             @RequestParam(required = false) String customerId,
-            @RequestParam(required = false) String ownerFirstName,
-            @RequestParam(required = false) String ownerLastName,
+            @RequestParam(required = false) String customerFirstName,
+            @RequestParam(required = false) String customerLastName,
             @RequestParam(required = false) String visitType,
             @RequestParam(required = false) String vetId,
             @RequestParam(required = false) String vetFirstName,
@@ -182,8 +181,8 @@ public class BillController {
         return billService.getAllBillsStream(
                 billId,
                 customerId,
-                ownerFirstName,
-                ownerLastName,
+                customerFirstName,
+                customerLastName,
                 visitType,
                 vetId,
                 vetFirstName,
@@ -195,8 +194,8 @@ public class BillController {
     public Mono<Long> getNumberOfBillsWithFilters(
             @RequestParam(required = false) String billId,
             @RequestParam(required = false) String customerId,
-            @RequestParam(required = false) String ownerFirstName,
-            @RequestParam(required = false) String ownerLastName,
+            @RequestParam(required = false) String customerFirstName,
+            @RequestParam(required = false) String customerLastName,
             @RequestParam(required = false) String visitType,
             @RequestParam(required = false) String vetId,
             @RequestParam(required = false) String vetFirstName,
@@ -206,8 +205,8 @@ public class BillController {
         return billService.getNumberOfBillsWithFilters(
                 billId,
                 customerId,
-                ownerFirstName,
-                ownerLastName,
+                customerFirstName,
+                customerLastName,
                 visitType,
                 vetId,
                 vetFirstName,
@@ -217,9 +216,9 @@ public class BillController {
     }
 
 
-    @GetMapping(value = "/bills/owner/{ownerFirstName}/{ownerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllBillsByOwnerName(@PathVariable String ownerFirstName, @PathVariable String ownerLastName) {
-        return billService.getAllBillsByOwnerName(ownerFirstName, ownerLastName);
+    @GetMapping(value = "/bills/customer/{customerFirstName}/{customerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsByCustomerName(@PathVariable String customerFirstName, @PathVariable String customerLastName) {
+        return billService.getAllBillsByCustomerName(customerFirstName, customerLastName);
     }
 
     @GetMapping(value = "/bills/vet/{vetFirstName}/{vetLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

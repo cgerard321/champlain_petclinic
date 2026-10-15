@@ -1,0 +1,44 @@
+:host {
+  display: block;
+  box-sizing: border-box;
+  min-width: 0;
+  color: #1b382b;
+}
+
+h2 {
+  margin: 0;
+  padding: 24px 24px 12px;
+  color: #1b382b;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+mat-dialog-content {
+  padding: 8px 24px 20px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+mat-dialog-content p {
+  margin: 0 0 14px;
+}
+
+.archive-note {
+  padding: 12px 14px;
+  border: 1px solid #d9e7da;
+  border-radius: 8px;
+  background: #f4f9f4;
+  color: #456451;
+  font-size: 0.875rem;
+}
+
+mat-dialog-actions {
+  gap: 10px;
+  padding: 12px 24px 24px;
+}
+
+@media (width <= 480px) {
+  mat-dialog-actions {
+    flex-wrap: wrap;
+  }
+}

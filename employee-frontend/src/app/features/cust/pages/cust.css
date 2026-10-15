@@ -1,32 +1,292 @@
+:host {
+  --sage-50: #f7faf3;
+  --sage-100: #edf3e7;
+  --sage-400: #afc79a;
+  --forest-700: #244b3f;
+  --forest-800: #1c3d33;
+  --cream: #fffdf8;
+  --white: #fff;
+  --text-primary: #263832;
+  --text-secondary: #66766d;
+  --text-muted: #7d8982;
+  --border: rgb(36 75 63 / 14%);
+  --border-strong: rgb(36 75 63 / 22%);
+  --shadow-sm: 0 2px 6px rgb(28 61 51 / 6%), 0 1px 2px rgb(28 61 51 / 5%);
+
+  display: block;
+  min-height: 100%;
+}
+
 .customer-page {
-  padding: 24px;
+  max-width: 1400px;
+  min-height: calc(100vh - 94px);
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
+  color: var(--text-primary);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(199 217 178 / 28%), transparent 30rem),
+    radial-gradient(circle at 0% 100%, rgb(199 217 178 / 16%), transparent 28rem);
+}
+
+.customer-page h1 {
+  position: relative;
+  margin: 0 0 2rem;
+  padding-bottom: 1rem;
+  color: var(--forest-700);
+  font-size: clamp(1.8rem, 3vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+.customer-page h1::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 58px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--forest-700), var(--sage-400));
+  content: '';
+}
+
+.search-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 1.75rem;
+  padding: 1.4rem 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 100% 0%, rgb(199 217 178 / 22%), transparent 18rem),
+    linear-gradient(145deg, var(--white), var(--cream));
+  box-shadow: var(--shadow-sm);
+}
+
+.search-container label {
+  color: var(--forest-700);
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.search-container input {
+  width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 11px;
+  color: var(--text-primary);
+  background-color: var(--white);
+  font: inherit;
+  font-size: 0.95rem;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.search-container input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-container input:hover {
+  border-color: rgb(36 75 63 / 42%);
+}
+
+.search-container input:focus-visible {
+  border-color: var(--forest-700);
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(36 75 63 / 14%);
+}
+
+.table-container {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-top: 5px solid var(--forest-700);
+  border-radius: 20px;
+  background: linear-gradient(145deg, var(--white), var(--cream));
+  box-shadow: var(--shadow-sm);
+}
+
+table {
+  width: 100%;
+  min-width: 680px;
+  border-spacing: 0;
+  border-collapse: separate;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+caption {
+  padding: 1.25rem 1.5rem;
+  color: var(--text-secondary);
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+th {
+  color: var(--forest-700);
+  background: var(--sage-100);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+td {
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+
+td:first-child {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+tbody tr {
+  transition: background-color 160ms ease;
+}
+
+tbody tr:nth-child(even) {
+  background: rgb(247 250 243 / 65%);
+}
+
+tbody tr:hover,
+tbody tr:focus-within {
+  background: var(--sage-100);
+}
+
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+td button {
+  min-height: 40px;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  color: var(--forest-700);
+  background: var(--white);
+  font: inherit;
+  font-size: 0.87rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+td button:hover {
+  color: var(--white);
+  background: var(--forest-700);
+}
+
+td button:focus-visible {
+  outline: 3px solid rgb(36 75 63 / 22%);
+  outline-offset: 3px;
+}
+
+.no-customers-row,
+.no-customers-row:hover {
+  background: var(--sage-50);
+}
+
+.no-customers-row td {
+  padding: 0;
+  text-align: center;
+}
+
+.no-customers-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  min-height: 220px;
+  box-sizing: border-box;
+  padding: 2rem 1.5rem;
+  background: linear-gradient(145deg, var(--white), var(--sage-50));
+}
+
+.no-customers-state h2 {
+  margin: 0;
+  color: var(--forest-700);
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.no-customers-state p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.state-container,
+.customer-page > p[role] {
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  color: var(--text-secondary);
+  text-align: center;
+  background: linear-gradient(145deg, var(--white), var(--sage-50));
+  box-shadow: var(--shadow-sm);
 }
 
 .state-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 32px;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 240px;
 }
 
-.table-container {
-  overflow-x: auto;
+.state-container p {
+  margin: 0;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+.customer-page > p[role='alert'] {
+  border-color: rgb(154 61 50 / 25%);
+  color: #9a3d32;
 }
 
-th,
-td {
-  padding: 16px;
-  border-bottom: 1px solid #ddd;
-  text-align: left;
+@media (width <= 700px) {
+  .customer-page {
+    padding: 2rem 1rem 3rem;
+  }
+
+  .search-container {
+    padding: 1.1rem;
+    border-radius: 16px;
+  }
+
+  .table-container {
+    border-radius: 16px;
+  }
+
+  th,
+  td,
+  caption {
+    padding: 1rem;
+  }
 }
 
-caption {
-  padding: 12px;
-  text-align: left;
+@media (prefers-reduced-motion: reduce) {
+  .search-container input,
+  tbody tr,
+  td button {
+    transition: none;
+  }
 }

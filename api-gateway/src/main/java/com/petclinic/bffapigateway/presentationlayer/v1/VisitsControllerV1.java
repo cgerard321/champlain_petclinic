@@ -82,8 +82,16 @@ public class VisitsControllerV1 {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.CUST, Roles.VET})
     @PostMapping(value =
             "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
-        return visitsServiceClient.addVisit(visitRequestDTO)
+    public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTO,
+                                                           @CookieValue("Bearer") String jwtToken) {
+        return visitRequestDTO
+                .flatMap(request -> customersServiceClient.getPetByPetId(request.getPetId(), false)
+                        .map(pet -> {
+                            request.setOwnerId(pet.getCustomerId());
+                            request.setJwtToken(jwtToken);
+                            return request;
+                        }))
+                .flatMap(request -> visitsServiceClient.addVisit(Mono.just(request)))
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }

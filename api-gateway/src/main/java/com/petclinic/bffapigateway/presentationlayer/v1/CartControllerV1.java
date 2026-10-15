@@ -373,5 +373,27 @@ public class CartControllerV1 {
         ));
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @PutMapping("/{cartId}/shipping")
+    public Mono<ResponseEntity<CartResponseDTO>> updateShippingMethod(
+        @PathVariable String cartId,
+        @RequestBody(required = false) CartShippingRequestDTO request) {
+
+    String shippingMethod = request != null ? request.getShippingMethod() : null;
+
+    return cartServiceClient.updateShippingMethod(cartId, shippingMethod)
+        .map(ResponseEntity::ok)
+        .onErrorResume(InvalidInputException.class, e -> {
+            CartResponseDTO errorBody = new CartResponseDTO();
+            errorBody.setMessage(e.getMessage());
+            return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorBody));
+        })
+        .onErrorResume(e -> mapCartErrorWithMessage(e,
+            ErrorOptions.builder()
+                .includeBadRequestBodyMessage(true)
+                .invalidInputAsUnprocessable(true)
+                .build()
+        ));
+    }
 
 }

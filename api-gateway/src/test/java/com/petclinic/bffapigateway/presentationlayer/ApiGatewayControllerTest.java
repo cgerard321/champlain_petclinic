@@ -1147,22 +1147,22 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void getAllBillsByOwnerName() {
+    void getAllBillsByCustomerName() {
         // Arrange
-        String ownerFirstName = "John";
-        String ownerLastName = "Doe";
+        String customerFirstName = "John";
+        String customerLastName = "Doe";
 
         BillResponseDTO bill = new BillResponseDTO();
         bill.setBillId("1");
-        bill.setOwnerFirstName(ownerFirstName);
-        bill.setOwnerLastName(ownerLastName);
+        bill.setCustomerFirstName(customerFirstName);
+        bill.setCustomerLastName(customerLastName);
 
-        when(billServiceClient.getBillsByOwnerName(ownerFirstName, ownerLastName))
+        when(billServiceClient.getBillsByCustomerName(customerFirstName, customerLastName))
                 .thenReturn(Flux.just(bill));
 
         // Act & Assert
         client.get()
-                .uri("/api/gateway/bills/owner/" + ownerFirstName + "/" + ownerLastName)
+                .uri("/api/gateway/bills/customer/" + customerFirstName + "/" + customerLastName)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBodyList(BillResponseDTO.class)
@@ -1172,14 +1172,14 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    public void getBillsByOwnerId(){
+    public void getBillsByCustomerId(){
         BillResponseDTO bill = new BillResponseDTO();
         bill.setBillId(UUID.randomUUID().toString());
         bill.setCustomerId("1");
         bill.setAmount(new BigDecimal("499"));
         bill.setVisitType("Test");
 
-        when(billServiceClient.getBillsByOwnerId(bill.getCustomerId()))
+        when(billServiceClient.getBillsByCustomerId(bill.getCustomerId()))
                 .thenReturn(Flux.just(bill));
 
         client.get()

@@ -812,6 +812,47 @@ public class CartControllerV1UnitTest {
     }
 
     @Test
+    @DisplayName("PUT /api/gateway/carts/{cartId}/shipping - Should update shipping method")
+    void updateShippingMethod_shouldReturnUpdatedCart() {
+        String cartId = "cart-123";
+        CartResponseDTO response = buildCartResponseDTO();
+        response.setShippingMethod("EXPRESS");
+        response.setShippingCost(19.99);
+
+        when(cartServiceClient.updateShippingMethod(eq(cartId), eq("EXPRESS"))).thenReturn(Mono.just(response));
+
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/shipping")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new CartShippingRequestDTO("EXPRESS"))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseDTO.class)
+                .isEqualTo(response);
+
+        verify(cartServiceClient).updateShippingMethod(eq(cartId), eq("EXPRESS"));
+    }
+
+    @Test
+    @DisplayName("PUT /api/gateway/carts/{cartId}/shipping - Should return 422 for invalid method")
+    void updateShippingMethod_withInvalidInput_shouldReturnUnprocessableEntity() {
+        String cartId = "cart-123";
+        when(cartServiceClient.updateShippingMethod(eq(cartId), eq("OVERNIGHT")))
+                .thenReturn(Mono.error(new InvalidInputException("Invalid shipping method. Allowed values are PICKUP, STANDARD, EXPRESS")));
+
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/shipping")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new CartShippingRequestDTO("OVERNIGHT"))
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectBody(CartResponseDTO.class)
+                .value(body -> assertEquals("Invalid shipping method. Allowed values are PICKUP, STANDARD, EXPRESS", body.getMessage()));
+
+        verify(cartServiceClient).updateShippingMethod(eq(cartId), eq("OVERNIGHT"));
+    }
+
+    @Test
     @DisplayName("GET /api/gateway/carts/promos/validate/{promoCode} - Should return promo details")
     void validatePromo_shouldReturnOk() {
         String promoCode = "SAVE10";

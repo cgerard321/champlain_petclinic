@@ -15,4 +15,6 @@ public class RatingResponseModel {
     String customerId;
     String reviewerUsername;
     String reviewerPhoto;
+    long likeCount;
+    boolean likedByCurrentUser;
 }

@@ -1,21 +1,38 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal, TemplateRef, viewChild } from '@angular/core';
-import { FormField, form, min, required, submit } from '@angular/forms/signals';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
-import { SupplyImageEditor } from '@features/supplies/components/supply-image-editor/supply-image-editor';
-import { Supply } from '@features/supplies/models/supply';
+import { Supply, SupplyRequest } from '@features/supplies/models/supply';
 import { SupplyService } from '@features/supplies/services/supply-service';
+import { ALLOWED_IMAGE_TYPES, ImageAction } from '@shared/components/image-editor/image-editor';
+import { ModalForm } from '@shared/components/modal-form/modal-form';
+import {
+  ModalFormData,
+  ModalFormField,
+  ModalFormResult,
+} from '@shared/components/modal-form/modal-form-models';
 import { Table, TableColumn } from '@shared/components/table/table';
 import { Roles } from '@shared/models/roles';
 
+// The shape of the modal's form: the editable Supply fields plus the photo control.
+interface SupplyFormValue {
+  productName: string;
+  supplierName: string;
+  productDescription: string;
+  productPrice: number;
+  productQuantity: number;
+  productSalePrice: number;
+  expirationDate: string;
+  photo: ImageAction;
+}
+
 @Component({
-  imports: [CurrencyPipe, FormField, MatDialogModule, MatIconModule, Table, SupplyImageEditor],
+  imports: [CurrencyPipe, MatIconModule, Table],
   selector: 'app-supply',
   styleUrl: './supply-page.css',
   templateUrl: './supply-page.html',
@@ -25,32 +42,41 @@ export class SupplyPage {
   private readonly supplyService = inject(SupplyService);
   private readonly auth = inject(AuthState);
   private readonly dialog = inject(MatDialog);
-  private readonly deleteDialogTemplate = viewChild.required<TemplateRef<unknown>>('deleteDialog');
 
   protected readonly inventoryId = this.route.snapshot.paramMap.get('inventoryId');
 
   protected readonly supplies = signal<Supply[]>([]);
-  protected readonly filters = signal({ productName: '', productDescription: '', status: '' });
+  protected readonly filters = signal({
+    productName: '',
+    supplierName: '',
+    productDescription: '',
+    status: '',
+  });
   protected readonly hasActiveFilters = computed(() =>
     Object.values(this.filters()).some((value) => value.trim().length > 0),
   );
+
   protected readonly filteredSupplies = computed(() => {
-    const { productName, productDescription, status } = this.filters();
+    const { productName, supplierName, productDescription, status } = this.filters();
     return this.supplies().filter(
       (supply) =>
         supply.productName.toLowerCase().includes(productName.trim().toLowerCase()) &&
+        this.supplierLabel(supply).toLowerCase().includes(supplierName.trim().toLowerCase()) &&
         supply.productDescription.toLowerCase().includes(productDescription.trim().toLowerCase()) &&
-        (!status || supply.status === status),
+        (!status || this.effectiveStatus(supply) === status),
     );
   });
 
-  protected setFilter(field: 'productName' | 'productDescription' | 'status', event: Event): void {
+  protected setFilter(
+    field: 'productName' | 'supplierName' | 'productDescription' | 'status',
+    event: Event,
+  ): void {
     const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
     this.filters.update((filters) => ({ ...filters, [field]: value }));
   }
 
   protected clearFilters(): void {
-    this.filters.set({ productName: '', productDescription: '', status: '' });
+    this.filters.set({ productName: '', supplierName: '', productDescription: '', status: '' });
   }
 
   // Only the initial fetch replaces the table; refreshes keep existing rows visible.
@@ -61,81 +87,46 @@ export class SupplyPage {
   protected readonly deleteError = signal('');
   protected readonly downloadingPdf = signal(false);
   protected readonly downloadError = signal('');
-  protected readonly showAddForm = signal(false);
-  protected readonly editingSupplyId = signal<string | null>(null);
-  protected readonly newSupply = signal({
-    productName: '',
-    productDescription: '',
-    productPrice: 0,
-    productQuantity: 1,
-    productSalePrice: 0,
-  });
+  protected readonly consumingSupplyId = signal<string | null>(null);
 
   protected readonly nameCell = viewChild<TemplateRef<{ $implicit: Supply }>>('nameCell');
   protected readonly priceCell = viewChild<TemplateRef<{ $implicit: Supply }>>('priceCell');
   protected readonly statusCell = viewChild<TemplateRef<{ $implicit: Supply }>>('statusCell');
   protected readonly actionsCell = viewChild<TemplateRef<{ $implicit: Supply }>>('actionsCell');
-
+  protected readonly expirationCell =
+    viewChild<TemplateRef<{ $implicit: Supply }>>('expirationCell');
   protected readonly supplyRowId = (supply: Supply): string => supply.productId;
 
   // Formatting and actions stay here so the shared table has no supply-specific logic.
   protected readonly columns = computed<TableColumn<Supply>[]>(() => [
     { id: 'name', header: 'Name', template: this.nameCell() },
+    {
+      id: 'supplier',
+      header: 'Supplier',
+      value: (supply) => this.supplierLabel(supply),
+    },
     { id: 'description', header: 'Description', value: (supply) => supply.productDescription },
     { id: 'price', header: 'Cost Price', template: this.priceCell() },
     { id: 'quantity', header: 'Quantity', value: (supply) => supply.productQuantity },
+    { id: 'expiration', header: 'Expiration Date', template: this.expirationCell() },
     { id: 'status', header: 'Status', template: this.statusCell() },
-    ...(this.canManageSupplies()
+    ...(this.canManageSupplies() || this.canConsumeSupplies()
       ? [{ id: 'actions', header: 'Actions', template: this.actionsCell() }]
       : []),
   ]);
 
-  protected readonly selectedImage = signal<File | null>(null);
-  protected readonly currentImage = signal<string | null>(null);
-  protected readonly imageChanged = signal(false);
-
-  protected onImageChange(file: File | null): void {
-    this.selectedImage.set(file);
-    this.imageChanged.set(true);
+  private supplierLabel(supply: Supply): string {
+    return supply.supplierName?.trim() || 'Not recorded';
   }
-
-  protected readonly supplyForm = form(this.newSupply, (path) => {
-    required(path.productName, {
-      message: 'Name is required',
-    });
-
-    required(path.productDescription, {
-      message: 'Description is required',
-    });
-
-    required(path.productPrice, {
-      message: 'Cost price is required',
-    });
-
-    min(path.productPrice, 0.01, {
-      message: 'Cost price must be greater than 0',
-    });
-
-    required(path.productQuantity, {
-      message: 'Quantity is required',
-    });
-
-    min(path.productQuantity, 1, {
-      message: 'Quantity must be at least 1',
-    });
-
-    required(path.productSalePrice, {
-      message: 'Sale price is required',
-    });
-
-    min(path.productSalePrice, 0.01, {
-      message: 'Sale price must be greater than 0',
-    });
-  });
 
   protected readonly canManageSupplies = computed(() => {
     const roles = this.auth.roles();
     return roles.includes(Roles.admin) || roles.includes(Roles.inventoryManager);
+  });
+
+  protected readonly canConsumeSupplies = computed(() => {
+    const roles = this.auth.roles();
+    return roles.includes(Roles.vet);
   });
 
   constructor() {
@@ -163,78 +154,180 @@ export class SupplyPage {
     });
   }
 
-  protected addSupply(event: Event): void {
-    event.preventDefault();
-
-    if (this.addingSupply()) return;
-
-    void submit(this.supplyForm, async () => {
-      const inventoryId = this.inventoryId;
-
-      if (!inventoryId || !this.canManageSupplies()) return;
-
-      this.addingSupply.set(true);
-      this.addError.set('');
-
-      const editingId = this.editingSupplyId();
-
-      try {
-        const photo: {
-          photoData?: string;
-          photoType?: string | null;
-        } = {};
-
-        if (this.imageChanged()) {
-          const file = this.selectedImage();
-
-          // Empty Base64 decodes to an empty byte array: remove the photo.
-          photo.photoData = file ? await this.readPhoto(file) : '';
-          photo.photoType = file ? file.type : null;
-        }
-
-        const supply = { ...this.newSupply(), ...photo };
-
-        const request$ = editingId
-          ? this.supplyService.updateSupply(inventoryId, editingId, supply)
-          : this.supplyService.createSupply(inventoryId, supply);
-
-        await firstValueFrom(request$);
-
-        this.cancelAddForm();
-        this.loadSupplies();
-      } catch {
-        this.addError.set(
-          editingId ? 'Unable to update supply or photo.' : 'Unable to add supply or photo.',
-        );
-      } finally {
-        this.addingSupply.set(false);
-      }
-    });
-  }
-
-  protected editSupply(supply: Supply): void {
-    this.selectedImage.set(null);
+  protected openAddDialog(): void {
     if (!this.canManageSupplies()) {
       return;
     }
-    this.selectedImage.set(null);
-    this.imageChanged.set(false);
-    this.currentImage.set(this.supplyPhotoUrl(supply));
 
-    this.editingSupplyId.set(supply.productId);
+    void this.openSupplyDialog();
+  }
+
+  protected editSupply(supply: Supply): void {
+    if (!this.canManageSupplies()) {
+      return;
+    }
+
+    void this.openSupplyDialog(supply);
+  }
+
+  private supplyFields(supply?: Supply): readonly ModalFormField[] {
+    const currentImageUrl = supply ? this.supplyPhotoUrl(supply) : null;
+
+    return [
+      { key: 'productName', label: 'Name', type: 'string', required: true },
+      {
+        key: 'supplierName',
+        label: 'Supplier name',
+        type: 'string',
+        required: !supply || Boolean(supply.supplierName?.trim()),
+        validators: [
+          (control) =>
+            typeof control.value === 'string' &&
+            control.value.length > 0 &&
+            control.value.trim().length === 0
+              ? { whitespace: true }
+              : null,
+        ],
+        errorMessages: { whitespace: 'Supplier name cannot be only whitespace.' },
+      },
+      { key: 'productDescription', label: 'Description', type: 'string', required: true },
+      {
+        key: 'productPrice',
+        label: 'Cost Price',
+        type: 'number',
+        required: true,
+        min: 0.01,
+        step: 0.01,
+      },
+      {
+        key: 'productQuantity',
+        label: 'Quantity',
+        type: 'number',
+        required: true,
+        min: 1,
+        step: 1,
+      },
+      {
+        key: 'productSalePrice',
+        label: 'Sale Price',
+        type: 'number',
+        required: true,
+        min: 0.01,
+        step: 0.01,
+      },
+      {
+        key: 'expirationDate',
+        label: 'Expiration Date',
+        type: 'date',
+        // Only reject past expiry dates when creating new supplies
+        minDate: supply ? undefined : this.todayAsText(),
+        errorMessages: { minDate: 'Expiration date cannot be in the past.' },
+      },
+      { key: 'photo', label: 'Supply photo', type: 'image', currentImageUrl },
+    ];
+  }
+
+  private async openSupplyDialog(supply?: Supply): Promise<void> {
     this.addError.set('');
 
-    // reset() clears touched and dirty state from the previous edit as it loads this supply.
-    this.supplyForm().reset({
-      productName: supply.productName,
-      productDescription: supply.productDescription,
-      productPrice: supply.productPrice,
-      productQuantity: supply.productQuantity,
-      productSalePrice: supply.productSalePrice,
+    const dialogRef = this.dialog.open<
+      ModalForm<SupplyFormValue>,
+      ModalFormData<SupplyFormValue>,
+      ModalFormResult<SupplyFormValue>
+    >(ModalForm, {
+      data: {
+        title: supply ? 'Edit Supply' : 'Add Supply',
+        submitLabel: supply ? 'Save Changes' : 'Add Supply',
+        fields: this.supplyFields(supply),
+        initialValue: supply
+          ? {
+              productName: supply.productName,
+              supplierName: supply.supplierName ?? '',
+              productDescription: supply.productDescription,
+              productPrice: supply.productPrice,
+              productQuantity: supply.productQuantity,
+              productSalePrice: supply.productSalePrice,
+              expirationDate: supply.expirationDate ?? '',
+            }
+          : {
+              productName: '',
+              supplierName: '',
+              productDescription: '',
+              productPrice: 0,
+              productQuantity: 1,
+              productSalePrice: 0,
+              expirationDate: '',
+            },
+      },
+      ariaLabel: supply ? 'Edit supply' : 'Add supply',
+      width: '560px',
+      maxWidth: '95vw',
     });
 
-    this.showAddForm.set(true);
+    // The dialog closes with undefined when the user cancels.
+    const result = await firstValueFrom(dialogRef.afterClosed());
+
+    if (!result || !this.canManageSupplies()) {
+      return;
+    }
+
+    await this.saveSupply(result.value, supply?.productId ?? null);
   }
+
+  private async saveSupply(value: SupplyFormValue, editingId: string | null): Promise<void> {
+    const inventoryId = this.inventoryId;
+
+    if (!inventoryId || this.addingSupply()) {
+      return;
+    }
+
+    this.addingSupply.set(true);
+    this.addError.set('');
+
+    try {
+      const payload = await this.buildSupplyRequest(value);
+
+      const request$ = editingId
+        ? this.supplyService.updateSupply(inventoryId, editingId, payload)
+        : this.supplyService.createSupply(inventoryId, payload);
+
+      await firstValueFrom(request$);
+
+      this.loadSupplies();
+    } catch {
+      this.addError.set(
+        editingId ? 'Unable to update supply or photo.' : 'Unable to add supply or photo.',
+      );
+    } finally {
+      this.addingSupply.set(false);
+    }
+  }
+
+  protected consumeSupply(supply: Supply): void {
+    if (!this.canConsumeSupplies() || !this.inventoryId) {
+      return;
+    }
+
+    // Prevent consuming if quantity is already 0 or if the supply is expired
+    if (supply.productQuantity <= 0 || this.expirationState(supply) === 'expired') {
+      return;
+    }
+    this.deleteError.set('');
+
+    this.consumingSupplyId.set(supply.productId);
+
+    this.supplyService.consumeSupply(this.inventoryId, supply.productId).subscribe({
+      next: () => {
+        this.consumingSupplyId.set(null);
+        this.loadSupplies();
+      },
+      error: () => {
+        this.consumingSupplyId.set(null);
+        this.deleteError.set('Unable to consume supply.');
+      },
+    });
+  }
+
   protected deleteSupply(supply: Supply): void {
     if (!this.canManageSupplies()) {
       return;
@@ -249,13 +342,26 @@ export class SupplyPage {
       return;
     }
 
-    const dialogRef = this.dialog.open<unknown, Supply, boolean>(this.deleteDialogTemplate(), {
-      data: supply,
+    const dialogRef = this.dialog.open<
+      ModalForm<Record<string, never>>,
+      ModalFormData<Record<string, never>>,
+      ModalFormResult<Record<string, never>>
+    >(ModalForm, {
+      data: {
+        title: 'Delete Supply',
+        message: `Are you sure you want to delete ${supply.productName}?`,
+        fields: [],
+        initialValue: {},
+        submitLabel: 'Delete',
+        destructive: true,
+      },
       ariaLabel: 'Delete supply',
+      width: '440px',
+      maxWidth: '95vw',
     });
 
-    dialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed !== true || !this.canManageSupplies()) {
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result || !this.canManageSupplies()) {
         return;
       }
 
@@ -268,33 +374,6 @@ export class SupplyPage {
         },
       });
     });
-  }
-  protected openAddForm(): void {
-    if (!this.canManageSupplies()) {
-      return;
-    }
-
-    this.selectedImage.set(null);
-    this.imageChanged.set(false);
-    this.currentImage.set(null);
-
-    this.showAddForm.set(true);
-  }
-  protected cancelAddForm(): void {
-    this.selectedImage.set(null);
-    this.supplyForm().reset({
-      productName: '',
-      productDescription: '',
-      productPrice: 0,
-      productQuantity: 1,
-      productSalePrice: 0,
-    });
-    this.editingSupplyId.set(null);
-    this.addError.set('');
-    this.showAddForm.set(false);
-    this.selectedImage.set(null);
-    this.imageChanged.set(false);
-    this.currentImage.set(null);
   }
 
   protected downloadPdf(): void {
@@ -343,16 +422,58 @@ export class SupplyPage {
     return 'Unable to download PDF.';
   }
 
+  // ------ Helpers ------
+
+  // Supplies expiring within this many days are flagged as "expiring soon".
+  private readonly expiringSoonDays = 30;
+
+  protected effectiveStatus(supply: Supply): string {
+    if (this.expirationState(supply) === 'expired') {
+      return 'OUT_OF_STOCK';
+    }
+    return supply.status;
+  }
+
+  protected expirationState(supply: Supply): 'none' | 'expired' | 'soon' | 'ok' {
+    if (!supply.expirationDate) {
+      return 'none';
+    }
+
+    // Adding T00:00:00 makes the date local. Without it, "2026-10-20" is read as UTC,
+    // which is the evening of the 19th in Montreal and would be off by one day.
+    const expiration = new Date(`${supply.expirationDate}T00:00:00`);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const daysLeft = Math.round((expiration.getTime() - today.getTime()) / 86_400_000);
+
+    if (daysLeft < 0) {
+      return 'expired';
+    }
+
+    return daysLeft <= this.expiringSoonDays ? 'soon' : 'ok';
+  }
+
+  private todayAsText(): string {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+
+    return `${now.getFullYear()}-${month}-${day}`;
+  }
+
   protected formatStatus(status: string): string {
     return status.replaceAll('_', ' ');
   }
 
   protected supplyPhotoUrl(supply: Supply): string | null {
-    if (!supply.photoData || !['image/jpeg', 'image/png'].includes(supply.photoType ?? '')) {
+    const type = supply.photoType ?? '';
+
+    if (!supply.photoData || !(ALLOWED_IMAGE_TYPES as readonly string[]).includes(type)) {
       return null;
     }
 
-    return `data:${supply.photoType};base64,${supply.photoData}`;
+    return `data:${type};base64,${supply.photoData}`;
   }
 
   private readPhoto(file: File): Promise<string> {
@@ -374,5 +495,30 @@ export class SupplyPage {
       reader.onabort = () => reject(new Error('Photo reading cancelled.'));
       reader.readAsDataURL(file);
     });
+  }
+
+  private async buildSupplyRequest(value: SupplyFormValue): Promise<SupplyRequest> {
+    const { photo, expirationDate, supplierName, ...fields } = value;
+    const normalizedSupplierName = supplierName.trim();
+    const request: SupplyRequest = {
+      ...fields,
+      expirationDate: expirationDate || null,
+      ...(normalizedSupplierName ? { supplierName: normalizedSupplierName } : {}),
+    };
+
+    switch (photo.action) {
+      case 'replace':
+        request.photoData = await this.readPhoto(photo.file);
+        request.photoType = photo.file.type;
+        break;
+      case 'remove':
+        request.photoData = '';
+        request.photoType = null;
+        break;
+      case 'keep':
+        break; // Nothing changes in the backend
+    }
+
+    return request;
   }
 }
