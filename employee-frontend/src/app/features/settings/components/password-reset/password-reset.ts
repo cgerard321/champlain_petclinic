@@ -4,9 +4,16 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 
 import { SettingsAccount } from '@features/settings/services/settings-account';
+import {
+  SettingsFormState,
+  SettingsSectionForm,
+} from '@features/settings/services/settings-form-state';
+
+const SECTION_ID = 'password';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const COOLDOWN_SECONDS = 60;
+const COOLDOWN_SECONDS = 30;
+const COOLDOWN_STORAGE_KEY = 'settings.password.cooldownUntil';
 
 @Component({
   selector: 'app-password-reset',
@@ -14,8 +21,9 @@ const COOLDOWN_SECONDS = 60;
   templateUrl: './password-reset.html',
   styleUrl: './password-reset.css',
 })
-export class PasswordReset {
+export class PasswordReset implements SettingsSectionForm {
   private readonly account = inject(SettingsAccount);
+  private readonly formState = inject(SettingsFormState);
 
   protected readonly email = signal('');
 
@@ -28,10 +36,28 @@ export class PasswordReset {
     () => this.emailValid() && !this.sending() && this.cooldownRemaining() === 0,
   );
 
+  readonly isDirty = computed(() => this.email().trim().length > 0);
+  readonly canSave = computed(() => false);
+
   private intervalId: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.stopCooldown());
+    this.formState.register(SECTION_ID, this);
+    this.syncCooldown();
+
+    inject(DestroyRef).onDestroy(() => {
+      this.formState.unregister(SECTION_ID);
+      this.stopCooldown();
+    });
+  }
+
+  save(): void {
+    return;
+  }
+
+  cancel(): void {
+    this.email.set('');
+    this.notice.set('');
   }
 
   protected onType(value: string): void {
@@ -65,22 +91,46 @@ export class PasswordReset {
   }
 
   private startCooldown(): void {
-    this.stopCooldown();
-    this.cooldownRemaining.set(COOLDOWN_SECONDS);
+    this.writeCooldownUntil(Date.now() + COOLDOWN_SECONDS * 1000);
+    this.syncCooldown();
+  }
 
-    this.intervalId = setInterval(() => {
-      this.cooldownRemaining.update((seconds) => Math.max(0, seconds - 1));
+  private syncCooldown(): void {
+    const remaining = Math.max(0, Math.ceil((this.readCooldownUntil() - Date.now()) / 1000));
 
-      if (this.cooldownRemaining() === 0) {
-        this.stopCooldown();
-      }
-    }, 1000);
+    this.cooldownRemaining.set(remaining);
+
+    if (remaining === 0) {
+      this.stopCooldown();
+
+      return;
+    }
+
+    if (this.intervalId === null) {
+      this.intervalId = setInterval(() => this.syncCooldown(), 1000);
+    }
   }
 
   private stopCooldown(): void {
     if (this.intervalId !== null) {
       clearInterval(this.intervalId);
       this.intervalId = null;
+    }
+  }
+
+  private readCooldownUntil(): number {
+    try {
+      return Number(localStorage.getItem(COOLDOWN_STORAGE_KEY)) || 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  private writeCooldownUntil(value: number): void {
+    try {
+      localStorage.setItem(COOLDOWN_STORAGE_KEY, String(value));
+    } catch {
+      return;
     }
   }
 }
