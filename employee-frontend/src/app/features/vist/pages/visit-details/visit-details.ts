@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 
 import { Customer } from '@features/cust/models/customer.model';
+import { visitStatusLabel } from '@features/vist/models/status-label';
 import { VisitResponseModel } from '@features/vist/models/VisitResponseModel';
 import { VisitService } from '@features/vist/services/visit-service';
 
@@ -15,6 +16,7 @@ import { VisitService } from '@features/vist/services/visit-service';
   styleUrl: './visit-details.css',
 })
 export class VisitDetails implements OnInit {
+  readonly visitStatusLabel = visitStatusLabel;
   protected readonly labels = {
     back: $localize`:@@visits.details.back:Retour aux visites`,
     title: $localize`:@@visits.details.title:Détails de la visite`,

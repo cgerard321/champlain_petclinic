@@ -23,7 +23,7 @@
       {{ details.visitEndDate ? (details.visitEndDate | date: 'medium') : labels.notAvailable }}
     </p>
     <p>
-      <strong>{{ labels.status }}:</strong> {{ details.status }}
+      <strong>{{ labels.status }}:</strong> {{ visitStatusLabel(details.status) }}
     </p>
   </section>
 

@@ -30,9 +30,26 @@ describe('VisitDetails', () => {
   };
 
   const getVisitById = vi.fn();
+  const getPetById = vi.fn();
+  const getCustomerById = vi.fn();
 
   async function render(visitId = 'VIST-2303-1701'): Promise<ComponentFixture<VisitDetails>> {
     getVisitById.mockReturnValue(of(visit));
+    getPetById.mockReturnValue(
+      of({
+        id: 'pet-1',
+        name: 'Leo',
+        birthDate: '2020-01-01',
+        customerId: 'customer-1',
+      }),
+    );
+    getCustomerById.mockReturnValue(
+      of({
+        id: 'customer-1',
+        firstName: 'John',
+        lastName: 'Smith',
+      }),
+    );
 
     await TestBed.configureTestingModule({
       imports: [VisitDetails],
@@ -49,7 +66,11 @@ describe('VisitDetails', () => {
         },
         {
           provide: VisitService,
-          useValue: { getVisitById },
+          useValue: {
+            getVisitById,
+            getPetById,
+            getCustomerById,
+          },
         },
       ],
     }).compileComponents();
@@ -77,6 +98,8 @@ describe('VisitDetails', () => {
     const fixture = await render('');
 
     expect(getVisitById).not.toHaveBeenCalled();
-    expect(fixture.nativeElement.textContent).toContain('No visit ID was provided.');
+    expect(fixture.nativeElement.textContent).toContain(
+      'Aucun identifiant de visite n’a été fourni.',
+    );
   });
 });
