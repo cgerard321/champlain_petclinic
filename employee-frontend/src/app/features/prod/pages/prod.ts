@@ -2,6 +2,7 @@ import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -28,11 +29,13 @@ import { ProductThumbnail } from '@features/prod/components/product-thumbnail/pr
 import { ProductUpdateDialog } from '@features/prod/components/product-update-dialog/product-update-dialog';
 import { Product } from '@features/prod/models/product.model';
 import { ProductService } from '@features/prod/services/product.service';
+import { ReviewSettingsService } from '@features/prod/services/review-settings.service';
 import { Roles } from '@shared/models/roles';
 
 @Component({
   imports: [
     CurrencyPipe,
+    FormsModule,
     MatButtonModule,
     MatCardModule,
     MatDialogModule,
@@ -53,12 +56,19 @@ export class Prod implements OnInit {
   private readonly productSearch = new Subject<string>();
   private readonly reload = new Subject<void>();
   private readonly searchTerm = signal('');
+  private readonly reviewSettingsService = inject(ReviewSettingsService);
+
+  protected readonly isAdmin = computed(() => this.auth.roles().includes(Roles.admin));
 
   protected readonly products = signal<Product[]>([]);
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly deleteErrorMessage = signal<string | null>(null);
   protected readonly deletingProductId = signal<string | null>(null);
+  protected readonly reviewEditPeriodHours = signal(48);
+  protected readonly settingsMessage = signal<string | null>(null);
+  protected readonly settingsError = signal<string | null>(null);
+  protected readonly isSavingSettings = signal(false);
   protected readonly canManageProducts = computed(() => {
     const roles = this.auth.roles();
     return roles.includes(Roles.admin) || roles.includes(Roles.inventoryManager);
@@ -89,6 +99,50 @@ export class Prod implements OnInit {
       });
 
     this.loadProducts();
+
+    if (this.isAdmin()) {
+      this.loadReviewSettings();
+    }
+  }
+
+  protected setReviewEditPeriodHours(value: number | string | null): void {
+    const parsedValue = value === null || value === '' ? NaN : Number(value);
+    this.reviewEditPeriodHours.set(parsedValue);
+  }
+
+  protected loadReviewSettings(): void {
+    this.reviewSettingsService.getSettings().subscribe({
+      next: (settings) => {
+        this.reviewEditPeriodHours.set(settings.editPeriodHours);
+      },
+      error: () => {
+        this.settingsError.set('Could not load review settings.');
+      },
+    });
+  }
+
+  protected saveReviewSettings(): void {
+    const hours = Number(this.reviewEditPeriodHours());
+
+    if (!Number.isInteger(hours) || hours < 0) {
+      this.settingsError.set('The edit period must be at least zero or greater');
+      return;
+    }
+    this.isSavingSettings.set(true);
+    this.settingsMessage.set(null);
+    this.settingsError.set(null);
+
+    this.reviewSettingsService.updateSettings({ editPeriodHours: hours }).subscribe({
+      next: (settings) => {
+        this.reviewEditPeriodHours.set(settings.editPeriodHours);
+        this.settingsMessage.set('Review edit period saved.');
+        this.isSavingSettings.set(false);
+      },
+      error: () => {
+        this.settingsError.set('Could not save review settings.');
+        this.isSavingSettings.set(false);
+      },
+    });
   }
 
   protected searchProducts(productName: string): void {
