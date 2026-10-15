@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
@@ -58,6 +59,7 @@ public class BillServiceImpl implements BillService{
     @Override
     public Flux<BillResponseDTO> getAllBills() {
         return updateOverdueBills()
+                .thenMany(archiveBill())
                 .thenMany(billRepository.findAll())
                 .map(EntityDtoUtil::toBillResponseDto);
     }
@@ -116,6 +118,7 @@ public class BillServiceImpl implements BillService{
                 : billRepository.findAllByArchiveFalse();
 
         return updateOverdueBills()
+                .thenMany(archiveBill())
                 .thenMany(bills)
                 .filter(filterCriteria)
                 .skip((long) pageable.getPageNumber() * pageable.getPageSize())
@@ -144,6 +147,7 @@ public class BillServiceImpl implements BillService{
                         (vetLastName == null || bill.getVetLastName().equals(vetLastName));
 
         return updateOverdueBills()
+                .thenMany(archiveBill())
                 .thenMany(billRepository.findAll())
                 .filter(filterCriteria)
                 .map(EntityDtoUtil::toBillResponseDto);
@@ -490,6 +494,19 @@ public class BillServiceImpl implements BillService{
                     }
                     return Mono.just(bill);
                 });
+    }
+
+    //automated archiving checks every day at midnight
+    @Scheduled(cron = "0 0 0 * * *")
+    public void scheduleBillArchiving(){
+        log.info("Starting automatic bill archiving check");
+        archiveBill()
+                .then()
+                .doOnSuccess(unused ->
+                        log.info("Completed automatic bill archiving check"))
+                .doOnError(error ->
+                        log.error("Error during automatic bill archiving: {}", error.getMessage(), error))
+                .subscribe();
     }
 
     private Mail generateConfirmationEmail(UserDetails user){

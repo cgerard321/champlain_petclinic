@@ -97,8 +97,8 @@ public class BillServiceImplTest {
                 .vetId("vetId1")
                 .vetFirstName("vetFirstName1")
                 .vetLastName("vetLastName1")
-                .date(LocalDate.of(2024, 10, 1))
-                .dueDate(LocalDate.of(2024, 10, 30))
+                .date(LocalDate.now().minusMonths(2))
+                .dueDate(LocalDate.now().plusMonths(1))
                 .amount(new BigDecimal("100.00"))
                 .gstAmount(new BigDecimal("5.00"))
                 .qstAmount(new BigDecimal("9.98"))
@@ -114,8 +114,8 @@ public class BillServiceImplTest {
                 .vetId("vetId2")
                 .vetFirstName("vetFirstName2")
                 .vetLastName("vetLastName2")
-                .date(LocalDate.of(2024, 10, 1))
-                .dueDate(LocalDate.of(2024, 10, 30))
+                .date(LocalDate.now().minusMonths(2))
+                .dueDate(LocalDate.now().plusMonths(1))
                 .amount(new BigDecimal("150.00"))
                 .gstAmount(new BigDecimal("7.50"))
                 .qstAmount(new BigDecimal("14.96"))
@@ -131,8 +131,8 @@ public class BillServiceImplTest {
                 .vetId("vetId3")
                 .vetFirstName("vetFirstName3")
                 .vetLastName("vetLastName3")
-                .date(LocalDate.of(2024, 10, 1))
-                .dueDate(LocalDate.of(2024, 10, 30))
+                .date(LocalDate.now().minusMonths(2))
+                .dueDate(LocalDate.now().plusMonths(1))
                 .amount(new BigDecimal("200.00"))
                 .gstAmount(new BigDecimal("10.00"))
                 .qstAmount(new BigDecimal("19.95"))
@@ -209,6 +209,7 @@ public class BillServiceImplTest {
 
         when(repo.findAll()).thenReturn(Flux.just(bill1, bill2, bill3));
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
+        when(repo.findAllByArchiveFalse()).thenReturn(Flux.empty());
 
         Flux<BillResponseDTO> bills = billService.getAllBillsStream(
                 null, null, null, null, null, null, null, null);
@@ -231,6 +232,8 @@ public class BillServiceImplTest {
                 .thenReturn(Flux.empty());
         when(repo.findAll())
                 .thenReturn(Flux.just(matching, nonMatching));
+        when(repo.findAllByArchiveFalse())
+                .thenReturn(Flux.empty());
 
         StepVerifier.create(
                         billService.getAllBillsStream(
@@ -239,6 +242,7 @@ public class BillServiceImplTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
+
     @Test
     void getAllBillsStream_WithAllFiltersMatching_ReturnsMatchingBill() {
         Bill bill = buildBill();
@@ -257,6 +261,9 @@ public class BillServiceImplTest {
 
         when(repo.findAll())
                 .thenReturn(Flux.just(bill));
+
+        when(repo.findAllByArchiveFalse())
+                .thenReturn(Flux.empty());
 
         StepVerifier.create(
                         billService.getAllBillsStream(
@@ -1015,13 +1022,8 @@ public void testGenerateBillPdf_BillNotFound() {
 
     private Bill buildBill() {
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2022, Calendar.SEPTEMBER, 25);
-        LocalDate date = calendar.getTime().toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-
-        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 15);
+        LocalDate date = LocalDate.now().minusMonths(2);
+        LocalDate dueDate = LocalDate.now().plusMonths(1);
 
         return Bill.builder()
                 .id("Id")
@@ -1042,13 +1044,8 @@ public void testGenerateBillPdf_BillNotFound() {
 
     private Bill buildUnpaidBill() {
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2022, Calendar.SEPTEMBER, 25);
-        LocalDate date = calendar.getTime().toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-
-        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
+        LocalDate date = LocalDate.now().minusMonths(2);
+        LocalDate dueDate = LocalDate.now().plusMonths(1);
 
         return Bill.builder()
                 .id("Id")
@@ -1522,6 +1519,8 @@ public void testGenerateBillPdf_BillNotFound() {
                 .thenReturn(Flux.just(archivedBill));
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID))
                 .thenReturn(Flux.empty());
+        when(repo.findAllByArchiveFalse())
+                .thenReturn(Flux.empty());
 
         StepVerifier.create(billService.getAllBillsByPage(
                         PageRequest.of(0, 10),
@@ -1534,7 +1533,6 @@ public void testGenerateBillPdf_BillNotFound() {
 
         verify(repo).findAllByArchiveTrue();
         verify(repo, never()).findAll();
-        verify(repo, never()).findAllByArchiveFalse();
     }
 
     @Test
@@ -1576,6 +1574,8 @@ public void testGenerateBillPdf_BillNotFound() {
                 .thenReturn(Flux.just(otherBill, matchingBill));
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID))
                 .thenReturn(Flux.empty());
+        when(repo.findAllByArchiveFalse())
+                .thenReturn(Flux.empty());
 
         StepVerifier.create(billService.getAllBillsByPage(
                         PageRequest.of(0, 10),
@@ -1590,7 +1590,57 @@ public void testGenerateBillPdf_BillNotFound() {
 
         verify(repo).findAllByArchiveTrue();
         verify(repo, never()).findAll();
-        verify(repo, never()).findAllByArchiveFalse();
+    }
+
+    @Test
+    void archiveBill_ShouldArchiveOnlyOldPaidBills() {
+        // Arrange
+        Bill oldPaidBill = buildBill();
+        oldPaidBill.setBillId("bill-1");
+        oldPaidBill.setBillStatus(BillStatus.PAID);
+        oldPaidBill.setDate(LocalDate.now().minusYears(2));
+        oldPaidBill.setArchive(false);
+
+        Bill recentPaidBill = buildBill();
+        recentPaidBill.setBillId("bill-2");
+        recentPaidBill.setBillStatus(BillStatus.PAID);
+        recentPaidBill.setDate(LocalDate.now().minusMonths(6));
+        recentPaidBill.setArchive(false);
+
+        Bill oldUnpaidBill = buildBill();
+        oldUnpaidBill.setBillId("bill-3");
+        oldUnpaidBill.setBillStatus(BillStatus.UNPAID);
+        oldUnpaidBill.setDate(LocalDate.now().minusYears(2));
+        oldUnpaidBill.setArchive(false);
+
+        when(repo.findAllByArchiveFalse())
+                .thenReturn(Flux.just(
+                        oldPaidBill,
+                        recentPaidBill,
+                        oldUnpaidBill
+                ));
+
+        when(repo.save(any(Bill.class)))
+                .thenAnswer(invocation ->
+                        Mono.just(invocation.getArgument(0)));
+
+        // Act & Assert
+        StepVerifier.create(billService.archiveBill())
+                .expectNextMatches(bill ->
+                        bill.getBillId().equals("bill-1")
+                                && bill.getArchive())
+                .expectNextMatches(bill ->
+                        bill.getBillId().equals("bill-2")
+                                && !bill.getArchive())
+                .expectNextMatches(bill ->
+                        bill.getBillId().equals("bill-3")
+                                && !bill.getArchive())
+                .verifyComplete();
+
+        // Verify that only the old paid bill was saved
+        verify(repo).save(oldPaidBill);
+        verify(repo, never()).save(recentPaidBill);
+        verify(repo, never()).save(oldUnpaidBill);
     }
 
     @Test
