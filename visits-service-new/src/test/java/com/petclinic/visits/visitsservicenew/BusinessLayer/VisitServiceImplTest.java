@@ -6,6 +6,7 @@ import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.Role;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.CancellationRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.VetNoteRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.IdGenerator;
@@ -1061,5 +1062,61 @@ class VisitServiceImplTest {
         );
 
         verify(visitRepo, times(1)).save(visit);
+    }
+
+    @Test
+    void addVetNote_whenVisitIsCompleted_thenSaveNote() {
+        Visit visit = buildVisit("Vet note test");
+        visit.setStatus(Status.COMPLETED);
+        VisitResponseDTO response = buildVisitResponseDTO();
+        response.setVetNote("Keep giving the meds");
+
+        when(visitRepo.findByVisitId(visit.getVisitId())).thenReturn(Mono.just(visit));
+        when(visitRepo.save(visit)).thenReturn(Mono.just(visit));
+        when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(response));
+
+        StepVerifier.create(visitService.addVetNote(visit.getVisitId(),
+                        VetNoteRequestDTO.builder().vetNote("  Keep giving the meds  ").build()))
+                .expectNext(response)
+                .verifyComplete();
+
+        assertEquals("Keep giving the meds", visit.getVetNote());
+        verify(visitRepo, times(1)).save(visit);
+    }
+
+    @Test
+    void addVetNote_whenVisitIsNotCompleted_thenThrowBadRequest() {
+        Visit visit = buildVisit("Vet note test");
+
+        when(visitRepo.findByVisitId(visit.getVisitId())).thenReturn(Mono.just(visit));
+
+        StepVerifier.create(visitService.addVetNote(visit.getVisitId(),
+                        VetNoteRequestDTO.builder().vetNote("Keep giving the meds").build()))
+                .expectError(BadRequestException.class)
+                .verify();
+
+        verify(visitRepo, never()).save(any());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"   ", "ok", "  meds  "})
+    void addVetNote_whenNoteIsBlankOrTooShort_thenThrowBadRequest(String note) {
+        StepVerifier.create(visitService.addVetNote("visitId",
+                        VetNoteRequestDTO.builder().vetNote(note).build()))
+                .expectError(BadRequestException.class)
+                .verify();
+
+        verify(visitRepo, never()).findByVisitId(anyString());
+    }
+
+    @Test
+    void addVetNote_whenVisitDoesNotExist_thenThrowNotFound() {
+        when(visitRepo.findByVisitId("missing")).thenReturn(Mono.empty());
+
+        StepVerifier.create(visitService.addVetNote("missing",
+                        VetNoteRequestDTO.builder().vetNote("Keep giving the meds").build()))
+                .expectError(NotFoundException.class)
+                .verify();
     }
 }

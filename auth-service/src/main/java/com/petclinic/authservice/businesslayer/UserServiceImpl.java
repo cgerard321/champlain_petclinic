@@ -441,6 +441,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserPasswordLessDTO updateUserRole(String userId, RolesChangeRequestDTO roles, String token) {
+        if (!jwtService.getRolesFromToken(token).contains("ADMIN")) {
+            throw new ForbiddenException("Only administrators can change user roles");
+        }
+
         User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
 
         if (existingUser == null) {
