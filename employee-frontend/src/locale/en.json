@@ -21,7 +21,7 @@
     },
     "home": {
       "loadError": "Failed to load user information. Please try again later.",
-      "welcomeBack": "Welcome back",
+      "welcomeBack": "Welcome back, {$INTERPOLATION}!",
       "welcomeDefault": "Welcome to Champlain Petclinic",
       "badge": "EMPLOYEE PORTAL",
       "title": "Clinic Management Dashboard",
