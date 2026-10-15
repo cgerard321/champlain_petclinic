@@ -11,7 +11,6 @@
   --text-secondary: #66766d;
   --border: rgb(36 75 63 / 14%);
   --shadow-sm: 0 2px 6px rgb(28 61 51 / 6%), 0 1px 2px rgb(28 61 51 / 5%);
-
   display: block;
 }
 
@@ -42,6 +41,7 @@
   font-size: clamp(1.8rem, 3vw, 2.35rem);
   font-weight: 700;
   line-height: 1.15;
+  letter-spacing: -0.035em;
 }
 
 .page-header h1::after {
@@ -74,22 +74,11 @@
   font-weight: 600;
 }
 
-.status-badge.available {
-  background: #e8f5e9;
-  color: #1b5e20;
-}
+.status-badge.available { background: #e8f5e9; color: #1b5e20; }
+.status-badge.re-order, .expiration-badge.expiring-soon { background: #fff1cc; color: #765000; }
+.status-badge.out-of-stock, .expiration-badge.expired { background: #ffebee; color: #b71c1c; }
 
-.status-badge.re-order,
-.expiration-badge.expiring-soon {
-  background: #fff1cc;
-  color: #765000;
-}
-
-.status-badge.out-of-stock,
-.expiration-badge.expired {
-  background: #ffebee;
-  color: #b71c1c;
-}
+.no-expiration { color: var(--text-secondary); }
 
 .state-message {
   padding: 1.5rem;
@@ -100,9 +89,7 @@
 }
 
 .error-message,
-.field-error {
-  color: #b00020;
-}
+.field-error { color: #b00020; }
 
 .field-error {
   margin: -6px 0 0;
@@ -122,14 +109,42 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 180ms ease;
+  transition: background-color 180ms ease, color 160ms ease, border-color 160ms ease;
 }
 
 .add-supply-button {
   padding: 10px 18px;
   background: var(--forest-700);
+  color: #fff;
   font-size: 0.95rem;
 }
+
+.edit-button,
+.history-button {
+  padding: 7px 8px;
+  background: var(--forest-700);
+  color: #fff;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.consume-button {
+  padding: 10px 18px;
+  background: #1976d2;
+  color: #fff;
+  font-size: 0.875rem;
+}
+
+.delete-button {
+  padding: 7px 8px;
+  background: rgb(183 28 28 / 100%);
+  border: 1px solid rgb(142 0 0 / 100%);
+  color: #fff;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.delete-button:hover { background: rgb(142 0 0 / 100%); }
 
 .add-supply-button:hover,
 .edit-button:hover,
@@ -148,15 +163,11 @@
   outline-offset: 3px;
 }
 
-.add-supply-button:disabled {
+.add-supply-button:disabled,
+.download-pdf-button:disabled,
+.clear-filters-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-}
-
-.field-error {
-  margin: -6px 0 0;
-  color: #b00020;
-  font-size: 0.9rem;
 }
 
 .action-buttons {
@@ -167,67 +178,6 @@
   width: max-content;
 }
 
-.edit-button,
-.history-button,
-.delete-button {
-  padding: 7px 8px;
-  font-size: 0.75rem;
-  white-space: nowrap;
-}
-
-.consume-button {
-  padding: 10px 18px;
-}
-
-.add-supply-button,
-.edit-button,
-.history-button {
-  background: var(--forest-700);
-  color: #fff;
-  font-size: 0.875rem;
-}
-
-.consume-button {
-  background: #1976d2;
-  color: #fff;
-  font-size: 0.875rem;
-}
-
-.delete-button {
-  background: #b71c1c;
-  color: #fff;
-  font-size: 0.875rem;
-}
-
-.add-supply-button:hover,
-.edit-button:hover,
-.history-button:hover,
-.consume-button:hover {
-  background: var(--forest-800);
-}
-
-.delete-button:hover {
-  background: #8e0000;
-}
-
-.dialog-cancel-button,
-.download-pdf-button,
-.clear-filters-button,
-.mobile-actions-button {
-  padding: 10px 18px;
-  border: 1px solid var(--forest-700);
-  background: transparent;
-  color: var(--forest-700);
-  font-size: 0.875rem;
-}
-
-.dialog-cancel-button:hover,
-.download-pdf-button:hover:not(:disabled),
-.clear-filters-button:hover:not(:disabled) {
-  background: var(--sage-50);
-}
-
-.action-buttons,
 .header-actions {
   display: flex;
   flex-wrap: wrap;
@@ -235,10 +185,26 @@
   gap: 12px;
 }
 
+.mobile-actions-button { display: none; }
+
+.dialog-cancel-button {
+  padding: 10px 18px;
+  border: 1px solid var(--forest-700);
+  background: transparent;
+  color: var(--forest-700);
+  font-size: 0.875rem;
+}
+
+.dialog-cancel-button:hover { background: var(--sage-50); }
+
 .download-pdf-button {
   display: inline-flex;
   align-items: center;
   padding: 9px 10px;
+  border: 1px solid var(--forest-700);
+  background: transparent;
+  color: var(--forest-700);
+  font-size: 0.95rem;
 }
 
 .download-pdf-button mat-icon {
@@ -263,6 +229,8 @@
   margin-left: 8px;
   opacity: 1;
 }
+
+.download-pdf-button:hover:not(:disabled) { background: var(--sage-50); }
 
 .supply-details {
   display: flex;
@@ -291,6 +259,19 @@
   box-shadow: var(--shadow-sm);
 }
 
+.supply-filters::before {
+  position: absolute;
+  z-index: -1;
+  top: -75px;
+  right: -55px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: rgb(199 217 178 / 18%);
+  content: '';
+  pointer-events: none;
+}
+
 .filter-heading {
   display: flex;
   align-items: center;
@@ -304,6 +285,12 @@
   color: var(--forest-700);
   font-size: 1.1rem;
   font-weight: 700;
+}
+
+.filter-heading p {
+  margin: 0.3rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
 }
 
 .supply-filter-grid {
@@ -322,9 +309,7 @@
   font-weight: 650;
 }
 
-.filter-field > span {
-  color: var(--forest-700);
-}
+.filter-field > span { color: var(--forest-700); }
 
 .filter-field input,
 .filter-field select {
@@ -339,6 +324,14 @@
   background-color: var(--white);
   font: inherit;
   font-weight: 400;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.filter-field input::placeholder { color: var(--text-muted); }
+
+.filter-field input:hover,
+.filter-field select:hover:not(:disabled) {
+  border-color: rgb(36 75 63 / 42%);
 }
 
 .filter-field input:focus-visible,
@@ -364,11 +357,7 @@
   font-size: 0.87rem;
   font-weight: 700;
   cursor: pointer;
-  transition:
-    color 160ms ease,
-    background-color 160ms ease,
-    border-color 160ms ease,
-    opacity 160ms ease;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, opacity 160ms ease;
 }
 
 .clear-filters-button:hover:not(:disabled) {
@@ -382,62 +371,34 @@
   outline-offset: 3px;
 }
 
-.clear-filters-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
-.expiration-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.expiration-badge.expired {
-  background: #ffebee;
-  color: #b71c1c;
-}
-
-.expiration-badge.expiring-soon {
-  background: #fff1cc;
-  color: #765000;
-}
-
-.no-expiration {
-  color: var(--text-secondary);
-}
-
 @media (width <= 1100px) {
-  .desktop-action-button {
-    display: none;
-  }
-
-  .mobile-actions-button {
-    display: inline-block;
-  }
+  .desktop-action-button { display: none; }
+  .mobile-actions-button { display: inline-block; }
 }
 
 @media (width <= 850px) {
-  .supply-filter-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+  .supply-filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (width <= 700px) {
+  .supply-page { padding: 2rem 1rem 3rem; }
+  .page-header { flex-direction: column; align-items: stretch; }
 }
 
 @media (width <= 600px) {
-  .supply-filters {
-    padding: 1.1rem;
-    border-radius: 16px;
-  }
-
-  .supply-filter-grid {
-    grid-template-columns: 1fr;
-    gap: 0.85rem;
-  }
+  .supply-filters { padding: 1.1rem; border-radius: 16px; }
+  .supply-filter-grid { grid-template-columns: 1fr; gap: 0.85rem; }
+  .filter-heading { align-items: flex-start; }
 }
 
-/* Dark Mode Overrides */
+@media (width <= 420px) {
+  .filter-heading { flex-direction: column; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .download-label { transition: none; }
+}
+
 :host-context(.dark-mode) {
   --cream: var(--mat-sys-surface-container-highest);
   --white: var(--mat-sys-surface-container-highest);
@@ -450,28 +411,9 @@
   --text-secondary: #a3b8ac;
   --border: rgb(36 75 63 / 12%);
 
-  .supply-page {
-    background: none;
-  }
-
-  .state-message {
-    background: var(--mat-sys-surface);
-    border: none;
-    box-shadow: none;
-  }
-
-  .add-supply-button,
-  .edit-button,
-  .clear-filters-button {
-    color: #111;
-  }
-
-  .filter-field input,
-  .filter-field select {
-    border-color: var(--sage-400);
-  }
-
-  .filter-field select {
-    color: #7f958a;
-  }
+  .supply-page { background: none; }
+  .state-message { background: var(--mat-sys-surface); border: none; box-shadow: none; }
+  .add-supply-button, .edit-button, .clear-filters-button { color: #111; }
+  .filter-field input, .filter-field select { border-color: var(--sage-400); }
+  .filter-field select { color: #7f958a; }
 }

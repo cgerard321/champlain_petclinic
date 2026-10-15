@@ -1,29 +1,28 @@
 import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIcon } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 
-import { HasUnsavedChanges } from '@core/models/has-unsaved-changes';
 import { Display } from '@features/settings/components/display/display';
+import { HasUnsavedChanges } from '@core/models/has-unsaved-changes';
 import { PasswordReset } from '@features/settings/components/password-reset/password-reset';
 import { UsernameForm } from '@features/settings/components/username-form/username-form';
 import { SettingsFormState } from '@features/settings/services/settings-form-state';
 import { ThemeService } from '@features/settings/services/themeservice';
 
 type SettingsSection = 'security' | 'display';
-
 @Component({
   selector: 'app-settings',
   imports: [
     MatButtonModule,
     MatCardModule,
     MatSnackBarModule,
-    MatIconModule,
+    MatIcon,
     Display,
-    UsernameForm,
     PasswordReset,
+    UsernameForm
   ],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
@@ -35,7 +34,6 @@ export class Settings implements OnInit, HasUnsavedChanges {
   protected readonly themeService = inject(ThemeService);
 
   protected readonly activeSection = signal<SettingsSection>('security');
-
   private originalThemeState = false;
 
   ngOnInit(): void {
