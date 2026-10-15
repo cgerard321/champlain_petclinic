@@ -102,99 +102,117 @@
       }
 
       @if (canViewBills()) {
-        <div class="bill-filters">
-          <label>
-            Customer ID
-            <input
-              type="text"
-              [ngModel]="filters().customerId"
-              (ngModelChange)="updateFilter('customerId', $event)"
-            />
-          </label>
-
-          <label>
-            Customer name
-            <input
-              type="text"
-              [ngModel]="filters().customerName"
-              (ngModelChange)="updateFilter('customerName', $event)"
-            />
-          </label>
-
-          <label>
-            Veterinarian name
-            <input
-              type="text"
-              [ngModel]="filters().vetName"
-              (ngModelChange)="updateFilter('vetName', $event)"
-            />
-          </label>
-
-          <label>
-            Visit type
-            <select
-              [ngModel]="filters().visitType"
-              (ngModelChange)="updateFilter('visitType', $event)"
-            >
-              <option value="">All visit types</option>
-              @for (visitType of visitTypes(); track visitType) {
-                <option [value]="visitType">{{ visitType }}</option>
-              }
-            </select>
-          </label>
-
-          <label>
-            Status
-            <select [ngModel]="filters().status" (ngModelChange)="updateFilter('status', $event)">
-              <option value="">All statuses</option>
-              <option value="PAID">Paid</option>
-              <option value="UNPAID">Unpaid</option>
-              <option value="OVERDUE">Overdue</option>
-            </select>
-          </label>
-
-          <label>
-            Creation year
-            <input
-              #yearFilter
-              type="number"
-              min="1"
-              step="1"
-              [value]="filters().year"
-              (input)="updateFilter('year', yearFilter.value)"
-            />
-          </label>
-
-          <label>
-            Creation month
-            <select [ngModel]="filters().month" (ngModelChange)="updateFilter('month', $event)">
-              <option value="">All months</option>
-              <option value="1">January</option>
-              <option value="2">February</option>
-              <option value="3">March</option>
-              <option value="4">April</option>
-              <option value="5">May</option>
-              <option value="6">June</option>
-              <option value="7">July</option>
-              <option value="8">August</option>
-              <option value="9">September</option>
-              <option value="10">October</option>
-              <option value="11">November</option>
-              <option value="12">December</option>
-            </select>
-          </label>
-
-          <label>
-            Currency
-            <select [ngModel]="currency()" (ngModelChange)="setCurrency($event)">
-              <option value="CAD">CAD</option>
-              <option value="USD">USD</option>
-            </select>
-          </label>
-
-          <button class="bill-secondary-action" type="button" (click)="clearFilters()">
-            Clear Filters
+        <!-- The control is rendered only for admins. CSS shows it in phone portrait. -->
+        <div #filtersRegion class="bill-filters-region">
+          <button
+            type="button"
+            class="bill-mobile-filters-toggle"
+            aria-controls="bill-filter-panel"
+            [attr.aria-expanded]="filtersRegion.classList.contains('bill-filters-region--open')"
+            (click)="filtersRegion.classList.toggle('bill-filters-region--open')"
+          >
+            {{
+              filtersRegion.classList.contains('bill-filters-region--open')
+                ? 'Hide Filters'
+                : 'Show Filters'
+            }}
+            <span aria-hidden="true" class="bill-filter-chevron">▾</span>
           </button>
+
+          <div id="bill-filter-panel" class="bill-filters">
+            <label>
+              Customer ID
+              <input
+                type="text"
+                [ngModel]="filters().customerId"
+                (ngModelChange)="updateFilter('customerId', $event)"
+              />
+            </label>
+
+            <label>
+              Customer name
+              <input
+                type="text"
+                [ngModel]="filters().customerName"
+                (ngModelChange)="updateFilter('customerName', $event)"
+              />
+            </label>
+
+            <label>
+              Veterinarian name
+              <input
+                type="text"
+                [ngModel]="filters().vetName"
+                (ngModelChange)="updateFilter('vetName', $event)"
+              />
+            </label>
+
+            <label>
+              Visit type
+              <select
+                [ngModel]="filters().visitType"
+                (ngModelChange)="updateFilter('visitType', $event)"
+              >
+                <option value="">All visit types</option>
+                @for (visitType of visitTypes(); track visitType) {
+                  <option [value]="visitType">{{ visitType }}</option>
+                }
+              </select>
+            </label>
+
+            <label>
+              Status
+              <select [ngModel]="filters().status" (ngModelChange)="updateFilter('status', $event)">
+                <option value="">All statuses</option>
+                <option value="PAID">Paid</option>
+                <option value="UNPAID">Unpaid</option>
+                <option value="OVERDUE">Overdue</option>
+              </select>
+            </label>
+
+            <label>
+              Creation year
+              <input
+                #yearFilter
+                type="number"
+                min="1"
+                step="1"
+                [value]="filters().year"
+                (input)="updateFilter('year', yearFilter.value)"
+              />
+            </label>
+
+            <label>
+              Creation month
+              <select [ngModel]="filters().month" (ngModelChange)="updateFilter('month', $event)">
+                <option value="">All months</option>
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+              </select>
+            </label>
+
+            <label>
+              Currency
+              <select [ngModel]="currency()" (ngModelChange)="setCurrency($event)">
+                <option value="CAD">CAD</option>
+                <option value="USD">USD</option>
+              </select>
+            </label>
+
+            <button class="bill-secondary-action" type="button" (click)="clearFilters()">
+              Clear Filters
+            </button>
+          </div>
         </div>
       }
 
