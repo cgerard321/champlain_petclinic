@@ -1,4 +1,4 @@
-import { DecimalPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
@@ -45,7 +45,7 @@ interface SupplyFormValue {
 }
 
 @Component({
-  imports: [DecimalPipe, MatIconModule, MatMenuModule, Table],
+  imports: [CurrencyPipe, MatIconModule, MatMenuModule, Table],
   selector: 'app-supply',
   styleUrl: './supply-page.css',
   templateUrl: './supply-page.html',
@@ -244,7 +244,7 @@ export class SupplyPage {
     },
     {
       id: 'status',
-      header: $localize`:@@supply.fields.status:Statut`,
+      header: $localize`:@@supply.fields.status:État`,
       template: this.statusCell(),
     },
     ...(this.canManageSupplies() || this.canConsumeSupplies()

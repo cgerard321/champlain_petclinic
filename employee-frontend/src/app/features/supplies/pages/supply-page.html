@@ -46,7 +46,7 @@
     <div class="filter-heading">
       <div>
         <h2 i18n="@@supply.filters.heading">Trouver un article</h2>
-        <p i18n="@@supply.filters.help">Filtrer par nom, fournisseur, description ou statut.</p>
+        <p i18n="@@supply.filters.help">Filtrer par nom, fournisseur, description ou état.</p>
       </div>
       <button
         class="clear-filters-button"
@@ -89,9 +89,9 @@
         />
       </label>
       <label class="filter-field">
-        <span i18n="@@supply.fields.status">Statut</span>
+        <span i18n="@@supply.fields.status">État</span>
         <select [value]="filters().status" (change)="setFilter('status', $event)">
-          <option value="" i18n="@@supply.filters.allStatuses">Tous les statuts</option>
+          <option value="" i18n="@@supply.filters.allStatuses">Tous les états</option>
           <option value="AVAILABLE" i18n="@@supply.status.available">Disponible</option>
           <option value="RE_ORDER" i18n="@@supply.status.reOrder">À commander</option>
           <option value="OUT_OF_STOCK" i18n="@@supply.status.outOfStock">Rupture de stock</option>
@@ -143,7 +143,7 @@
 </ng-template>
 
 <ng-template #priceCell let-supply>
-  {{ supply.productPrice | number: '1.2-2' }}&nbsp;CAD
+  {{ supply.productPrice | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
 </ng-template>
 
 <ng-template #statusCell let-supply>
