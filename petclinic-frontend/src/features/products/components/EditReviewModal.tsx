@@ -55,7 +55,23 @@ const EditReviewModal = ({
       setError('');
       onClose();
     } catch (err) {
-      setError('updateFailed');
+      const responseError = err as {
+        response?: {
+          data?: {
+            message?: string;
+          };
+        };
+      };
+
+      if (
+        responseError.response?.data?.message ===
+        'This review is no longer editable'
+      ) {
+        setError('reviewEditPeriodEnded');
+      } else {
+        setError('updateFailed');
+      }
+
       console.error('Failed to update review:', err);
     }
   };
