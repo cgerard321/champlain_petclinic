@@ -1287,7 +1287,7 @@ public class VisitControllerUnitTest {
     private MockServerWebExchange exchangeForOwner(String userId) {
         MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(BASE_VISIT_URL));
         exchange.getAttributes().put("tokenValues",
-                TokenResponseDTO.builder().userId(userId).roles(List.of("OWNER")).build());
+                TokenResponseDTO.builder().userId(userId).roles(List.of("CUST")).build());
         return exchange;
     }
 

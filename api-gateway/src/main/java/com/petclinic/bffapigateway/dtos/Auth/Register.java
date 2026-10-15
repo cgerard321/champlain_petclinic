@@ -26,7 +26,7 @@ public class Register {
     private String email;
     private String username;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private final String defaultRole = Roles.OWNER.toString();
+    private final String defaultRole = Roles.CUST.toString();
     @PasswordStrengthCheck
     private String password;
     private CustomerRequestDTO owner;

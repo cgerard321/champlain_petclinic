@@ -54,7 +54,7 @@
 //    }
 //
 //
-//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER})
+//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.CUST})
 //    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 //    public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTO) {
 //        return visitsServiceClient.addVisit(visitRequestDTO)
@@ -241,7 +241,7 @@
 //        return visitsServiceClient.getAllArchivedVisits();
 //    }
 //
-//    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+//    @SecuredEndpoint(allowedRoles = {Roles.CUST})
 //    @DeleteMapping(value="/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
 //    public Mono<ResponseEntity<ReviewResponseDTO>> deleteReview(@PathVariable String reviewId) {
 //        return Mono.just(reviewId)

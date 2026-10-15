@@ -168,7 +168,7 @@ class ApiGatewayControllerTest {
         when(authServiceClient.validateToken(anyString()))
                 .thenReturn(Mono.just(ResponseEntity.ok(TokenResponseDTO.builder()
                         .userId("userId123")
-                        .roles(List.of("OWNER"))
+                        .roles(List.of("CUST"))
                         .token("bearer-token")
                         .build())));
         when(customersServiceClient.getCustomer("userId123", false))

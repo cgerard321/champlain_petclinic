@@ -29,19 +29,19 @@ public class CustomerCartController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST, Roles.ADMIN})
     @GetMapping("/{customerId}/cart")
     public Mono<ResponseEntity<CartResponseDTO>> getCartForCustomer(@PathVariable String customerId) {
         return mapToOkOrNotFound(cartServiceClient.getCartByCustomerId(customerId));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST, Roles.ADMIN})
     @GetMapping("/{customerId}/cart/recent-purchases")
     public Mono<ResponseEntity<List<CartProductResponseDTO>>> getRecentPurchasesForCustomer(@PathVariable String customerId) {
         return mapToOkOrNotFound(cartServiceClient.getRecentPurchasesByCustomerId(customerId));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST, Roles.ADMIN})
     @GetMapping("/{customerId}/cart/recommendation-purchases")
     public Mono<ResponseEntity<List<CartProductResponseDTO>>> getRecommendationPurchasesForCustomer(@PathVariable String customerId) {
         return mapToOkOrNotFound(cartServiceClient.getRecommendationPurchasesByCustomerId(customerId));
