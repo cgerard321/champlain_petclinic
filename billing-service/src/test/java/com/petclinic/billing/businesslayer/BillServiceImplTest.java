@@ -2838,5 +2838,106 @@ public void testGenerateBillPdf_BillNotFound() {
         assertEquals(expectedBody, sentMail.getBody(), "Email body should match the formatted receipt layout");
     }
 
+    @Test
+    void createBill_sendEmail_shouldSendReceiptEmailUSD() {
+        // Arrange
+        BillRequestDTO billDTO = new BillRequestDTO();
+        billDTO.setBillStatus(BillStatus.PAID);
+        billDTO.setVetId("vet-123");
+        billDTO.setCustomerId("customer-456");
+        billDTO.setAmount(new BigDecimal("100.00")); // required field per controller
+        billDTO.setDate(LocalDate.now());
+        billDTO.setDueDate(LocalDate.now().plusDays(30));
+
+        // Mock vet info
+        VetResponseDTO vetResponse = new VetResponseDTO();
+        vetResponse.setFirstName("John");
+        vetResponse.setLastName("Doe");
+        when(vetClient.getVetByVetId("vet-123")).thenReturn(Mono.just(vetResponse));
+
+        // Mock customer info
+        CustomerResponseDTO customerResponse = new CustomerResponseDTO();
+        customerResponse.setFirstName("Alice");
+        customerResponse.setLastName("Smith");
+        when(customerServiceClient.getCustomerByCustomerId("customer-456")).thenReturn(Mono.just(customerResponse));
+
+        // Mock user details (correct order for parameters)
+        UserDetails userDetails = UserDetails.builder()
+                .email("test@example.com")
+                .username("Alice Smith")
+                .userId("customer-456")
+                .build();
+        when(authClient.getUserById(eq("jwtToken"), eq("customer-456")))
+                .thenReturn(Mono.just(userDetails));
+
+        // Mock repo behavior
+        Bill billEntity = EntityDtoUtil.toBillEntity(billDTO);
+        billEntity.setBillId("generated-id");
+        billEntity.setVetFirstName("John");
+        billEntity.setVetLastName("Doe");
+        billEntity.setCustomerFirstName("Alice");
+        billEntity.setCustomerLastName("Smith");
+        billEntity.setAmount(new BigDecimal("100.00"));
+        billEntity.setInterest(BigDecimal.ZERO);
+        billEntity.setTaxedAmount(BigDecimal.ZERO);
+
+        when(repo.findById(anyString())).thenReturn(Mono.empty());
+        when(repo.findAllBillsByBillStatus(any())).thenReturn(Flux.empty());
+        when(repo.insert(any(Bill.class))).thenReturn(Mono.just(billEntity));
+
+        // Mock mail sending
+        ArgumentCaptor<Mail> mailCaptor = ArgumentCaptor.forClass(Mail.class);
+        when(mailService.sendMail(mailCaptor.capture()))
+                .thenReturn("Message sent to test@example.com");
+
+        billService = new BillServiceImpl(repo, vetClient, customerServiceClient, authClient, mailService);
+
+        // Act
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "jwtToken"))
+                .expectNextMatches(response ->
+                        response.getBillId().equals("generated-id") &&
+                                response.getVetFirstName().equals("John") &&
+                                response.getCustomerFirstName().equals("Alice") &&
+                                response.getBillStatus().equals(BillStatus.PAID) &&
+                                response.getDueDate() != null
+                )
+                .verifyComplete();
+
+        // Assert
+        Mail sentMail = mailCaptor.getValue();
+        assertEquals("test@example.com", sentMail.getEmailSendTo());
+        assertEquals("Pet Clinic - Payment Receipt", sentMail.getEmailTitle());
+
+        BigDecimal convertedAmount = FormatBillUtil.convertFromCad(billEntity.getAmount(), "USD");
+        BigDecimal convertedInterest = FormatBillUtil.convertFromCad(billEntity.getInterest(), "USD");
+        BigDecimal convertedTotal = FormatBillUtil.convertFromCad(billEntity.getAmount().add(billEntity.getInterest()), "USD");
+
+        // ✅ Dynamic expected email body
+        String expectedBody = String.format(
+                "Dear %s,<br><br>" +
+                        "Please find below the details of your payment receipt:<br><br>" +
+                        "--------------------------------------------<br>" +
+                        "Bill ID: %s<br>" +
+                        "Date: %s<br>" +
+                        "Subtotal: %s<br>" +
+                        "Interest: %s<br>" +
+                        "Total Due: %s<br>" +
+                        "--------------------------------------------<br><br>" +
+                        "Thank you for choosing Pet Clinic.<br><br>" +
+                        "Best regards,<br>" +
+                        "Pet Clinic Team",
+                userDetails.getUsername(),
+                billEntity.getBillId(),
+                billEntity.getDate(),
+                FormatBillUtil.formatCurrency(convertedAmount, "USD"),
+                FormatBillUtil.formatCurrency(convertedInterest, "USD"),
+                FormatBillUtil.formatCurrency(convertedTotal, "USD"
+                )
+        );
+
+        assertEquals(expectedBody, sentMail.getBody(), "Email body should match the formatted receipt layout");
+    }
+
+
 }
 
