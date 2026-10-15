@@ -246,6 +246,51 @@
         "description": "Discover the clinic's different areas of care."
       }
     },
+    "cust": {
+      "customerList": "Customer List",
+      "customerListLoading": "Loading customers...",
+      "noCustomers": "No customers registered.",
+      "searchCustomers": "Search customers",
+      "searchPlaceholder": "Search customer by name, Id, address, city or phone number",
+      "customerDetails": {
+        "title": "Registered customers and contact information",
+        "name": "Name",
+        "address": "Address",
+        "city": "City",
+        "phone": "Phone number",
+        "pets": "Pets"
+      },
+      "detailErrors": {
+        "notAvailable": "Not available"
+      },
+      "petsButton": "Registered Pets",
+      "noCustFound": "No customers found.",
+      "tryAgain": "Try a different name, ID, or phone number."
+    },
+    "pet": {
+      "petDetailsTitle": "Pet Details",
+      "petDetailsSubtitle": "Registered pets and their information",
+      "closeButton": "Close",
+      "loadingPets": "Loading pets...",
+      "noPetsFound": "No registered found for this customer.",
+      "petDetails": {
+        "pets": "Pets",
+        "species": "Species",
+        "age": "Age",
+        "years": "years",
+        "year": "year",
+        "weight": "Weight"
+      },
+      "types": {
+        "cat": "Cat",
+        "dog": "Dog",
+        "lizard": "Lizard",
+        "snake": "Snake",
+        "bird": "Bird",
+        "hamster": "Hamster",
+        "others": "Others"
+      }
+    },
     "modal": {
       "actions": { "cancel": "Cancel", "save": "Save" },
       "validation": {
