@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.CustomerResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
+import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -36,4 +37,15 @@ public class OwnerController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN})
+    @DeleteMapping(value = "/{customerId}/soft")
+    public Mono<ResponseEntity<Void>> softDeleteCustomer(@PathVariable String customerId) {
+        return Mono.just(customerId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new InvalidInputException("Provided customer id is invalid: " + customerId))))
+                .flatMap(customersServiceClient::softDeleteCustomer)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()));
+    }
+
 }

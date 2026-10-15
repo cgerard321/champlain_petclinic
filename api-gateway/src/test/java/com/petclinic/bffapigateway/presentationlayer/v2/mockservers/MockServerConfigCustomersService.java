@@ -109,6 +109,32 @@ public class MockServerConfigCustomersService {
                 );
     }
 
+    public void registerSoftDeleteCustomerEndpoint() {
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/customers/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a/soft")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(204)
+                );
+    }
+
+    public void registerSoftDeleteCustomerNotFoundEndpoint() {
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/customers/12345678-1234-1234-1234-123456789012/soft")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(404)
+                );
+    }
+
     public void registerGetCustomerByIdEndpoint() {
         String customerResponseJson = "{"
                 + "\"customerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\","
