@@ -19,6 +19,34 @@
       "settings": "Settings",
       "logout": "Logout"
     },
+    "home": {
+      "welcomeBack": "Welcome back",
+      "welcomeDefault": "Welcome to Champlain Petclinic",
+      "badge": "EMPLOYEE PORTAL",
+      "title": "Clinic Management Dashboard",
+      "description": "Manage appointments, oversee daily clinic operations, access patient medical records, and monitor inventory seamlessly in one central location!",
+      "viewVisits": "View Visits",
+      "browseProducts": "Browse Products",
+      "quickActions": {
+        "title": "Quick Actions",
+        "vetsTitle": "Veterinarians",
+        "vetsTag": "SCHEDULES & SPECIALTIES",
+        "vetsDescription": "Access vet profiles, assigned specialties, and daily availability calendars.",
+        "vetsFooter": "Active Staff",
+        "custTitle": "Customers & Owners",
+        "custTag": "CLIENT RECORDS",
+        "custDescription": "Register new clients, manage pet profiles, and update contact details.",
+        "custFooter": "Patient Database",
+        "billTitle": "Bills & Invoices",
+        "billTag": "FINANCIAL MANAGEMENT",
+        "billDescription": "Track pending payments, generate clinic invoices, and process billing.",
+        "billFooter": "Invoicing System",
+        "invtTitle": "Inventory & Stock",
+        "invtTag": "SUPPLY MONITORING",
+        "invtDescription": "Monitor pharmaceutical stocks, equipment levels, and restock alerts.",
+        "invtFooter": "Stock Control"
+      }
+    },
     "settings": {
       "title": "Settings",
       "save": "Save",
