@@ -1,3 +1,382 @@
-p {
-    max-width: 100%;
+.bill-page {
+  box-sizing: border-box;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+  color: #1b382b;
+}
+
+.bill-page * {
+  box-sizing: border-box;
+}
+
+.bill-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.bill-header__copy {
+  max-width: 680px;
+}
+
+.bill-eyebrow {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #2e523e;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bill-header h1 {
+  margin: 0 0 8px;
+  color: #1b382b;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.bill-header p,
+.bill-card__header p,
+.bill-empty-state p {
+  margin: 0;
+  color: #4a6353;
+  line-height: 1.6;
+}
+
+.bill-primary-action {
+  border: 1px solid #1b382b;
+  border-radius: 10px;
+  padding: 0.7rem 1.25rem;
+  background: #1b382b;
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.bill-primary-action:hover {
+  background: #2e523e;
+}
+
+.bill-primary-action:focus-visible {
+  outline: 3px solid #8dbb8f;
+  outline-offset: 3px;
+}
+
+.bill-card {
+  overflow: hidden;
+  border: 1px solid #e0eae0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 20px rgb(27 56 43 / 5%);
+}
+
+.bill-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px;
+}
+
+.bill-card__header h2 {
+  margin: 0 0 6px;
+  color: #1b382b;
+  font-size: 1.25rem;
+}
+
+/* Bill lookup */
+
+.bill-lookup {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.bill-lookup label {
+  font-weight: 600;
+}
+
+.bill-lookup__controls {
+  display: flex;
+  gap: 12px;
+}
+
+.bill-lookup input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #aebfb1;
+  border-radius: 10px;
+  font: inherit;
+}
+
+.bill-lookup input:focus-visible {
+  outline: 3px solid #8dbb8f;
+  outline-offset: 2px;
+}
+
+.bill-secondary-action {
+  padding: 10px 16px;
+  border: 1px solid #1b382b;
+  border-radius: 10px;
+  background: #fff;
+  color: #1b382b;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+}
+
+.bill-secondary-action:hover {
+  background: #e5efe4;
+}
+
+.bill-secondary-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Bill table */
+
+.bill-table-wrapper {
+  overflow-x: auto;
+  border-top: 1px solid #e0eae0;
+}
+
+.bill-table {
+  width: 100%;
+  min-width: 620px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.bill-table th {
+  padding: 14px 24px;
+  background: #f7faf7;
+  color: #4a6353;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.bill-table td {
+  padding: 14px 24px;
+  border-top: 1px solid #e0eae0;
+}
+
+.bill-table th:last-child,
+.bill-table td:last-child {
+  min-width: 190px;
+}
+
+/* Bill actions */
+
+.bill-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.bill-table-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 78px;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid #1b382b;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.bill-table-button--outline {
+  background: #fff;
+  color: #1b382b;
+}
+
+.bill-table-button--outline:hover {
+  background: #edf4ed;
+}
+
+.bill-table-button--primary {
+  background: #1b382b;
+  color: #fff;
+}
+
+.bill-table-button--primary:hover {
+  background: #315842;
+}
+
+.bill-table-button:focus-visible {
+  outline: 3px solid #8dbb8f;
+  outline-offset: 2px;
+}
+
+/* Empty and error states */
+
+.bill-empty-state {
+  border-top: 1px solid #e0eae0;
+  padding: 48px 24px;
+  background: #fbfdfb;
+  text-align: center;
+}
+
+.bill-empty-state h3 {
+  margin: 0 0 8px;
+  color: #1b382b;
+  font-size: 1.1rem;
+}
+
+.bill-details-error {
+  padding: 16px;
+  border: 1px solid #c96b6b;
+  border-radius: 10px;
+  color: #a52c2c;
+}
+
+.bill-permission-note {
+  margin: 16px 0;
+}
+
+/* Archive bills */
+
+.bill-archive-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-height: 42px;
+  padding: 10px 18px;
+  border: 1px solid #315842;
+  border-radius: 9px;
+  background: #315842;
+  color: #fff;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.bill-archive-action:hover:not(:disabled) {
+  background: #1b382b;
+}
+
+.bill-archive-action:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.bill-archive-action:focus-visible {
+  outline: 3px solid #8dbb8f;
+  outline-offset: 2px;
+}
+
+.bill-archive-message {
+  margin: 0 24px 16px;
+  padding: 12px 16px;
+  border-radius: 9px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.bill-archive-message--success {
+  border: 1px solid #b9dbc3;
+  background: #f0f8f1;
+  color: #205b36;
+}
+
+.bill-archive-message--error {
+  border: 1px solid #edb7b7;
+  background: #fff3f3;
+  color: #a12424;
+}
+
+.bill-archive-status {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: #e1f2e5;
+  color: #21613a;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.bill-archive-status--archived {
+  background-color: #e9edf0;
+  color: #52616b;
+}
+
+/* Active and archived bill views */
+
+.bill-view-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px 18px;
+}
+
+.bill-view-action {
+  min-height: 40px;
+  padding: 9px 20px;
+  border: 1px solid #315842;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #315842;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.bill-view-action:hover {
+  background-color: #edf5ee;
+}
+
+.bill-view-action--selected,
+.bill-view-action--selected:hover {
+  background-color: #315842;
+  color: #fff;
+}
+
+.bill-view-action:focus-visible {
+  outline: 3px solid #8dbb8f;
+  outline-offset: 2px;
+}
+
+/* Existing CPC-1913 styling */
+
+@media (width <= 640px) {
+  .bill-page {
+    padding: 24px 16px 32px;
+  }
+
+  .bill-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .bill-primary-action {
+    width: 100%;
+  }
+
+  .bill-card__header {
+    flex-direction: column;
+  }
 }

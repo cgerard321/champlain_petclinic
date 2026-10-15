@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterLink } from '@angular/router';
@@ -24,6 +25,7 @@ import {
   reduce,
   switchMap,
   toArray,
+  firstValueFrom,
 } from 'rxjs';
 
 import { isApiError, ApiError } from '@core/models/api-error';
@@ -31,9 +33,17 @@ import { AuthState } from '@core/services/auth-state';
 import {
   Inventory,
   InventoryFilters,
+  InventoryRequest,
   InventoryType,
 } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
+import { ModalForm } from '@shared/components/modal-form/modal-form';
+import {
+  ModalFormData,
+  ModalFormField,
+  ModalFormResult,
+} from '@shared/components/modal-form/modal-form-models';
+import { getInventoryPermissions } from '@shared/models/inventory-permissions';
 import { Roles } from '@shared/models/roles';
 
 // These values are the starter records created by the inventory service. Keep the API values
@@ -71,6 +81,11 @@ const starterInventoryDescriptions: Record<string, string> = {
   'Supplies for treating and dressing wounds': $localize`:@@inventory.data.descriptions.woundCareSupplies:Fournitures pour traiter et panser les plaies`,
   'Kits for testing infectious diseases in pets': $localize`:@@inventory.data.descriptions.infectiousDiseaseTestKits:Trousses pour dépister les maladies infectieuses chez les animaux`,
 };
+interface InventoryFormValue {
+  inventoryName: string;
+  inventoryType: string;
+  inventoryDescription: string;
+}
 
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
@@ -83,11 +98,18 @@ export class InventoryList implements OnInit, OnDestroy {
   private readonly auth = inject(AuthState);
   private readonly destroyRef = inject(DestroyRef);
   private readonly locale = inject(LOCALE_ID);
+  private readonly dialog = inject(MatDialog);
 
   private inventorySubscription?: Subscription;
   private inventoryTypesSubscription?: Subscription;
   private readonly quantitySubscriptions = new Set<Subscription>();
   private filterTimer?: ReturnType<typeof setTimeout>;
+
+  protected readonly can = computed(() => getInventoryPermissions(this.auth.roles()));
+
+  protected readonly canManageFavorites = computed(
+    () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager),
+  );
 
   protected readonly currentPage = signal(0);
   protected readonly pageSize = 8;
@@ -105,6 +127,8 @@ export class InventoryList implements OnInit, OnDestroy {
   protected readonly allTypesLabel = $localize`:@@inventory.filters.allTypes:Tous les types`;
   protected readonly noFavoritesLabel = $localize`:@@inventory.empty.noFavorites:Aucun inventaire favori trouvé.`;
   protected readonly emptyLabel = $localize`:@@inventory.empty.message:Aucun inventaire à afficher pour le moment.`;
+  protected readonly savingLabel = $localize`:@@inventory.actions.saving:Enregistrement…`;
+  protected readonly addInventoryLabel = $localize`:@@inventory.actions.add:Ajouter un inventaire`;
 
   protected readonly filters = signal<InventoryFilters>({
     inventoryName: '',
@@ -113,13 +137,17 @@ export class InventoryList implements OnInit, OnDestroy {
     importantOnly: false,
   });
 
-  protected readonly canManageFavorites = computed(
-    () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager),
-  );
-
   protected readonly isSavingAnyFavorite = computed(() =>
     Object.values(this.savingFavorites()).some(Boolean),
   );
+
+  protected get inventoryTypesDropdown(): string[] {
+    return this.inventoryTypes().map((t) => t.type);
+  }
+
+  protected readonly savingInventory = signal(false);
+  protected readonly formError = signal<string | null>(null);
+  protected readonly deleteError = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadInventories();
@@ -350,6 +378,167 @@ export class InventoryList implements OnInit, OnDestroy {
       });
   }
 
+  protected openAddDialog(): void {
+    if (!this.can().canCreateInventory) return;
+
+    void this.openInventoryDialog();
+  }
+
+  protected editInventory(inventory: Inventory): void {
+    if (!this.can().canUpdateInventory) return;
+
+    void this.openInventoryDialog(inventory);
+  }
+
+  private inventoryFields(): readonly ModalFormField[] {
+    return [
+      {
+        key: 'inventoryName',
+        label: $localize`:@@inventory.fields.name:Nom de l'inventaire`,
+        type: 'string',
+        required: true,
+        errorMessages: { required: $localize`:@@inventory.validation.nameRequired:Le nom de l'inventaire est requis.` },
+      },
+      {
+        key: 'inventoryType',
+        label: $localize`:@@inventory.fields.type:Type d'inventaire`,
+        type: 'enum',
+        required: true,
+        errorMessages: { required: $localize`:@@inventory.validation.typeRequired:Le type d'inventaire est requis.` },
+        options: this.inventoryTypes().map((type) => ({ value: type.type, label: this.localizedInventoryType(type.type) })),
+      },
+      {
+        key: 'inventoryDescription',
+        label: $localize`:@@inventory.fields.description:Description`,
+        type: 'string',
+        required: true,
+        errorMessages: { required: $localize`:@@inventory.validation.descriptionRequired:La description est requise.` },
+      },
+    ];
+  }
+
+  private async openInventoryDialog(inventory?: Inventory): Promise<void> {
+    this.formError.set(null);
+
+    if (this.inventoryTypesLoading() || this.inventoryTypes().length === 0) {
+      this.formError.set(
+        this.inventoryTypesError() ?? $localize`:@@inventory.errors.typesLoading:Les types d'inventaire sont encore en chargement. Réessayez dans un instant.`,
+      );
+      return;
+    }
+
+    const dialogRef = this.dialog.open<
+      ModalForm<InventoryFormValue>,
+      ModalFormData<InventoryFormValue>,
+      ModalFormResult<InventoryFormValue>
+    >(ModalForm, {
+      data: {
+        title: inventory ? $localize`:@@inventory.actions.editTitle:Modifier l'inventaire` : $localize`:@@inventory.actions.add:Ajouter un inventaire`,
+        submitLabel: inventory ? $localize`:@@inventory.actions.saveChanges:Enregistrer les modifications` : $localize`:@@inventory.actions.add:Ajouter un inventaire`,
+        cancelLabel: $localize`:@@inventory.actions.cancel:Annuler`,
+        fields: this.inventoryFields(),
+        initialValue: inventory
+          ? {
+              inventoryName: this.localizedInventoryName(inventory.inventoryName),
+              inventoryType: inventory.inventoryType,
+              inventoryDescription: this.localizedInventoryDescription(inventory.inventoryDescription),
+            }
+          : { inventoryName: '', inventoryType: '', inventoryDescription: '' },
+      },
+      ariaLabel: inventory ? $localize`:@@inventory.actions.editTitle:Modifier l'inventaire` : $localize`:@@inventory.actions.add:Ajouter un inventaire`,
+      width: '480px',
+      maxWidth: '95vw',
+    });
+
+    // The dialog closes with undefined when the user cancels.
+    const result = await firstValueFrom(dialogRef.afterClosed());
+
+    const allowed = inventory ? this.can().canUpdateInventory : this.can().canCreateInventory;
+
+    if (!result || !allowed) return;
+
+    await this.saveInventory(result.value, inventory ?? null);
+  }
+
+  private async saveInventory(value: InventoryFormValue, editingInventory: Inventory | null): Promise<void> {
+    if (this.savingInventory()) return;
+
+    const editingId = editingInventory?.inventoryId ?? null;
+    this.savingInventory.set(true);
+    this.formError.set(null);
+
+    try {
+      const body = this.toInventoryRequest(value, editingInventory);
+
+      await firstValueFrom(
+        editingId
+          ? this.inventoryService.updateInventory(editingId, body)
+          : this.inventoryService.createInventory(body),
+      );
+
+      this.loadInventories(this.currentPage());
+    } catch {
+      this.formError.set(editingId ? $localize`:@@inventory.errors.update:Impossible de modifier l'inventaire.` : $localize`:@@inventory.errors.create:Impossible de créer l'inventaire.`);
+    } finally {
+      this.savingInventory.set(false);
+    }
+  }
+
+  private toInventoryRequest(value: InventoryFormValue, original: Inventory | null): InventoryRequest {
+    return {
+      inventoryName:
+        original && value.inventoryName === this.localizedInventoryName(original.inventoryName)
+          ? original.inventoryName
+          : value.inventoryName,
+      inventoryType: value.inventoryType,
+      inventoryDescription:
+        original &&
+        value.inventoryDescription === this.localizedInventoryDescription(original.inventoryDescription)
+          ? original.inventoryDescription
+          : value.inventoryDescription,
+    };
+  }
+
+  protected deleteInventoryAction(inventory: Inventory): void {
+    if (!this.can().canDeleteInventory) return;
+
+    this.deleteError.set(null);
+
+    const dialogRef = this.dialog.open<
+      ModalForm<Record<string, never>>,
+      ModalFormData<Record<string, never>>,
+      ModalFormResult<Record<string, never>>
+    >(ModalForm, {
+      data: {
+          title: $localize`:@@inventory.actions.deleteTitle:Supprimer l'inventaire`,
+          message: $localize`:@@inventory.actions.deleteConfirm:Voulez-vous vraiment supprimer ${this.localizedInventoryName(inventory.inventoryName)}:name: ?`,
+        fields: [],
+        initialValue: {},
+          submitLabel: $localize`:@@inventory.actions.delete:Supprimer`,
+          cancelLabel: $localize`:@@inventory.actions.cancel:Annuler`,
+        destructive: true,
+      },
+        ariaLabel: $localize`:@@inventory.actions.deleteTitle:Supprimer l'inventaire`,
+      width: '440px',
+      maxWidth: '95vw',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result || !this.can().canDeleteInventory) return;
+
+      this.inventoryService.deleteInventory(inventory.inventoryId).subscribe({
+        next: () => {
+          this.inventories.update((current) =>
+            current.filter((inv) => inv.inventoryId !== inventory.inventoryId),
+          );
+        },
+        error: () => {
+          this.deleteError.set($localize`:@@inventory.errors.delete:Impossible de supprimer l'inventaire.`);
+        },
+      });
+    });
+  }
+
   private loadInventoryTypes(): void {
     this.inventoryTypesLoading.set(true);
     this.inventoryTypesError.set(null);
@@ -398,6 +587,11 @@ export class InventoryList implements OnInit, OnDestroy {
   }
 
   private loadInventories(page = this.currentPage()): void {
+    if (!this.can().hasAnyAccess) {
+      this.isLoading.set(false);
+      return;
+    }
+
     const requestedPage = page;
 
     this.inventorySubscription?.unsubscribe();

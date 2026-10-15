@@ -114,7 +114,10 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                             existingProduct.setProductQuantity(requestDTO.getProductQuantity());
                                             existingProduct.setProductSalePrice(requestDTO.getProductSalePrice());
                                             existingProduct.setLastUpdatedAt(LocalDateTime.now());
-
+                                            if (requestDTO.getSupplierName() != null) {
+                                                existingProduct.setSupplierName(normalizeSupplierName(requestDTO.getSupplierName()));
+                                            }
+                                            existingProduct.setExpirationDate(requestDTO.getExpirationDate());
                                             // Set Status based on the product quantity
 //                                            if (existingProduct.getProductQuantity() == 0) {
 //                                                existingProduct.setStatus(Status.OUT_OF_STOCK);
@@ -623,6 +626,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                     }
                                 validatePhoto(requestDTO);
                                 Product product = EntityDTOUtil.toProductEntity(requestDTO);
+                                product.setSupplierName(normalizeSupplierName(requestDTO.getSupplierName()));
+
                                 if (product.getPhotoData() != null && product.getPhotoData().length == 0) {
                                     product.setPhotoData(null);
                                     product.setPhotoType(null);
@@ -630,6 +635,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                 product.setInventoryId(inventoryId);
                                 product.setProductId(EntityDTOUtil.generateUUID());
                                 product.setLastUpdatedAt(LocalDateTime.now());
+                                product.setExpirationDate(requestDTO.getExpirationDate());
                                 return productRepository.save(product)
                                         .map(EntityDTOUtil::toProductResponseDTO);
                             });
@@ -767,6 +773,20 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                     }
                 });
     }
+
+    private String normalizeSupplierName(String supplierName) {
+        if(supplierName == null) {
+            return null; // Allow older clients to create supplies without this new field.
+        }
+
+        String normalized = supplierName.strip();
+        if (normalized.isEmpty()) {
+            throw new InvalidInputException("Supplier name cannot be empty.");
+        }
+        return normalized;
+    }
+
+
 
     private void validatePhoto(ProductRequestDTO requestDTO) {
         byte[] data = requestDTO.getPhotoData();

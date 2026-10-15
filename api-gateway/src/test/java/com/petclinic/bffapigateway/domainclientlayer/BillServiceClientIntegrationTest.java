@@ -133,18 +133,18 @@ class BillServiceClientIntegrationTest {
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(mapper.writeValueAsString(billResponseDTO)).addHeader("Content-Type", "application/json"));
 
-        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByOwnerId("1");
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByCustomerId("1");
         StepVerifier.create(billResponseDTOMono)
                 .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getCustomerId().equals("1"))
                 .verifyComplete();
     }
 
     @Test
-    void getBillsByOwnerName() throws Exception {
+    void getBillsByCustomerName() throws Exception {
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(mapper.writeValueAsString(billResponseDTO)).addHeader("Content-Type", "application/json"));
 
-        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByOwnerName("Joe", "Nuts");
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByCustomerName("Joe", "Nuts");
         StepVerifier.create(billResponseDTOMono)
                 .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getCustomerId().equals("1"))
                 .verifyComplete();
@@ -439,7 +439,7 @@ class BillServiceClientIntegrationTest {
     void getBillsByInvalidCustomerId() {
         server.enqueue(new MockResponse().setResponseCode(400));
 
-        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByOwnerId("invalidCustomerId");
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByCustomerId("invalidCustomerId");
 
         StepVerifier.create(billResponseDTOMono)
                 .expectError(WebClientResponseException.BadRequest.class)
@@ -568,8 +568,8 @@ class BillServiceClientIntegrationTest {
         assertTrue(request.getPath().contains("/bills/stream"));
         assertTrue(request.getPath().contains("billId=1"));
         assertTrue(request.getPath().contains("customerId=123"));
-        assertTrue(request.getPath().contains("ownerFirstName=John"));
-        assertTrue(request.getPath().contains("ownerLastName=Doe"));
+        assertTrue(request.getPath().contains("customerFirstName=John"));
+        assertTrue(request.getPath().contains("customerLastName=Doe"));
         assertTrue(request.getPath().contains("visitType=Check%20up"));
         assertTrue(request.getPath().contains("vetId=456"));
         assertTrue(request.getPath().contains("vetFirstName=Jane"));
@@ -639,8 +639,8 @@ class BillServiceClientIntegrationTest {
         assertTrue(request.getPath().contains("/bills/stream"));
         assertTrue(request.getPath().contains("billId=1"));
         assertTrue(request.getPath().contains("customerId=123"));
-        assertTrue(request.getPath().contains("ownerFirstName=John"));
-        assertTrue(request.getPath().contains("ownerLastName=Doe"));
+        assertTrue(request.getPath().contains("customerFirstName=John"));
+        assertTrue(request.getPath().contains("customerLastName=Doe"));
         assertTrue(request.getPath().contains("visitType=Checkup"));
         assertTrue(request.getPath().contains("vetId=456"));
         assertTrue(request.getPath().contains("vetFirstName=Jane"));
@@ -1154,8 +1154,8 @@ class BillServiceClientIntegrationTest {
         assertTrue(request.getPath().contains("/bills-filtered-count"));
         assertTrue(request.getPath().contains("billId=1"));
         assertTrue(request.getPath().contains("customerId=123"));
-        assertTrue(request.getPath().contains("ownerFirstName=John"));
-        assertTrue(request.getPath().contains("ownerLastName=Doe"));
+        assertTrue(request.getPath().contains("customerFirstName=John"));
+        assertTrue(request.getPath().contains("customerLastName=Doe"));
         assertTrue(request.getPath().contains("visitType=Checkup"));
         assertTrue(request.getPath().contains("vetId=456"));
         assertTrue(request.getPath().contains("vetFirstName=Jane"));
@@ -1183,7 +1183,7 @@ class BillServiceClientIntegrationTest {
         assertEquals("GET", request.getMethod());
         assertTrue(request.getPath().contains("/bills-filtered-count"));
         assertTrue(request.getPath().contains("customerId=123"));
-        assertTrue(request.getPath().contains("ownerLastName=Doe"));
+        assertTrue(request.getPath().contains("customerLastName=Doe"));
         assertFalse(request.getPath().contains("billId="));
         assertFalse(request.getPath().contains("visitType="));
     }

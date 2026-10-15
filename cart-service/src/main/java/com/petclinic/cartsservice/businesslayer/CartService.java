@@ -39,5 +39,6 @@ public interface CartService {
 
     Mono<CartResponseModel> applyPromoToCart(String cartId, Double promoPercent);
 
+    Mono<Void> deleteCartByCustomerId(String customerId);
 }
 

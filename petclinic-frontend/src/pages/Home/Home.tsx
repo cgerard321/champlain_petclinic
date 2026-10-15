@@ -8,38 +8,45 @@ import { Container, Row, Col, Card, Button, Accordion } from 'react-bootstrap';
 import ServiceCard from '@/features/home/components/ServiceCard';
 import VetCard from '@/features/home/components/VetCard';
 import useFeaturedVets from '@/features/home/hooks/useFeaturedVets';
-import { FAQ_ITEMS } from '@/features/faq/data/FaqItems';
+// import { FAQ_ITEMS, formattedHours } from '@/features/faq/data/FaqItems';
+import { FAQ_ITEMS, formatHours } from '@/features/faq/data/FaqItems';
 import type { FaqItem } from '@/features/faq/models/FaqItem';
 
 import { Reveal } from '@/shared/components';
 import { clinic } from '@/shared/content';
 
 import './Home.css';
+import { useTranslation } from 'react-i18next';
 
 export default function Home(): JSX.Element {
   const navigate = useNavigate();
+  const { t } = useTranslation('home');
 
   const { vets, photos, tagsByVet, loading, error } = useFeaturedVets(3);
 
   const highlights = useMemo(
     () => [
       {
+        id: 'rating',
         icon: '\uD83C\uDF1F',
-        title: '4.9/5 average rating',
-        label: 'from pet parents',
+        title: t('highlights.rating.title'),
+        label: t('highlights.rating.label'),
       },
+
       {
+        id: 'team',
         icon: '\uD83D\uDC69\u200D\u2695\uFE0F',
-        title: 'Experienced team',
-        label: 'Board-certified vets',
+        title: t('highlights.team.title'),
+        label: t('highlights.team.label'),
       },
       {
+        id: 'sameDay',
         icon: '\u23F0',
-        title: 'Same-day appointments',
-        label: 'When available',
+        title: t('highlights.sameDay.title'),
+        label: t('highlights.sameDay.label'),
       },
     ],
-    []
+    [t]
   );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -62,16 +69,12 @@ export default function Home(): JSX.Element {
         <div className="intro-inner">
           <Reveal delay={80}>
             <h1 className="intro-title">
-              Welcome to <span>Champlain Pet Clinic</span> 🐾
+              {t('intro.welcome')}
+              <span>{t('intro.clinicName')}</span> 🐾
             </h1>
           </Reveal>
           <Reveal delay={240}>
-            <p className="intro-sub">
-              At Champlain Pet Clinic, we offer a wide range of services to
-              ensure the health and well-being of your beloved pets. Our
-              experienced veterinarians and staff are dedicated to providing the
-              best care possible.
-            </p>
+            <p className="intro-sub">{t('clinicDescription')}</p>
           </Reveal>
           <Reveal delay={500}>
             <div className="intro-ctas">
@@ -79,10 +82,10 @@ export default function Home(): JSX.Element {
                 variant="primary"
                 onClick={() => navigate('/customer/visits')}
               >
-                Book Appointment
+                {t('bookAppointment')}
               </Button>
               <Button variant="light" onClick={() => navigate('/contact')}>
-                Contact Us
+                {t('contactUs')}
               </Button>
             </div>
           </Reveal>
@@ -92,11 +95,14 @@ export default function Home(): JSX.Element {
       {/* Center content */}
       <Container className="py-4">
         {/* Reviews & Info or something like that. Extra info? */}
-        <section className="home-section mb-2" aria-label="Highlights">
+        <section
+          className="home-section mb-2"
+          aria-label={t('highlights.ariaLabel')}
+        >
           <Reveal delay={500}>
             <Row xs={1} md={3} className="g-1">
               {highlights.map(h => (
-                <Col key={h.title}>
+                <Col key={h.id}>
                   <Card className="shadow-soft stat-card stat-compact h-100">
                     <Card.Body className="d-flex align-items-center gap-2 p-0">
                       <div className="stat-icon">{h.icon}</div>
@@ -113,17 +119,21 @@ export default function Home(): JSX.Element {
         </section>
 
         {/* Services at a glance */}
-        <section className="home-section" aria-label="Services">
+        <section className="home-section" aria-label={t('services.ariaLabel')}>
           <Reveal delay={500}>
             <h2 className="section-title text-center mb-2">
-              Services at a Glance
+              {t('services.title')}
             </h2>
           </Reveal>
           <Row xs={1} sm={2} md={3} className="g-2">
             {clinic.services.map((s, i) => (
-              <Col key={s.title}>
+              <Col key={s.id}>
                 <Reveal delay={i * 80 + 500}>
-                  <ServiceCard icon={s.icon} title={s.title} desc={s.desc} />
+                  <ServiceCard
+                    icon={s.icon}
+                    title={t(`services.items.${s.id}.title`)}
+                    desc={t(`services.items.${s.id}.desc`)}
+                  />
                 </Reveal>
               </Col>
             ))}
@@ -131,9 +141,12 @@ export default function Home(): JSX.Element {
         </section>
 
         {/* Featured veterinarians */}
-        <section className="home-section" aria-label="Featured veterinarians">
+        <section
+          className="home-section"
+          aria-label={t('featuredVets.ariaLabel')}
+        >
           <h2 className="section-title text-center mb-2">
-            Featured Veterinarians
+            {t('featuredVets.title')}
           </h2>
           <Row xs={1} md={3} className="g-2">
             {vets.map((v, i) => (
@@ -152,16 +165,27 @@ export default function Home(): JSX.Element {
         </section>
 
         {/* FAQ */}
-        <section id="faq" className="home-section" aria-label="FAQ">
-          <h2 className="section-title text-center mb-3">FAQ</h2>
+        <section
+          id="faq"
+          className="home-section"
+          aria-label={t('faq.ariaLabel')}
+        >
+          <h2 className="section-title text-center mb-3">{t('faq.title')}</h2>
           <Row className="justify-content-center">
             <Col lg={8}>
               <Reveal delay={80}>
                 <Accordion alwaysOpen defaultActiveKey={HOME_FAQ[0]?.id}>
                   {HOME_FAQ.map(item => (
                     <Accordion.Item eventKey={item.id} key={item.id}>
-                      <Accordion.Header>{item.question}</Accordion.Header>
-                      <Accordion.Body>{item.answer}</Accordion.Body>
+                      <Accordion.Header>
+                        {t(`items.${item.id}.question`, { ns: 'faq' })}
+                      </Accordion.Header>
+                      <Accordion.Body>
+                        {t(`items.${item.id}.answer`, {
+                          ns: 'faq',
+                          hours: formatHours(t),
+                        })}
+                      </Accordion.Body>
                     </Accordion.Item>
                   ))}
                 </Accordion>
@@ -173,7 +197,7 @@ export default function Home(): JSX.Element {
               variant="outline-secondary"
               onClick={() => navigate('/faq')}
             >
-              View all FAQs
+              {t('faq.button')}
             </Button>
           </div>
         </section>
@@ -182,14 +206,14 @@ export default function Home(): JSX.Element {
         <section
           id="contact"
           className="home-section cta-band"
-          aria-label="Contact"
+          aria-label={t('contactInfo.ariaLabel')}
         >
           <Row className="align-items-center g-3">
             <Col lg>
               <Reveal delay={80}>
-                <h3 className="mb-1">Have questions or need help?</h3>
+                <h3 className="mb-1">{t('contactInfo.hasQuestion')}</h3>
                 <p className="text-muted mb-0">
-                  Our team is just a message away.
+                  {t('contactInfo.messageAway')}
                 </p>
               </Reveal>
             </Col>
@@ -200,13 +224,13 @@ export default function Home(): JSX.Element {
                   variant="outline-secondary"
                   onClick={() => navigate('/contact')}
                 >
-                  Contact Us
+                  {t('contactInfo.buttonContact')}
                 </Button>
                 <Button
                   variant="primary"
                   onClick={() => navigate('/customer/visits')}
                 >
-                  Book Appointment
+                  {t('contactInfo.buttonBook')}
                 </Button>
               </Reveal>
             </Col>
