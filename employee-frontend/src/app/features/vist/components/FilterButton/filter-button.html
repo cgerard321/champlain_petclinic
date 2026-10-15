@@ -1,0 +1,34 @@
+<div class="filter-dropdown">
+  <button
+    class="filter-button"
+    type="button"
+    aria-controls="visit-status-menu"
+    [attr.aria-expanded]="isMenuOpen()"
+    (click)="toggleMenu()"
+    i18n="@@visits.filterButton"
+  >
+    Filtrer Par
+  </button>
+
+  @if (isMenuOpen()) {
+    <ul
+      class="filter-dropdown__menu"
+      id="visit-status-menu"
+      aria-label="Statuts de visite"
+      i18n-aria-label="@@visits.statusMenuLabel"
+    >
+      @for (status of statuses; track status) {
+        <li>
+          <label class="filter-dropdown__option">
+            <input
+              type="checkbox"
+              [checked]="selectedStatuses().includes(status)"
+              (change)="toggleStatus(status)"
+            />
+            <span>{{ statusLabel(status) }}</span>
+          </label>
+        </li>
+      }
+    </ul>
+  }
+</div>

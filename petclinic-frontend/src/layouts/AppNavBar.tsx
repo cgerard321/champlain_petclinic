@@ -203,11 +203,6 @@ export function NavBar(): JSX.Element {
                     </NavDropdown.Item>
                   </NavDropdown>
                 )}
-                {(isInventoryManager || isAdmin) && (
-                  <Nav.Link as={Link} to={AppRoutePaths.Inventories}>
-                    {t('nav.inventories')}
-                  </Nav.Link>
-                )}
                 {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.Promos}>
                     {t('nav.promos')}

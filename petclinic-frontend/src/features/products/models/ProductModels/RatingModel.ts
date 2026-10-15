@@ -4,4 +4,6 @@ export interface RatingModel {
   customerId?: string;
   reviewerUsername?: string;
   reviewerPhoto?: string | null;
+  likeCount?: number;
+  likedByCurrentUser?: boolean;
 }

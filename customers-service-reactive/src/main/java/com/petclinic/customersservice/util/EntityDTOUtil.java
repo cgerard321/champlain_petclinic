@@ -32,6 +32,7 @@ public class EntityDTOUtil {
         customer.setAddress(customerRequestDTO.getAddress());
         customer.setProvince(customerRequestDTO.getProvince());
         customer.setTelephone(customerRequestDTO.getTelephone());
+        customer.setIsActive(true);
         return customer;
     }
 
