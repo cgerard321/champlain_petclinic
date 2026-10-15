@@ -422,7 +422,6 @@
     .bill-page {
       padding: 16px 12px 24px;
     }
-  }
   
 
   .bill-header {
@@ -437,6 +436,7 @@
   .bill-card__header {
     flex-direction: column;
   }
+}
 
 .bill-payment {
   padding: 32px;
