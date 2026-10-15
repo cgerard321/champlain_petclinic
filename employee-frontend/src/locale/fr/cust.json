@@ -1,0 +1,38 @@
+{
+  "cust": {
+    "customerList": "Liste des clients",
+    "customerListLoading": "Chargement des clients...",
+    "NoCustomers": "Aucun client enregistré.",
+    "SearchCustomers": "Rechercher des clients",
+    "searchPlaceholder": "Rechercher un client par nom, identifiant, adresse, ville ou numéro de téléphone",
+    "customerDetails": {
+      "title": "Clients enregistrés et informations de contact",
+      "name": "Nom",
+      "address": "Adresse",
+      "city": "Ville",
+      "phone": "Numéro de téléphone",
+      "pets": "Animaux de compagnie"
+    },
+    "detailErrors": {
+      "notAvailable": "Non disponible"
+    },
+    "petsButton": "Animaux enregistrés",
+    "noCustFound": "Aucun client trouvé.",
+    "tryAgain": "Essayez un nom, un identifiant ou un numéro de téléphone différent."
+  },
+  "pet": {
+    "petDetailsTitle": "Détails de l'animal",
+    "petDetailsSubtitle": "Animaux enregistrés et leurs informations",
+    "closeButton": "Fermer",
+    "loadingPets": "Chargement des animaux...",
+    "noPetsFound": "Aucun animal enregistré pour ce client.",
+    "petDetails": {
+      "pets": "Animaux",
+      "species": "Espèce",
+      "age": "Âge",
+      "years": "ans",
+      "year": "an",
+      "weight": "Poids"
+    }
+  }
+}

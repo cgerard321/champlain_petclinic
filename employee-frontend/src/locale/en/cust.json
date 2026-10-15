@@ -1,0 +1,40 @@
+{
+  "cust": {
+    "customerList": "Customer List",
+    "customerListLoading": "Loading customers...",
+    "NoCustomers": "No customers registered.",
+    "SearchCustomers": "Search customers",
+    "searchPlaceholder": "Search customer by name, Id, address, city or phone number",
+    "customerDetails": {
+      "title": "Registered customers and contact information",
+      "name": "Name",
+      "address": "Address",
+      "city": "City",
+      "phone": "Phone number",
+      "pets": "Pets"
+    },
+    "detailErrors":
+    {
+      "notAvailable": "Not available"
+    },
+    "petsButton": "Registered Pets",
+    "noCustFound": "No customers found.",
+    "tryAgain": "Try a different name, ID, or phone number."
+  },
+  "pet": {
+    "petDetailsTitle": "Pet Details",
+    "petDetailsSubtitle": "Registered pets and their information",
+    "closeButton": "Close Pet Details dialog",
+    "loadingPets": "Loading pets...",
+    "noPetsFound": "No registered found for this customer.",
+    "petDetails": {
+      "pets": "Pets",
+      "species": "Species",
+      "age": "Age",
+      "years": "Years",
+      "year": "Year",
+      "weight": "Weight",
+      "owner": "Owner"
+    }
+  }
+}
