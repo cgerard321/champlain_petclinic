@@ -8,6 +8,10 @@ import { firstValueFrom } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
 import { Supply, SupplyRequest } from '@features/supplies/models/supply';
+import {
+  SupplyHistoryDialog,
+  SupplyHistoryDialogData,
+} from '@features/supplies/pages/supply-history-dialog';
 import { SupplyService } from '@features/supplies/services/supply-service';
 import { ALLOWED_IMAGE_TYPES, ImageAction } from '@shared/components/image-editor/image-editor';
 import { ModalForm } from '@shared/components/modal-form/modal-form';
@@ -66,6 +70,23 @@ export class SupplyPage {
         (!status || this.effectiveStatus(supply) === status),
     );
   });
+
+  protected openSupplyHistory(supply: Supply): void {
+    if (!this.canManageSupplies() || !this.inventoryId) {
+      return;
+    }
+
+    this.dialog.open<SupplyHistoryDialog, SupplyHistoryDialogData>(SupplyHistoryDialog, {
+      data: {
+        inventoryId: this.inventoryId,
+        productId: supply.productId,
+        supplyName: supply.productName,
+      },
+      ariaLabel: `History for ${supply.productName}`,
+      width: '640px',
+      maxWidth: '95vw',
+    });
+  }
 
   protected setFilter(
     field: 'productName' | 'supplierName' | 'productDescription' | 'status',
