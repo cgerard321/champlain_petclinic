@@ -230,3 +230,21 @@ mat-dialog-actions {
     flex: 1;
   }
 }
+
+:host-context(.dark-mode) {
+  --sage-50: #121f1a;
+  --sage-100: #1a2b24;
+  --sage-200: #22362d;
+  --sage-300: #2b3d34;
+  --sage-400: #3f5a4b;
+  --forest-700: #e3eeee;
+  --forest-800: #5f9a7d;
+  --forest-900: #4f8669;
+  --cream: var(--mat-sys-surface-container-highest);
+  --white: var(--mat-sys-surface-container-highest);
+  --text-primary: #e6efe9;
+  --text-secondary: #a3b8ac;
+  --text-muted: #7f958a;
+  --border: rgb(36 75 63 / 12%);
+  --border-strong: rgb(36 75 63 / 20%);
+}

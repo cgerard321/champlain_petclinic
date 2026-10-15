@@ -1,4 +1,3 @@
-/* The supplies page opens from an inventory, so keep its palette aligned with the inventory page. */
 :host {
   --white: #fff;
   --cream: #fffdf8;
@@ -20,13 +19,11 @@
   box-sizing: border-box;
   width: 100%;
   max-width: 1400px;
-  min-height: calc(100vh - 94px);
   margin: 0 auto;
   padding: 2.5rem 2rem 4rem;
   color: var(--text-primary);
-  background:
-    radial-gradient(circle at 100% 0%, rgb(199 217 178 / 28%), transparent 30rem),
-    radial-gradient(circle at 0% 100%, rgb(199 217 178 / 16%), transparent 28rem);
+  background: radial-gradient(circle at 100% 0%, rgb(199 217 178 / 28%), transparent 30rem),
+  radial-gradient(circle at 0% 100%, rgb(199 217 178 / 16%), transparent 28rem);
 }
 
 .page-header {
@@ -45,7 +42,6 @@
   font-size: clamp(1.8rem, 3vw, 2.35rem);
   font-weight: 700;
   line-height: 1.15;
-  letter-spacing: -0.035em;
 }
 
 .page-header h1::after {
@@ -68,7 +64,8 @@
   font-weight: 500;
 }
 
-.status-badge {
+.status-badge,
+.expiration-badge {
   display: inline-block;
   padding: 4px 10px;
   border-radius: 999px;
@@ -81,12 +78,14 @@
   color: #1b5e20;
 }
 
-.status-badge.re-order {
+.status-badge.re-order,
+.expiration-badge.expiring-soon {
   background: #fff1cc;
   color: #765000;
 }
 
-.status-badge.out-of-stock {
+.status-badge.out-of-stock,
+.expiration-badge.expired {
   background: #ffebee;
   color: #b71c1c;
 }
@@ -99,28 +98,51 @@
   box-shadow: var(--shadow-sm);
 }
 
-.error-message {
+.error-message,
+.field-error {
   color: #b00020;
+}
+
+.field-error {
+  margin: -6px 0 0;
+  font-size: 0.9rem;
 }
 
 .add-supply-button,
 .edit-button,
 .history-button,
 .delete-button,
-.consume-button {
+.consume-button,
+.dialog-cancel-button,
+.download-pdf-button,
+.clear-filters-button {
   border: 0;
   border-radius: 999px;
-  color: #fff;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 180ms ease;
+  padding: 10px 18px;
 }
 
-.add-supply-button {
-  padding: 10px 18px;
+.add-supply-button,
+.edit-button,
+.history-button {
   background: var(--forest-700);
-  font-size: 0.95rem;
+  color: #fff;
+  font-size: 0.875rem;
+}
+
+.consume-button {
+  background: #1976d2;
+  color: #fff;
+  font-size: 0.875rem;
+}
+
+.delete-button {
+  background: #b71c1c;
+  color: #fff;
+  font-size: 0.875rem;
 }
 
 .add-supply-button:hover,
@@ -130,78 +152,26 @@
   background: var(--forest-800);
 }
 
-.add-supply-button:focus-visible,
-.edit-button:focus-visible,
-.history-button:focus-visible,
-.delete-button:focus-visible,
-.consume-button:focus-visible,
-.dialog-cancel-button:focus-visible {
-  outline: 3px solid var(--sage-400);
-  outline-offset: 3px;
-}
-
-.add-supply-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.field-error {
-  margin: -6px 0 0;
-  color: #b00020;
-  font-size: 0.9rem;
-}
-
-.action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px;
-}
-
-.edit-button,
-.history-button,
-.delete-button,
-.consume-button {
-  padding: 10px 18px;
-  font-size: 0.875rem;
-}
-
-.edit-button,
-.history-button {
-  background: var(--forest-700);
-}
-
-.consume-button {
-  background: #1976d2;
-}
-
-.delete-button {
-  border-color: rgb(142 0 0 / 100%);
-  background: rgb(183 28 28 / 100%);
-}
-
 .delete-button:hover {
-  border-color: rgb(183 28 28 / 100%);
-  background: rgb(142 0 0 / 100%);
+  background: #8e0000;
 }
 
-.dialog-cancel-button {
-  padding: 10px 18px;
+.dialog-cancel-button,
+.download-pdf-button,
+.clear-filters-button {
   border: 1px solid var(--forest-700);
-  border-radius: 999px;
   background: transparent;
   color: var(--forest-700);
-  font: inherit;
   font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
 }
 
-.dialog-cancel-button:hover {
+.dialog-cancel-button:hover,
+.download-pdf-button:hover:not(:disabled),
+.clear-filters-button:hover:not(:disabled) {
   background: var(--sage-50);
 }
 
-/* Download button: icon only, expands to show its label on hover, focus or while downloading */
+.action-buttons,
 .header-actions {
   display: flex;
   flex-wrap: wrap;
@@ -213,15 +183,6 @@
   display: inline-flex;
   align-items: center;
   padding: 9px 10px;
-  border: 1px solid var(--forest-700);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--forest-700);
-  font: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 180ms ease;
 }
 
 .download-pdf-button mat-icon {
@@ -236,10 +197,7 @@
   overflow: hidden;
   white-space: nowrap;
   opacity: 0;
-  transition:
-    max-width 220ms ease,
-    opacity 160ms ease,
-    margin-left 220ms ease;
+  transition: max-width 220ms ease, opacity 160ms ease, margin-left 220ms ease;
 }
 
 .download-pdf-button:hover .download-label,
@@ -249,38 +207,6 @@
   margin-left: 8px;
   opacity: 1;
 }
-
-.download-pdf-button:hover:not(:disabled) {
-  background: var(--sage-50);
-}
-
-.download-pdf-button:focus-visible {
-  outline: 3px solid var(--sage-400);
-  outline-offset: 3px;
-}
-
-.download-pdf-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .download-label {
-    transition: none;
-  }
-}
-
-@media (width <= 700px) {
-  .supply-page {
-    padding: 2rem 1rem 3rem;
-  }
-
-  .page-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
-
 
 .supply-details {
   display: flex;
@@ -304,28 +230,9 @@
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: 20px;
-  background:
-    radial-gradient(circle at 100% 0%, rgb(199 217 178 / 22%), transparent 18rem),
-    linear-gradient(145deg, var(--white), var(--cream));
+  background: radial-gradient(circle at 100% 0%, rgb(199 217 178 / 22%), transparent 18rem),
+  linear-gradient(145deg, var(--white), var(--cream));
   box-shadow: var(--shadow-sm);
-}
-
-.supply-filters::before {
-  position: absolute;
-  z-index: -1;
-  top: -75px;
-  right: -55px;
-  width: 190px;
-  height: 190px;
-  border-radius: 50%;
-  background: rgb(199 217 178 / 18%);
-  content: '';
-  pointer-events: none;
-}
-
-.filter-heading,
-.supply-filter-grid {
-  position: relative;
 }
 
 .filter-heading {
@@ -341,12 +248,6 @@
   color: var(--forest-700);
   font-size: 1.1rem;
   font-weight: 700;
-}
-
-.filter-heading p {
-  margin: 0.3rem 0 0;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
 }
 
 .supply-filter-grid {
@@ -382,87 +283,12 @@
   background-color: var(--white);
   font: inherit;
   font-weight: 400;
-  transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background-color 160ms ease;
-}
-
-.filter-field input::placeholder {
-  color: var(--text-muted);
-}
-
-.filter-field input:hover,
-.filter-field select:hover:not(:disabled) {
-  border-color: rgb(36 75 63 / 42%);
 }
 
 .filter-field input:focus-visible,
 .filter-field select:focus-visible {
   border-color: var(--forest-700);
   box-shadow: 0 0 0 3px rgb(36 75 63 / 14%);
-}
-
-.filter-field select:disabled {
-  cursor: not-allowed;
-  background-color: var(--sage-50);
-  opacity: 0.7;
-}
-
-.clear-filters-button {
-  min-height: 40px;
-  padding: 0.55rem 0.95rem;
-  border: 1px solid var(--forest-700);
-  border-radius: 10px;
-  color: var(--forest-700);
-  background-color: rgb(255 255 255 / 78%);
-  font: inherit;
-  font-size: 0.87rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition:
-    color 160ms ease,
-    background-color 160ms ease,
-    border-color 160ms ease,
-    opacity 160ms ease;
-}
-
-.clear-filters-button:hover:not(:disabled) {
-  border-color: var(--forest-800);
-  color: var(--white);
-  background-color: var(--forest-700);
-}
-
-.clear-filters-button:focus-visible {
-  outline: 3px solid rgb(36 75 63 / 22%);
-  outline-offset: 3px;
-}
-
-.clear-filters-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
-.expiration-badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.expiration-badge.expired {
-  background: #ffebee;
-  color: #b71c1c;
-}
-
-.expiration-badge.expiring-soon {
-  background: #fff1cc;
-  color: #765000;
-}
-
-.no-expiration {
-  color: var(--text-secondary);
 }
 
 @media (width <= 850px) {
@@ -481,15 +307,43 @@
     grid-template-columns: 1fr;
     gap: 0.85rem;
   }
-
-  .filter-heading {
-    align-items: flex-start;
-  }
 }
 
-@media (width <= 420px) {
-  .filter-heading {
-    flex-direction: column;
+/* Dark Mode Overrides */
+:host-context(.dark-mode) {
+  --cream: var(--mat-sys-surface-container-highest);
+  --white: var(--mat-sys-surface-container-highest);
+  --text-muted: #7f958a;
+  --border-strong: rgb(36 75 63 / 20%);
+  --sage-50: #121f1a;
+  --sage-400: #3f5a4b;
+  --forest-700: #e3eeee;
+  --text-primary: #e6efe9;
+  --text-secondary: #a3b8ac;
+  --border: rgb(36 75 63 / 12%);
+
+  .supply-page {
+    background: none;
   }
 
+  .state-message {
+    background: var(--mat-sys-surface);
+    border: none;
+    box-shadow: none;
+  }
+
+  .add-supply-button,
+  .edit-button,
+  .clear-filters-button {
+    color: #111;
+  }
+
+  .filter-field input,
+  .filter-field select {
+    border-color: var(--sage-400);
+  }
+
+  .filter-field select {
+    color: #7f958a;
+  }
 }

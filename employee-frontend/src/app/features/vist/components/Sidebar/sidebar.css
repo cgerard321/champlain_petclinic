@@ -45,3 +45,26 @@
     min-height: auto;
   }
 }
+
+:host-context(.dark-mode) {
+  .sidebar {
+    background: var(--mat-sys-surface-container-highest);
+    border: 1px solid rgb(255 255 255 / 12%) !important;
+    box-shadow: none;
+  }
+
+  .sidebar__header h2 {
+    color: #fff !important;
+  }
+
+  .sidebar__hide {
+    background: var(--mat-sys-surface);
+    border: 1px solid #315842;
+    color: #8dbb8f;
+  }
+
+  .sidebar__hide:hover {
+    background: #315842;
+    color: #fff;
+  }
+}

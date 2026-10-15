@@ -52,7 +52,8 @@
         }
       },
       "display": {
-        "title": "Display"
+        "title": "Display",
+        "toggle": "Toggle Theme"
       }
     },
     "role": {
