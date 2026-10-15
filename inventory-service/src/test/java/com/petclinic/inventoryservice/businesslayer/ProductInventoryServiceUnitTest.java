@@ -20,6 +20,7 @@ import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import com.petclinic.inventoryservice.utils.exceptions.UnprocessableEntityException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -2150,8 +2151,10 @@ class ProductInventoryServiceUnitTest {
                 })
                 .verifyComplete();
 
-        verify(supplyAuditRepository).insert(argThat(entry ->
-                inventoryId.equals(entry.inventoryId())
+        verify(supplyAuditRepository).insert(argThat(new ArgumentMatcher<SupplyAuditEntry>() {
+            @Override
+            public boolean matches(SupplyAuditEntry entry) {
+                return inventoryId.equals(entry.inventoryId())
                         && productId.equals(entry.supplyId())
                         && "Product Name".equals(entry.supplyName())
                         && entry.previousQuantity() == 10
@@ -2159,7 +2162,9 @@ class ProductInventoryServiceUnitTest {
                         && entry.quantityChange() == -1
                         && entry.action() == SupplyAuditAction.CONSUMED
                         && entry.changedAt() != null
-                        && entry.changedBy().equals("test-user")));
+                        && "test-user".equals(entry.changedBy());
+            }
+        }));
     }
 
     @Test
