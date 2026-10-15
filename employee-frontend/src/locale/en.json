@@ -128,7 +128,8 @@
         "sample_preview": "Sample profiles · Design preview",
         "button": "Explore directory",
         "preview_note": "Veterinarian directory coming soon.",
-        "layout_preview_note": "Explore the layout with fictional profiles."
+        "layout_preview_note": "Explore the layout with fictional profiles.",
+        "live_note": "View your team’s profiles and contact details."
       },
       "list": {
         "back": "Back to veterinarians",
@@ -137,7 +138,9 @@
         "preview_title": "Preview · Fictional profiles",
         "preview_description": "These examples demonstrate the layout. Contact details and working hours are fictional. Viewing and editing real profiles will be available later.",
         "profiles_label": "Sample veterinarian profiles",
-        "empty": "No profiles to display."
+        "empty": "No profiles to display.",
+        "loading": "Loading veterinarians…",
+        "live_profiles_label": "Veterinarian profiles"
       },
       "profile": {
         "role": "Veterinarian",
@@ -177,6 +180,48 @@
       "specialties": {
         "heading": "Specialties",
         "description": "Discover the clinic's different areas of care."
+      },
+      "actions": {
+        "retry": "Try again",
+        "open_profile": "View {$INTERPOLATION} {$INTERPOLATION_1}’s profile",
+        "save": "Save",
+        "cancel": "Cancel",
+        "edit": "Edit profile"
+      },
+      "errors": {
+        "not_found": "This veterinarian profile could not be found.",
+        "forbidden": "You do not have permission to perform this action.",
+        "unauthorized": "Your session has expired. Please sign in again.",
+        "invalid": "The information was rejected. Check the fields and try again.",
+        "generic": "Unable to complete the request. Check your connection and try again."
+      },
+      "days": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      },
+      "edit": {
+        "first_name": "First name",
+        "last_name": "Last name",
+        "name_hint": "Between 2 and 30 characters.",
+        "email_hint": "A valid email address is required.",
+        "phone_hint": "Example: (514) 555-0123, with an optional extension #1234.",
+        "biography_hint": "At least 10 characters.",
+        "title": "Edit profile",
+        "description": "All fields are required. Specialties, status, and working hours are preserved.",
+        "legend": "Veterinarian information",
+        "saving": "Saving…",
+        "leave": "Leave this page and discard unsaved changes?"
+      },
+      "detail": {
+        "back": "Back to directory",
+        "title": "Veterinarian profile",
+        "loading": "Loading profile…",
+        "saved": "The profile has been saved."
       }
     }
   }

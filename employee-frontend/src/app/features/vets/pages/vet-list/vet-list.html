@@ -9,23 +9,32 @@
     </p>
   </header>
 
-  <aside class="preview-notice" aria-labelledby="preview-title">
-    <h2 id="preview-title" i18n="@@vets.list.preview_title">Aperçu · Profils fictifs</h2>
-    <p i18n="@@vets.list.preview_description">
-      Ces exemples présentent la mise en page. Les coordonnées et les horaires sont fictifs. La
-      consultation des profils réels et leur modification seront disponibles ultérieurement.
-    </p>
-  </aside>
-
-  <ul
-    class="profile-grid"
-    aria-label="Exemples de profils vétérinaires"
-    i18n-aria-label="@@vets.list.profiles_label"
-  >
-    @for (vet of vets; track vet.vetId) {
-      <li><app-vet-profile-card [vet]="vet" /></li>
-    } @empty {
-      <li class="empty-state" i18n="@@vets.list.empty">Aucun profil à afficher.</li>
-    }
-  </ul>
+  @if (loading()) {
+    <p role="status" i18n="@@vets.list.loading">Chargement des vétérinaires…</p>
+  } @else if (error()) {
+    <div class="empty-state">
+      <p role="alert">{{ error() }}</p>
+      <button type="button" (click)="load()" i18n="@@vets.actions.retry">Réessayer</button>
+    </div>
+  } @else {
+    <ul
+      class="profile-grid"
+      aria-label="Profils vétérinaires"
+      i18n-aria-label="@@vets.list.live_profiles_label"
+    >
+      @for (vet of vets(); track vet.vetId) {
+        <li>
+          <app-vet-profile-card [vet]="vet" />
+          <a
+            class="profile-link"
+            [routerLink]="['/vets', vet.vetId]"
+            i18n="@@vets.actions.open_profile"
+            >Voir le profil de {{ vet.firstName }} {{ vet.lastName }}</a
+          >
+        </li>
+      } @empty {
+        <li class="empty-state" i18n="@@vets.list.empty">Aucun profil à afficher.</li>
+      }
+    </ul>
+  }
 </section>

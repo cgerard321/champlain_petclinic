@@ -79,7 +79,28 @@ h1 {
 }
 
 .profile-grid > li {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+}
+
+app-vet-profile-card {
+  flex: 1;
+}
+
+.profile-link {
+  display: block;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #254e3e;
+  color: #fff;
+  text-align: center;
+}
+
+.profile-link:focus-visible {
+  outline: 3px solid #254e3e;
+  outline-offset: 3px;
 }
 
 .empty-state {
