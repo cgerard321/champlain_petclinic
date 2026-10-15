@@ -16,6 +16,21 @@ export interface Supply {
   expirationDate?: string | null;
 }
 
+export type SupplyAuditAction = 'CREATED' | 'QUANTITY_UPDATED' | 'CONSUMED' | 'DELETED';
+
+export interface SupplyAuditEntry {
+  id: string;
+  inventoryId: string;
+  supplyId: string;
+  supplyName: string;
+  previousQuantity: number;
+  newQuantity: number;
+  quantityChange: number;
+  action: SupplyAuditAction;
+  changedAt: string;
+  changedBy: string;
+}
+
 export interface SupplyRequest {
   productName: string;
   supplierName?: string;
