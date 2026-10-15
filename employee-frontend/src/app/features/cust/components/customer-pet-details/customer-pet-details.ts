@@ -24,8 +24,8 @@ export class PetDetails implements OnInit {
   protected readonly pets = signal<Pet[]>([]);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
-  protected readonly year = $localize`:@@cust.year:an`;
-  protected readonly years = $localize`:@@cust.years:ans`;
+  protected readonly year = $localize`:@@pet.petDetails.year:an`;
+  protected readonly years = $localize`:@@pet.petDetails.years:ans`;
 
   ngOnInit(): void {
     this.customerService.getPetDetails(this.data.customerId).subscribe({

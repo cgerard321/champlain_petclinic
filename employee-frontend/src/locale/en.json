@@ -263,8 +263,8 @@
         "pets": "Pets",
         "species": "Species",
         "age": "Age",
-        "years": "Years",
-        "year": "Year",
+        "years": "years",
+        "year": "year",
         "weight": "Weight"
       },
       "types": {
