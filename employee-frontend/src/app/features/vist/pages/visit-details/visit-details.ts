@@ -62,13 +62,10 @@ export class VisitDetails implements OnInit {
         this.visitService
           .getPetById(visit.petId)
           .pipe(
-            switchMap((pet) =>
-              this.visitService.getCustomerById(pet.customerId),
-            ),
+            switchMap((pet) => this.visitService.getCustomerById(pet.customerId)),
             catchError(() => of(null as Customer | null)),
           )
           .subscribe((customer) => {
-            console.log('Customer returned by API:', customer);
             this.customer.set(customer);
           });
       },

@@ -5,12 +5,11 @@ import { EMPTY, filter, map, switchMap, Observable } from 'rxjs';
 import { CurrentUserResponse } from '@core/models/current-user-response';
 import { AuthState } from '@core/services/auth-state';
 import { SseClient } from '@core/services/sse-client';
+import { Pet, Customer } from '@features/cust/models/customer.model';
 import { Status } from '@features/vist/models/Status';
 import { TimeSlot } from '@features/vist/models/TimeSlot';
 import { Visit } from '@features/vist/models/Visit';
 import { VisitResponseModel } from '@features/vist/models/VisitResponseModel';
-import { Pet } from '@features/cust/models/customer.model';
-import { Customer } from '@features/cust/models/customer.model';
 
 @Injectable({ providedIn: 'root' })
 export class VisitService {

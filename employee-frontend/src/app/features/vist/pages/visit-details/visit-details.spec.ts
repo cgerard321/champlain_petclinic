@@ -3,9 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
-import { VisitResponseModel } from '../../models/VisitResponseModel';
-import { Status } from '../../models/Status';
-import { VisitService } from '../../services/visit-service';
+import { Status } from '@features/vist/models/Status';
+import { VisitResponseModel } from '@features/vist/models/VisitResponseModel';
+import { VisitService } from '@features/vist/services/visit-service';
 
 import { VisitDetails } from './visit-details';
 
@@ -13,6 +13,7 @@ describe('VisitDetails', () => {
   const visit: VisitResponseModel = {
     visitId: 'VIST-2303-1701',
     visitDate: '2023-03-17T16:00:00',
+    visitEndDate: '2023-03-17T16:30:00',
     description: 'Dog Massage',
     petId: 'pet-1',
     petName: 'Leo',
@@ -30,7 +31,7 @@ describe('VisitDetails', () => {
 
   const getVisitById = vi.fn();
 
-  async function render(visitId = 'VIST-2303-1701') {
+  async function render(visitId = 'VIST-2303-1701'): Promise<ComponentFixture<VisitDetails>> {
     getVisitById.mockReturnValue(of(visit));
 
     await TestBed.configureTestingModule({
@@ -53,8 +54,7 @@ describe('VisitDetails', () => {
       ],
     }).compileComponents();
 
-    const fixture: ComponentFixture<VisitDetails> =
-      TestBed.createComponent(VisitDetails);
+    const fixture: ComponentFixture<VisitDetails> = TestBed.createComponent(VisitDetails);
     fixture.detectChanges();
 
     return fixture;
@@ -77,8 +77,6 @@ describe('VisitDetails', () => {
     const fixture = await render('');
 
     expect(getVisitById).not.toHaveBeenCalled();
-    expect(fixture.nativeElement.textContent).toContain(
-      'No visit ID was provided.',
-    );
+    expect(fixture.nativeElement.textContent).toContain('No visit ID was provided.');
   });
 });
