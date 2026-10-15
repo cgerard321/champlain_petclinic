@@ -162,6 +162,7 @@
 <ng-template #actionsCell let-supply>
   <div class="action-buttons">
     @if (canManageSupplies()) {
+
       <button
         type="button"
         class="edit-button"
@@ -178,6 +179,12 @@
       >
         Supprimer
       </button>
+
+      <button type="button" class="history-button" (click)="openSupplyHistory(supply)">
+        History
+      </button>
+      <button type="button" class="edit-button" (click)="editSupply(supply)">Edit</button>
+      <button type="button" class="delete-button" (click)="deleteSupply(supply)">Delete</button>
     }
     @if (canConsumeSupplies()) {
       <button

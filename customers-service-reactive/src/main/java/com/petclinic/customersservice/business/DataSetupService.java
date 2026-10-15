@@ -67,25 +67,25 @@ public class DataSetupService implements CommandLineRunner {
 
 
         Customer o1 = new Customer("1", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "George", "Franklin",
-                "110 W. Liberty St.", "Madison", "Ontario", "6085551023", null);
+                "110 W. Liberty St.", "Madison", "Ontario", "6085551023", null, true);
         Customer o2 = new Customer("2", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "Betty", "Davis",
-                "638 Cardinal Ave.", "Sun Prairie", "Quebec", "6085551749", "3e5a214b-009d-4a25-9313-344676e6157d");
+                "638 Cardinal Ave.", "Sun Prairie", "Quebec", "6085551749", "3e5a214b-009d-4a25-9313-344676e6157d", true);
         Customer o3 = new Customer("3", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Eduardo", "Rodriguez",
-                "2693 Commerce St.", "McFarland", "Ontario", "6085558763", null);
+                "2693 Commerce St.", "McFarland", "Ontario", "6085558763", null, true);
         Customer o4 = new Customer("4", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", "Harold", "Davis",
-                "563 Friendly St.", "Windsor", "Ontario", "6085553198", null);
+                "563 Friendly St.", "Windsor", "Ontario", "6085553198", null, true);
         Customer o5 = new Customer("5", "c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", "Peter", "McTavish",
-                "2387 S. Fair Way", "Madison", "Quebec", "6085552765", null);
+                "2387 S. Fair Way", "Madison", "Quebec", "6085552765", null, true);
         Customer o6 = new Customer("6", "b3d09eab-4085-4b2d-a121-78a0a2f9e501", "Jean", "Coleman",
-                "105 N. Lake St.", "Monona", "Quebec", "6085552654", null);
+                "105 N. Lake St.", "Monona", "Quebec", "6085552654", null, true);
         Customer o7 = new Customer("7", "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", "Jeff", "Black",
-                "1450 Oak Blvd.", "Monona", "Quebec", "6085555387", null);
+                "1450 Oak Blvd.", "Monona", "Quebec", "6085555387", null, true);
         Customer o8 = new Customer("8", "48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", "Maria", "Escobito",
-                "345 Maple St.", "Madison", "Quebec", "6085557683", null);
+                "345 Maple St.", "Madison", "Quebec", "6085557683", null, true);
         Customer o9 = new Customer("9", "9f6accd1-e943-4322-932e-199d93824317", "David", "Schroeder",
-                "2749 Blackhawk Trail", "Madison", "Quebec", "6085559435", null);
+                "2749 Blackhawk Trail", "Madison", "Quebec", "6085559435", null, true);
         Customer o10 = new Customer("10", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", "Carlos", "Esteban",
-                "2335 Independence La.", "Waunakee", "Ontario", "6085555487", null);
+                "2335 Independence La.", "Waunakee", "Ontario", "6085555487", null, true);
 
 
         Flux.just(o1, o2, o3, o4, o5, o6, o7, o8, o9, o10)
