@@ -281,6 +281,7 @@
   }
 }
 
+
 .supply-details {
   display: flex;
   align-items: center;
@@ -490,4 +491,5 @@
   .filter-heading {
     flex-direction: column;
   }
+
 }
