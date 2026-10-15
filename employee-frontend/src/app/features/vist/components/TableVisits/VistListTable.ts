@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { RouterLink } from '@angular/router';
 
 import { AuthState } from '@core/services/auth-state';
 import { FollowUpVisitDialog } from '@features/vist/components/FollowUpVisit/FollowUpVisitDialog';
@@ -15,7 +16,7 @@ import { Roles } from '@shared/models/roles';
 
 @Component({
   selector: 'app-visit',
-  imports: [DatePipe, MatButtonModule, MatDialogModule, MatSnackBarModule],
+  imports: [DatePipe, MatButtonModule, MatDialogModule, MatSnackBarModule, RouterLink],
   styleUrl: './VistListTable.css',
   templateUrl: './VistListTable.html',
 })
