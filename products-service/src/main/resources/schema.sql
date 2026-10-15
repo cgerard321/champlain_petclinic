@@ -35,8 +35,26 @@ CREATE TABLE IF NOT EXISTS product_ratings
     product_id  VARCHAR(36) NOT NULL,
     customer_id VARCHAR(36) NOT NULL,
     rating      SMALLINT,
-    review      TEXT
+    review      TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE product_ratings
+ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+UPDATE product_ratings
+SET created_at = CURRENT_TIMESTAMP
+WHERE created_at IS NULL;
+
+CREATE TABLE IF NOT EXISTS review_settings
+(
+    id                BIGINT PRIMARY KEY,
+    edit_period_hours INTEGER NOT NULL
+);
+
+INSERT INTO review_settings (id, edit_period_hours)
+values (1, 48)
+ON CONFLICT (id) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS review_likes
 (
