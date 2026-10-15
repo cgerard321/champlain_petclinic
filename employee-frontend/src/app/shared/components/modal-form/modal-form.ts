@@ -55,6 +55,8 @@ export class ModalForm<T extends object> {
   protected readonly form = this.createForm();
 
   protected readonly fields = this.data.fields;
+  protected readonly cancelLabel = $localize`:@@modal.actions.cancel:Annuler`;
+  protected readonly saveLabel = $localize`:@@modal.actions.save:Enregistrer`;
 
   protected createForm(): DynamicFormGroup {
     const controls: DynamicFormControls = {};
@@ -170,24 +172,25 @@ export class ModalForm<T extends object> {
     }
 
     if (control.hasError('required')) {
-      return `${field.label} is required.`;
+      return $localize`:@@modal.validation.required:Le champ ${field.label}:label: est obligatoire.`;
     }
 
     if (control.hasError('min')) {
       const minimum = control.getError('min').min;
-      return `${field.label} must be at least ${minimum}.`;
+      return $localize`:@@modal.validation.min:${field.label}:label: doit être au moins ${minimum}:minimum:.`;
     }
 
     if (control.hasError('max')) {
       const maximum = control.getError('max').max;
-      return `${field.label} must be at most ${maximum}.`;
+      return $localize`:@@modal.validation.max:${field.label}:label: doit être au plus ${maximum}:maximum:.`;
     }
 
     if (control.hasError('minDate')) {
-      return `${field.label} cannot be before ${control.getError('minDate').min}.`;
+      const earliest = control.getError('minDate').min;
+      return $localize`:@@modal.validation.minDate:${field.label}:label: ne peut pas être antérieur au ${earliest}:earliest:.`;
     }
 
-    return 'Invalid value.';
+    return $localize`:@@modal.validation.invalid:Valeur invalide.`;
   }
 
   protected submit(): void {

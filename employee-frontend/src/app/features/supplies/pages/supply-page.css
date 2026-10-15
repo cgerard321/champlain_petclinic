@@ -70,6 +70,7 @@
 
 .status-badge {
   display: inline-block;
+  white-space: nowrap;
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 0.8rem;
