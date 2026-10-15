@@ -1182,7 +1182,7 @@ public void testGenerateBillPdf_BillNotFound() {
         Mono<BigDecimal> result = billService.calculateCurrentBalance(customerId);
 
         StepVerifier.create(result)
-                .expectNext(new BigDecimal(150.0))
+                .expectNext(new BigDecimal("150.00"))
                 .verifyComplete();
     }
 
