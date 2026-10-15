@@ -29,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 
 import javax.security.auth.callback.TextInputCallback;
 import java.io.ByteArrayOutputStream;
+import java.time.Instant;
 import java.util.Comparator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -877,7 +878,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 newQuantity,
                 newQuantity - previousQuantity,
                 action,
-                LocalDateTime.now(),
+                Instant.now(),
                 changedBy
         );
 

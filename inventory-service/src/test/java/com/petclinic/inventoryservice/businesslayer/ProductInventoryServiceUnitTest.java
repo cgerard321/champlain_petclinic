@@ -36,6 +36,7 @@ import java.util.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Pattern;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -722,6 +723,53 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
         verify(productRepository).save(argThat(savedProduct ->
                 "Original Supplier".equals(savedProduct.getSupplierName())));
+    }
+
+    @Test
+    void updateProductInInventory_withoutQuantityChange_shouldNotWriteAuditEntry() {
+        String inventoryId = "1";
+        String productId = UUID.randomUUID().toString();
+        ProductRequestDTO request = ProductRequestDTO.builder()
+                .productName("Updated Product Name")
+                .productDescription("Description")
+                .productPrice(99.99)
+                .productQuantity(10)
+                .productSalePrice(15.99)
+                .build();
+        Inventory inventory = Inventory.builder()
+                .inventoryId(inventoryId)
+                .inventoryType(inventoryType.getType())
+                .build();
+        Product existingProduct = Product.builder()
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Original Product Name")
+                .productQuantity(10)
+                .supplierName("Original Supplier")
+                .build();
+        Product savedProduct = Product.builder()
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Updated Product Name")
+                .productQuantity(10)
+                .productDescription("Description")
+                .productPrice(99.99)
+                .productSalePrice(15.99)
+                .supplierName("Original Supplier")
+                .build();
+
+        when(inventoryRepository.findInventoryByInventoryId(inventoryId)).thenReturn(Mono.just(inventory));
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.just(existingProduct));
+        when(productRepository.existsByInventoryIdAndProductNameIgnoreCaseAndProductIdNot(
+                inventoryId, request.getProductName(), productId)).thenReturn(Mono.just(false));
+        when(productRepository.save(any(Product.class))).thenReturn(Mono.just(savedProduct));
+
+        StepVerifier.create(productInventoryService.updateProductInInventory(
+                        Mono.just(request), inventoryId, productId, "test-user"))
+                .expectNextMatches(response -> response.getProductQuantity() == 10)
+                .verifyComplete();
+
+        verify(supplyAuditRepository, never()).insert(any(SupplyAuditEntry.class));
     }
 
     @Test
@@ -2101,6 +2149,17 @@ class ProductInventoryServiceUnitTest {
                     return true;
                 })
                 .verifyComplete();
+
+        verify(supplyAuditRepository).insert(argThat(entry ->
+                inventoryId.equals(entry.inventoryId())
+                        && productId.equals(entry.supplyId())
+                        && "Product Name".equals(entry.supplyName())
+                        && entry.previousQuantity() == 10
+                        && entry.newQuantity() == 9
+                        && entry.quantityChange() == -1
+                        && entry.action() == SupplyAuditAction.CONSUMED
+                        && entry.changedAt() != null
+                        && entry.changedBy().equals("test-user")));
     }
 
     @Test
@@ -2558,7 +2617,7 @@ class ProductInventoryServiceUnitTest {
                 10,
                 2,
                 SupplyAuditAction.QUANTITY_UPDATED,
-                LocalDateTime.now(),
+                Instant.now(),
                 "test-user");
         when(supplyAuditRepository.findTop20ByInventoryIdAndSupplyIdOrderByChangedAtDesc(
                 inventoryId, productId))

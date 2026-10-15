@@ -3,7 +3,7 @@ package com.petclinic.inventoryservice.datalayer.Audit;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Document(collection = "supply_audit_entries")
 public record SupplyAuditEntry(
@@ -15,7 +15,7 @@ public record SupplyAuditEntry(
         int newQuantity,
         int quantityChange,
         SupplyAuditAction action,
-        LocalDateTime changedAt,
+        Instant changedAt,
         String changedBy
 ) {
 }

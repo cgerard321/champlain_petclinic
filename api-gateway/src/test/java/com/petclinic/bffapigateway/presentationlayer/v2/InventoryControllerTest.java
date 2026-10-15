@@ -1775,4 +1775,33 @@ public class InventoryControllerTest {
         verify(inventoryServiceClient, times(1))
                 .searchInventory(eq(page), eq(size), eq(null), eq(null), eq(null), eq(null), eq(null));
     }
+
+    @Test
+    void getSupplyHistory_shouldReturnAuditEntriesForSupply() {
+        String inventoryId = "inventory-1";
+        String productId = "product-1";
+        Map<String, Object> entry = Map.of(
+                "id", "audit-1",
+                "inventoryId", inventoryId,
+                "supplyId", productId,
+                "supplyName", "Bandages",
+                "previousQuantity", 8,
+                "newQuantity", 10,
+                "quantityChange", 2,
+                "action", "QUANTITY_UPDATED",
+                "changedAt", "2026-10-14T20:38:52.412Z",
+                "changedBy", "test-user");
+        when(inventoryServiceClient.getSupplyHistory(inventoryId, productId)).thenReturn(Flux.just(entry));
+
+        client.get()
+                .uri(baseInventoryURL + "/{inventoryId}/products/{productId}/history", inventoryId, productId)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo("audit-1")
+                .jsonPath("$[0].changedAt").isEqualTo("2026-10-14T20:38:52.412Z");
+
+        verify(inventoryServiceClient).getSupplyHistory(inventoryId, productId);
+    }
 }

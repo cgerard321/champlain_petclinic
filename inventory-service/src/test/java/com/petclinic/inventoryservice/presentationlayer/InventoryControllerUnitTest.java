@@ -2,6 +2,8 @@ package com.petclinic.inventoryservice.presentationlayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
+import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditAction;
+import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditEntry;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Product.Status;
@@ -26,6 +28,7 @@ import reactor.test.StepVerifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.time.Instant;
 
 import static com.petclinic.inventoryservice.datalayer.Product.Status.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -2387,6 +2390,27 @@ class InventoryControllerUnitTest {
                 .expectStatus().isBadRequest()
                 .expectBody()
                 .jsonPath("$.message", "Product quantity is 0");
+    }
+
+    @Test
+    void getSupplyHistory_shouldReturnAuditEntriesForSupply() {
+        String inventoryId = "inventory-1";
+        String productId = "product-1";
+        SupplyAuditEntry entry = new SupplyAuditEntry(
+                "audit-1", inventoryId, productId, "Bandages", 8, 10, 2,
+                SupplyAuditAction.QUANTITY_UPDATED, Instant.parse("2026-10-14T20:38:52.412Z"), "test-user");
+        when(productInventoryService.getSupplyHistory(inventoryId, productId)).thenReturn(Flux.just(entry));
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products/{productId}/history", inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo("audit-1")
+                .jsonPath("$[0].changedAt").isEqualTo("2026-10-14T20:38:52.412Z");
+
+        verify(productInventoryService).getSupplyHistory(inventoryId, productId);
     }
 
 }
