@@ -92,7 +92,7 @@ public class EntityDtoUtil {
     }
 
     private static long timeRemaining(Bill bill){
-        if (bill.getDueDate().isBefore(LocalDate.now())) {
+        if (bill.getDueDate() == null || bill.getDueDate().isBefore(LocalDate.now())) {
             return 0L;
         }
 
