@@ -7,8 +7,15 @@
     "cancel": "Cancel",
     "uploadPhoto": "Upload Photo",
     "deletePhoto": "Delete Photo",
-    "update": "Update Profile"
-
+    "update": "Update Profile",
+    "deleteAccount": "Delete Account"
+  },
+  "deleteAccount": {
+    "title": "Delete Account",
+    "message": "Are you sure you want to delete your account? You will be logged out, and your profile photo will be permanently deleted.",
+    "confirm": "Delete Account",
+    "cancel": "Cancel",
+    "failed": "Failed to delete your account. Please try again."
   },
 
     "uploadPetPhotoModal": {
