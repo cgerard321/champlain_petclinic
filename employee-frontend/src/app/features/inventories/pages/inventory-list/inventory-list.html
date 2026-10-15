@@ -2,7 +2,12 @@
   <div class="page-header">
     <h1 i18n="@@inventory.title">Inventaire</h1>
     @if (can().canCreateInventory) {
-      <button type="button" class="add-inventory-button" [disabled]="savingInventory() || inventoryTypesLoading()" (click)="openAddDialog()">
+      <button
+        type="button"
+        class="add-inventory-button"
+        [disabled]="savingInventory() || inventoryTypesLoading()"
+        (click)="openAddDialog()"
+      >
         {{ savingInventory() ? savingLabel : addInventoryLabel }}
       </button>
     }
@@ -15,16 +20,27 @@
   @if (!can().hasAnyAccess) {
     <div class="state-container">
       <mat-icon color="warn">block</mat-icon>
-      <p i18n="@@inventory.access.denied">L'accès à l'inventaire n'est pas disponible pour votre rôle.</p>
+      <p i18n="@@inventory.access.denied">
+        L'accès à l'inventaire n'est pas disponible pour votre rôle.
+      </p>
     </div>
   } @else {
-    <section class="inventory-filters" aria-label="Filtrer les inventaires" i18n-aria-label="@@inventory.filters.aria">
+    <section
+      class="inventory-filters"
+      aria-label="Filtrer les inventaires"
+      i18n-aria-label="@@inventory.filters.aria"
+    >
       <div class="filter-heading">
         <div>
           <h2 i18n="@@inventory.filters.heading">Trouver un inventaire</h2>
           <p i18n="@@inventory.filters.help">Filtrer par nom, type ou description.</p>
         </div>
-        <button class="clear-filters-button" type="button" (click)="clearFilters()" [disabled]="!hasActiveFilters()">
+        <button
+          class="clear-filters-button"
+          type="button"
+          (click)="clearFilters()"
+          [disabled]="!hasActiveFilters()"
+        >
           <ng-container i18n="@@inventory.filters.clear">Effacer les filtres</ng-container>
         </button>
       </div>
@@ -32,12 +48,24 @@
       <div class="inventory-filter-grid">
         <label class="filter-field">
           <span i18n="@@inventory.fields.name">Nom de l'inventaire</span>
-          <input type="search" placeholder="Rechercher par nom" i18n-placeholder="@@inventory.filters.namePlaceholder" [value]="filters().inventoryName" (input)="setTextFilter('inventoryName', $event)" />
+          <input
+            type="search"
+            placeholder="Rechercher par nom"
+            i18n-placeholder="@@inventory.filters.namePlaceholder"
+            [value]="filters().inventoryName"
+            (input)="setTextFilter('inventoryName', $event)"
+          />
         </label>
         <label class="filter-field">
           <span i18n="@@inventory.fields.type">Type d'inventaire</span>
-          <select [value]="filters().inventoryType" [disabled]="inventoryTypesLoading() || !!inventoryTypesError()" (change)="setInventoryTypeFilter($event)">
-            <option value="">{{ inventoryTypesLoading() ? loadingTypesLabel : allTypesLabel }}</option>
+          <select
+            [value]="filters().inventoryType"
+            [disabled]="inventoryTypesLoading() || !!inventoryTypesError()"
+            (change)="setInventoryTypeFilter($event)"
+          >
+            <option value="">
+              {{ inventoryTypesLoading() ? loadingTypesLabel : allTypesLabel }}
+            </option>
             @for (type of inventoryTypes(); track type.typeId) {
               <option [value]="type.type">{{ localizedInventoryType(type.type) }}</option>
             }
@@ -48,12 +76,23 @@
         </label>
         <label class="filter-field">
           <span i18n="@@inventory.fields.description">Description</span>
-          <input type="search" placeholder="Rechercher par description" i18n-placeholder="@@inventory.filters.descriptionPlaceholder" [value]="filters().inventoryDescription" (input)="setTextFilter('inventoryDescription', $event)" />
+          <input
+            type="search"
+            placeholder="Rechercher par description"
+            i18n-placeholder="@@inventory.filters.descriptionPlaceholder"
+            [value]="filters().inventoryDescription"
+            (input)="setTextFilter('inventoryDescription', $event)"
+          />
         </label>
       </div>
       <div class="filter-footer">
         <label class="important-filter">
-          <input type="checkbox" [checked]="filters().importantOnly" [disabled]="isSavingAnyFavorite()" (change)="setImportantOnly($event)" />
+          <input
+            type="checkbox"
+            [checked]="filters().importantOnly"
+            [disabled]="isSavingAnyFavorite()"
+            (change)="setImportantOnly($event)"
+          />
           <span i18n="@@inventory.filters.favoritesOnly">Favoris seulement</span>
         </label>
       </div>
@@ -95,11 +134,18 @@
       <div class="inventory-grid">
         @for (inventory of inventories(); track inventory.inventoryId) {
           <div class="inventory-card-wrapper">
-            <a class="inventory-card-link" [routerLink]="['/invt', inventory.inventoryId, 'supplies']">
+            <a
+              class="inventory-card-link"
+              [routerLink]="['/invt', inventory.inventoryId, 'supplies']"
+            >
               <mat-card appearance="outlined" class="inventory-card">
                 <mat-card-header>
-                  <mat-card-title>{{ localizedInventoryName(inventory.inventoryName) }}</mat-card-title>
-                  <mat-card-subtitle>{{ localizedInventoryType(inventory.inventoryType) }}</mat-card-subtitle>
+                  <mat-card-title>{{
+                    localizedInventoryName(inventory.inventoryName)
+                  }}</mat-card-title>
+                  <mat-card-subtitle>{{
+                    localizedInventoryType(inventory.inventoryType)
+                  }}</mat-card-subtitle>
                 </mat-card-header>
                 <mat-card-content>
                   <p>{{ localizedInventoryDescription(inventory.inventoryDescription) }}</p>
@@ -107,18 +153,36 @@
                     @if (quantityFor(inventory.inventoryId) !== null) {
                       {{ stockQuantityLabel(inventory.inventoryId) }}
                     } @else {
-                      <ng-container i18n="@@inventory.quantity.unavailable">Quantité indisponible</ng-container>
+                      <ng-container i18n="@@inventory.quantity.unavailable"
+                        >Quantité indisponible</ng-container
+                      >
                     }
                   </p>
                   @if (can().canUpdateInventory || can().canDeleteInventory) {
                     <div class="inventory-actions">
                       @if (can().canUpdateInventory) {
-                        <button type="button" class="edit-button" (click)="$event.stopPropagation(); $event.preventDefault(); editInventory(inventory)">
+                        <button
+                          type="button"
+                          class="edit-button"
+                          (click)="
+                            $event.stopPropagation();
+                            $event.preventDefault();
+                            editInventory(inventory)
+                          "
+                        >
                           <ng-container i18n="@@inventory.actions.edit">Modifier</ng-container>
                         </button>
                       }
                       @if (can().canDeleteInventory) {
-                        <button type="button" class="delete-button" (click)="$event.stopPropagation(); $event.preventDefault(); deleteInventoryAction(inventory)">
+                        <button
+                          type="button"
+                          class="delete-button"
+                          (click)="
+                            $event.stopPropagation();
+                            $event.preventDefault();
+                            deleteInventoryAction(inventory)
+                          "
+                        >
                           <ng-container i18n="@@inventory.actions.delete">Supprimer</ng-container>
                         </button>
                       }
@@ -127,18 +191,52 @@
                 </mat-card-content>
               </mat-card>
             </a>
-            <button type="button" class="favorite-button" [class.is-favorite]="inventory.important" [disabled]="!canManageFavorites() || isLoading() || isSavingFavorite(inventory.inventoryId)" [attr.aria-pressed]="!!inventory.important" [attr.aria-label]="favoriteAriaLabel(inventory)" (click)="toggleFavorite(inventory)">
-              <mat-icon aria-hidden="true">{{ inventory.important ? 'star' : 'star_border' }}</mat-icon>
+            <button
+              type="button"
+              class="favorite-button"
+              [class.is-favorite]="inventory.important"
+              [disabled]="
+                !canManageFavorites() || isLoading() || isSavingFavorite(inventory.inventoryId)
+              "
+              [attr.aria-pressed]="!!inventory.important"
+              [attr.aria-label]="favoriteAriaLabel(inventory)"
+              (click)="toggleFavorite(inventory)"
+            >
+              <mat-icon aria-hidden="true">{{
+                inventory.important ? 'star' : 'star_border'
+              }}</mat-icon>
             </button>
           </div>
         }
       </div>
     }
 
-    <nav class="inventory-pagination" aria-label="Pages de l'inventaire" i18n-aria-label="@@inventory.pagination.aria">
-      <button class="pagination-button" type="button" aria-label="Page précédente" i18n-aria-label="@@inventory.pagination.previous" [disabled]="currentPage() === 0 || isLoading()" (click)="goToPreviousPage()">&lt;</button>
+    <nav
+      class="inventory-pagination"
+      aria-label="Pages de l'inventaire"
+      i18n-aria-label="@@inventory.pagination.aria"
+    >
+      <button
+        class="pagination-button"
+        type="button"
+        aria-label="Page précédente"
+        i18n-aria-label="@@inventory.pagination.previous"
+        [disabled]="currentPage() === 0 || isLoading()"
+        (click)="goToPreviousPage()"
+      >
+        &lt;
+      </button>
       <span class="pagination-current" aria-current="page">{{ currentPage() + 1 }}</span>
-      <button class="pagination-button" type="button" aria-label="Page suivante" i18n-aria-label="@@inventory.pagination.next" [disabled]="!canGoToNextPage() || isLoading()" (click)="goToNextPage()">&gt;</button>
+      <button
+        class="pagination-button"
+        type="button"
+        aria-label="Page suivante"
+        i18n-aria-label="@@inventory.pagination.next"
+        [disabled]="!canGoToNextPage() || isLoading()"
+        (click)="goToNextPage()"
+      >
+        &gt;
+      </button>
     </nav>
   }
 </div>

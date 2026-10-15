@@ -46,41 +46,6 @@ import {
 import { getInventoryPermissions } from '@shared/models/inventory-permissions';
 import { Roles } from '@shared/models/roles';
 
-// These values are the starter records created by the inventory service. Keep the API values
-// unchanged so existing filters, links, and favorite updates continue to use the stored data.
-const starterInventoryNames: Record<string, string> = {
-  'Medical equipment': $localize`:@@inventory.data.names.medicalEquipment:Équipement médical`,
-  'First-Aid': $localize`:@@inventory.data.names.firstAid:Premiers soins`,
-  Vaccines: $localize`:@@inventory.data.names.vaccines:Vaccins`,
-  Medications: $localize`:@@inventory.data.names.medications:Médicaments`,
-  'Pet Carriers': $localize`:@@inventory.data.names.petCarriers:Cages de transport pour animaux`,
-  'Diagnostic Kits': $localize`:@@inventory.data.names.diagnosticKits:Trousses de diagnostic`,
-  'Surgical Instruments': $localize`:@@inventory.data.names.surgicalInstruments:Instruments chirurgicaux`,
-  'Anesthesia Supplies': $localize`:@@inventory.data.names.anesthesiaSupplies:Fournitures d'anesthésie`,
-  'Wound Care Supplies': $localize`:@@inventory.data.names.woundCareSupplies:Fournitures de soins des plaies`,
-  'Infectious Disease Test Kits': $localize`:@@inventory.data.names.infectiousDiseaseTestKits:Trousses de dépistage des maladies infectieuses`,
-};
-
-const starterInventoryTypes: Record<string, string> = {
-  Equipment: $localize`:@@inventory.data.types.equipment:Équipement`,
-  Bandages: $localize`:@@inventory.data.types.bandages:Bandages`,
-  Injections: $localize`:@@inventory.data.types.injections:Injections`,
-  Medications: $localize`:@@inventory.data.types.medications:Médicaments`,
-  'Diagnostic Kits': $localize`:@@inventory.data.types.diagnosticKits:Trousses de diagnostic`,
-};
-
-const starterInventoryDescriptions: Record<string, string> = {
-  'Medical equipment for surgery': $localize`:@@inventory.data.descriptions.medicalEquipment:Équipement médical pour la chirurgie`,
-  'First-aid supplies for pet emergencies': $localize`:@@inventory.data.descriptions.firstAid:Fournitures de premiers soins pour les urgences chez les animaux`,
-  'Supplies for disease prevention': $localize`:@@inventory.data.descriptions.vaccines:Fournitures pour la prévention des maladies`,
-  'Antibiotics for pet infections': $localize`:@@inventory.data.descriptions.medications:Antibiotiques pour traiter les infections chez les animaux`,
-  'Carriers for transporting pets': $localize`:@@inventory.data.descriptions.petCarriers:Cages pour transporter les animaux`,
-  'Kits for diagnosing various pet illnesses and conditions': $localize`:@@inventory.data.descriptions.diagnosticKits:Trousses pour diagnostiquer diverses maladies et affections chez les animaux`,
-  'Tools for performing surgical procedures on pets': $localize`:@@inventory.data.descriptions.surgicalInstruments:Outils pour effectuer des interventions chirurgicales sur les animaux`,
-  'Supplies for administering anesthesia during surgeries': $localize`:@@inventory.data.descriptions.anesthesiaSupplies:Fournitures pour administrer l'anesthésie pendant les interventions chirurgicales`,
-  'Supplies for treating and dressing wounds': $localize`:@@inventory.data.descriptions.woundCareSupplies:Fournitures pour traiter et panser les plaies`,
-  'Kits for testing infectious diseases in pets': $localize`:@@inventory.data.descriptions.infectiousDiseaseTestKits:Trousses pour dépister les maladies infectieuses chez les animaux`,
-};
 interface InventoryFormValue {
   inventoryName: string;
   inventoryType: string;
@@ -99,6 +64,41 @@ export class InventoryList implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly locale = inject(LOCALE_ID);
   private readonly dialog = inject(MatDialog);
+  // These values are the starter records created by the inventory service. Keep the API values
+  // unchanged so existing filters, links, and favorite updates continue to use the stored data.
+  private readonly starterInventoryNames: Record<string, string> = {
+    'Medical equipment': $localize`:@@inventory.data.names.medicalEquipment:Équipement médical`,
+    'First-Aid': $localize`:@@inventory.data.names.firstAid:Premiers soins`,
+    Vaccines: $localize`:@@inventory.data.names.vaccines:Vaccins`,
+    Medications: $localize`:@@inventory.data.names.medications:Médicaments`,
+    'Pet Carriers': $localize`:@@inventory.data.names.petCarriers:Cages de transport pour animaux`,
+    'Diagnostic Kits': $localize`:@@inventory.data.names.diagnosticKits:Trousses de diagnostic`,
+    'Surgical Instruments': $localize`:@@inventory.data.names.surgicalInstruments:Instruments chirurgicaux`,
+    'Anesthesia Supplies': $localize`:@@inventory.data.names.anesthesiaSupplies:Fournitures d'anesthésie`,
+    'Wound Care Supplies': $localize`:@@inventory.data.names.woundCareSupplies:Fournitures de soins des plaies`,
+    'Infectious Disease Test Kits': $localize`:@@inventory.data.names.infectiousDiseaseTestKits:Trousses de dépistage des maladies infectieuses`,
+  };
+
+  private readonly starterInventoryTypes: Record<string, string> = {
+    Equipment: $localize`:@@inventory.data.types.equipment:Équipement`,
+    Bandages: $localize`:@@inventory.data.types.bandages:Bandages`,
+    Injections: $localize`:@@inventory.data.types.injections:Injections`,
+    Medications: $localize`:@@inventory.data.types.medications:Médicaments`,
+    'Diagnostic Kits': $localize`:@@inventory.data.types.diagnosticKits:Trousses de diagnostic`,
+  };
+
+  private readonly starterInventoryDescriptions: Record<string, string> = {
+    'Medical equipment for surgery': $localize`:@@inventory.data.descriptions.medicalEquipment:Équipement médical pour la chirurgie`,
+    'First-aid supplies for pet emergencies': $localize`:@@inventory.data.descriptions.firstAid:Fournitures de premiers soins pour les urgences chez les animaux`,
+    'Supplies for disease prevention': $localize`:@@inventory.data.descriptions.vaccines:Fournitures pour la prévention des maladies`,
+    'Antibiotics for pet infections': $localize`:@@inventory.data.descriptions.medications:Antibiotiques pour traiter les infections chez les animaux`,
+    'Carriers for transporting pets': $localize`:@@inventory.data.descriptions.petCarriers:Cages pour transporter les animaux`,
+    'Kits for diagnosing various pet illnesses and conditions': $localize`:@@inventory.data.descriptions.diagnosticKits:Trousses pour diagnostiquer diverses maladies et affections chez les animaux`,
+    'Tools for performing surgical procedures on pets': $localize`:@@inventory.data.descriptions.surgicalInstruments:Outils pour effectuer des interventions chirurgicales sur les animaux`,
+    'Supplies for administering anesthesia during surgeries': $localize`:@@inventory.data.descriptions.anesthesiaSupplies:Fournitures pour administrer l'anesthésie pendant les interventions chirurgicales`,
+    'Supplies for treating and dressing wounds': $localize`:@@inventory.data.descriptions.woundCareSupplies:Fournitures pour traiter et panser les plaies`,
+    'Kits for testing infectious diseases in pets': $localize`:@@inventory.data.descriptions.infectiousDiseaseTestKits:Trousses pour dépister les maladies infectieuses chez les animaux`,
+  };
 
   private inventorySubscription?: Subscription;
   private inventoryTypesSubscription?: Subscription;
@@ -169,15 +169,15 @@ export class InventoryList implements OnInit, OnDestroy {
   }
 
   protected localizedInventoryName(name: string): string {
-    return starterInventoryNames[name] ?? name;
+    return this.starterInventoryNames[name] ?? name;
   }
 
   protected localizedInventoryType(type: string): string {
-    return starterInventoryTypes[type] ?? type;
+    return this.starterInventoryTypes[type] ?? type;
   }
 
   protected localizedInventoryDescription(description: string): string {
-    return starterInventoryDescriptions[description] ?? description;
+    return this.starterInventoryDescriptions[description] ?? description;
   }
 
   private normalizeSearchText(value: string): string {
@@ -397,22 +397,31 @@ export class InventoryList implements OnInit, OnDestroy {
         label: $localize`:@@inventory.fields.name:Nom de l'inventaire`,
         type: 'string',
         required: true,
-        errorMessages: { required: $localize`:@@inventory.validation.nameRequired:Le nom de l'inventaire est requis.` },
+        errorMessages: {
+          required: $localize`:@@inventory.validation.nameRequired:Le nom de l'inventaire est requis.`,
+        },
       },
       {
         key: 'inventoryType',
         label: $localize`:@@inventory.fields.type:Type d'inventaire`,
         type: 'enum',
         required: true,
-        errorMessages: { required: $localize`:@@inventory.validation.typeRequired:Le type d'inventaire est requis.` },
-        options: this.inventoryTypes().map((type) => ({ value: type.type, label: this.localizedInventoryType(type.type) })),
+        errorMessages: {
+          required: $localize`:@@inventory.validation.typeRequired:Le type d'inventaire est requis.`,
+        },
+        options: this.inventoryTypes().map((type) => ({
+          value: type.type,
+          label: this.localizedInventoryType(type.type),
+        })),
       },
       {
         key: 'inventoryDescription',
         label: $localize`:@@inventory.fields.description:Description`,
         type: 'string',
         required: true,
-        errorMessages: { required: $localize`:@@inventory.validation.descriptionRequired:La description est requise.` },
+        errorMessages: {
+          required: $localize`:@@inventory.validation.descriptionRequired:La description est requise.`,
+        },
       },
     ];
   }
@@ -422,7 +431,8 @@ export class InventoryList implements OnInit, OnDestroy {
 
     if (this.inventoryTypesLoading() || this.inventoryTypes().length === 0) {
       this.formError.set(
-        this.inventoryTypesError() ?? $localize`:@@inventory.errors.typesLoading:Les types d'inventaire sont encore en chargement. Réessayez dans un instant.`,
+        this.inventoryTypesError() ??
+          $localize`:@@inventory.errors.typesLoading:Les types d'inventaire sont encore en chargement. Réessayez dans un instant.`,
       );
       return;
     }
@@ -433,19 +443,27 @@ export class InventoryList implements OnInit, OnDestroy {
       ModalFormResult<InventoryFormValue>
     >(ModalForm, {
       data: {
-        title: inventory ? $localize`:@@inventory.actions.editTitle:Modifier l'inventaire` : $localize`:@@inventory.actions.add:Ajouter un inventaire`,
-        submitLabel: inventory ? $localize`:@@inventory.actions.saveChanges:Enregistrer les modifications` : $localize`:@@inventory.actions.add:Ajouter un inventaire`,
+        title: inventory
+          ? $localize`:@@inventory.actions.editTitle:Modifier l'inventaire`
+          : $localize`:@@inventory.actions.add:Ajouter un inventaire`,
+        submitLabel: inventory
+          ? $localize`:@@inventory.actions.saveChanges:Enregistrer les modifications`
+          : $localize`:@@inventory.actions.add:Ajouter un inventaire`,
         cancelLabel: $localize`:@@inventory.actions.cancel:Annuler`,
         fields: this.inventoryFields(),
         initialValue: inventory
           ? {
               inventoryName: this.localizedInventoryName(inventory.inventoryName),
               inventoryType: inventory.inventoryType,
-              inventoryDescription: this.localizedInventoryDescription(inventory.inventoryDescription),
+              inventoryDescription: this.localizedInventoryDescription(
+                inventory.inventoryDescription,
+              ),
             }
           : { inventoryName: '', inventoryType: '', inventoryDescription: '' },
       },
-      ariaLabel: inventory ? $localize`:@@inventory.actions.editTitle:Modifier l'inventaire` : $localize`:@@inventory.actions.add:Ajouter un inventaire`,
+      ariaLabel: inventory
+        ? $localize`:@@inventory.actions.editTitle:Modifier l'inventaire`
+        : $localize`:@@inventory.actions.add:Ajouter un inventaire`,
       width: '480px',
       maxWidth: '95vw',
     });
@@ -460,7 +478,10 @@ export class InventoryList implements OnInit, OnDestroy {
     await this.saveInventory(result.value, inventory ?? null);
   }
 
-  private async saveInventory(value: InventoryFormValue, editingInventory: Inventory | null): Promise<void> {
+  private async saveInventory(
+    value: InventoryFormValue,
+    editingInventory: Inventory | null,
+  ): Promise<void> {
     if (this.savingInventory()) return;
 
     const editingId = editingInventory?.inventoryId ?? null;
@@ -478,13 +499,20 @@ export class InventoryList implements OnInit, OnDestroy {
 
       this.loadInventories(this.currentPage());
     } catch {
-      this.formError.set(editingId ? $localize`:@@inventory.errors.update:Impossible de modifier l'inventaire.` : $localize`:@@inventory.errors.create:Impossible de créer l'inventaire.`);
+      this.formError.set(
+        editingId
+          ? $localize`:@@inventory.errors.update:Impossible de modifier l'inventaire.`
+          : $localize`:@@inventory.errors.create:Impossible de créer l'inventaire.`,
+      );
     } finally {
       this.savingInventory.set(false);
     }
   }
 
-  private toInventoryRequest(value: InventoryFormValue, original: Inventory | null): InventoryRequest {
+  private toInventoryRequest(
+    value: InventoryFormValue,
+    original: Inventory | null,
+  ): InventoryRequest {
     return {
       inventoryName:
         original && value.inventoryName === this.localizedInventoryName(original.inventoryName)
@@ -493,7 +521,8 @@ export class InventoryList implements OnInit, OnDestroy {
       inventoryType: value.inventoryType,
       inventoryDescription:
         original &&
-        value.inventoryDescription === this.localizedInventoryDescription(original.inventoryDescription)
+        value.inventoryDescription ===
+          this.localizedInventoryDescription(original.inventoryDescription)
           ? original.inventoryDescription
           : value.inventoryDescription,
     };
@@ -510,15 +539,15 @@ export class InventoryList implements OnInit, OnDestroy {
       ModalFormResult<Record<string, never>>
     >(ModalForm, {
       data: {
-          title: $localize`:@@inventory.actions.deleteTitle:Supprimer l'inventaire`,
-          message: $localize`:@@inventory.actions.deleteConfirm:Voulez-vous vraiment supprimer ${this.localizedInventoryName(inventory.inventoryName)}:name: ?`,
+        title: $localize`:@@inventory.actions.deleteTitle:Supprimer l'inventaire`,
+        message: $localize`:@@inventory.actions.deleteConfirm:Voulez-vous vraiment supprimer ${this.localizedInventoryName(inventory.inventoryName)}:name: ?`,
         fields: [],
         initialValue: {},
-          submitLabel: $localize`:@@inventory.actions.delete:Supprimer`,
-          cancelLabel: $localize`:@@inventory.actions.cancel:Annuler`,
+        submitLabel: $localize`:@@inventory.actions.delete:Supprimer`,
+        cancelLabel: $localize`:@@inventory.actions.cancel:Annuler`,
         destructive: true,
       },
-        ariaLabel: $localize`:@@inventory.actions.deleteTitle:Supprimer l'inventaire`,
+      ariaLabel: $localize`:@@inventory.actions.deleteTitle:Supprimer l'inventaire`,
       width: '440px',
       maxWidth: '95vw',
     });
@@ -533,7 +562,9 @@ export class InventoryList implements OnInit, OnDestroy {
           );
         },
         error: () => {
-          this.deleteError.set($localize`:@@inventory.errors.delete:Impossible de supprimer l'inventaire.`);
+          this.deleteError.set(
+            $localize`:@@inventory.errors.delete:Impossible de supprimer l'inventaire.`,
+          );
         },
       });
     });
