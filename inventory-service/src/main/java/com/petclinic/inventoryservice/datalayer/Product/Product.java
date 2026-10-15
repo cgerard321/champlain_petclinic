@@ -17,6 +17,7 @@ public class Product {
     private String productId;
     private String inventoryId;
     private String productName;
+    private String supplierName;
     private String productDescription;
     private Integer productQuantity;
     private Double productPrice;
@@ -28,5 +29,9 @@ public class Product {
     private String photoType;
 
     private LocalDate expirationDate;
+
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName == null ? null : supplierName.strip();
+    }
 
 }

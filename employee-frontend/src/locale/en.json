@@ -23,13 +23,44 @@
       "title": "Settings",
       "save": "Save",
       "cancel": "Cancel",
+      "close": "Close settings",
       "saved": "Changes saved",
       "security": {
-        "title": "Security"
+        "title": "Security",
+        "account": {
+          "title": "Account",
+          "username": "Username",
+          "role": "Role"
+        },
+        "username": {
+          "title": "Change your username",
+          "label": "New username",
+          "preview": "You will sign in with",
+          "sameAsCurrent": "This username is the same as the current one",
+          "reserved": "This username is reserved",
+          "suggestions": "Suggestions",
+          "tryInstead": "Try instead",
+          "saved": "Username changed",
+          "saveFailed": "This username could not be saved. It may already be taken, try another one.",
+          "rules": {
+            "length": "3 to 30 characters",
+            "startsAlpha": "Starts with a letter",
+            "charset": "Only letters without accents, numbers or underscore",
+            "noSpaceNoAt": "No spaces or \"@\"",
+            "noTrailing": "Doesn't end with an underscore, and no two in a row"
+          }
+        }
       },
       "display": {
         "title": "Display"
       }
+    },
+    "role": {
+      "admin": "Administrator",
+      "vet": "Veterinarian",
+      "receptionist": "Receptionist",
+      "inventoryManager": "Inventory Manager",
+      "unknown": "Employee"
     },
     "notFound": {
       "title": "Page Not Found",
@@ -48,7 +79,43 @@
       "terms": "Terms of Service",
       "copyright": "© 2026 Champlain Pet Clinic. All rights reserved."
     },
+    "visit": {
+      "pages": {
+        "buttonName": "Show filters"
+      },
+      "components": {
+        "filterbutton": "Filter By"
+      }
+    },
     "visits": {
+      "nextappointement": {
+        "title": "Next upcoming visit"
+      },
+      "showFilters": "Show filters",
+      "filterButton": "Filter By",
+      "hideFilters": "Hide filters",
+      "sidebarLabel": "Visit filters",
+      "statusMenuLabel": "Visit statuses",
+      "listLabel": "Visit list",
+      "title": "List of Visits",
+      "nextAppointmentTitle": "Next appointment",
+      "nextAppointmentLoading": "Loading next appointment...",
+      "nextAppointmentError": "Could not load the next appointment.",
+      "noUpcomingAppointment": "No upcoming appointments.",
+      "visitId": "Visit ID",
+      "veterinarianFullName": "Veterinarian full name",
+      "petName": "Pet name",
+      "description": "Description",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "status": "Status",
+      "statusScheduled": "Scheduled",
+      "statusCompleted": "Completed",
+      "statusCancelled": "Cancelled",
+      "statusConfirmed": "Confirmed",
+      "statusUpcoming": "Upcoming",
+      "statusArchived": "Archived",
+      "statusOutOfStatus": "Out of status",
       "followUp": {
         "actions": "Actions",
         "button": "Schedule follow-up",
