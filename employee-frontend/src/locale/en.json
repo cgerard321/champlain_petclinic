@@ -236,6 +236,111 @@
         "heading": "Specialties",
         "description": "Discover the clinic's different areas of care."
       }
+    },
+    "inventory": {
+      "title": "Inventory",
+      "data": {
+        "names": {
+          "medicalEquipment": "Medical equipment",
+          "firstAid": "First-Aid",
+          "vaccines": "Vaccines",
+          "medications": "Medications",
+          "petCarriers": "Pet Carriers",
+          "diagnosticKits": "Diagnostic Kits",
+          "surgicalInstruments": "Surgical Instruments",
+          "anesthesiaSupplies": "Anesthesia Supplies",
+          "woundCareSupplies": "Wound Care Supplies",
+          "infectiousDiseaseTestKits": "Infectious Disease Test Kits"
+        },
+        "types": {
+          "equipment": "Equipment",
+          "bandages": "Bandages",
+          "injections": "Injections",
+          "medications": "Medications",
+          "diagnosticKits": "Diagnostic Kits"
+        },
+        "descriptions": {
+          "medicalEquipment": "Medical equipment for surgery",
+          "firstAid": "First-aid supplies for pet emergencies",
+          "vaccines": "Supplies for disease prevention",
+          "medications": "Antibiotics for pet infections",
+          "petCarriers": "Carriers for transporting pets",
+          "diagnosticKits": "Kits for diagnosing various pet illnesses and conditions",
+          "surgicalInstruments": "Tools for performing surgical procedures on pets",
+          "anesthesiaSupplies": "Supplies for administering anesthesia during surgeries",
+          "woundCareSupplies": "Supplies for treating and dressing wounds",
+          "infectiousDiseaseTestKits": "Kits for testing infectious diseases in pets"
+        }
+      },
+      "fields": {
+        "name": "Inventory name",
+        "type": "Inventory type",
+        "description": "Description"
+      },
+      "filters": {
+        "aria": "Filter inventories",
+        "heading": "Find an inventory",
+        "help": "Filter by name, type, or description.",
+        "clear": "Clear filters",
+        "namePlaceholder": "Search by name",
+        "descriptionPlaceholder": "Search by description",
+        "loadingTypes": "Loading types…",
+        "allTypes": "All types",
+        "favoritesOnly": "Favorites only"
+      },
+      "loading": "Loading inventories…",
+      "noResults": {
+        "heading": "No matching inventory",
+        "message": "No inventory matched your search. Try a different name or description, or clear the filters."
+      },
+      "empty": {
+        "heading": "No inventories available",
+        "noFavorites": "No favorite inventories found.",
+        "message": "There are no inventories to display right now."
+      },
+      "quantity": {
+        "one": "{$count} item in stock",
+        "other": "{$count} items in stock",
+        "unavailable": "Quantity unavailable"
+      },
+      "favorite": {
+        "add": "Add {$name} to favorites",
+        "remove": "Remove {$name} from favorites"
+      },
+      "pagination": {
+        "aria": "Inventory pages",
+        "previous": "Previous page",
+        "next": "Next page"
+      },
+      "errors": {
+        "favorite": "Could not update the favorite for {$name}.",
+        "types": "Could not load inventory types. Try refreshing the page.",
+        "noTypes": "No inventory types are available.",
+        "load": "Failed to load inventories.",
+        "typesLoading": "Inventory types are still loading. Try again in a moment.",
+        "update": "Unable to update inventory.",
+        "create": "Unable to create inventory.",
+        "delete": "Unable to delete inventory."
+      },
+      "access": {
+        "denied": "Inventory access is not available for your role."
+      },
+      "actions": {
+        "saving": "Saving...",
+        "add": "Add Inventory",
+        "edit": "Edit",
+        "delete": "Delete",
+        "editTitle": "Edit Inventory",
+        "saveChanges": "Save Changes",
+        "deleteTitle": "Delete Inventory",
+        "deleteConfirm": "Are you sure you want to delete {$name}?",
+        "cancel": "Cancel"
+      },
+      "validation": {
+        "nameRequired": "Inventory name is required.",
+        "typeRequired": "Inventory type is required.",
+        "descriptionRequired": "Description is required."
+      }
     }
   }
 }
