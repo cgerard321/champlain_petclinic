@@ -1,13 +1,14 @@
 import { Component, inject, signal } from '@angular/core';
 
 import { AuthState } from '@core/services/auth-state';
+import { NextAppointment } from '@features/vist/components/NextAppointment/NextAppointment';
 import { Sidebar } from '@features/vist/components/Sidebar/sidebar';
 import { VistListTable } from '@features/vist/components/TableVisits/VistListTable';
 import { Status } from '@features/vist/models/Status';
 // import { ComingSoon } from '@shared/components/coming-soon/coming-soon';
 
 @Component({
-  imports: [VistListTable, Sidebar],
+  imports: [VistListTable, Sidebar, NextAppointment],
   selector: 'app-vist',
   styleUrl: './vist.css',
   templateUrl: './vist.html',
