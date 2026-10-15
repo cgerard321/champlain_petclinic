@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Optional;
+import com.petclinic.bffapigateway.dtos.Bills.PaymentRequestDTO;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,11 +34,25 @@ public class BillControllerV1 {
 
     // Define endpoints to interact with the BillServiceClient here
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
     @GetMapping(value = "", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBills() {
         return billServiceClient.getAllBills();
     }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.RECEPTIONIST})
+    @PostMapping(value = "/customers/{customerId}/{billId}/pay", consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<BillResponseDTO>> payBill(@PathVariable String customerId, @PathVariable String billId,
+            @RequestBody PaymentRequestDTO paymentRequestDTO,
+            @CookieValue("Bearer") String jwtToken) {
+
+        return billServiceClient.payBill(customerId, billId, paymentRequestDTO, jwtToken).map(ResponseEntity::ok);
+    }
+
+
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "/{billId}")

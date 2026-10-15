@@ -580,9 +580,6 @@ public class BillServiceImpl implements BillService{
 
         return customerMono.flatMapMany(customer ->
                 billRepository.findByCustomerId(customerId)
-                        // Only return bills where first/last name match the customer record
-                        .filter(bill -> bill.getCustomerFirstName().equals(customer.getFirstName())
-                                && bill.getCustomerLastName().equals(customer.getLastName()))
                         .map(EntityDtoUtil::toBillResponseDto)
         );
     }
@@ -624,15 +621,8 @@ public class BillServiceImpl implements BillService{
     public Mono<BigDecimal> calculateCurrentBalance(String customerId) {
         return billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID)
                 .concatWith(billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
-                .map(bill -> {
-                    BigDecimal total = bill.getAmount();
-                    // Check interest exemption first - if exempt, don't add interest regardless of status
-                    if (!bill.isInterestExempt()) {
-                        BigDecimal interest = InterestCalculationUtil.calculateInterest(bill);
-                        total = total.add(interest);
-                    }
-                    return total;
-                })
+                .map(EntityDtoUtil::toBillResponseDto)
+                .map(BillResponseDTO::getTotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")));
     }
