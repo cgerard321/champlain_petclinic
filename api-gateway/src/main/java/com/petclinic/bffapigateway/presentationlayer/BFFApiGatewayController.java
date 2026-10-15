@@ -122,7 +122,7 @@ public class BFFApiGatewayController {
 //        return visitsServiceClient.getAllVisits(description);
 //    }
 //
-//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.OWNER})
+//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.CUST})
 //    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
 //    @GetMapping(value = "visits/owners/{ownerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
 //    public Flux<VisitResponseDTO> getVisitsByOwnerId(@PathVariable String ownerId){
@@ -131,7 +131,7 @@ public class BFFApiGatewayController {
 //    }
 //
 //
-//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.OWNER})
+//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.CUST})
 //    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
 //    @GetMapping(value = "visits/emergency/owners/{ownerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
 //    public Flux<EmergencyResponseDTO> getEmergencyVisitsByOwnerId(@PathVariable String ownerId){
@@ -354,7 +354,7 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.CUST})
     @DeleteMapping(value = "vets/{vetId}/ratings/{ratingId}")
     public Mono<ResponseEntity<Void>> deleteRatingByRatingId(@PathVariable String vetId,
                                                              @PathVariable String ratingId,
@@ -364,7 +364,7 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @DeleteMapping(value = "vets/{vetId}/ratings/customer")
     public Mono<ResponseEntity<Void>> deleteRatingByCustomer(@PathVariable String vetId,
                                                              @CookieValue("Bearer") String jwt){

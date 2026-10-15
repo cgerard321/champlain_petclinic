@@ -173,7 +173,7 @@ public class CartController {
     }
 
     //admin restriction at check out
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PostMapping("/{cartId}/checkout")
     public Mono<ResponseEntity<CartResponseDTO>> checkoutCart(@PathVariable String cartId) {
         return cartServiceClient.checkoutCart(cartId)

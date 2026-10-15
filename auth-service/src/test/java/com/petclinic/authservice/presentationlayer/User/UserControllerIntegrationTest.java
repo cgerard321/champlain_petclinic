@@ -361,6 +361,8 @@ class UserControllerIntegrationTest {
                 .value(user -> {
                     assertEquals(userDTO.getEmail(), user.getEmail());
                     assertEquals(userDTO.getUsername(),user.getUsername());
+                    assertEquals(Set.of("CUST"), user.getRoles().stream()
+                            .map(Role::getName).collect(java.util.stream.Collectors.toSet()));
 
                 });
 
@@ -653,7 +655,7 @@ class UserControllerIntegrationTest {
     @Test
     void updateUserRole_validUserId() {
         RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
-                .roles(Collections.singleton("OWNER"))
+                .roles(Collections.singleton("CUST"))
                 .build();
         String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
 
@@ -683,7 +685,7 @@ class UserControllerIntegrationTest {
     @Test
     void updateUserRole_InvalidUserId() {
         RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
-                .roles(Collections.singleton("OWNER"))
+                .roles(Collections.singleton("CUST"))
                 .build();
         String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
         String invalidUserId = "invalidId";
@@ -702,7 +704,7 @@ class UserControllerIntegrationTest {
     @Test
     void updateUserRole_NoCookie() {
         RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
-                .roles(Collections.singleton("OWNER"))
+                .roles(Collections.singleton("CUST"))
                 .build();
 
         webTestClient
@@ -719,7 +721,7 @@ class UserControllerIntegrationTest {
     void updateUserRole_cannotChangeOwnRoles() {
         String userId = "validUserId";
         RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
-                .roles(Collections.singleton("OWNER"))
+                .roles(Collections.singleton("CUST"))
                 .build();
 
         String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));

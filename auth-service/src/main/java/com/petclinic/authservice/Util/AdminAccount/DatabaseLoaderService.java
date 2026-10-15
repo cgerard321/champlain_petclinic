@@ -34,7 +34,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
         
         roleRepo.save(Role.builder().name("ADMIN").build());
         roleRepo.save(Role.builder().name("VET").build());
-        roleRepo.save(Role.builder().name("OWNER").build());
+        roleRepo.save(Role.builder().name("CUST").build());
         roleRepo.save(Role.builder().name("INVENTORY_MANAGER").build());
         roleRepo.save(Role.builder().name("RECEPTIONIST").build());
 

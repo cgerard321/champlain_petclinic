@@ -131,7 +131,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
-          <ProtectedRoute roles={['OWNER']}>
+          <ProtectedRoute roles={['CUST']}>
             <ProfileEdit />
           </ProtectedRoute>
         ),
@@ -247,7 +247,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerVisitsCalendar,
         element: (
-          <ProtectedRoute roles={['OWNER']}>
+          <ProtectedRoute roles={['CUST']}>
             <CustomerVisitsCalendar />
           </ProtectedRoute>
         ),
@@ -303,7 +303,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfile,
         element: (
-          <ProtectedRoute roles={['OWNER']}>
+          <ProtectedRoute roles={['CUST']}>
             <ProfilePage />
           </ProtectedRoute>
         ),
@@ -343,7 +343,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.UpdatePet,
         element: (
-          <ProtectedRoute roles={['ADMIN', 'VET', 'OWNER']}>
+          <ProtectedRoute roles={['ADMIN', 'VET', 'CUST']}>
             <UpdateCustomerPetPage />
           </ProtectedRoute>
         ),
@@ -389,7 +389,7 @@ const router = createBrowserRouter([
   {
     path: AppRoutePaths.OwnerBookAppointment,
     element: (
-      <ProtectedRoute roles={['OWNER']}>
+      <ProtectedRoute roles={['CUST']}>
         <OwnerBookAppointment />
       </ProtectedRoute>
     ),

@@ -13,7 +13,7 @@ const ownerUser = {
   username: 'owner',
   userId: 'owner-user-id',
   email: 'owner@example.com',
-  roles: ['OWNER'],
+  roles: ['CUST'],
 };
 
 const currentDate = new Date();
@@ -81,6 +81,11 @@ async function openAuthenticatedPage(
 }
 
 test.describe('Reactive visit streams', () => {
+  test.beforeEach(async ({ page }) => {
+    // Keep incidental customer/cart lookups local to the mocked test session.
+    await page.route(`${backendUrl}/**`, route => route.fulfill({ json: [] }));
+  });
+
   test('renders staff visits from separate SSE events and ignores malformed events', async ({
     page,
   }) => {
