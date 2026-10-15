@@ -21,7 +21,7 @@ angular.module('visitList')
             url = "api/gateway/visits"
         }else if ($window.localStorage.getItem("roles").includes("VET")) {
             url = "api/gateway/visits/vets/"+$window.localStorage.getItem("practitionerIdAndMonth").split(",")[0]
-        }else if ($window.localStorage.getItem("roles").includes("OWNER")) {
+        }else if ($window.localStorage.getItem("roles").includes("CUST")) {
             url = "api/gateway/visits/owners/"+$window.localStorage.getItem("UUID")
         }else{url = ""}
 

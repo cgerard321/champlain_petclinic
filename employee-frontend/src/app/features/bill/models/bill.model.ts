@@ -36,3 +36,9 @@ export interface BillRequestModel {
   date: Date;
   amount: number | null;
 }
+
+export interface PaymentRequest {
+  cardNumber: string;
+  cvv: string;
+  expirationDate: string;
+}

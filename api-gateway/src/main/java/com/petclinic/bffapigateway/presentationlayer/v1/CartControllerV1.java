@@ -150,7 +150,7 @@ public class CartControllerV1 {
 
     // --- Endpoints ---
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PostMapping
     public Mono<ResponseEntity<CartResponseDTO>> createCart(@RequestBody CartRequestDTO cartRequestDTO) {
         return cartServiceClient.createCart(cartRequestDTO)
@@ -198,7 +198,7 @@ public class CartControllerV1 {
     return cartServiceClient.getAllCarts(queryParams);
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST, Roles.ADMIN})
     @GetMapping("/{cartId}")
     public Mono<ResponseEntity<CartResponseDTO>> getCartById(@PathVariable String cartId) {
         return mapToOkOrNotFound(cartServiceClient.getCartByCartId(cartId));
@@ -214,7 +214,7 @@ public class CartControllerV1 {
         ));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @DeleteMapping("/{cartId}/products")
     public Mono<ResponseEntity<Void>> deleteAllItemsInCart(@PathVariable String cartId) {
     return cartServiceClient.deleteAllItemsInCart(cartId)
@@ -225,7 +225,7 @@ public class CartControllerV1 {
         ));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @DeleteMapping(value = "/{cartId}/products/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<Void>> removeProductFromCart(@PathVariable String cartId, @PathVariable String productId){
     return cartServiceClient.removeProductFromCart(cartId, productId)
@@ -236,7 +236,7 @@ public class CartControllerV1 {
         ));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST, Roles.ADMIN})
     @PostMapping("/{cartId}/products")
     public Mono<ResponseEntity<CartResponseDTO>> addProductToCart(
         @PathVariable String cartId,
@@ -271,7 +271,7 @@ public class CartControllerV1 {
         ));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PatchMapping("/{cartId}/products/{productId}")
     public Mono<ResponseEntity<CartResponseDTO>> patchProductQuantityInCart(@PathVariable String cartId,
                                         @PathVariable String productId,
@@ -279,13 +279,13 @@ public class CartControllerV1 {
     return handleQuantityUpdate(cartId, productId, requestDTO);
     }
     
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PostMapping("/{cartId}/checkout")
     public Mono<ResponseEntity<CartResponseDTO>> checkoutCart(@PathVariable String cartId) {
         return mapToOkOrNotFound(cartServiceClient.checkoutCart(cartId));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PostMapping("/{cartId}/wishlist")
     public Mono<ResponseEntity<CartResponseDTO>> addProductToWishlist(
         @PathVariable String cartId,
@@ -302,7 +302,7 @@ public class CartControllerV1 {
         ));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @DeleteMapping("/{cartId}/wishlist/{productId}")
     public Mono<ResponseEntity<Void>> removeProductFromWishlist(
         @PathVariable String cartId,
@@ -315,7 +315,7 @@ public class CartControllerV1 {
         ));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PostMapping("/{cartId}/wishlist-transfers")
     public Mono<ResponseEntity<CartResponseDTO>> createWishlistTransfer(
         @PathVariable String cartId,
@@ -334,7 +334,7 @@ public class CartControllerV1 {
                 .build()
         ));
     }
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PutMapping("/{cartId}/promo")
     public Mono<ResponseEntity<CartResponseDTO>> applyPromoToCart(
         @PathVariable String cartId,
@@ -352,7 +352,7 @@ public class CartControllerV1 {
         ));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST, Roles.ADMIN})
     @GetMapping("/promos/validate/{promoCode}")
     public Mono<ResponseEntity<PromoCodeResponseDTO>> validatePromo(
             @PathVariable String promoCode) {
@@ -363,7 +363,7 @@ public class CartControllerV1 {
                 ));
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @DeleteMapping("/{cartId}/promo")
     public Mono<ResponseEntity<Void>> clearPromo(@PathVariable String cartId) {
     return cartServiceClient.clearPromo(cartId)
@@ -373,5 +373,27 @@ public class CartControllerV1 {
         ));
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
+    @PutMapping("/{cartId}/shipping")
+    public Mono<ResponseEntity<CartResponseDTO>> updateShippingMethod(
+        @PathVariable String cartId,
+        @RequestBody(required = false) CartShippingRequestDTO request) {
+
+    String shippingMethod = request != null ? request.getShippingMethod() : null;
+
+    return cartServiceClient.updateShippingMethod(cartId, shippingMethod)
+        .map(ResponseEntity::ok)
+        .onErrorResume(InvalidInputException.class, e -> {
+            CartResponseDTO errorBody = new CartResponseDTO();
+            errorBody.setMessage(e.getMessage());
+            return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorBody));
+        })
+        .onErrorResume(e -> mapCartErrorWithMessage(e,
+            ErrorOptions.builder()
+                .includeBadRequestBodyMessage(true)
+                .invalidInputAsUnprocessable(true)
+                .build()
+        ));
+    }
 
 }

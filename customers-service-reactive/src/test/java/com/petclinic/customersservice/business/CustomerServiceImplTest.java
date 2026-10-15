@@ -1,6 +1,7 @@
 package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.customersExceptions.exceptions.NotFoundException;
+import com.petclinic.customersservice.customersExceptions.exceptions.FailedDependencyException;
 import com.petclinic.customersservice.data.Customer;
 import com.petclinic.customersservice.data.CustomerRepo;
 import com.petclinic.customersservice.domainclientlayer.CartServiceClient;
@@ -84,6 +85,28 @@ class CustomerServiceImplTest {
                 .verify();
         verify(repo).findAll();
 
+    }
+
+    @Test
+    void getAllCustomers_ShouldExcludeSoftDeletedCustomers() {
+        Customer activeCustomer = buildCustomer();
+        activeCustomer.setCustomerId("customerId-active");
+        activeCustomer.setIsActive(true);
+
+        Customer legacyCustomer = buildCustomer();
+        legacyCustomer.setCustomerId("customerId-legacy");
+        legacyCustomer.setIsActive(null);
+
+        Customer deletedCustomer = buildCustomer();
+        deletedCustomer.setCustomerId("customerId-deleted");
+        deletedCustomer.setIsActive(false);
+
+        when(repo.findAll()).thenReturn(Flux.just(activeCustomer, legacyCustomer, deletedCustomer));
+
+        StepVerifier.create(customerService.getAllCustomers())
+                .expectNextMatches(dto -> dto.getCustomerId().equals("customerId-active"))
+                .expectNextMatches(dto -> dto.getCustomerId().equals("customerId-legacy"))
+                .verifyComplete();
     }
 
     @Test
@@ -231,6 +254,84 @@ class CustomerServiceImplTest {
         verify(repo, never()).deleteById(anyString());
     }
 
+    @Test
+    void softDeleteCustomerByCustomerId_WithPhoto_ShouldDeletePhotoAndCartThenDeactivate() {
+        String customerId = "customerId-123";
+        String photoId = "photo-999";
+        Customer existingCustomer = buildCustomer();
+        existingCustomer.setPhotoId(photoId);
+        existingCustomer.setIsActive(true);
+
+        when(repo.findCustomerByCustomerId(customerId)).thenReturn(Mono.just(existingCustomer));
+        when(filesServiceClient.deleteFile(photoId)).thenReturn(Mono.empty());
+        when(cartServiceClient.deleteCartByCustomerId(customerId)).thenReturn(Mono.empty());
+        when(repo.save(any(Customer.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(customerService.softDeleteCustomerByCustomerId(customerId))
+                .consumeNextWith(response -> assertEquals(customerId, response.getCustomerId()))
+                .verifyComplete();
+
+        InOrder inOrder = inOrder(filesServiceClient, cartServiceClient, repo);
+        inOrder.verify(filesServiceClient).deleteFile(photoId);
+        inOrder.verify(cartServiceClient).deleteCartByCustomerId(customerId);
+        inOrder.verify(repo).save(argThat(customer ->
+                Boolean.FALSE.equals(customer.getIsActive()) && customer.getPhotoId() == null));
+        verify(repo, never()).deleteById(anyString());
+    }
+
+    @Test
+    void softDeleteCustomerByCustomerId_WhenPhotoDeletionFails_ShouldNotDeactivateCustomerOrDeleteCart() {
+        String customerId = "customerId-123";
+        String photoId = "photo-999";
+        Customer existingCustomer = buildCustomer();
+        existingCustomer.setPhotoId(photoId);
+        existingCustomer.setIsActive(true);
+
+        when(repo.findCustomerByCustomerId(customerId)).thenReturn(Mono.just(existingCustomer));
+        when(filesServiceClient.deleteFile(photoId))
+                .thenReturn(Mono.error(new FailedDependencyException("Failed to delete file from Files Service")));
+
+        StepVerifier.create(customerService.softDeleteCustomerByCustomerId(customerId))
+                .expectError(FailedDependencyException.class)
+                .verify();
+
+        verify(cartServiceClient, never()).deleteCartByCustomerId(anyString());
+        verify(repo, never()).save(any(Customer.class));
+    }
+
+    @Test
+    void softDeleteCustomerByCustomerId_WhenCustomerDoesNotExist_ShouldThrowNotFound() {
+        String customerId = "customerId-123";
+
+        when(repo.findCustomerByCustomerId(customerId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(customerService.softDeleteCustomerByCustomerId(customerId))
+                .expectErrorMatches(error -> error instanceof NotFoundException &&
+                        error.getMessage().equals("Customer id not found: " + customerId))
+                .verify();
+
+        verify(filesServiceClient, never()).deleteFile(anyString());
+        verify(cartServiceClient, never()).deleteCartByCustomerId(anyString());
+        verify(repo, never()).save(any(Customer.class));
+    }
+
+    @Test
+    void softDeleteCustomerByCustomerId_WhenAlreadyInactive_ShouldStillSucceed() {
+        String customerId = "customerId-123";
+        Customer inactiveCustomer = buildCustomer();
+        inactiveCustomer.setIsActive(false);
+
+        when(repo.findCustomerByCustomerId(customerId)).thenReturn(Mono.just(inactiveCustomer));
+        when(cartServiceClient.deleteCartByCustomerId(customerId)).thenReturn(Mono.empty());
+        when(repo.save(any(Customer.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(customerService.softDeleteCustomerByCustomerId(customerId))
+                .consumeNextWith(response -> assertEquals(customerId, response.getCustomerId()))
+                .verifyComplete();
+
+        verify(filesServiceClient, never()).deleteFile(anyString());
+        verify(repo).save(argThat(customer -> Boolean.FALSE.equals(customer.getIsActive())));
+    }
 
     @Test
     void updateCustomer_ShouldSucceed() {

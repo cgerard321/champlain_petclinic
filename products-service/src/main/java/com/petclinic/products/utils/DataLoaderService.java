@@ -15,12 +15,14 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class DataLoaderService implements CommandLineRunner {
@@ -44,23 +46,6 @@ public class DataLoaderService implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // If the database is not empty, do not load data
-        try {
-            restoreMissingReferencedLegacyImages();
-            if (
-                    Boolean.TRUE.equals(productRepository.findAll().hasElements().block()) ||
-                            Boolean.TRUE.equals(productBundleRepository.findAll().hasElements().block()) ||
-                            Boolean.TRUE.equals(imageRepository.findAll().hasElements().block()) ||
-                            Boolean.TRUE.equals(ratingRepository.findAll().hasElements().block()) ||
-                            Boolean.TRUE.equals(productTypeRepository.findAll().hasElements().block())) {
-                System.out.println("Database not empty, skipping data loading");
-                return;
-            }
-        } catch (Exception e) {
-            System.out.println("Error checking if products exist: " + e.getMessage());
-            return;
-        }
-
         SeededProduct seededProduct1 = seedProduct("06a7d573-bcab-4db3-956f-773324b92a80", "Dog Food", "Premium dry food for adult dogs", 45.99, 44, "586d0700-57db-4312-b6f1-413b79dd018c", DeliveryType.DELIVERY, ProductStatus.AVAILABLE, "2002-09-26", "dog_food.png", "08a5af6b-3501-4157-9a99-1aa82387b9e4");
         SeededProduct seededProduct2 = seedProduct("98f7b33a-d62a-420a-a84a-05a27c85fc91", "Cat Litter", "Clumping cat litter with odor control", 12.99, 3, "6a247af0-52d9-4179-a5b4-ad4b92e686b1", DeliveryType.PICKUP, ProductStatus.AVAILABLE, "2020-06-30", "cat_litter.png", "36b06c01-10f3-4645-9c45-900afc5a8b8a");
         SeededProduct seededProduct3 = seedProduct("baee7cd2-b67a-449f-b262-91f45dde8a6d", "Flea Collar", "Flea and tick prevention for small dogs", 9.99, 53, "86627454-970e-41a9-baa6-71ab759bf66c", DeliveryType.DELIVERY, ProductStatus.AVAILABLE, "2019-09-29", "flea_collar.png", "be4e60a4-2369-46e8-abee-20c1a8dce3e5");
@@ -736,17 +721,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .filter(Objects::nonNull)
                 .toList());
 
-        Flux.just(bundle1, bundle2, bundle3)
-                .flatMap(s -> productBundleRepository.save(s)
-                        .log(s.toString()))
-                .subscribe();
-
-        Flux.fromIterable(seededProducts)
-                .flatMap(s -> productRepository.save(s)
-                        .log(s.toString()))
-                .subscribe();
-
-        Flux.just(
+        List<Rating> seededRatings = List.of(
                         rating1prod1, rating2prod1, rating3prod1,
                         rating1prod2, rating2prod2, rating3prod2,
                         rating1prod3, rating2prod3, rating3prod3,
@@ -755,46 +730,226 @@ public class DataLoaderService implements CommandLineRunner {
                         rating1prod6, rating2prod6, rating3prod6,
                         rating1prod7, rating2prod7, rating3prod7,
                         rating1prod8, rating2prod8, rating3prod8
-                )
-                .flatMap(s -> ratingRepository.save(s)
-                        .log(s.toString()))
-                .subscribe();
+                );
 
-        Flux.fromIterable(seededImages)
-                .flatMap(s -> imageRepository.save(s)
-                        .log(s.toString()))
-                .subscribe();
+        List<ProductTypeDb> seededProductTypes = List.of(
+                productType1, productType2, productType3, productType4);
+        List<ProductBundle> seededBundles = List.of(bundle1, bundle2, bundle3);
 
-        Flux.just(productType1, productType2, productType3, productType4)
-                .flatMap(s -> productTypeRepository.save(s)
-                        .log(s.toString()))
-                .subscribe();
+        seedData(seededProductTypes, seededImages, seededProducts, seededRatings, seededBundles)
+                .then(backfillSeedTranslations())
+                .then(restoreMissingReferencedLegacyImages())
+                .subscribe(
+                        ignored -> { },
+                        error -> log.error("Error loading product seed data", error),
+                        () -> log.info("Product seed data loading completed"));
     }
 
-    private void restoreMissingReferencedLegacyImages() {
-        Set<String> referencedImageIds = productRepository.findAll()
+    // Only missing translations of unchanged seed text are filled on existing databases.
+    private Mono<Void> backfillSeedTranslations() {
+        return Flux.fromIterable(productTranslations())
+                .concatMap(seed -> productRepository.backfillFrenchName(seed.productId(), seed.name(), seed.nameFr())
+                        .then(productRepository.backfillFrenchDescription(seed.productId(), seed.description(), seed.descriptionFr())))
+                .then();
+    }
+
+    private static List<ProductTranslation> productTranslations() {
+        return List.of(
+                new ProductTranslation("06a7d573-bcab-4db3-956f-773324b92a80", "Dog Food", "Nourriture pour chiens", "Premium dry food for adult dogs", "Nourriture sèche de qualité supérieure pour chiens adultes"),
+                new ProductTranslation("98f7b33a-d62a-420a-a84a-05a27c85fc91", "Cat Litter", "Litière pour chats", "Clumping cat litter with odor control", "Litière agglomérante pour chats avec contrôle des odeurs"),
+                new ProductTranslation("baee7cd2-b67a-449f-b262-91f45dde8a6d", "Flea Collar", "Collier antipuces", "Flea and tick prevention for small dogs", "Protection contre les puces et les tiques pour petits chiens"),
+                new ProductTranslation("ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a", "Bird Cage", "Cage pour oiseaux", "Spacious cage for small birds like parakeets", "Cage spacieuse pour petits oiseaux comme les perruches"),
+                new ProductTranslation("4d508fb7-f1f2-4952-829d-10dd7254cf26", "Aquarium Filter", "Filtre pour aquarium", "Filter system for small to medium-sized aquariums", "Système de filtration pour aquariums de petite et moyenne taille"),
+                new ProductTranslation("a6a27433-e7a9-4e78-8ae3-0cb57d756863", "Horse Saddle", "Selle pour cheval", "Lightweight saddle for riding horses", "Selle légère pour monter à cheval"),
+                new ProductTranslation("4affcab7-3ab1-4917-a114-2b6301aa5565", "Rabbit Hutch", "Clapier pour lapins", "Outdoor wooden hutch for rabbits", "Clapier extérieur en bois pour lapins"),
+                new ProductTranslation("1501f30e-1db1-44b2-a555-bca6f64450e4", "Fish Tank Heater", "Chauffe-eau pour aquarium", "Submersible heater for tropical fish tanks", "Chauffe-eau submersible pour aquariums de poissons tropicaux"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7001", "Senior Dog Joint Supplement", "Supplément articulaire pour chiens âgés", "Glucosamine chews supporting mobility in older dogs", "Bouchées à la glucosamine favorisant la mobilité des chiens âgés"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7002", "Puppy Deworming Tablets", "Comprimés vermifuges pour chiots", "Broad-spectrum deworming treatment for puppies", "Traitement vermifuge à large spectre pour chiots"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7003", "Ear Cleaning Solution", "Solution nettoyante pour les oreilles", "Gentle cleanser for routine canine and feline ear care", "Nettoyant doux pour les soins réguliers des oreilles des chiens et des chats"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7004", "Veterinary Dental Gel", "Gel dentaire vétérinaire", "Enzymatic gel for reducing plaque and tartar", "Gel enzymatique pour réduire la plaque et le tartre"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7005", "Calming Chews", "Bouchées apaisantes", "Herbal calming supplement for stressful visits and travel", "Supplément apaisant à base de plantes pour les visites et les déplacements stressants"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7006", "Cat Hairball Remedy", "Remède contre les boules de poils pour chats", "Lubricating paste to help prevent hairballs", "Pâte lubrifiante pour aider à prévenir les boules de poils"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7007", "Wound Care Spray", "Vaporisateur pour le soin des plaies", "Antiseptic spray for minor cuts and abrasions", "Vaporisateur antiseptique pour les coupures et les éraflures mineures"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7008", "Flea Treatment Drops", "Gouttes antipuces", "Monthly topical flea and tick treatment for cats", "Traitement topique mensuel contre les puces et les tiques pour chats"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7009", "Stainless Steel Food Bowl", "Gamelle en acier inoxydable", "Non-slip bowl suitable for cats and small dogs", "Gamelle antidérapante pour chats et petits chiens"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7010", "Reflective Dog Leash", "Laisse réfléchissante pour chiens", "Reflective nylon leash for safer evening walks", "Laisse en nylon réfléchissant pour des promenades plus sûres en soirée"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7011", "Adjustable Recovery Collar", "Collerette de protection réglable", "Soft adjustable collar for post-treatment recovery", "Collerette souple et réglable pour la convalescence après un traitement"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7012", "Orthopedic Pet Bed", "Lit orthopédique pour animaux", "Supportive washable bed for aging pets", "Lit lavable offrant un bon soutien aux animaux vieillissants"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7013", "Cat Scratching Post", "Griffoir pour chats", "Compact sisal scratching post with toy attachment", "Griffoir compact en sisal avec jouet fixé"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7014", "Grooming Brush Set", "Ensemble de brosses de toilettage", "Brush and comb set for routine coat maintenance", "Ensemble de brosses et de peignes pour l’entretien régulier du pelage"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7015", "Portable Water Bottle", "Bouteille d’eau portative", "Leak-resistant travel bottle for dogs", "Bouteille de voyage étanche pour chiens"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7016", "Heated Pet Blanket", "Couverture chauffante pour animaux", "Low-voltage fleece blanket for cold-weather comfort", "Couverture en molleton à basse tension pour le confort par temps froid"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7017", "Sensitive Stomach Dog Food", "Nourriture pour chiens à l’estomac sensible", "Easily digestible dry food for adult dogs", "Nourriture sèche facile à digérer pour chiens adultes"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7018", "Indoor Cat Formula", "Nourriture pour chats d’intérieur", "Balanced dry food formulated for indoor cats", "Nourriture sèche équilibrée formulée pour les chats d’intérieur"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7019", "Kitten Starter Food", "Nourriture de départ pour chatons", "Nutrient-rich food for growing kittens", "Nourriture riche en nutriments pour chatons en croissance"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7020", "Small Animal Timothy Hay", "Foin de fléole pour petits animaux", "Fresh timothy hay for rabbits and guinea pigs", "Foin de fléole frais pour lapins et cochons d’Inde"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7021", "Tropical Fish Flakes", "Flocons pour poissons tropicaux", "Daily flake food for tropical aquarium fish", "Nourriture quotidienne en flocons pour poissons tropicaux d’aquarium"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7022", "Parakeet Seed Blend", "Mélange de graines pour perruches", "Mixed seed blend for small companion birds", "Mélange de graines pour petits oiseaux de compagnie"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7023", "Senior Cat Wet Food Pack", "Assortiment de nourriture humide pour chats âgés", "Moisture-rich meal pack for senior cats", "Assortiment de repas riches en eau pour chats âgés"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7024", "Equine Electrolyte Supplement", "Supplément d’électrolytes pour chevaux", "Electrolyte powder for active horses", "Poudre d’électrolytes pour chevaux actifs"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7025", "Digital Pet Scale", "Balance numérique pour animaux", "Precise scale for monitoring pet weight at home", "Balance précise pour surveiller le poids des animaux à la maison"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7026", "Automatic Feeder", "Distributeur automatique de nourriture", "Programmable feeder for scheduled meals", "Distributeur programmable pour des repas à heures fixes"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7027", "Compact Pet Carrier", "Cage de transport compacte", "Ventilated carrier for cats and small dogs", "Cage de transport ventilée pour chats et petits chiens"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7028", "Aquarium Water Test Kit", "Trousse d’analyse de l’eau d’aquarium", "Multi-parameter test kit for aquarium water quality", "Trousse d’analyse multiparamètre pour la qualité de l’eau d’aquarium"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7029", "LED Examination Light", "Lampe d’examen à DEL", "Rechargeable light for home health checks", "Lampe rechargeable pour les examens de santé à domicile"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7030", "Pet Nail Grinder", "Lime électrique pour griffes", "Quiet rechargeable grinder for routine nail care", "Lime électrique silencieuse et rechargeable pour l’entretien régulier des griffes"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7031", "Foldable Exercise Pen", "Enclos d’exercice pliable", "Portable enclosure for puppies and small animals", "Enclos portatif pour chiots et petits animaux"),
+                new ProductTranslation("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7032", "Canine First Aid Kit", "Trousse de premiers soins pour chiens", "Practical first aid kit for common pet emergencies", "Trousse pratique de premiers soins pour les urgences courantes chez les animaux")
+        );
+    }
+
+    private record ProductTranslation(String productId, String name, String nameFr,
+                                      String description, String descriptionFr) { }
+
+    private Flux<Void> seedData(
+            List<ProductTypeDb> productTypes,
+            List<Image> images,
+            List<Product> products,
+            List<Rating> ratings,
+            List<ProductBundle> bundles) {
+        return saveSeededProductTypes(productTypes)
+                .then(saveSeededImages(images))
+                .then(saveSeededProducts(products))
+                .then(saveSeededRatings(ratings))
+                .thenMany(saveSeededBundles(bundles));
+    }
+
+    private Mono<Void> saveSeededProductTypes(List<ProductTypeDb> productTypes) {
+        return Flux.fromIterable(productTypes)
+                .concatMap(productType -> safeMono(productTypeRepository
+                        .findByProductTypeId(productType.getProductTypeId()))
+                        .hasElement()
+                        .flatMap(exists -> exists
+                                ? Mono.empty()
+                                : safeMono(productTypeRepository.save(productType)).then()))
+                .then();
+    }
+
+    private Mono<Void> saveSeededImages(List<Image> images) {
+        return Flux.fromIterable(images)
+                .filter(Objects::nonNull)
+                .concatMap(image -> safeMono(imageRepository.findImageByImageId(image.getImageId()))
+                        .hasElement()
+                        .flatMap(exists -> exists
+                                ? Mono.empty()
+                                : loadAndSaveSeedImage(image)))
+                .then();
+    }
+
+    private Mono<Void> loadAndSaveSeedImage(Image image) {
+        return Mono.defer(() -> {
+            try {
+                byte[] imageData = loadImageData("images/" + image.getImageName());
+                Image loadedImage = Image.builder()
+                        .imageId(image.getImageId())
+                        .imageName(image.getImageName())
+                        .imageType(image.getImageType())
+                        .imageData(imageData)
+                        .build();
+                return safeMono(imageRepository.save(loadedImage)).then();
+            } catch (Exception error) {
+                log.warn("Unable to load seed image {}; skipping it", image.getImageName(), error);
+                return Mono.empty();
+            }
+        });
+    }
+
+    private Mono<Void> saveSeededProducts(List<Product> products) {
+        return Flux.fromIterable(products)
+                .concatMap(product -> productExists(product)
+                        .flatMap(exists -> exists
+                                ? Mono.empty()
+                                : safeMono(productRepository.save(product)).then()))
+                .then();
+    }
+
+    private Mono<Boolean> productExists(Product product) {
+        Mono<Boolean> byId = product.getProductId() == null
+                ? Mono.just(false)
+                : safeMono(productRepository.findProductByProductId(product.getProductId()))
+                        .hasElement();
+
+        return byId.flatMap(exists -> exists
+                ? Mono.just(true)
+                : safeFlux(productRepository
+                        .findByProductNameContainingIgnoreCase(product.getProductName()))
+                        .filter(existing -> product.getProductName().equals(existing.getProductName()))
+                        .hasElements());
+    }
+
+    private Mono<Void> saveSeededRatings(List<Rating> ratings) {
+        return Flux.fromIterable(ratings)
+                .concatMap(rating -> safeMono(productRepository
+                        .findProductByProductId(rating.getProductId()))
+                        .hasElement()
+                        .flatMap(productExists -> productExists
+                                ? safeMono(ratingRepository.findRatingByCustomerIdAndProductId(
+                                        rating.getCustomerId(), rating.getProductId()))
+                                        .hasElement()
+                                        .flatMap(ratingExists -> ratingExists
+                                                ? Mono.empty()
+                                                : safeMono(ratingRepository.save(rating)).then())
+                                : Mono.empty()))
+                .then();
+    }
+
+    private Mono<Void> saveSeededBundles(List<ProductBundle> bundles) {
+        return Flux.fromIterable(bundles)
+                .concatMap(bundle -> bundleProductsExist(bundle)
+                        .flatMap(productsExist -> productsExist
+                                ? bundleExists(bundle)
+                                        .flatMap(bundleExists -> bundleExists
+                                                ? Mono.empty()
+                                                : safeMono(productBundleRepository.save(bundle)).then())
+                                : Mono.empty()))
+                .then();
+    }
+
+    private Mono<Boolean> bundleProductsExist(ProductBundle bundle) {
+        return safeFlux(productRepository.findAllByProductIdIn(bundle.getProductIds()))
+                .map(Product::getProductId)
+                .collectList()
+                .map(existingIds -> Set.copyOf(existingIds)
+                        .containsAll(bundle.getProductIds()));
+    }
+
+    private Mono<Boolean> bundleExists(ProductBundle bundle) {
+        return safeMono(productBundleRepository.findByBundleId(bundle.getBundleId()))
+                .hasElement()
+                .flatMap(existsById -> existsById
+                        ? Mono.just(true)
+                        : bundle.getProductIds().isEmpty()
+                                ? Mono.just(false)
+                                : safeFlux(productBundleRepository.findAllByProductIdsContaining(
+                                                bundle.getProductIds().get(0)))
+                                        .filter(existing -> bundle.getBundleName().equals(existing.getBundleName())
+                                                && bundle.getProductIds().equals(existing.getProductIds()))
+                                        .hasElements());
+    }
+
+    private Mono<Void> restoreMissingReferencedLegacyImages() {
+        return safeFlux(productRepository.findAll())
                 .map(Product::getImageId)
                 .filter(imageId -> imageId != null && !imageId.isBlank())
-                .collectList()
-                .map(Set::copyOf)
-                .block();
-
-        if (referencedImageIds == null || referencedImageIds.isEmpty()) {
-            return;
-        }
-
-        Flux.fromIterable(legacyImageSeeds())
-                .filter(seed -> referencedImageIds.contains(seed.imageId()))
+                .collect(Collectors.toSet())
+                .flatMapMany(referencedImageIds -> Flux.fromIterable(legacyImageSeeds())
+                        .filter(seed -> referencedImageIds.contains(seed.imageId())))
                 .concatMap(seed -> imageRepository.findImageByImageId(seed.imageId())
                         .switchIfEmpty(Mono.defer(() -> saveLegacyImage(seed))))
-                .then()
-                .block();
+                .then();
+    }
+
+    private <T> Mono<T> safeMono(Mono<T> publisher) {
+        return publisher == null ? Mono.empty() : publisher;
+    }
+
+    private <T> Flux<T> safeFlux(Flux<T> publisher) {
+        return publisher == null ? Flux.empty() : publisher;
     }
 
     private Mono<Image> saveLegacyImage(LegacyImageSeed seed) {
         try {
-            byte[] imageData = new ClassPathResource(seed.resourcePath())
-                    .getContentAsByteArray();
+            byte[] imageData = loadImageData(seed.resourcePath());
             Image image = Image.builder()
                     .imageId(seed.imageId())
                     .imageName(seed.imageName())
@@ -805,6 +960,10 @@ public class DataLoaderService implements CommandLineRunner {
         } catch (Exception error) {
             return Mono.error(error);
         }
+    }
+
+    byte[] loadImageData(String resourcePath) throws IOException {
+        return new ClassPathResource(resourcePath).getContentAsByteArray();
     }
 
     private List<LegacyImageSeed> legacyImageSeeds() {
@@ -888,6 +1047,12 @@ public class DataLoaderService implements CommandLineRunner {
                 .deliveryType(deliveryType)
                 .build();
 
+        productTranslations().stream()
+                .filter(seed -> seed.productId().equals(productId))
+                .findFirst().ifPresent(seed -> {
+                    product.setProductNameFr(seed.nameFr());
+                    product.setProductDescriptionFr(seed.descriptionFr());
+                });
         return new SeededProduct(product, image);
     }
 

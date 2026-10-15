@@ -1,3 +1,36 @@
 p {
   max-width: 100%;
 }
+
+.visits-page {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.visits-page--sidebar-hidden {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.visits-page__content {
+  min-width: 0;
+}
+
+.visits-page__show-sidebar {
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  color: #111;
+  cursor: pointer;
+  font: inherit;
+}
+
+@media (width <= 700px) {
+  .visits-page {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+}

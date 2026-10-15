@@ -6,7 +6,12 @@ import { EMPTY, filter, map, Observable, switchMap } from 'rxjs';
 import { CurrentUserResponse } from '@core/models/current-user-response';
 import { AuthState } from '@core/services/auth-state';
 import { SseClient } from '@core/services/sse-client';
-import { BillRecord, BillRequestModel, BillUpdateRequest } from '@features/bill/models/bill.model';
+import {
+  BillRecord,
+  BillRequestModel,
+  BillUpdateRequest,
+  PaymentRequest,
+} from '@features/bill/models/bill.model';
 import { Customer } from '@features/bill/models/customer.model';
 import { Veterinarian } from '@features/bill/models/vet.model';
 import { Roles } from '@shared/models/roles';
@@ -25,14 +30,20 @@ export class BillService {
   private readonly auth = inject(AuthState);
 
   private readonly baseUrl = '/api/gateway/bills';
-  createBill(body: BillRequestModel): Observable<BillRecord> {
+  createBill(
+    body: BillRequestModel,
+    sendEmail = false,
+    currency: 'CAD' | 'USD' = 'CAD',
+  ): Observable<BillRecord> {
     const request = {
       ...body,
       date: formatDate(body.date, 'yyyy-MM-dd', 'en-US'),
     };
 
     return this.http
-      .post<BillApiRecord>(this.baseUrl, request)
+      .post<BillApiRecord>(this.baseUrl, request, {
+        params: { sendEmail, currency },
+      })
       .pipe(map((bill) => this.toBillRecord(bill)));
   }
   getVetByVetId(vetId: string): Observable<Veterinarian> {
@@ -84,6 +95,38 @@ export class BillService {
   archiveEligibleBills(): Observable<void> {
     return this.http.patch<void>(`${this.baseUrl}/archive`, null);
   }
+  getReceptionistBills(): Observable<BillRecord> {
+    if (!this.auth.hasRole(Roles.receptionist)) {
+      return EMPTY;
+    }
+
+    return this.getBillsFromUrl(this.baseUrl);
+  }
+
+  payBill(bill: BillRecord, payment: PaymentRequest): Observable<BillRecord> {
+    return this.http
+      .post<BillApiRecord>(
+        `${this.baseUrl}/customers/${bill.customerId}/${bill.billId}/pay`,
+        payment,
+      )
+      .pipe(map((result) => this.toBillRecord(result)));
+  }
+
+  setInterestExempt(billId: string, exempt: boolean): Observable<void> {
+    return this.http.patch<void>(
+      `/api/v2/gateway/bills/${encodeURIComponent(billId)}/exempt-interest`,
+      null,
+      { params: { exempt } },
+    );
+  }
+
+  downloadBillPdf(billId: string, currency: 'CAD' | 'USD' = 'CAD'): Observable<Blob> {
+    return this.http.get(`/api/v2/gateway/bills/${encodeURIComponent(billId)}/pdf`, {
+      params: { currency },
+      responseType: 'blob',
+    });
+  }
+
   private getBillsFromUrl(url: string): Observable<BillRecord> {
     return this.sse
       .stream(url, {

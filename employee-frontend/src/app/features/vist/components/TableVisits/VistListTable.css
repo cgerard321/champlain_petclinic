@@ -36,6 +36,14 @@ td button {
   white-space: nowrap;
 }
 
+.actions {
+  text-align: center;
+}
+
+td button + button {
+  margin-left: 8px;
+}
+
 tr:last-child td {
   border-bottom: none;
 }

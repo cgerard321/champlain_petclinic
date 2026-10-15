@@ -10,6 +10,9 @@ import UploadPetPhotoModal from '@/features/customers/components/UploadPetPhotoM
 import { deletePet } from '@/features/customers/api/deletePet';
 import { deleteCustomerPhoto } from '@/features/customers/api/deleteCustomerPhoto';
 import { deletePetPhoto } from '@/features/customers/api/deletePetPhoto';
+import { softDeleteCustomer } from '@/features/customers/api/softDeleteCustomer';
+import { useNavigate } from 'react-router-dom';
+import { AppRoutePaths } from '@/shared/models/path.routes';
 import {
   getPetTypeName,
   getPetTypeImage,
@@ -53,7 +56,8 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
   onProfilePhotoUploaded,
   onPetPhotoUploaded,
 }): JSX.Element => {
-  const { user } = useUser();
+  const { user, logout } = useUser();
+  const navigate = useNavigate();
   const { t } = useTranslation('customers');
 
   const [error, setError] = useState<string | null>(null);
@@ -178,6 +182,28 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
     } catch (error) {
       console.error('Error deleting profile photo:', error);
       alert('Failed to delete profile photo. Please try again.');
+    }
+  };
+
+  const handleDeleteAccount = async (): Promise<void> => {
+    if (!user.userId) return;
+
+    const confirmed = await confirm({
+      title: t('deleteAccount.title'),
+      message: t('deleteAccount.message'),
+      confirmText: t('deleteAccount.confirm'),
+      cancelText: t('deleteAccount.cancel'),
+    });
+
+    if (!confirmed) return;
+
+    try {
+      await softDeleteCustomer(user.userId);
+      await logout();
+      navigate(AppRoutePaths.Login);
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      alert(t('deleteAccount.failed'));
     }
   };
 
@@ -427,6 +453,13 @@ const CustomerProfilePage: React.FC<CustomerProfilePageProps> = ({
             onClick={onUpdateProfileClick}
           >
             {t('buttons.update')}
+          </button>
+          <button
+            className="customers-delete-pet-button"
+            style={{ alignSelf: 'flex-end', marginTop: '8px' }}
+            onClick={handleDeleteAccount}
+          >
+            {t('buttons.deleteAccount')}
           </button>
         </div>
       </div>
