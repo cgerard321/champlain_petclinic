@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
@@ -44,7 +45,7 @@ interface SupplyFormValue {
 }
 
 @Component({
-  imports: [DecimalPipe, MatIconModule, Table],
+  imports: [DecimalPipe, MatIconModule, MatMenuModule, Table],
   selector: 'app-supply',
   styleUrl: './supply-page.css',
   templateUrl: './supply-page.html',
@@ -126,7 +127,7 @@ export class SupplyPage {
 
   protected readonly isFrench = this.locale.startsWith('fr');
   protected readonly tableLabel = $localize`:@@supply.table.label:Articles dans cet inventaire`;
-  protected readonly downloadLabel = $localize`:@@supply.actions.download:Télécharger`;
+  protected readonly downloadLabel = $localize`:@@supply.actions.download:Télécharger PDF`;
   protected readonly downloadingLabel = $localize`:@@supply.actions.downloading:Téléchargement…`;
   protected readonly consumeLabel = $localize`:@@supply.actions.consume:Utiliser l'article`;
   protected readonly cannotConsumeStockLabel = $localize`:@@supply.actions.cannotConsumeStock:Impossible d'utiliser l'article : rupture de stock`;

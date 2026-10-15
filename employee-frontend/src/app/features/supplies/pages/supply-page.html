@@ -162,7 +162,7 @@
     @if (canManageSupplies()) {
       <button
         type="button"
-        class="edit-button"
+        class="edit-button desktop-action-button"
         (click)="editSupply(supply)"
         i18n="@@supply.actions.edit"
       >
@@ -170,7 +170,7 @@
       </button>
       <button
         type="button"
-        class="delete-button"
+        class="delete-button desktop-action-button"
         (click)="deleteSupply(supply)"
         i18n="@@supply.actions.deleteButton"
       >
@@ -178,12 +178,31 @@
       </button>
       <button
         type="button"
-        class="history-button"
+        class="history-button desktop-action-button"
         (click)="openSupplyHistory(supply)"
         i18n="@@supply.actions.history"
       >
         Historique
       </button>
+      <button
+        type="button"
+        class="history-button mobile-actions-button"
+        [matMenuTriggerFor]="supplyActionsMenu"
+        i18n="@@supply.fields.actions"
+      >
+        Actions
+      </button>
+      <mat-menu #supplyActionsMenu="matMenu">
+        <button mat-menu-item (click)="editSupply(supply)" i18n="@@supply.actions.edit">
+          Modifier
+        </button>
+        <button mat-menu-item (click)="deleteSupply(supply)" i18n="@@supply.actions.deleteButton">
+          Supprimer
+        </button>
+        <button mat-menu-item (click)="openSupplyHistory(supply)" i18n="@@supply.actions.history">
+          Historique
+        </button>
+      </mat-menu>
     }
     @if (canConsumeSupplies()) {
       <button
