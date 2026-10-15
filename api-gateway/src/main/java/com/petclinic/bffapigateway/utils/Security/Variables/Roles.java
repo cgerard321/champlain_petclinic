@@ -9,7 +9,7 @@ package com.petclinic.bffapigateway.utils.Security.Variables;
 public enum Roles {
     ADMIN ( "ADMIN"),
     VET ( "VET"),
-    OWNER ( "OWNER"),
+    CUST ( "CUST"),
     RECEPTIONIST ( "RECEPTIONIST"),
     INVENTORY_MANAGER ( "INVENTORY_MANAGER"),
     ANONYMOUS ( "ANONYMOUS"),

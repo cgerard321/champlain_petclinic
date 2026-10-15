@@ -608,7 +608,7 @@ public class AuthServiceClientIntegrationTest {
     @Test
     @DisplayName("Should get all roles")
     void shouldGetAllRoles() throws Exception {
-        Role role1 = Role.builder().name("OWNER").build();
+        Role role1 = Role.builder().name("CUST").build();
         Role role2 = Role.builder().name("ADMIN").build();
 
 

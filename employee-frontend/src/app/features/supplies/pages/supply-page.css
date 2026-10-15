@@ -70,6 +70,7 @@
 
 .status-badge {
   display: inline-block;
+  white-space: nowrap;
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 0.8rem;
@@ -153,14 +154,20 @@
 
 .action-buttons {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
+  width: max-content;
 }
 
 .edit-button,
 .history-button,
-.delete-button,
+.delete-button {
+  padding: 7px 8px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
 .consume-button {
   padding: 10px 18px;
   font-size: 0.875rem;
@@ -183,6 +190,10 @@
 .delete-button:hover {
   border-color: rgb(183 28 28 / 100%);
   background: rgb(142 0 0 / 100%);
+}
+
+.mobile-actions-button {
+  display: none;
 }
 
 .dialog-cancel-button {
@@ -245,7 +256,7 @@
 .download-pdf-button:hover .download-label,
 .download-pdf-button:focus-visible .download-label,
 .download-pdf-button.expanded .download-label {
-  max-width: 8rem;
+  max-width: 13rem;
   margin-left: 8px;
   opacity: 1;
 }
@@ -463,6 +474,16 @@
 
 .no-expiration {
   color: var(--text-secondary);
+}
+
+@media (width <= 1100px) {
+  .desktop-action-button {
+    display: none;
+  }
+
+  .mobile-actions-button {
+    display: inline-block;
+  }
 }
 
 @media (width <= 850px) {

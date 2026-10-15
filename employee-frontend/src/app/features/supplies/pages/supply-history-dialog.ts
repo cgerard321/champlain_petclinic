@@ -8,7 +8,7 @@ import {
   MatDialogTitle,
 } from '@angular/material/dialog';
 
-import { SupplyAuditEntry } from '@features/supplies/models/supply';
+import { SupplyAuditAction, SupplyAuditEntry } from '@features/supplies/models/supply';
 import { SupplyService } from '@features/supplies/services/supply-service';
 
 export interface SupplyHistoryDialogData {
@@ -43,6 +43,21 @@ export class SupplyHistoryDialog {
         this.loading.set(false);
       },
     });
+  }
+
+  protected actionLabel(action: SupplyAuditAction): string {
+    switch (action) {
+      case 'CREATED':
+        return $localize`:@@supply.history.actions.created:Créé`;
+      case 'QUANTITY_UPDATED':
+        return $localize`:@@supply.history.actions.quantityUpdated:Quantité modifiée`;
+      case 'CONSUMED':
+        return $localize`:@@supply.history.actions.consumed:Utilisé`;
+      case 'DELETED':
+        return $localize`:@@supply.history.actions.deleted:Supprimé`;
+      default:
+        return action;
+    }
   }
 
   protected close(): void {

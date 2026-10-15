@@ -56,8 +56,8 @@ export function CartProvider({
     return [];
   }, [user?.roles]);
 
-  const isOwner = useMemo(
-    () => roleList.some(role => role === 'OWNER'),
+  const isCustomer = useMemo(
+    () => roleList.some(role => role === 'CUST'),
     [roleList]
   );
 
@@ -81,7 +81,7 @@ export function CartProvider({
     cartId: string | null;
     cartCount: number;
   }> => {
-    if (!isOwner || !user?.userId) {
+    if (!isCustomer || !user?.userId) {
       setCartId(null);
       setCartCount(0);
       return { cartId: null, cartCount: 0 };
@@ -106,7 +106,7 @@ export function CartProvider({
 
     setCartCount(nextCount);
     return { cartId: id, cartCount: nextCount };
-  }, [user?.userId, cartId, isOwner]);
+  }, [user?.userId, cartId, isCustomer]);
 
   // Force sync after "Add to Cart" to prevent UI mismatch
   const syncAfterAddToCart = useCallback(async () => {
@@ -124,7 +124,7 @@ export function CartProvider({
   // When the user logs in, check if we already have cart data in localStorage.
   // If not, fetch it from the API to keep the cart state in sync.
   useEffect(() => {
-    if (!isOwner) {
+    if (!isCustomer) {
       setCartId(null);
       setCartCount(0);
       return;
@@ -148,11 +148,11 @@ export function CartProvider({
     return () => {
       alive = false;
     };
-  }, [user?.userId, refreshFromAPI, isOwner]);
+  }, [user?.userId, refreshFromAPI, isCustomer]);
 
   // Sync with updates from other components/tabs (Products page, etc.)
   useEffect(() => {
-    if (!isOwner) {
+    if (!isCustomer) {
       setCartCountState(0);
       setCartIdState(null);
       return;
@@ -180,7 +180,7 @@ export function CartProvider({
       );
       window.removeEventListener('storage', onStorage);
     };
-  }, [isOwner]);
+  }, [isCustomer]);
 
   const value = useMemo<CartContextType>(
     () => ({
