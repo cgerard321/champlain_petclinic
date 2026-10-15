@@ -1,6 +1,13 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProductText } from '../utils/useProductText';
 import './Invoice.css';
-import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
+import {
+  computeTaxes,
+  formatTaxRate,
+  roundToCents,
+  taxLabelKey,
+} from '../utils/taxUtils';
 import type { ShippingMethod } from '@/shared/api/cart';
 
 export interface InvoiceItem {
@@ -48,6 +55,8 @@ function Invoice({
   onIndexChange,
   onClose,
 }: Props): JSX.Element | null {
+  const { t } = useTranslation('carts');
+  const { localizedName } = useProductText(invoices?.[index]?.items ?? []);
   interface WindowWithHtml2Pdf extends Window {
     html2pdf?: unknown;
   }
@@ -266,7 +275,7 @@ function Invoice({
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Invoice receipt"
+      aria-label={t('invoice.label')}
     >
       <div
         id={`invoice-print-${inv.invoiceId}`}
@@ -276,54 +285,68 @@ function Invoice({
         <div className="invoice-body">
           {inv.billing && (
             <div className="invoice-client-info">
-              <h3>Client Information</h3>
+              <h3>{t('invoice.clientInformation')}</h3>
               <p>
-                <strong>Name:</strong> {inv.billing.fullName}
+                <strong>{t('invoice.name')}</strong> {inv.billing.fullName}
               </p>
               <p>
-                <strong>Email:</strong> {inv.billing.email}
+                <strong>{t('invoice.email')}</strong> {inv.billing.email}
               </p>
               <p>
-                <strong>Address:</strong> {inv.billing.address}
+                <strong>{t('invoice.address')}</strong> {inv.billing.address}
               </p>
               <p>
-                <strong>City:</strong> {inv.billing.city}
+                <strong>{t('invoice.city')}</strong> {inv.billing.city}
               </p>
               <p>
-                <strong>Province:</strong> {inv.billing.province}
+                <strong>{t('invoice.province')}</strong> {inv.billing.province}
               </p>
               <p>
-                <strong>Postal code:</strong> {inv.billing.postalCode}
+                <strong>{t('invoice.postalCode')}</strong>{' '}
+                {inv.billing.postalCode}
               </p>
             </div>
           )}
 
           <div className="invoice-date">
-            <strong>Date:</strong> {new Date(inv.date).toLocaleString()}
+            <strong>{t('invoice.date')}</strong>{' '}
+            {new Date(inv.date).toLocaleString()}
           </div>
 
-          <h3>Items</h3>
+          <h3>{t('invoice.items')}</h3>
           {inv.items.map((item, idx) => (
             <div
               key={`${item.productId ?? 'item'}-${idx}`}
               className="invoice-card"
             >
-              <h4>{item.productName}</h4>
-              <p>Price: ${item.productSalePrice.toFixed(2)}</p>
-              <p>Quantity: {item.quantity}</p>
+              <h4>{localizedName(item)}</h4>
               <p>
-                Total: ${(item.productSalePrice * item.quantity).toFixed(2)}
+                {t('invoice.price')} ${item.productSalePrice.toFixed(2)}
+              </p>
+              <p>
+                {t('invoice.quantity')} {item.quantity}
+              </p>
+              <p>
+                {t('summary.total')} $
+                {(item.productSalePrice * item.quantity).toFixed(2)}
               </p>
             </div>
           ))}
 
           <div className="invoice-taxes">
-            <p>Items subtotal: ${inv.subtotal.toFixed(2)}</p>
-            <p>Discount: -${inv.discount.toFixed(2)}</p>
             <p>
-              Shipping ({inv.shippingMethod}): ${inv.shippingCost.toFixed(2)}
+              {t('summary.itemsSubtotal')} ${inv.subtotal.toFixed(2)}
             </p>
-            <p>Subtotal: ${taxableSubtotal.toFixed(2)}</p>
+            <p>
+              {t('summary.discount')} -${inv.discount.toFixed(2)}
+            </p>
+            <p>
+              {t('summary.shippingWithMethod', { method: inv.shippingMethod })}{' '}
+              ${inv.shippingCost.toFixed(2)}
+            </p>
+            <p>
+              {t('summary.subtotal')} ${taxableSubtotal.toFixed(2)}
+            </p>
             {/* Render tax lines based on billing province when available */}
             {(() => {
               try {
@@ -339,8 +362,10 @@ function Invoice({
                         ).toFixed(2);
                         return (
                           <p key={i}>
-                            {l.name} ({formatTaxRate(l.rate)}%): $
-                            {displayAmount}
+                            {t(`taxes.${taxLabelKey(l.name, prov)}`, {
+                              defaultValue: l.name,
+                            })}{' '}
+                            ({formatTaxRate(l.rate)}%): ${displayAmount}
                           </p>
                         );
                       })}
@@ -360,11 +385,13 @@ function Invoice({
                 </>
               );
             })()}
-            <h3>Total: ${inv.total.toFixed(2)}</h3>
+            <h3>
+              {t('summary.total')} ${inv.total.toFixed(2)}
+            </h3>
           </div>
           <div className="invoice-modal-actions">
             <button className="download-invoice-btn" onClick={downloadInvoice}>
-              Download Invoice
+              {t('invoice.download')}
             </button>
           </div>
         </div>
