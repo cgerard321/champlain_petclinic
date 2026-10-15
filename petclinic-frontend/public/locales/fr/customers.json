@@ -6,7 +6,16 @@
     "cancel": "Annuler",
     "uploadPhoto": "Téléverser une photo",
     "deletePhoto": "Supprimer la photo",
-    "update": "Mettre à jour le profile"
+    "update": "Mettre à jour le profile",
+    "deleteAccount": "Supprimer le compte"
+  },
+
+  "deleteAccount": {
+    "title": "Supprimer le compte",
+    "message": "Voulez-vous vraiment supprimer votre compte ? Vous serez déconnecté et votre photo de profil sera définitivement supprimée.",
+    "confirm": "Supprimer le compte",
+    "cancel": "Annuler",
+    "failed": "Échec de la suppression de votre compte. Veuillez réessayer."
   },
 
   "uploadPetPhotoModal": {
@@ -80,6 +89,7 @@
     "loading": "Chargement...",
     "notFound": "Aucun client trouvé.",
     "infoTitle": "Informations du client",
+    "photoAlt": "Photo de profil de {{name}}",
     "pets": {
       "title": "Animaux du client",
       "petId": "ID de l'animal :",
@@ -107,7 +117,8 @@
       "delete": "Supprimer le client",
       "deleteTitle": "Supprimer",
       "enable": "Activer le compte",
-      "disable": "Désactiver le compte"
+      "disable": "Désactiver le compte",
+      "deletePhoto": "Supprimer la photo"
     },
     "messages": {
       "confirmDelete": "Voulez-vous vraiment supprimer ce client ?",
@@ -116,7 +127,10 @@
       "confirmEnable": "Voulez-vous vraiment activer le compte de cet utilisateur ?",
       "confirmDisable": "Voulez-vous vraiment désactiver le compte de cet utilisateur ?",
       "enableSuccess": "Compte utilisateur activé avec succès.",
-      "disableSuccess": "Compte utilisateur désactivé avec succès."
+      "disableSuccess": "Compte utilisateur désactivé avec succès.",
+      "confirmDeletePhoto": "Voulez-vous vraiment supprimer la photo de ce client ?",
+      "deletePhotoSuccess": "Photo du client supprimée avec succès.",
+      "deletePhotoError": "Impossible de supprimer la photo du client. Veuillez réessayer."
     }
   },
   "customerForm": {

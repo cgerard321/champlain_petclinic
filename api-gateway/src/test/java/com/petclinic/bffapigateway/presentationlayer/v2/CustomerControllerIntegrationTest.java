@@ -40,6 +40,8 @@ class CustomerControllerIntegrationTest {
         mockServerConfigCustomersService.registerDeleteCustomerEndpoint();
         mockServerConfigCustomersService.registerDeleteCustomerEmptyResponseEndpoint();
         mockServerConfigCustomersService.registerGetCustomerByIdEndpoint();
+        mockServerConfigCustomersService.registerSoftDeleteCustomerEndpoint();
+        mockServerConfigCustomersService.registerSoftDeleteCustomerNotFoundEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
@@ -115,5 +117,53 @@ class CustomerControllerIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void whenSoftDeleteCustomer_asSameCustomer_thenReturnNoContent() {
+        webTestClient.delete()
+                .uri("/api/v2/gateway/customers/{customerId}/soft", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                .cookie("Bearer", jwtTokenForValidOwnerId)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
+    void whenSoftDeleteCustomer_asDifferentCustomer_thenReturnForbidden() {
+        webTestClient.delete()
+                .uri("/api/v2/gateway/customers/{customerId}/soft", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                .cookie("Bearer", jwtTokenForInvalidOwnerId)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
+    @Test
+    void whenSoftDeleteCustomer_asAdmin_withNonExistentCustomer_thenReturnNotFound() {
+        webTestClient.delete()
+                .uri("/api/v2/gateway/customers/{customerId}/soft", "12345678-1234-1234-1234-123456789012")
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void whenSoftDeleteCustomer_withInvalidCustomerIdLength_thenReturnUnprocessableEntity() {
+        webTestClient.delete()
+                .uri("/api/v2/gateway/customers/{customerId}/soft", "short-id")
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(422);
     }
 }

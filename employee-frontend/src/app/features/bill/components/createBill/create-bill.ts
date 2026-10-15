@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { form, FormField, required, min } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { provideNativeDateAdapter, MatOption } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -24,6 +25,7 @@ import { BillService } from '@features/bill/services/bill-service';
   imports: [
     MatFormFieldModule,
     MatCardModule,
+    MatCheckboxModule,
     MatDatepickerModule,
     MatInputModule,
     MatSelect,
@@ -47,6 +49,7 @@ export class CreateBill implements OnInit {
   protected readonly customers = signal<Customer[]>([]);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly sendEmail = signal(false);
 
   protected readonly vets = signal<Veterinarian[]>([]);
 
@@ -100,7 +103,7 @@ export class CreateBill implements OnInit {
     }
     this.isSubmitting = true;
 
-    this.billService.createBill(this.billRequest()).subscribe({
+    this.billService.createBill(this.billRequest(), this.sendEmail()).subscribe({
       next: (createdBill: BillRequestModel) => {
         this.dialogRef.close(createdBill);
         this.showSnackbar('Bill created successfully!');
