@@ -10,7 +10,9 @@
     <h1 class="title" i18n="@@visits.title">Liste des visites</h1>
     <table>
       <tr>
-        <th i18n="@@visits.visitId">Identifiant de la visite</th>
+        <td>
+          <a [routerLink]="['/vist', visits.visitId]">{{ visits.visitId }}</a>
+        </td>
         <th i18n="@@visits.veterinarianFullName">Nom complet du vétérinaire</th>
         <th i18n="@@visits.petName">Nom de l&apos;animal</th>
         <th i18n="@@visits.description">Description</th>
