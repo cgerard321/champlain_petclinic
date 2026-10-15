@@ -7,14 +7,17 @@ import org.springframework.data.r2dbc.core.R2dbcEntityTemplate;
 import org.springframework.data.r2dbc.repository.support.R2dbcRepositoryFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import java.nio.charset.StandardCharsets;
 import java.sql.DriverManager;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import reactor.core.publisher.Mono;
+
 @Testcontainers
 class ProductTranslationMigrationTest {
+
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine");
 
@@ -45,7 +48,7 @@ class ProductTranslationMigrationTest {
                 assertTrue(rows.next());
                 assertNull(rows.getString(1));
             }
-            loader.run();
+            ((Mono<Void>) ReflectionTestUtils.invokeMethod(loader, "backfillSeedTranslations")).block();
             try (var rows = sql.executeQuery("SELECT * FROM products WHERE product_name='Dog Food'")) {
                 assertTrue(rows.next());
                 assertEquals("Nourriture pour chiens", rows.getString("product_name_fr"));
@@ -60,7 +63,7 @@ class ProductTranslationMigrationTest {
             }
             sql.execute("UPDATE products SET product_name_fr='Nom personnalisé', product_description_fr='' WHERE product_name='Dog Food'");
             sql.execute(schema);
-            loader.run();
+            ((Mono<Void>) ReflectionTestUtils.invokeMethod(loader, "backfillSeedTranslations")).block();
             try (var rows = sql.executeQuery("SELECT * FROM products WHERE product_name='Dog Food'")) {
                 assertTrue(rows.next());
                 assertEquals("Nom personnalisé", rows.getString("product_name_fr"));
@@ -74,4 +77,5 @@ class ProductTranslationMigrationTest {
             }
         }
     }
+
 }
