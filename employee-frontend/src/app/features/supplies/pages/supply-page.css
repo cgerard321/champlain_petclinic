@@ -246,7 +246,7 @@
 .download-pdf-button:hover .download-label,
 .download-pdf-button:focus-visible .download-label,
 .download-pdf-button.expanded .download-label {
-  max-width: 8rem;
+  max-width: 13rem;
   margin-left: 8px;
   opacity: 1;
 }

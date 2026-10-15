@@ -125,12 +125,12 @@ export class SupplyPage {
   };
 
   protected readonly isFrench = this.locale.startsWith('fr');
-  protected readonly tableLabel = $localize`:@@supply.table.label:Fournitures dans cet inventaire`;
-  protected readonly downloadLabel = $localize`:@@supply.actions.download:Télécharger le PDF`;
-  protected readonly downloadingLabel = $localize`:@@supply.actions.downloading:Téléchargement du PDF…`;
-  protected readonly consumeLabel = $localize`:@@supply.actions.consume:Utiliser la fourniture`;
-  protected readonly cannotConsumeStockLabel = $localize`:@@supply.actions.cannotConsumeStock:Impossible d'utiliser la fourniture : rupture de stock`;
-  protected readonly cannotConsumeExpiredLabel = $localize`:@@supply.actions.cannotConsumeExpired:Impossible d'utiliser la fourniture : produit périmé`;
+  protected readonly tableLabel = $localize`:@@supply.table.label:Articles dans cet inventaire`;
+  protected readonly downloadLabel = $localize`:@@supply.actions.download:Télécharger`;
+  protected readonly downloadingLabel = $localize`:@@supply.actions.downloading:Téléchargement…`;
+  protected readonly consumeLabel = $localize`:@@supply.actions.consume:Utiliser l'article`;
+  protected readonly cannotConsumeStockLabel = $localize`:@@supply.actions.cannotConsumeStock:Impossible d'utiliser l'article : rupture de stock`;
+  protected readonly cannotConsumeExpiredLabel = $localize`:@@supply.actions.cannotConsumeExpired:Impossible d'utiliser l'article : produit périmé`;
   protected readonly consumingLabel = $localize`:@@supply.actions.consuming:Utilisation…`;
   protected readonly consumeButtonLabel = $localize`:@@supply.actions.consumeButton:Utiliser`;
 
@@ -175,9 +175,9 @@ export class SupplyPage {
       data: {
         inventoryId: this.inventoryId,
         productId: supply.productId,
-        supplyName: supply.productName,
+        supplyName: this.localizedSupplyName(supply.productName),
       },
-      ariaLabel: `History for ${supply.productName}`,
+      ariaLabel: $localize`:@@supply.history.ariaLabel:Historique de l'article ${this.localizedSupplyName(supply.productName)}:name:`,
       width: '640px',
       maxWidth: '95vw',
     });
@@ -389,7 +389,7 @@ export class SupplyPage {
       },
       {
         key: 'photo',
-        label: $localize`:@@supply.fields.photo:Photo de la fourniture`,
+        label: $localize`:@@supply.fields.photo:Photo de l'article`,
         type: 'image',
         currentImageUrl,
       },
@@ -406,11 +406,11 @@ export class SupplyPage {
     >(ModalForm, {
       data: {
         title: supply
-          ? $localize`:@@supply.actions.editTitle:Modifier la fourniture`
-          : $localize`:@@supply.actions.add:Ajouter une fourniture`,
+          ? $localize`:@@supply.actions.editTitle:Modifier l'article`
+          : $localize`:@@supply.actions.add:Ajouter un article`,
         submitLabel: supply
           ? $localize`:@@supply.actions.saveChanges:Enregistrer les modifications`
-          : $localize`:@@supply.actions.add:Ajouter une fourniture`,
+          : $localize`:@@supply.actions.add:Ajouter un article`,
         cancelLabel: $localize`:@@supply.actions.cancel:Annuler`,
         fields: this.supplyFields(supply),
         initialValue: supply
@@ -434,8 +434,8 @@ export class SupplyPage {
             },
       },
       ariaLabel: supply
-        ? $localize`:@@supply.actions.editTitle:Modifier la fourniture`
-        : $localize`:@@supply.actions.add:Ajouter une fourniture`,
+        ? $localize`:@@supply.actions.editTitle:Modifier l'article`
+        : $localize`:@@supply.actions.add:Ajouter un article`,
       width: '560px',
       maxWidth: '95vw',
     });
@@ -474,8 +474,8 @@ export class SupplyPage {
     } catch {
       this.addError.set(
         editingId
-          ? $localize`:@@supply.errors.update:Impossible de modifier la fourniture ou la photo.`
-          : $localize`:@@supply.errors.create:Impossible d'ajouter la fourniture ou la photo.`,
+          ? $localize`:@@supply.errors.update:Impossible de modifier l'article ou la photo.`
+          : $localize`:@@supply.errors.create:Impossible d'ajouter l'article ou la photo.`,
       );
     } finally {
       this.addingSupply.set(false);
@@ -502,9 +502,7 @@ export class SupplyPage {
       },
       error: () => {
         this.consumingSupplyId.set(null);
-        this.deleteError.set(
-          $localize`:@@supply.errors.consume:Impossible d'utiliser la fourniture.`,
-        );
+        this.deleteError.set($localize`:@@supply.errors.consume:Impossible d'utiliser l'article.`);
       },
     });
   }
@@ -520,7 +518,7 @@ export class SupplyPage {
 
     if (!inventoryId) {
       this.deleteError.set(
-        $localize`:@@supply.errors.missingInventory:Impossible de supprimer la fourniture : identifiant d'inventaire manquant.`,
+        $localize`:@@supply.errors.missingInventory:Impossible de supprimer l'article : identifiant d'inventaire manquant.`,
       );
       return;
     }
@@ -531,7 +529,7 @@ export class SupplyPage {
       ModalFormResult<Record<string, never>>
     >(ModalForm, {
       data: {
-        title: $localize`:@@supply.actions.deleteTitle:Supprimer la fourniture`,
+        title: $localize`:@@supply.actions.deleteTitle:Supprimer l'article`,
         message: $localize`:@@supply.actions.deleteConfirm:Voulez-vous vraiment supprimer ${this.localizedSupplyName(supply.productName)}:name: ?`,
         fields: [],
         initialValue: {},
@@ -539,7 +537,7 @@ export class SupplyPage {
         cancelLabel: $localize`:@@supply.actions.cancel:Annuler`,
         destructive: true,
       },
-      ariaLabel: $localize`:@@supply.actions.deleteTitle:Supprimer la fourniture`,
+      ariaLabel: $localize`:@@supply.actions.deleteTitle:Supprimer l'article`,
       width: '440px',
       maxWidth: '95vw',
     });
@@ -555,7 +553,7 @@ export class SupplyPage {
         },
         error: () => {
           this.deleteError.set(
-            $localize`:@@supply.errors.delete:Impossible de supprimer la fourniture.`,
+            $localize`:@@supply.errors.delete:Impossible de supprimer l'article.`,
           );
         },
       });

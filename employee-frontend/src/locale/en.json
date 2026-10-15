@@ -333,6 +333,7 @@
       "actions": {
         "add": "Add Supply",
         "edit": "Edit",
+        "history": "History",
         "delete": "Delete",
         "deleteButton": "Delete",
         "editTitle": "Edit Supply",
@@ -341,12 +342,27 @@
         "deleteTitle": "Delete Supply",
         "deleteConfirm": "Are you sure you want to delete {$name}?",
         "download": "Download PDF",
-        "downloading": "Downloading PDF",
+        "downloading": "Downloading PDF...",
         "consume": "Consume supply",
         "consuming": "Consuming...",
         "consumeButton": "Consume",
         "cannotConsumeStock": "Cannot consume - out of stock",
         "cannotConsumeExpired": "Cannot consume - expired"
+      },
+      "history": {
+        "ariaLabel": "History for {$name}",
+        "title": "History: {$INTERPOLATION}",
+        "loading": "Loading history...",
+        "error": "Unable to load supply history.",
+        "empty": "No audit history is available for this supply.",
+        "by": "By {$INTERPOLATION}",
+        "close": "Close",
+        "actions": {
+          "created": "Created",
+          "quantityUpdated": "Quantity updated",
+          "consumed": "Consumed",
+          "deleted": "Deleted"
+        }
       },
       "validation": {
         "supplierWhitespace": "Supplier name cannot be only whitespace.",

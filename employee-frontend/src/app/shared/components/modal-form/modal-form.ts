@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { CommonModule, formatNumber } from '@angular/common';
+import { Component, inject, LOCALE_ID } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -47,6 +47,7 @@ type DynamicFormGroup = FormGroup<DynamicFormControls>;
 })
 export class ModalForm<T extends object> {
   private readonly dialogRef = inject(MatDialogRef<ModalForm<T>, ModalFormResult<T>>);
+  private readonly locale = inject(LOCALE_ID);
 
   // MAT_DIALOG_DATA contains the configuration passed when the dialog is opened.
   // The generic type keeps the form data connected to the type of object being edited.
@@ -176,12 +177,12 @@ export class ModalForm<T extends object> {
     }
 
     if (control.hasError('min')) {
-      const minimum = control.getError('min').min;
+      const minimum = formatNumber(control.getError('min').min, this.locale);
       return $localize`:@@modal.validation.min:${field.label}:label: doit être au moins ${minimum}:minimum:.`;
     }
 
     if (control.hasError('max')) {
-      const maximum = control.getError('max').max;
+      const maximum = formatNumber(control.getError('max').max, this.locale);
       return $localize`:@@modal.validation.max:${field.label}:label: doit être au plus ${maximum}:maximum:.`;
     }
 

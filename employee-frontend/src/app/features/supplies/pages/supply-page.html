@@ -1,9 +1,9 @@
 <section class="supply-page">
   <div class="page-header">
     <div>
-      <h1 i18n="@@supply.title">Fournitures</h1>
+      <h1 i18n="@@supply.title">Articles</h1>
       <p class="page-description" i18n="@@supply.description">
-        Consulter et gérer les fournitures de cet inventaire.
+        Consulter et gérer les articles de cet inventaire.
       </p>
     </div>
 
@@ -24,7 +24,7 @@
         </button>
 
         <button type="button" class="add-supply-button" (click)="openAddDialog()">
-          <ng-container i18n="@@supply.actions.add">Ajouter une fourniture</ng-container>
+          <ng-container i18n="@@supply.actions.add">Ajouter un article</ng-container>
         </button>
       </div>
     }
@@ -40,12 +40,12 @@
 
   <section
     class="supply-filters"
-    aria-label="Filtrer les fournitures"
+    aria-label="Filtrer les articles"
     i18n-aria-label="@@supply.filters.aria"
   >
     <div class="filter-heading">
       <div>
-        <h2 i18n="@@supply.filters.heading">Trouver une fourniture</h2>
+        <h2 i18n="@@supply.filters.heading">Trouver un article</h2>
         <p i18n="@@supply.filters.help">Filtrer par nom, fournisseur, description ou statut.</p>
       </div>
       <button
@@ -59,7 +59,7 @@
     </div>
     <div class="supply-filter-grid">
       <label class="filter-field">
-        <span i18n="@@supply.fields.supplyName">Nom de la fourniture</span>
+        <span i18n="@@supply.fields.supplyName">Nom de l'article</span>
         <input
           type="search"
           placeholder="Rechercher par nom"
@@ -104,20 +104,18 @@
   }
 
   @if (loading()) {
-    <p class="state-message" i18n="@@supply.loading">Chargement des fournitures…</p>
+    <p class="state-message" i18n="@@supply.loading">Chargement des articles…</p>
   } @else if (error()) {
     <p class="state-message error-message" role="alert" i18n="@@supply.errors.load">
-      Impossible de charger les fournitures.
+      Impossible de charger les articles.
     </p>
   } @else if (supplies().length === 0) {
-    <p class="state-message" i18n="@@supply.empty">
-      Aucune fourniture trouvée dans cet inventaire.
-    </p>
+    <p class="state-message" i18n="@@supply.empty">Aucun article trouvé dans cet inventaire.</p>
   } @else if (filteredSupplies().length === 0) {
     <div class="state-message" role="status">
-      <h2 i18n="@@supply.noResults.heading">Aucune fourniture correspondante</h2>
+      <h2 i18n="@@supply.noResults.heading">Aucun article correspondant</h2>
       <p i18n="@@supply.noResults.message">
-        Aucune fourniture ne correspond à vos filtres dans cet inventaire. Modifiez ou effacez les
+        Aucun article ne correspond à vos filtres dans cet inventaire. Modifiez ou effacez les
         filtres.
       </p>
       <button class="clear-filters-button" type="button" (click)="clearFilters()">
@@ -178,11 +176,14 @@
       >
         Supprimer
       </button>
-      <button type="button" class="history-button" (click)="openSupplyHistory(supply)">
-        History
+      <button
+        type="button"
+        class="history-button"
+        (click)="openSupplyHistory(supply)"
+        i18n="@@supply.actions.history"
+      >
+        Historique
       </button>
-      <button type="button" class="edit-button" (click)="editSupply(supply)">Edit</button>
-      <button type="button" class="delete-button" (click)="deleteSupply(supply)">Delete</button>
     }
     @if (canConsumeSupplies()) {
       <button
