@@ -445,6 +445,18 @@ public class VisitsServiceClient {
                 .bodyToMono(VisitResponseDTO.class);
     }
 
+    public Mono<VisitResponseDTO> addVetNote(String visitId, VetNoteRequestDTO request){
+        return webClient
+                .patch()
+                .uri("/" + visitId + "/note")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(JsonNode.class)
+                        .flatMap(errorNode -> Mono.error(new BadRequestException(errorNode.get("message").asText()))))
+                .bodyToMono(VisitResponseDTO.class);
+    }
+
 
 
 

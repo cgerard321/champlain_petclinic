@@ -10,6 +10,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
@@ -29,6 +30,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
 class ProductControllerIntegrationTest extends PostgresTestContainerBase {
+
+    @MockBean
+    private com.petclinic.products.utils.DataLoaderService dataLoaderService;
 
     @Autowired
     private WebTestClient webTestClient;

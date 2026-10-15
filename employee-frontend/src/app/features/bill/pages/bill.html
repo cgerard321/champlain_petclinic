@@ -12,6 +12,9 @@
       </button>
     }
   </header>
+  @if (paymentMessage()) {
+    <p role="status">{{ paymentMessage() }}</p>
+  }
 
   @if (canViewDetails()) {
     <form class="bill-lookup" (submit)="searchForBill($event)">
@@ -38,12 +41,14 @@
     <section class="bill-card">
       <div class="bill-card__header">
         <div>
-          <h2>{{ canViewBills() ? 'Bill Overview' : 'My Bills' }}</h2>
+          <h2>{{ canViewOwnBills() ? 'My Bills' : 'Bill Overview' }}</h2>
           <p>
             {{
-              canViewBills()
-                ? 'View, update, and archive billing records.'
-                : 'View bills associated with your veterinarian account.'
+              canPayBill()
+                ? 'Select an unpaid bill to process a payment.'
+                : canViewBills()
+                  ? 'View, update, and archive billing records.'
+                  : 'View bills associated with your veterinarian account.'
             }}
           </p>
         </div>
@@ -97,99 +102,117 @@
       }
 
       @if (canViewBills()) {
-        <div class="bill-filters">
-          <label>
-            Customer ID
-            <input
-              type="text"
-              [ngModel]="filters().customerId"
-              (ngModelChange)="updateFilter('customerId', $event)"
-            />
-          </label>
-
-          <label>
-            Customer name
-            <input
-              type="text"
-              [ngModel]="filters().customerName"
-              (ngModelChange)="updateFilter('customerName', $event)"
-            />
-          </label>
-
-          <label>
-            Veterinarian name
-            <input
-              type="text"
-              [ngModel]="filters().vetName"
-              (ngModelChange)="updateFilter('vetName', $event)"
-            />
-          </label>
-
-          <label>
-            Visit type
-            <select
-              [ngModel]="filters().visitType"
-              (ngModelChange)="updateFilter('visitType', $event)"
-            >
-              <option value="">All visit types</option>
-              @for (visitType of visitTypes(); track visitType) {
-                <option [value]="visitType">{{ visitType }}</option>
-              }
-            </select>
-          </label>
-
-          <label>
-            Status
-            <select [ngModel]="filters().status" (ngModelChange)="updateFilter('status', $event)">
-              <option value="">All statuses</option>
-              <option value="PAID">Paid</option>
-              <option value="UNPAID">Unpaid</option>
-              <option value="OVERDUE">Overdue</option>
-            </select>
-          </label>
-
-          <label>
-            Creation year
-            <input
-              #yearFilter
-              type="number"
-              min="1"
-              step="1"
-              [value]="filters().year"
-              (input)="updateFilter('year', yearFilter.value)"
-            />
-          </label>
-
-          <label>
-            Creation month
-            <select [ngModel]="filters().month" (ngModelChange)="updateFilter('month', $event)">
-              <option value="">All months</option>
-              <option value="1">January</option>
-              <option value="2">February</option>
-              <option value="3">March</option>
-              <option value="4">April</option>
-              <option value="5">May</option>
-              <option value="6">June</option>
-              <option value="7">July</option>
-              <option value="8">August</option>
-              <option value="9">September</option>
-              <option value="10">October</option>
-              <option value="11">November</option>
-              <option value="12">December</option>
-            </select>
-          </label>
-
-          <label>
-            Currency
-            <select [ngModel]="currency()" (ngModelChange)="setCurrency($event)">
-              <option value="CAD">CAD</option>
-              <option value="USD">USD</option>
-            </select>
-          </label>
-
-          <button class="bill-secondary-action" type="button" (click)="clearFilters()">
-            Clear Filters
+        <!-- The control is rendered only for admins. CSS shows it in phone portrait. -->
+        <div #filtersRegion class="bill-filters-region">
+          <button
+            type="button"
+            class="bill-mobile-filters-toggle"
+            aria-controls="bill-filter-panel"
+            [attr.aria-expanded]="filtersRegion.classList.contains('bill-filters-region--open')"
+            (click)="filtersRegion.classList.toggle('bill-filters-region--open')"
+          >
+            {{
+              filtersRegion.classList.contains('bill-filters-region--open')
+                ? 'Hide Filters'
+                : 'Show Filters'
+            }}
+            <span aria-hidden="true" class="bill-filter-chevron">▾</span>
           </button>
+
+          <div id="bill-filter-panel" class="bill-filters">
+            <label>
+              Customer ID
+              <input
+                type="text"
+                [ngModel]="filters().customerId"
+                (ngModelChange)="updateFilter('customerId', $event)"
+              />
+            </label>
+
+            <label>
+              Customer name
+              <input
+                type="text"
+                [ngModel]="filters().customerName"
+                (ngModelChange)="updateFilter('customerName', $event)"
+              />
+            </label>
+
+            <label>
+              Veterinarian name
+              <input
+                type="text"
+                [ngModel]="filters().vetName"
+                (ngModelChange)="updateFilter('vetName', $event)"
+              />
+            </label>
+
+            <label>
+              Visit type
+              <select
+                [ngModel]="filters().visitType"
+                (ngModelChange)="updateFilter('visitType', $event)"
+              >
+                <option value="">All visit types</option>
+                @for (visitType of visitTypes(); track visitType) {
+                  <option [value]="visitType">{{ visitType }}</option>
+                }
+              </select>
+            </label>
+
+            <label>
+              Status
+              <select [ngModel]="filters().status" (ngModelChange)="updateFilter('status', $event)">
+                <option value="">All statuses</option>
+                <option value="PAID">Paid</option>
+                <option value="UNPAID">Unpaid</option>
+                <option value="OVERDUE">Overdue</option>
+              </select>
+            </label>
+
+            <label>
+              Creation year
+              <input
+                #yearFilter
+                type="number"
+                min="1"
+                step="1"
+                [value]="filters().year"
+                (input)="updateFilter('year', yearFilter.value)"
+              />
+            </label>
+
+            <label>
+              Creation month
+              <select [ngModel]="filters().month" (ngModelChange)="updateFilter('month', $event)">
+                <option value="">All months</option>
+                <option value="1">January</option>
+                <option value="2">February</option>
+                <option value="3">March</option>
+                <option value="4">April</option>
+                <option value="5">May</option>
+                <option value="6">June</option>
+                <option value="7">July</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">October</option>
+                <option value="11">November</option>
+                <option value="12">December</option>
+              </select>
+            </label>
+
+            <label>
+              Currency
+              <select [ngModel]="currency()" (ngModelChange)="setCurrency($event)">
+                <option value="CAD">CAD</option>
+                <option value="USD">USD</option>
+              </select>
+            </label>
+
+            <button class="bill-secondary-action" type="button" (click)="clearFilters()">
+              Clear Filters
+            </button>
+          </div>
         </div>
       }
 
@@ -271,13 +294,15 @@
 
                     <td data-label="Actions">
                       <div class="bill-row-actions">
-                        <button
-                          type="button"
-                          class="bill-table-button bill-table-button--outline"
-                          (click)="openBillDetails(bill.billId)"
-                        >
-                          Details
-                        </button>
+                        @if (canViewDetails()) {
+                          <button
+                            type="button"
+                            class="bill-table-button bill-table-button--outline"
+                            (click)="openBillDetails(bill.billId)"
+                          >
+                            Details
+                          </button>
+                        }
                         <button
                           type="button"
                           class="bill-table-button bill-table-button--outline"
@@ -313,6 +338,16 @@
                             }}
                           </button>
                         }
+                        @if (canPayBill() && bill.billStatus === 'UNPAID' && !bill.archive) {
+                          <button
+                            type="button"
+                            class="bill-table-button bill-table-button--primary"
+                            (click)="openPayment(bill, paymentTemplate)"
+                            [disabled]="paying()"
+                          >
+                            Pay Bill
+                          </button>
+                        }
                       </div>
                     </td>
                   </tr>
@@ -340,7 +375,13 @@
               </p>
             } @else {
               <h3>No bills found</h3>
-              <p>There are no bills associated with your veterinarian account.</p>
+              <p>
+                {{
+                  canPayBill()
+                    ? 'There are no bills to display.'
+                    : 'There are no bills associated with your veterinarian account.'
+                }}
+              </p>
             }
           </div>
         }
@@ -359,4 +400,78 @@
       {{ message }}
     </p>
   }
+
+  <ng-template #paymentTemplate>
+    @if (selectedBill(); as bill) {
+      <section class="bill-payment" aria-labelledby="payment-title">
+        <h2 id="payment-title">Pay Bill</h2>
+
+        <p>
+          {{ bill.customerFirstName }} {{ bill.customerLastName }} —
+          {{ bill.totalAmount ?? bill.amount | currency: 'CAD' }}
+        </p>
+        @if (paymentError()) {
+          <p class="bill-details-error" role="alert">{{ paymentError() }}</p>
+        }
+        <form #paymentForm="ngForm" (ngSubmit)="payBill()">
+          <label for="cardNumber">Card number</label>
+          <input
+            id="cardNumber"
+            name="cardNumber"
+            [(ngModel)]="payment.cardNumber"
+            required
+            pattern="[0-9]{16}"
+            maxlength="16"
+            inputmode="numeric"
+            autocomplete="off"
+            [disabled]="paying()"
+          />
+
+          <label for="cvv">CVV</label>
+          <input
+            id="cvv"
+            name="cvv"
+            type="password"
+            [(ngModel)]="payment.cvv"
+            required
+            pattern="[0-9]{3}"
+            maxlength="3"
+            inputmode="numeric"
+            autocomplete="off"
+            [disabled]="paying()"
+          />
+
+          <label for="expirationDate">Expiration date (MM/YY)</label>
+          <input
+            id="expirationDate"
+            name="expirationDate"
+            [(ngModel)]="payment.expirationDate"
+            required
+            pattern="(0[1-9]|1[0-2])/[0-9]{2}"
+            maxlength="5"
+            placeholder="12/30"
+            autocomplete="off"
+            [disabled]="paying()"
+          />
+
+          <button
+            class="bill-primary-action"
+            type="submit"
+            [disabled]="paymentForm.invalid || paying()"
+          >
+            {{ paying() ? 'Processing...' : 'Confirm Payment' }}
+          </button>
+
+          <button
+            class="bill-secondary-action"
+            type="button"
+            (click)="closePayment()"
+            [disabled]="paying()"
+          >
+            Cancel
+          </button>
+        </form>
+      </section>
+    }
+  </ng-template>
 </div>

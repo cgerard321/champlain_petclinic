@@ -258,3 +258,202 @@
     white-space: normal;
   }
 }
+
+/* CPC-1475 - Responsive Customer Bill Cards */
+
+/* Keep customer billing content inside its container */
+.customer-bills-page .billsListContainer {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Prevent card width from exceeding available space */
+.customer-bills-page .billCard {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* Allow bill information to shrink properly */
+.customer-bills-page .billCardContent,
+.customer-bills-page .billColumn {
+  min-width: 0;
+}
+
+/* Improve keyboard focus visibility */
+.customer-bills-page .detailsButton:focus-visible {
+  outline: 3px solid #80bdff;
+  outline-offset: 3px;
+}
+
+/* Tablet screens */
+@media (max-width: 900px) {
+  .customer-bills-page .billCard {
+    width: 100%;
+    max-width: 680px;
+    flex-wrap: wrap;
+  }
+
+  .customer-bills-page .billActions {
+    flex-wrap: wrap;
+  }
+}
+
+/* Mobile phones */
+@media (max-width: 640px) {
+  /* Stack bill information and actions vertically */
+  .customer-bills-page .billCard {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0;
+    padding: 14px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  /* Stack the two information columns */
+  .customer-bills-page .billCardContent {
+    width: 100%;
+    min-width: 0;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Remove the existing 50% column limitation */
+  .customer-bills-page .billColumn.leftColumn,
+  .customer-bills-page .billColumn.rightColumn {
+    flex: 0 1 auto;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Allow labels and values to wrap */
+  .customer-bills-page .billField {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 14px;
+  }
+
+  .customer-bills-page .billValue {
+    min-width: 0;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+  }
+
+  /* Keep the Details button accessible */
+  .customer-bills-page .billActions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: stretch;
+  }
+
+  .customer-bills-page .detailsButton {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+/* Very small mobile screens */
+@media (max-width: 380px) {
+  .customer-bills-page .billCard {
+    padding: 10px;
+    gap: 12px;
+  }
+
+  .customer-bills-page .billField {
+    font-size: 13px;
+  }
+}
+
+/* CPC-1475 - Customer BILL responsive dialogs */
+
+/* Mobile portrait and narrow browser windows */
+@media (max-width: 640px) {
+  .customer-bills-page .modalOverlay {
+    box-sizing: border-box;
+    padding: 12px;
+    overflow-y: auto;
+  }
+
+  .customer-bills-page .modalContent {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 24px);
+    padding: 16px;
+    overflow: hidden auto;
+    overflow-wrap: anywhere;
+  }
+
+  /* Stack filter labels and form fields */
+  .customer-bills-page .modalContent.form-modal .form-grid {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: stretch;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .customer-bills-page .modalContent.form-modal .form-grid label {
+    text-align: left;
+    padding-right: 0;
+  }
+
+  .customer-bills-page .modalContent.form-modal .form-grid input,
+  .customer-bills-page .modalContent.form-modal .form-grid select {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  /* Keep filter action buttons accessible */
+  .customer-bills-page .modalContent.form-modal .form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    grid-column: 1 / -1;
+    gap: 8px;
+  }
+
+  .customer-bills-page .modalContent.form-modal .form-actions button {
+    flex: 1 1 120px;
+    min-width: 0;
+    min-height: 44px;
+    max-width: 100%;
+  }
+
+  /* Bill Details footer: Download PDF and Pay Bill */
+  .customer-bills-page .modalContent:not(.form-modal) > div:last-child {
+    flex-wrap: wrap;
+  }
+
+  .customer-bills-page .modalContent:not(.form-modal) > div:last-child button {
+    flex: 1 1 120px;
+    min-width: 0;
+    min-height: 44px;
+    white-space: normal;
+  }
+}
+
+/* Very narrow mobile phones */
+@media (max-width: 380px) {
+  .customer-bills-page .modalContent {
+    padding: 12px;
+  }
+
+  .customer-bills-page .modalContent.form-modal .form-actions,
+  .customer-bills-page .modalContent:not(.form-modal) > div:last-child {
+    flex-direction: column;
+  }
+
+  .customer-bills-page .modalContent.form-modal .form-actions button,
+  .customer-bills-page .modalContent:not(.form-modal) > div:last-child button {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+}

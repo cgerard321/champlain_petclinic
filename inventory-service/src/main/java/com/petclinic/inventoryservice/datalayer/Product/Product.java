@@ -30,4 +30,8 @@ public class Product {
 
     private LocalDate expirationDate;
 
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName == null ? null : supplierName.strip();
+    }
+
 }
