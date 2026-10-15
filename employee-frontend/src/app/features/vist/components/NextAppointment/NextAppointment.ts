@@ -1,10 +1,10 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, DestroyRef, inject, input, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { timer } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { timer } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
 import { FollowUpVisitDialog } from '@features/vist/components/FollowUpVisit/FollowUpVisitDialog';
@@ -37,10 +37,8 @@ export class NextAppointment implements OnInit {
     return (
       this.visit()
         .filter((visit) => new Date(visit.visitDate).getTime() >= now)
-        .sort(
-          (a, b) =>
-            new Date(a.visitDate).getTime() - new Date(b.visitDate).getTime(),
-        )[0] ?? null
+        .sort((a, b) => new Date(a.visitDate).getTime() - new Date(b.visitDate).getTime())[0] ??
+      null
     );
   });
 
