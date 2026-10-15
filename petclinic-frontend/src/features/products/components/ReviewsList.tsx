@@ -122,6 +122,7 @@ export function ReviewsList({
         await onReviewModification();
       } catch (err) {
         console.error('Could not update/fetch product ratings', err);
+        throw err;
       }
     }
     fetchReviews();
