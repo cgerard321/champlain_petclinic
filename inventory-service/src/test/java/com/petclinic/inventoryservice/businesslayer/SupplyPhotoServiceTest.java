@@ -3,6 +3,8 @@ package com.petclinic.inventoryservice.businesslayer;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
+import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditEntry;
+import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.presentationlayer.ProductRequestDTO;
@@ -29,6 +31,7 @@ class SupplyPhotoServiceTest {
     private static final byte[] PNG = {(byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A};
     private InventoryRepository inventories;
     private ProductRepository products;
+    private SupplyAuditRepository audits;
     private ProductInventoryService service;
     private Product existing;
 
@@ -37,8 +40,9 @@ class SupplyPhotoServiceTest {
         inventories = mock(InventoryRepository.class);
         products = mock(ProductRepository.class);
         InventoryTypeRepository types = mock(InventoryTypeRepository.class);
+        audits = mock(SupplyAuditRepository.class);
         service = new ProductInventoryServiceImpl(inventories, products, types,
-                new InventoryValidator(inventories, types, products));
+                new InventoryValidator(inventories, types, products), audits);
         existing = Product.builder().productId("supply-1").inventoryId("inventory-1")
                 .productName("Original supply").productQuantity(10).productPrice(5.0)
                 .photoData(JPG.clone()).photoType("image/jpeg").build();
@@ -50,6 +54,8 @@ class SupplyPhotoServiceTest {
         when(products.existsByInventoryIdAndProductNameIgnoreCaseAndProductIdNot(
                 "inventory-1", "Supply", "supply-1")).thenReturn(Mono.just(false));
         when(products.save(any(Product.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(audits.insert(any(SupplyAuditEntry.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
     }
 
     private ProductRequestDTO request(byte[] data, String type) {
@@ -66,7 +72,8 @@ class SupplyPhotoServiceTest {
     @ParameterizedTest
     @MethodSource("validPhotos")
     void addSupplyPersistsValidPhotoAndMapsResponse(byte[] data, String type) {
-        StepVerifier.create(service.addSupplyToInventory(Mono.just(request(data, type)), "inventory-1"))
+        StepVerifier.create(service.addSupplyToInventory(
+                        Mono.just(request(data, type)), "inventory-1", "test-user"))
                 .assertNext(response -> {
                     assertPhoto(response, data, type);
                     assertEquals("inventory-1", response.getInventoryId());
@@ -96,14 +103,15 @@ class SupplyPhotoServiceTest {
 
     @Test
     void addSupplyNormalizesEmptyPhotoToNull() {
-        StepVerifier.create(service.addSupplyToInventory(Mono.just(request(new byte[0], " ")), "inventory-1"))
+        StepVerifier.create(service.addSupplyToInventory(
+                        Mono.just(request(new byte[0], " ")), "inventory-1", "test-user"))
                 .assertNext(response -> assertPhoto(response, null, null)).verifyComplete();
         verify(products).save(argThat(saved -> saved.getPhotoData() == null && saved.getPhotoType() == null));
     }
 
     private void assertUpdatePhoto(byte[] data, String type, byte[] expectedData, String expectedType) {
         StepVerifier.create(service.updateProductInInventory(Mono.just(request(data, type)),
-                        "inventory-1", "supply-1"))
+                        "inventory-1", "supply-1", "test-user"))
                 .assertNext(response -> assertPhoto(response, expectedData, expectedType)).verifyComplete();
         verify(products).save(same(existing));
         assertArrayEquals(expectedData, existing.getPhotoData());
@@ -126,7 +134,8 @@ class SupplyPhotoServiceTest {
     @ParameterizedTest
     @MethodSource("invalidPhotos")
     void addSupplyRejectsInvalidPhotoWithoutSaving(byte[] data, String type, String message) {
-        StepVerifier.create(service.addSupplyToInventory(Mono.just(request(data, type)), "inventory-1"))
+        StepVerifier.create(service.addSupplyToInventory(
+                        Mono.just(request(data, type)), "inventory-1", "test-user"))
                 .expectErrorMatches(error -> error instanceof InvalidInputException
                         && message.equals(error.getMessage())).verify();
         verify(products, never()).save(any(Product.class));
@@ -136,7 +145,7 @@ class SupplyPhotoServiceTest {
     @MethodSource("invalidPhotos")
     void updateRejectsInvalidPhotoWithoutChangingExistingPhoto(byte[] data, String type, String message) {
         StepVerifier.create(service.updateProductInInventory(Mono.just(request(data, type)),
-                        "inventory-1", "supply-1"))
+                        "inventory-1", "supply-1", "test-user"))
                 .expectErrorMatches(error -> error instanceof InvalidInputException
                         && message.equals(error.getMessage())).verify();
         verify(products, never()).save(any(Product.class));

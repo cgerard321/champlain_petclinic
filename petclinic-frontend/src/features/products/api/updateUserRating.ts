@@ -7,7 +7,6 @@ export async function updateUserRating(
   newRating: number,
   newReview: string | null
 ): Promise<RatingModel> {
-  const emptyResponse = { rating: 0, review: '' };
   try {
     const doesUserRatingExist = await getUserRating(productId);
     let response;
@@ -36,6 +35,6 @@ export async function updateUserRating(
     }
   } catch (error) {
     console.error('Error updating user rating:', error);
-    return emptyResponse;
+    throw error;
   }
 }

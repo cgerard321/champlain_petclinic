@@ -10,7 +10,9 @@ import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
+import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
+import com.petclinic.bffapigateway.dtos.Visits.VetNoteRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
@@ -25,6 +27,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
+import org.springframework.mock.web.server.MockServerWebExchange;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
@@ -60,6 +64,9 @@ public class VisitControllerUnitTest {
 
     @MockBean
     private CustomersServiceClient customersServiceClient;
+
+    @Autowired
+    private VisitsControllerV1 visitsControllerV1;
 
     private final String BASE_VISIT_URL = "/api/gateway/visits";
     private final String REVIEWS_URL = BASE_VISIT_URL + "/reviews";
@@ -1218,6 +1225,70 @@ public class VisitControllerUnitTest {
 
         verify(visitsServiceClient, times(1))
                 .downloadPrescriptionPdf(eq(visitId));
+    }
+
+    @Test
+    void addVetNote_whenValidRequest_thenReturnUpdatedVisit() {
+        VetNoteRequestDTO request = VetNoteRequestDTO.builder().vetNote("Keep giving the meds").build();
+        VisitResponseDTO visitWithNote = VisitResponseDTO.builder().visitId("V001").petId("P001").vetNote("Keep giving the meds").build();
+
+        when(visitsServiceClient.addVetNote(eq("V001"), any(VetNoteRequestDTO.class)))
+                .thenReturn(Mono.just(visitWithNote));
+
+        webTestClient.patch()
+                .uri(BASE_VISIT_URL + "/{visitId}/note", "V001")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(VisitResponseDTO.class)
+                .value(visit -> assertEquals("Keep giving the meds", visit.getVetNote()));
+
+        verify(visitsServiceClient, times(1)).addVetNote(eq("V001"), any(VetNoteRequestDTO.class));
+    }
+
+    @Test
+    void addVetNote_whenVisitDoesNotExist_thenReturnNotFound() {
+        when(visitsServiceClient.addVetNote(eq("INVALID"), any(VetNoteRequestDTO.class)))
+                .thenReturn(Mono.empty());
+
+        webTestClient.patch()
+                .uri(BASE_VISIT_URL + "/{visitId}/note", "INVALID")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(VetNoteRequestDTO.builder().vetNote("Keep giving the meds").build())
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void getVisitByVisitId_whenOwnerOfPet_thenReturnVetNote() {
+        VisitResponseDTO visitWithNote = VisitResponseDTO.builder().visitId("V001").petId("P001").vetNote("Keep giving the meds").build();
+        when(visitsServiceClient.getVisitByVisitId("V001", false)).thenReturn(Mono.just(visitWithNote));
+        when(customersServiceClient.getPetByPetId("P001", false))
+                .thenReturn(Mono.just(PetResponseDTO.builder().petId("P001").customerId("owner-1").build()));
+
+        StepVerifier.create(visitsControllerV1.getVisitByVisitId("V001", false, exchangeForOwner("owner-1")))
+                .expectNextMatches(response -> "Keep giving the meds".equals(response.getBody().getVetNote()))
+                .verifyComplete();
+    }
+
+    @Test
+    void getVisitByVisitId_whenOtherOwner_thenHideVetNote() {
+        VisitResponseDTO visitWithNote = VisitResponseDTO.builder().visitId("V001").petId("P001").vetNote("Keep giving the meds").build();
+        when(visitsServiceClient.getVisitByVisitId("V001", false)).thenReturn(Mono.just(visitWithNote));
+        when(customersServiceClient.getPetByPetId("P001", false))
+                .thenReturn(Mono.just(PetResponseDTO.builder().petId("P001").customerId("owner-1").build()));
+
+        StepVerifier.create(visitsControllerV1.getVisitByVisitId("V001", false, exchangeForOwner("owner-2")))
+                .expectNextMatches(response -> response.getBody().getVetNote() == null)
+                .verifyComplete();
+    }
+
+    private MockServerWebExchange exchangeForOwner(String userId) {
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(BASE_VISIT_URL));
+        exchange.getAttributes().put("tokenValues",
+                TokenResponseDTO.builder().userId(userId).roles(List.of("OWNER")).build());
+        return exchange;
     }
 
 

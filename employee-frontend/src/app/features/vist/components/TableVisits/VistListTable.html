@@ -18,13 +18,15 @@
         <th i18n="@@visits.endDate">Date de fin</th>
         <th i18n="@@visits.status">Statut</th>
         @if (canScheduleFollowUp) {
-          <th i18n="@@visits.followUp.actions">Actions</th>
+          <th class="actions" i18n="@@visits.followUp.actions">Actions</th>
         }
       </tr>
 
       @for (visits of visibleVisits(); track visits.visitId) {
         <tr>
-          <td>{{ visits.visitId }}</td>
+          <td>
+            <a [routerLink]="['/vist', visits.visitId]">{{ visits.visitId }}</a>
+          </td>
           <td>{{ visits.vetFirstName }} {{ visits.vetLastName }}</td>
           <td>{{ visits.petName }}</td>
           <td>{{ visits.description }}</td>
@@ -32,7 +34,7 @@
           <td>{{ visits.visitEndDate | date: 'short' }}</td>
           <td>{{ statusLabel(visits.status) }}</td>
           @if (canScheduleFollowUp) {
-            <td>
+            <td class="actions">
               @if (visits.status === 'COMPLETED') {
                 <button
                   mat-stroked-button
@@ -41,6 +43,14 @@
                   i18n="@@visits.followUp.button"
                 >
                   Planifier un suivi
+                </button>
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="openVetNote(visits)"
+                  i18n="@@visits.note.button"
+                >
+                  Ajouter une note
                 </button>
               }
             </td>
