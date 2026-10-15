@@ -5,9 +5,11 @@ import { EMPTY, filter, map, switchMap, Observable } from 'rxjs';
 import { CurrentUserResponse } from '@core/models/current-user-response';
 import { AuthState } from '@core/services/auth-state';
 import { SseClient } from '@core/services/sse-client';
+import { Pet, Customer } from '@features/cust/models/customer.model';
 import { Status } from '@features/vist/models/Status';
 import { TimeSlot } from '@features/vist/models/TimeSlot';
 import { Visit } from '@features/vist/models/Visit';
+import { VisitResponseModel } from '@features/vist/models/VisitResponseModel';
 
 @Injectable({ providedIn: 'root' })
 export class VisitService {
@@ -46,6 +48,10 @@ export class VisitService {
       );
   }
 
+  getVisitById(visitId: string): Observable<VisitResponseModel> {
+    return this.http.get<VisitResponseModel>(`/api/gateway/visits/${encodeURIComponent(visitId)}`);
+  }
+
   getAvailableTimeSlots(practitionerId: string, date: string): Observable<TimeSlot[]> {
     return this.http.get<TimeSlot[]>(
       `/api/gateway/visits/availability/vets/${practitionerId}/slots`,
@@ -77,5 +83,13 @@ export class VisitService {
       status: Status.UPCOMING,
       isEmergency: false,
     });
+  }
+
+  getPetById(petId: string): Observable<Pet> {
+    return this.http.get<Pet>(`/api/gateway/pets/${petId}`);
+  }
+
+  getCustomerById(customerId: string): Observable<Customer> {
+    return this.http.get<Customer>(`/api/gateway/customers/${customerId}`);
   }
 }

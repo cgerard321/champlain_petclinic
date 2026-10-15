@@ -107,4 +107,10 @@ public class GlobalControllerExceptionHandlerConfig {
     public HTTPErrorMessage handleDisabledAccountException(DisabledAccountException ex) {
         return new HTTPErrorMessage(FORBIDDEN.value(), ex.getMessage());
     }
+
+    @ExceptionHandler(value = ForbiddenException.class)
+    @ResponseStatus(value = FORBIDDEN)
+    public HTTPErrorMessage forbiddenException(ForbiddenException ex, WebRequest request) {
+        return new HTTPErrorMessage(FORBIDDEN.value(), ex.getMessage());
+    }
 }

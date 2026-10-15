@@ -93,6 +93,7 @@ public class UserControllerV1 {
         }
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PatchMapping(value = "/{userId}", consumes = "application/json", produces = "application/json")
     public Mono<ResponseEntity<UserResponseDTO>> updateUserRoles(final @PathVariable String userId, @RequestBody RolesChangeRequestDTO roleChangeDTO, @CookieValue("Bearer") String auth) {
         return authServiceClient.updateUsersRoles(userId, roleChangeDTO, auth)
