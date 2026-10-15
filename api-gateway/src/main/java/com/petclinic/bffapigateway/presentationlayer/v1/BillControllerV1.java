@@ -4,6 +4,7 @@ import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
+import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -57,15 +58,15 @@ public class BillControllerV1 {
                                                             @CookieValue("Bearer") String jwtToken) {
 
         if (model.getCustomerId() == null || model.getCustomerId().trim().isEmpty()) {
-            return Mono.just(ResponseEntity.badRequest().build());
+            throw new BadRequestException("Must have a customer Id");
         }
 
         if (model.getVetId() == null || model.getVetId().trim().isEmpty()) {
-            return Mono.just(ResponseEntity.badRequest().build());
+            throw new BadRequestException("Must have a vet Id");
         }
 
         if (model.getAmount() == null || model.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            return Mono.just(ResponseEntity.badRequest().build());
+            throw new BadRequestException("Amount must be greater than 0");
         }
 
         if (model.getBillStatus() == null) {
@@ -80,12 +81,12 @@ public class BillControllerV1 {
 
         if (model.getDate().isBefore(LocalDate.now())) {
             log.error("Attempted to create bill with past date: {}", model.getDate());
-            return Mono.just(ResponseEntity.badRequest().build());
+            throw new BadRequestException("Date must be today or after");
         }
 
         if (model.getBillStatus() == BillStatus.OVERDUE) {
             log.error("Attempted to create bill with OVERDUE status - not allowed for manual creation");
-            return Mono.just(ResponseEntity.badRequest().build());
+            throw new BadRequestException("Bill must not be OVERDUE on creation");
         }
 
         if (model.getDueDate() == null) {

@@ -92,3 +92,22 @@ export function suggestUsernames(typed: string, max = 3): string[] {
 
   return suggestFrom([base, `${base}1`], max);
 }
+
+export function suggestAlternatives(typed: string, max = 3): string[] {
+  const base = toUsernameBase(typed);
+
+  if (base.length === 0) {
+    return [];
+  }
+
+  const current = normalizeUsername(typed).toLowerCase();
+  const candidates = ['1', '2', '3']
+    .map((suffix) => {
+      const room = USERNAME_MAX_LENGTH - suffix.length;
+
+      return `${base.slice(0, room).replace(/_+$/, '')}${suffix}`;
+    })
+    .filter((candidate) => candidate.toLowerCase() !== current);
+
+  return suggestFrom(candidates, max);
+}

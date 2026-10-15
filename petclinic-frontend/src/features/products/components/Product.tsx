@@ -1,3 +1,8 @@
+import { useTranslation } from 'react-i18next';
+import {
+  localizedProduct,
+  formatProductPrice,
+} from '@/features/products/utils/localizedProduct';
 import { JSX, useEffect, useState } from 'react';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import ImageContainer from './ImageContainer';
@@ -21,12 +26,14 @@ export default function Product({
 }: {
   product: ProductModel;
 }): JSX.Element {
+  const { t, i18n } = useTranslation('products');
+  const language = i18n.resolvedLanguage || i18n.language || 'en';
   const { isAuthenticated } = useUser();
   const isInventoryManager = IsInventoryManager();
   const isVet = IsVet();
   const isReceptionist = IsReceptionist();
 
-  const [currentProduct] = useState<ProductModel>(product);
+  const currentProduct = product;
   const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
     null
   );
@@ -55,15 +62,15 @@ export default function Product({
   const getDeliveryTypeLabel = (deliveryType: string): string => {
     switch (deliveryType) {
       case 'DELIVERY':
-        return 'Delivery';
+        return t('delivery');
       case 'PICKUP':
-        return 'Pickup';
+        return t('pickup');
       case 'DELIVERY_AND_PICKUP':
-        return 'Delivery & Pickup';
+        return t('deliveryPickup');
       case 'NO_DELIVERY_OPTION':
-        return 'No delivery option';
+        return t('noDelivery');
       default:
-        return 'Unknown Delivery Type';
+        return t('unknownDelivery');
     }
   };
 
@@ -80,7 +87,7 @@ export default function Product({
     }
     const isSuccess = await addToCart(currentProduct.productId, 1);
     if (isSuccess) {
-      setSuccessMessageCart('Product added to cart successfully!');
+      setSuccessMessageCart('cartSuccess');
       setTimeout(() => setSuccessMessageCart(null), 3000);
     }
   };
@@ -92,7 +99,7 @@ export default function Product({
     }
     const isSuccess = await addToWishlist(currentProduct.productId, 1);
     if (isSuccess) {
-      setSuccessMessageWishlist('Product added to wishlist successfully!');
+      setSuccessMessageWishlist('wishSuccess');
       setIsWishlisted(true); // stays true after adding
       setTimeout(() => setSuccessMessageWishlist(null), 3000);
     }
@@ -105,7 +112,7 @@ export default function Product({
     }
     const isSuccess = await removeFromWishlistByIcon(currentProduct.productId);
     if (isSuccess) {
-      setSuccessMessageWishlist('Product removed from wishlist successfully!');
+      setSuccessMessageWishlist('wishRemoved');
       setIsWishlisted(false); // stays false after removing
       setTimeout(() => setSuccessMessageWishlist(null), 3000);
     }
@@ -122,13 +129,16 @@ export default function Product({
   if (selectedProduct) {
     return (
       <div>
-        <h1>{selectedProduct.productName}</h1>
-        <p>{selectedProduct.productDescription}</p>
-        <p>Price: ${selectedProduct.productSalePrice.toFixed(2)}</p>
+        <h1>{localizedProduct(selectedProduct, language).name}</h1>
+        <p>{localizedProduct(selectedProduct, language).description}</p>
+        <p>
+          {t('price')}{' '}
+          {formatProductPrice(selectedProduct.productSalePrice, language)}
+        </p>
         <div className="deliveryType-container">
           <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
         </div>
-        <button onClick={handleBackToList}>Back to Catalog</button>
+        <button onClick={handleBackToList}>{t('back')}</button>
       </div>
     );
   }
@@ -145,11 +155,16 @@ export default function Product({
       key={currentProduct.productId}
       style={{ position: 'relative' }}
     >
+      {currentProduct.productQuantity < 10 && (
+        <span className="stock-label">
+          {currentProduct.productQuantity === 0 ? t('outStock') : t('lowStock')}
+        </span>
+      )}
       {/* Wishlist Heart Button */}
       {!isInventoryManager && !isVet && !isReceptionist && (
         <button
           className="wishlist-heart-btn"
-          title="Add to Wishlist"
+          title={isWishlisted ? t('removeWishlist') : t('addWishlist')}
           onClick={handleOnClickHeartIcon}
         >
           {isWishlisted ? (
@@ -165,14 +180,19 @@ export default function Product({
           image={currentProduct.image}
           imageId={currentProduct.imageId}
         />
-        <h2 className="product-title">{currentProduct.productName}</h2>
+        <h2 className="product-title">
+          {localizedProduct(currentProduct, language).name}
+        </h2>
       </div>
 
       <div className="deliveryType-container">
         <p>{getDeliveryTypeLabel(currentProduct.deliveryType)}</p>
       </div>
 
-      <p>Price: ${currentProduct.productSalePrice.toFixed(2)}</p>
+      <p>
+        {t('price')}{' '}
+        {formatProductPrice(currentProduct.productSalePrice, language)}
+      </p>
 
       <div className="avgrating-container">
         <StarRating
@@ -190,14 +210,14 @@ export default function Product({
             disabled={currentProduct.productQuantity === 0}
           >
             {currentProduct.productQuantity === 0
-              ? 'Out of Stock'
-              : 'Add to Cart'}
+              ? t('outStock')
+              : t('addCart')}
           </button>
           {successMessageCart && (
-            <p className="success-message">{successMessageCart}</p>
+            <p className="success-message">{t(successMessageCart)}</p>
           )}
           {successMessageWishlist && (
-            <p className="success-message">{successMessageWishlist}</p>
+            <p className="success-message">{t(successMessageWishlist)}</p>
           )}
         </>
       )}
@@ -217,7 +237,7 @@ export default function Product({
             boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
           }}
         >
-          PRE-ORDER
+          {t('preorder')}
         </div>
       )}
     </div>

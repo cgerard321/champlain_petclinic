@@ -15,7 +15,7 @@ public class CustomerClient {
     private final String customersBaseURL;
 
     public CustomerClient(
-            @Value("customers-service") String customersServiceHost,
+            @Value("customers-service-reactive") String customersServiceHost,
             @Value("8080") String customersServicePort
     ) {
         this.customersBaseURL = "http://" + customersServiceHost + ":" + customersServicePort + "/customers";

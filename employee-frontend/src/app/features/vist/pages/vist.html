@@ -1,1 +1,28 @@
-<app-coming-soon />
+<!-- <app-coming-soon /> -->
+<div class="visits-page" [class.visits-page--sidebar-hidden]="!isSidebarVisible()">
+  @if (isSidebarVisible()) {
+    <app-visit-sidebar
+      [selectedStatuses]="selectedStatuses()"
+      (hide)="hideSidebar()"
+      (statusSelectionChange)="updateSelectedStatuses($event)"
+    />
+  }
+
+  <section
+    class="visits-page__content"
+    aria-label="Liste des visites"
+    i18n-aria-label="@@visits.listLabel"
+  >
+    @if (!isSidebarVisible()) {
+      <button
+        class="visits-page__show-sidebar"
+        type="button"
+        (click)="showSidebar()"
+        i18n="@@visits.showFilters"
+      >
+        Afficher les filtres
+      </button>
+    }
+    <app-visit [selectedStatuses]="selectedStatuses()" />
+  </section>
+</div>

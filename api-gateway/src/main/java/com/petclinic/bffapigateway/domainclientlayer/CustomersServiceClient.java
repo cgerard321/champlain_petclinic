@@ -7,12 +7,15 @@ import com.petclinic.bffapigateway.dtos.Pets.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 
 
 import java.net.URI;
@@ -243,6 +246,15 @@ public class CustomersServiceClient {
                 .uri(customersServiceUrl +"/customers/"+ customerId)
                 .retrieve()
                 .bodyToMono(CustomerResponseDTO.class);
+    }
+
+    public Mono<Void> softDeleteCustomer(final String customerId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl + "/customers/" + customerId + "/soft")
+                .retrieve()
+                .onStatus(HttpStatus.NOT_FOUND::equals,
+                        response -> Mono.error(new NotFoundException("Customer id not found: " + customerId)))
+                .bodyToMono(Void.class);
     }
 
 
