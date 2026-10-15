@@ -1,5 +1,5 @@
 <!-- <app-coming-soon /> -->
-<div class="visits-page" [class.visits-page--sidebar-hidden]="!isSidebarVisible()">
+<main class="visits-page" [class.visits-page--sidebar-hidden]="!isSidebarVisible()">
   @if (isSidebarVisible()) {
     <app-visit-sidebar
       [selectedStatuses]="selectedStatuses()"
@@ -23,6 +23,7 @@
         Afficher les filtres
       </button>
     }
+    <app-next-appointment />
     <app-visit [selectedStatuses]="selectedStatuses()" />
   </section>
-</div>
+</main>

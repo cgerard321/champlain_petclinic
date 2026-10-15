@@ -22,4 +22,5 @@ public class Customer {
     private String province;
     private String telephone;
     private String photoId;
+    private Boolean isActive;
 }

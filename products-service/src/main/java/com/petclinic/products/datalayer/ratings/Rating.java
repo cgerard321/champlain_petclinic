@@ -1,5 +1,6 @@
 package com.petclinic.products.datalayer.ratings;
 
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,4 +21,5 @@ public class Rating {
     private String customerId;
     private Byte rating;
     private String review;
+    private LocalDateTime createdAt;
 }
