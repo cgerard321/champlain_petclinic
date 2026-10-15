@@ -137,6 +137,38 @@
         "slotsError": "Could not load available times.",
         "scheduleError": "Could not schedule the follow-up.",
         "confirmation": "The follow-up visit was scheduled."
+      },
+      "note": {
+        "button": "Add note",
+        "title": "Add a note",
+        "note": "Note for the pet owner",
+        "noteRequired": "Note is required",
+        "noteInvalid": "Note must be at least 5 characters",
+        "save": "Save",
+        "saveError": "Could not save the note.",
+        "confirmation": "The note was saved."
+      },
+      "details": {
+        "back": "Back to visits",
+        "title": "Visit Details",
+        "loading": "Loading visit details...",
+        "visitInfo": "Visit Information",
+        "visitId": "Visit ID",
+        "description": "Description",
+        "start": "Start",
+        "end": "End",
+        "status": "Status",
+        "petInfo": "Pet Information",
+        "name": "Name",
+        "birthDate": "Birth Date",
+        "vetInfo": "Veterinarian Information",
+        "email": "Email",
+        "phone": "Phone",
+        "customerInfo": "Customer Information",
+        "notAvailable": "Not available",
+        "noVisitId": "No visit ID was provided.",
+        "notFound": "Visit not found.",
+        "loadError": "Unable to load visit details."
       }
     },
     "vets": {
@@ -244,7 +276,7 @@
         "hamster": "Hamster",
         "others": "Others"
       }
-    }
+    },
     "inventory": {
       "title": "Inventory",
       "data": {

@@ -20,4 +20,5 @@ export interface Visit {
   visitEndDate: Date;
   isEmergency: boolean;
   prescriptionFile?: FileDetails;
+  vetNote?: string;
 }

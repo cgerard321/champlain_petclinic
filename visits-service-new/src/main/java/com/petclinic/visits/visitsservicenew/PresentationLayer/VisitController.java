@@ -326,4 +326,9 @@ public class VisitController {
         return visitService.cancelVisit(visitId, cancellationRequestDTO);
     }
 
+    @PatchMapping(value = "/{visitId}/note", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<VisitResponseDTO> addVetNote(@PathVariable String visitId, @RequestBody VetNoteRequestDTO vetNoteRequestDTO){
+        return visitService.addVetNote(visitId, vetNoteRequestDTO);
+    }
+
 }

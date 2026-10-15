@@ -4,9 +4,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { RouterLink } from '@angular/router';
 
 import { AuthState } from '@core/services/auth-state';
 import { FollowUpVisitDialog } from '@features/vist/components/FollowUpVisit/FollowUpVisitDialog';
+import { VetNoteDialog } from '@features/vist/components/VetNote/VetNoteDialog';
 import { Status } from '@features/vist/models/Status';
 import { visitStatusLabel } from '@features/vist/models/status-label';
 import { Visit } from '@features/vist/models/Visit';
@@ -15,7 +17,7 @@ import { Roles } from '@shared/models/roles';
 
 @Component({
   selector: 'app-visit',
-  imports: [DatePipe, MatButtonModule, MatDialogModule, MatSnackBarModule],
+  imports: [DatePipe, MatButtonModule, MatDialogModule, MatSnackBarModule, RouterLink],
   styleUrl: './VistListTable.css',
   templateUrl: './VistListTable.html',
 })
@@ -76,6 +78,33 @@ export class VistListTable implements OnInit {
             $localize`:@@visits.followUp.confirmation:La visite de suivi a été planifiée.`,
             '',
             { duration: 3000, verticalPosition: 'top' },
+          );
+        }
+      });
+  }
+
+  protected openVetNote(visit: Visit): void {
+    this.dialog
+      .open(VetNoteDialog, {
+        data: { visit },
+        width: '620px',
+        maxWidth: '95vw',
+      })
+      .afterClosed()
+      .subscribe((updatedVisit?: Visit) => {
+        if (updatedVisit) {
+          this.visit.update((visits) =>
+            visits.map((current) =>
+              current.visitId === updatedVisit.visitId ? updatedVisit : current,
+            ),
+          );
+          this.snackBar.open(
+            $localize`:@@visits.note.confirmation:La note a été enregistrée.`,
+            '',
+            {
+              duration: 3000,
+              verticalPosition: 'top',
+            },
           );
         }
       });
