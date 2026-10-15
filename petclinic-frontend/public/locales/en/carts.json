@@ -134,7 +134,8 @@
     "addProductFailed": "Failed to add {{name}} to cart.",
     "checkoutFailed": "Checkout failed: {{message}}",
     "unexpected": "Unexpected error",
-    "updateWishlistFailed": "Could not update wishlist."
+    "updateWishlistFailed": "Could not update wishlist.",
+    "stockLimitOne": "You cannot add more than 1 item. Only 1 item left in stock."
   },
   "item": {
     "lowStock": "Only {{count}} items left in stock.",
@@ -143,7 +144,8 @@
     "quantityOf": "Quantity of {{name}}",
     "addToWishlist": "Add to wishlist",
     "addToCartLabel": "Add {{name}} to cart",
-    "removeFromWishlistLabel": "Remove {{name}} from wishlist"
+    "removeFromWishlistLabel": "Remove {{name}} from wishlist",
+    "lowStockOne": "Only 1 item left in stock."
   },
   "billing": {
     "close": "Close billing form",
@@ -176,7 +178,8 @@
       "NT": "Northwest Territories",
       "NU": "Nunavut",
       "YT": "Yukon"
-    }
+    },
+    "telephone": "Telephone"
   },
   "invoice": {
     "label": "Invoice receipt",

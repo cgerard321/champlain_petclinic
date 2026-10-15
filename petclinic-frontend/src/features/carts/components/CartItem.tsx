@@ -43,6 +43,11 @@ const CartItem = ({
   const { localizedName, localizedDescription } = useProductText([item]);
   const remainingStock = item.productQuantity - (item.quantity ?? 0);
 
+  let lowStockMessage = t('item.lowStock', { count: remainingStock });
+  if (remainingStock === 1) {
+    lowStockMessage = t('item.lowStockOne');
+  }
+
   // ---- rôles / read-only staff+admin ----
   const { user } = useUser();
   const roleNames = new Set<string>();
@@ -88,9 +93,7 @@ const CartItem = ({
         <div className="cart-item-header">
           <h2 className="info-title">{localizedName(item)}</h2>
           {remainingStock <= 5 && remainingStock > 0 && (
-            <span className="stock-message">
-              {t('item.lowStock', { count: remainingStock })}
-            </span>
+            <span className="stock-message">{lowStockMessage}</span>
           )}
           {remainingStock === 0 && (
             <span className="stock-message out-of-stock">

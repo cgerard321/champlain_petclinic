@@ -592,9 +592,15 @@ const UserCart: React.FC = () => {
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
       if (newQuantity > item.productQuantity) {
+        let stockLimitMessage = t('errors.stockLimit', {
+          stock: item.productQuantity,
+        });
+        if (item.productQuantity === 1) {
+          stockLimitMessage = t('errors.stockLimitOne');
+        }
         setErrorMessages(prevErrors => ({
           ...prevErrors,
-          [index]: t('errors.stockLimit', { stock: item.productQuantity }),
+          [index]: stockLimitMessage,
         }));
         return;
       } else {

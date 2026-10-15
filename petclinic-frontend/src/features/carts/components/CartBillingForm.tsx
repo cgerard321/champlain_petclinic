@@ -221,7 +221,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
             <input
               type="tel"
               name="phoneNumber"
-              placeholder="Telephone"
+              placeholder={t('billing.telephone')}
               value={billing.phoneNumber}
               onChange={handleChange}
               autoComplete="tel"
