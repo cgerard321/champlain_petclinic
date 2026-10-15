@@ -86,4 +86,13 @@ describe('VisitService', () => {
     });
     request.flush({ ...completedVisit, status: Status.UPCOMING });
   });
+
+  it('saves a note on the visit', () => {
+    service.addVetNote(completedVisit.visitId, 'Keep giving the meds').subscribe();
+
+    const request = http.expectOne(`/api/gateway/visits/${completedVisit.visitId}/note`);
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({ vetNote: 'Keep giving the meds' });
+    request.flush({ ...completedVisit, vetNote: 'Keep giving the meds' });
+  });
 });

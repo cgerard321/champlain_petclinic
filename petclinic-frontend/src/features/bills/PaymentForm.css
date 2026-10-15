@@ -255,3 +255,87 @@
     transform: rotate(360deg);
   }
 }
+
+/* CPC-1475 - Customer billing payment responsiveness */
+
+.customer-bills-page .payment-modal {
+  box-sizing: border-box;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  overscroll-behavior-y: contain;
+}
+
+.customer-bills-page .payment-breakdown p {
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.customer-bills-page .payment-form .form-group {
+  min-width: 0;
+}
+
+/* Mobile portrait */
+@media (max-width: 600px) {
+  .customer-bills-page .payment-modal-overlay {
+    box-sizing: border-box;
+    padding: 12px;
+  }
+
+  .customer-bills-page .payment-modal {
+    width: 100%;
+    max-width: 500px;
+    max-height: calc(100dvh - 24px);
+    margin: 0;
+  }
+
+  .customer-bills-page .payment-header,
+  .customer-bills-page .payment-details,
+  .customer-bills-page .payment-form {
+    padding: 16px;
+  }
+
+  .customer-bills-page .payment-header .close-button {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+  }
+
+  .customer-bills-page .payment-form .form-row,
+  .customer-bills-page .payment-form .form-actions {
+    flex-direction: column;
+  }
+
+  .customer-bills-page .payment-form .form-actions button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+/* Small mobile phones */
+@media (max-width: 380px) {
+  .customer-bills-page .payment-header,
+  .customer-bills-page .payment-details,
+  .customer-bills-page .payment-form {
+    padding: 12px;
+  }
+
+  .customer-bills-page .payment-header h2 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Mobile landscape */
+@media (max-height: 500px) and (orientation: landscape) {
+  .customer-bills-page .payment-modal-overlay {
+    box-sizing: border-box;
+    align-items: flex-start;
+    padding: 8px;
+    overflow-y: auto;
+  }
+
+  .customer-bills-page .payment-modal {
+    max-height: calc(100dvh - 16px);
+    margin: auto;
+    overflow-y: auto;
+  }
+}

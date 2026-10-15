@@ -1,11 +1,9 @@
-export const USERNAME_MIN_LENGTH = 3;
-export const USERNAME_MAX_LENGTH = 30;
-
-export const USERNAME_PATTERN = /^[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)*$/;
+const USERNAME_MIN_LENGTH = 3;
+const USERNAME_MAX_LENGTH = 30;
 
 const DIACRITICS = new RegExp('[\\u0300-\\u036f]', 'g');
 
-export const RESERVED_USERNAMES = [
+const RESERVED_USERNAMES = [
   'admin',
   'administrator',
   'root',
@@ -42,13 +40,8 @@ export function checkUsernameRules(raw: string): UsernameRule[] {
   ];
 }
 
-export function matchesUsernameFormat(raw: string): boolean {
-  const value = normalizeUsername(raw);
-  return (
-    value.length >= USERNAME_MIN_LENGTH &&
-    value.length <= USERNAME_MAX_LENGTH &&
-    USERNAME_PATTERN.test(value)
-  );
+function matchesUsernameFormat(raw: string): boolean {
+  return checkUsernameRules(raw).every((rule) => rule.met);
 }
 
 export function isReserved(raw: string): boolean {
@@ -64,6 +57,7 @@ export function isSameAsCurrent(raw: string, current: string): boolean {
 export function isValidUsername(raw: string): boolean {
   return matchesUsernameFormat(raw) && !isReserved(raw);
 }
+
 function clampUsername(value: string): string {
   return value.slice(0, USERNAME_MAX_LENGTH).replace(/_+$/, '');
 }
@@ -72,17 +66,17 @@ function toUsernameBase(raw: string): string {
   const folded = normalizeUsername(raw)
     .normalize('NFD')
     .replace(DIACRITICS, '')
-
     .replace(/[^A-Za-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '')
-
     .replace(/^[^A-Za-z]+/, '');
 
   return clampUsername(folded);
 }
+
 function suggestFrom(candidates: string[], max: number): string[] {
   return [...new Set(candidates.map(clampUsername))].filter(isValidUsername).slice(0, max);
 }
+
 export function suggestUsernames(typed: string, max = 3): string[] {
   const base = toUsernameBase(typed);
 
@@ -100,14 +94,14 @@ export function suggestAlternatives(typed: string, max = 3): string[] {
     return [];
   }
 
-  const current = normalizeUsername(typed).toLowerCase();
+  const typedValue = normalizeUsername(typed).toLowerCase();
   const candidates = ['1', '2', '3']
     .map((suffix) => {
       const room = USERNAME_MAX_LENGTH - suffix.length;
 
       return `${base.slice(0, room).replace(/_+$/, '')}${suffix}`;
     })
-    .filter((candidate) => candidate.toLowerCase() !== current);
+    .filter((candidate) => candidate.toLowerCase() !== typedValue);
 
   return suggestFrom(candidates, max);
 }

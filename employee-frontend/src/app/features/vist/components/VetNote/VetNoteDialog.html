@@ -1,0 +1,58 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title i18n="@@visits.note.title">Ajouter une note</h2>
+  <button
+    mat-icon-button
+    mat-dialog-close
+    type="button"
+    aria-label="Fermer"
+    i18n-aria-label="@@visits.followUp.close"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<form class="follow-up-form" (submit)="submit($event)">
+  <mat-dialog-content>
+    <div class="visit-details">
+      <div>
+        <span i18n="@@visits.followUp.pet">Animal</span>
+        <strong>{{ visit.petName }}</strong>
+      </div>
+      <div>
+        <span i18n="@@visits.followUp.veterinarian">Vétérinaire</span>
+        <strong>{{ visit.vetFirstName }} {{ visit.vetLastName }}</strong>
+      </div>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label i18n="@@visits.note.note">Note pour le propriétaire</mat-label>
+      <textarea matInput rows="5" [formField]="noteForm.vetNote"></textarea>
+      @if (noteForm.vetNote().touched() && noteForm.vetNote().invalid()) {
+        <mat-error>{{ noteForm.vetNote().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    @if (errorMessage()) {
+      <p class="error-message" role="alert">{{ errorMessage() }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button
+      mat-button
+      type="button"
+      [disabled]="isSubmitting()"
+      (click)="cancel()"
+      i18n="@@visits.followUp.cancel"
+    >
+      Annuler
+    </button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="isSubmitting()">
+      @if (isSubmitting()) {
+        <mat-progress-spinner diameter="20" mode="indeterminate" />
+      } @else {
+        <ng-container i18n="@@visits.note.save">Enregistrer</ng-container>
+      }
+    </button>
+  </mat-dialog-actions>
+</form>
