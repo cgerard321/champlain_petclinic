@@ -22,7 +22,7 @@ export class Cust implements OnInit {
   protected readonly customers = signal<Customer[]>([]);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
-  protected readonly notAvailable =  $localize`:@@cust.notAvailable:Non disponible`;
+  protected readonly notAvailable = $localize`:@@cust.notAvailable:Non disponible`;
   protected readonly searchPlaceholder = $localize`:@@cust.searchPlaceholder:Rechercher un client par nom, prénom, ID, téléphone, adresse ou ville`;
 
   ngOnInit(): void {
@@ -70,5 +70,4 @@ export class Cust implements OnInit {
       ),
     );
   });
-
 }

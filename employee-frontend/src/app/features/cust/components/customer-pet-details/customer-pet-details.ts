@@ -27,7 +27,6 @@ export class PetDetails implements OnInit {
   protected readonly year = $localize`:@@cust.year:an`;
   protected readonly years = $localize`:@@cust.years:ans`;
 
-
   ngOnInit(): void {
     this.customerService.getPetDetails(this.data.customerId).subscribe({
       next: (pet) => {
@@ -62,7 +61,9 @@ export class PetDetails implements OnInit {
   protected getPetTypeName(petTypeId: string): string {
     const petType = this.petTypes().find((type) => type.petTypeId === petTypeId);
 
-    return this.petTypeLabels[petType?.name.toLowerCase() ?? ''] ?? $localize`:@@pet.types.others:Autres`;
+    return (
+      this.petTypeLabels[petType?.name.toLowerCase() ?? ''] ?? $localize`:@@pet.types.others:Autres`
+    );
   }
   protected readonly petTypeLabels: Record<string, string> = {
     cat: $localize`:@@pet.types.cat:Chat`,
@@ -70,7 +71,6 @@ export class PetDetails implements OnInit {
     lizard: $localize`:@@pet.types.lizard:Lizard`,
     snake: $localize`:@@pet.types.snake:Serpent`,
     hamster: $localize`:@@pet.types.hamster:Hamster`,
-    bird: $localize`:@@pet.types.bird:Oiseau`
+    bird: $localize`:@@pet.types.bird:Oiseau`,
   };
-
 }

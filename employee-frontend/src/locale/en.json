@@ -199,8 +199,7 @@
         "phone": "Phone number",
         "pets": "Pets"
       },
-      "detailErrors":
-      {
+      "detailErrors": {
         "notAvailable": "Not available"
       },
       "petsButton": "Registered Pets",
