@@ -1,5 +1,6 @@
 package com.petclinic.products.businesslayer.ratings;
 
+import com.petclinic.products.datalayer.ratings.ReviewSettingsRepository;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
@@ -11,21 +12,24 @@ import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import com.petclinic.products.utils.exceptions.RatingAlreadyExists;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
 public class RatingServiceImpl implements RatingService {
-    private RatingRepository ratingRepository;
-    private ProductRepository productRepository;
-    private ReviewLikeRepository reviewLikeRepository;
+    private final RatingRepository ratingRepository;
+    private final ProductRepository productRepository;
+    private final ReviewSettingsRepository reviewSettingsRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
 
     public RatingServiceImpl(RatingRepository ratingRepository, ProductRepository productRepository,
-                             ReviewLikeRepository reviewLikeRepository) {
+                             ReviewLikeRepository reviewLikeRepository, ReviewSettingsRepository reviewSettingsRepository) {
         this.ratingRepository = ratingRepository;
         this.productRepository = productRepository;
         this.reviewLikeRepository = reviewLikeRepository;
+        this.reviewSettingsRepository = reviewSettingsRepository;
     }
 
     @Override
@@ -109,16 +113,34 @@ public class RatingServiceImpl implements RatingService {
                 .flatMap(req ->
                         productRepository.findProductByProductId(productId)
                                 .switchIfEmpty(Mono.error(new NotFoundException("Product id not found: " + productId)))
-                                .flatMap(prod -> ratingRepository.findRatingByCustomerIdAndProductId(customerId, productId)
-                                        .switchIfEmpty(Mono.error(new NotFoundException("Rating could not be found for customer " + customerId + " for product " + productId)))
-                                        .flatMap(found -> {
-                                            Rating newRating = EntityModelUtil.toRatingEntity(req, productId, customerId);
-                                            newRating.setId(found.getId());
-                                            return ratingRepository.save(newRating);
-                                        })
+                                .flatMap(prod ->
+                                        ratingRepository.findRatingByCustomerIdAndProductId(customerId, productId)
                                 )
-                                .map(EntityModelUtil::toRatingResponseModel)
-                );
+                                        .switchIfEmpty(Mono.error(new NotFoundException("Rating could not be found for customer " + customerId + " for product " + productId)))
+                                        .flatMap(existingRating ->
+                                           reviewSettingsRepository.findById(1L)
+                                                   .switchIfEmpty(Mono.error(new InvalidInputException("Review settings are unavailable")))
+                                                   .flatMap(settings -> {
+                                                       if (existingRating.getCreatedAt() == null) {
+                                                           return Mono.error(new InvalidInputException("Review creation time is unavailable"));
+                                                       }
+                                                       if (settings.getEditPeriodHours() == null || settings.getEditPeriodHours() < 0) {
+                                                           return Mono.error(new InvalidInputException("Edit period must be zero or greater"));
+                                                       }
+                                                       LocalDateTime deadline = existingRating.getCreatedAt()
+                                                               .plusHours(settings.getEditPeriodHours());
+                                                       if (LocalDateTime.now().isAfter(deadline)){
+                                                           return Mono.error(new InvalidInputException("This review is no longer editable")
+                                                           );
+                                                       }
+                                                       existingRating.setRating(req.getRating());
+                                                       existingRating.setReview(req.getReview() == null ? "" : req.getReview()
+                                                       );
+                                                       return ratingRepository.save(existingRating);
+                                                   })
+                                        )
+                                )
+                                .map(EntityModelUtil::toRatingResponseModel);
     }
 
     @Override
