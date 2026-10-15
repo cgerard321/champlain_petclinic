@@ -78,4 +78,8 @@ export class VisitService {
       isEmergency: false,
     });
   }
+
+  addVetNote(visitId: string, vetNote: string): Observable<Visit> {
+    return this.http.patch<Visit>(`/api/gateway/visits/${visitId}/note`, { vetNote });
+  }
 }

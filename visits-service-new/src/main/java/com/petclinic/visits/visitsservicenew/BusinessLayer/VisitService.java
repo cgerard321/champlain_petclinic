@@ -1,6 +1,7 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.PresentationLayer.CancellationRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.VetNoteRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import org.springframework.core.io.InputStreamResource;
@@ -42,6 +43,8 @@ public interface VisitService {
     Mono<InputStreamResource> exportVisitsToCSV();
 
     Mono<VisitResponseDTO> cancelVisit(String visitId, CancellationRequestDTO request);
+
+    Mono<VisitResponseDTO> addVetNote(String visitId, VetNoteRequestDTO request);
 
 //    Mono<VetDTO> testingGetVetDTO(String vetId);
 //    Mono<PetResponseDTO> testingGetPetDTO(int petId);

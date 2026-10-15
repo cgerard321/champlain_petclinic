@@ -19,6 +19,7 @@ import com.petclinic.visits.visitsservicenew.Exceptions.DuplicateTimeException;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.CancellationRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.VetNoteRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
@@ -368,6 +369,27 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
 
+    @Override
+    public Mono<VisitResponseDTO> addVetNote(String visitId, VetNoteRequestDTO request) {
+        if (request == null || request.getVetNote() == null || request.getVetNote().isBlank()) {
+            return Mono.error(new BadRequestException("Note is required"));
+        }
+
+        if (request.getVetNote().trim().length() < 5) {
+            return Mono.error(new BadRequestException("Note must be at least 5 characters"));
+        }
+
+        return repo.findByVisitId(visitId)
+                .switchIfEmpty(Mono.error(new NotFoundException("No visit was found with visitId: " + visitId)))
+                .filter(visit -> visit.getStatus() == Status.COMPLETED)
+                .switchIfEmpty(Mono.error(new BadRequestException("Cannot add a note to a visit that is not completed.")))
+                .flatMap(visit -> {
+                    visit.setVetNote(request.getVetNote().trim());
+                    return repo.save(visit);
+                })
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
+    }
+
 
 //    @Override
 //    public Mono<VetDTO> testingGetVetDTO(String vetId) {
@@ -402,6 +424,7 @@ public class VisitServiceImpl implements VisitService {
                                     updatedVisit.setVisitId(existingVisit.getVisitId());
 
                                     updatedVisit.setPrescriptionFileId(existingVisit.getPrescriptionFileId());
+                                    updatedVisit.setVetNote(existingVisit.getVetNote());
 
                                     if (updatedVisit.getStatus() == null) {
                                         updatedVisit.setStatus(existingVisit.getStatus());

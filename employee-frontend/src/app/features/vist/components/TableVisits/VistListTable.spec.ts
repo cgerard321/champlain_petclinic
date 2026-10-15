@@ -92,4 +92,26 @@ describe('VistListTable', () => {
       verticalPosition: 'top',
     });
   });
+
+  it('shows the add note action for a veterinarian on completed visits', async () => {
+    const fixture = await render(Roles.vet);
+    const buttons = fixture.nativeElement.querySelectorAll('td button');
+
+    expect(buttons[1].textContent).toContain('Ajouter une note');
+  });
+
+  it('updates the visit with the saved note and shows confirmation', async () => {
+    const visitWithNote = { ...completedVisit, vetNote: 'Keep giving the meds' };
+    const fixture = await render(Roles.vet, visitWithNote);
+    const component = fixture.componentInstance;
+
+    component['openVetNote'](completedVisit);
+
+    expect(dialogOpen).toHaveBeenCalled();
+    expect(component['visit']()).toEqual([visitWithNote]);
+    expect(snackBarOpen).toHaveBeenCalledWith('La note a été enregistrée.', '', {
+      duration: 3000,
+      verticalPosition: 'top',
+    });
+  });
 });

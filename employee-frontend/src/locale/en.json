@@ -122,6 +122,16 @@
         "slotsError": "Could not load available times.",
         "scheduleError": "Could not schedule the follow-up.",
         "confirmation": "The follow-up visit was scheduled."
+      },
+      "note": {
+        "button": "Add note",
+        "title": "Add a note",
+        "note": "Note for the pet owner",
+        "noteRequired": "Note is required",
+        "noteInvalid": "Note must be at least 5 characters",
+        "save": "Save",
+        "saveError": "Could not save the note.",
+        "confirmation": "The note was saved."
       }
     },
     "vets": {
