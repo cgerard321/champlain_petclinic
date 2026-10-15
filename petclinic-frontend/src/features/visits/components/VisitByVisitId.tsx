@@ -114,6 +114,13 @@ export default function VisitDetails(): JSX.Element {
           <span className="visit-label">Visit End Date:</span>
           <span className="visit-value">{visit.visitEndDate}</span>
         </div>
+
+        {visit.status === 'COMPLETED' && visit.vetNote && (
+          <div className="visit-field">
+            <span className="visit-label">Vet Note:</span>
+            <span className="visit-value">{visit.vetNote}</span>
+          </div>
+        )}
       </div>
 
       <div className="button-visit-details">

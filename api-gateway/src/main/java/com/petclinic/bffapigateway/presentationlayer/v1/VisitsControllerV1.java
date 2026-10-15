@@ -2,10 +2,12 @@ package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
+import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.CancellationRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
+import com.petclinic.bffapigateway.dtos.Visits.VetNoteRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
@@ -23,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -56,11 +59,31 @@ public class VisitsControllerV1 {
     @GetMapping(value = "/{visitId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(
             @PathVariable String visitId,
-            @RequestParam(required = false, defaultValue = "false") boolean includePrescription) {
+            @RequestParam(required = false, defaultValue = "false") boolean includePrescription,
+            ServerWebExchange exchange) {
 
+        TokenResponseDTO user = exchange.getAttribute("tokenValues");
         return visitsServiceClient.getVisitByVisitId(visitId, includePrescription)
+                .flatMap(visit -> hideVetNoteFromOtherOwners(visit, user))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    // Only the owner of the visit's pet can read the vet note
+    private Mono<VisitResponseDTO> hideVetNoteFromOtherOwners(VisitResponseDTO visit, TokenResponseDTO user) {
+        boolean isOwner = user != null && user.getRoles() != null
+                && user.getRoles().stream().anyMatch(role -> role.contains(Roles.OWNER.toString()));
+        if (visit.getVetNote() == null || !isOwner) {
+            return Mono.just(visit);
+        }
+
+        return customersServiceClient.getPetByPetId(visit.getPetId(), false)
+                .filter(pet -> user.getUserId().equals(pet.getCustomerId()))
+                .map(pet -> visit)
+                .switchIfEmpty(Mono.fromSupplier(() -> {
+                    visit.setVetNote(null);
+                    return visit;
+                }));
     }
 
     @GetMapping(value = "/pets/{petId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -321,6 +344,15 @@ public class VisitsControllerV1 {
 
         return visitsServiceClient
                 .cancelVisit(visitId, cancellationRequestDTO)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.VET})
+    @PatchMapping(value = "/{visitId}/note", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> addVetNote(@PathVariable String visitId, @RequestBody VetNoteRequestDTO vetNoteRequestDTO) {
+        return visitsServiceClient
+                .addVetNote(visitId, vetNoteRequestDTO)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
