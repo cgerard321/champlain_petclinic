@@ -68,7 +68,7 @@ export class PetDetails implements OnInit {
   protected readonly petTypeLabels: Record<string, string> = {
     cat: $localize`:@@pet.types.cat:Chat`,
     dog: $localize`:@@pet.types.dog:Chien`,
-    lizard: $localize`:@@pet.types.lizard:Lizard`,
+    lizard: $localize`:@@pet.types.lizard:Lézard`,
     snake: $localize`:@@pet.types.snake:Serpent`,
     hamster: $localize`:@@pet.types.hamster:Hamster`,
     bird: $localize`:@@pet.types.bird:Oiseau`,
