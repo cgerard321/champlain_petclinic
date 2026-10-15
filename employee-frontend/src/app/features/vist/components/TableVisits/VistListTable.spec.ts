@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -50,6 +51,7 @@ describe('VistListTable', () => {
     await TestBed.configureTestingModule({
       imports: [VistListTable],
       providers: [
+        provideRouter([]),
         { provide: VisitService, useValue: { getAllVisits: () => of(completedVisit) } },
         { provide: AuthState, useValue: { hasRole: (value: string) => value === role } },
       ],
@@ -88,6 +90,28 @@ describe('VistListTable', () => {
     expect(dialogOpen).toHaveBeenCalled();
     expect(component['visit']()).toEqual([upcomingVisit, completedVisit]);
     expect(snackBarOpen).toHaveBeenCalledWith('La visite de suivi a été planifiée.', '', {
+      duration: 3000,
+      verticalPosition: 'top',
+    });
+  });
+
+  it('shows the add note action for a veterinarian on completed visits', async () => {
+    const fixture = await render(Roles.vet);
+    const buttons = fixture.nativeElement.querySelectorAll('td button');
+
+    expect(buttons[1].textContent).toContain('Ajouter une note');
+  });
+
+  it('updates the visit with the saved note and shows confirmation', async () => {
+    const visitWithNote = { ...completedVisit, vetNote: 'Keep giving the meds' };
+    const fixture = await render(Roles.vet, visitWithNote);
+    const component = fixture.componentInstance;
+
+    component['openVetNote'](completedVisit);
+
+    expect(dialogOpen).toHaveBeenCalled();
+    expect(component['visit']()).toEqual([visitWithNote]);
+    expect(snackBarOpen).toHaveBeenCalledWith('La note a été enregistrée.', '', {
       duration: 3000,
       verticalPosition: 'top',
     });

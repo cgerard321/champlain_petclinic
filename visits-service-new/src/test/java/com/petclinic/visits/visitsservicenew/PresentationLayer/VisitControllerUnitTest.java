@@ -9,6 +9,7 @@ import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.SpecialtyDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Workday;
+import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
@@ -744,7 +745,38 @@ class VisitControllerUnitTest {
                 .expectStatus().is5xxServerError();
     }
 
+    @Test
+    void addVetNote_whenValidRequest_thenReturnUpdatedVisit() {
+        VisitResponseDTO visitWithNote = VisitResponseDTO.builder()
+                .visitId("VIST-2211-2401")
+                .status(Status.COMPLETED)
+                .vetNote("Keep giving the meds")
+                .build();
+        when(visitService.addVetNote(eq("VIST-2211-2401"), any(VetNoteRequestDTO.class)))
+                .thenReturn(Mono.just(visitWithNote));
 
+        webTestClient.patch()
+                .uri("/visits/{visitId}/note", "VIST-2211-2401")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(VetNoteRequestDTO.builder().vetNote("Keep giving the meds").build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(VisitResponseDTO.class)
+                .value(response -> assertEquals("Keep giving the meds", response.getVetNote()));
 
+        verify(visitService, times(1)).addVetNote(eq("VIST-2211-2401"), any(VetNoteRequestDTO.class));
+    }
+
+    @Test
+    void addVetNote_whenVisitIsNotCompleted_thenReturnBadRequest() {
+        when(visitService.addVetNote(eq("VIST-2211-2401"), any(VetNoteRequestDTO.class)))
+                .thenReturn(Mono.error(new BadRequestException("Cannot add a note to a visit that is not completed.")));
+
+        webTestClient.patch()
+                .uri("/visits/{visitId}/note", "VIST-2211-2401")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(VetNoteRequestDTO.builder().vetNote("Keep giving the meds").build())
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
 }
-
