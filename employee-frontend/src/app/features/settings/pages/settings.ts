@@ -4,6 +4,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { Router } from '@angular/router';
 
+import { HasUnsavedChanges } from '@core/models/has-unsaved-changes';
+import { PasswordReset } from '@features/settings/components/password-reset/password-reset';
 import { UsernameForm } from '@features/settings/components/username-form/username-form';
 import { SettingsFormState } from '@features/settings/services/settings-form-state';
 
@@ -11,11 +13,11 @@ type SettingsSection = 'security' | 'display';
 
 @Component({
   selector: 'app-settings',
-  imports: [MatButtonModule, MatCardModule, MatIconModule, UsernameForm],
+  imports: [MatButtonModule, MatCardModule, MatIconModule, PasswordReset, UsernameForm],
   templateUrl: './settings.html',
   styleUrl: './settings.css',
 })
-export class Settings {
+export class Settings implements HasUnsavedChanges {
   private readonly formState = inject(SettingsFormState);
   private readonly router = inject(Router);
 

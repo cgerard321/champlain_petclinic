@@ -49,10 +49,24 @@
             "noSpaceNoAt": "No spaces or \"@\"",
             "noTrailing": "Doesn't end with an underscore, and no two in a row"
           }
+        },
+        "password": {
+          "title": "Password",
+          "intro": "Get a link by email to choose a new password.",
+          "label": "Email",
+          "send": "Send the link",
+          "retryIn": "New link in",
+          "sent": "If this email matches an account, a reset link has been sent."
         }
       },
       "display": {
         "title": "Display"
+      },
+      "leave": {
+        "title": "Unsaved changes",
+        "message": "Your changes are not saved. Do you want to leave this page?",
+        "confirm": "Leave",
+        "cancel": "Stay"
       }
     },
     "role": {
