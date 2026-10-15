@@ -1,19 +1,20 @@
 <main class="home-container">
   <h1 class="welcome-title">
     @if (employeeName()) {
-      Welcome back, {{ employeeName() }}!
+      <ng-container i18n="@@home.welcomeBack">Bon Retour, {{ employeeName() }}!</ng-container>
     } @else {
-      Welcome to Champlain Petclinic
+      <ng-container i18n="@@home.welcomeDefault">Bienvenue à Champlain Petclinic</ng-container>
     }
   </h1>
   <mat-card class="welcome-card" appearance="outlined">
     <div class="welcome-content">
       <div class="welcome-text">
-        <span class="welcome-badge">EMPLOYEE PORTAL</span>
-        <h1>Clinic Management Dashboard</h1>
-        <p class="welcome-description">
-          Manage appointments, oversee daily clinic operations, access patient medical records, and
-          monitor inventory seamlessly in one central location!
+        <span class="welcome-badge" i18n="@@home.badge">PORTAIL EMPLOYÉS</span>
+        <h1 i18n="@@home.title">Tableau de bord de la clinique</h1>
+        <p class="welcome-description" i18n="@@home.description">
+          Gérez les rendez-vous, supervisez les opérations quotidiennes de la clinique, accédez aux
+          dossiers médicaux des patients et surveillez les stocks de manière transparente depuis un
+          seul et même endroit!
         </p>
         <div class="welcome-buttons">
           <a routerLink="/vist" class="welcome-btn btn-primary">
@@ -22,7 +23,7 @@
                 d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 4H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"
               ></path>
             </svg>
-            View Visits
+            <ng-container i18n="@@home.viewVisits">Voir les visites</ng-container>
           </a>
           <a routerLink="/prod" class="welcome-btn btn-secondary">
             <svg class="btn-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -30,7 +31,7 @@
                 d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"
               ></path>
             </svg>
-            Browse Products
+            <ng-container i18n="@@home.browseProducts">Parcourir les produits</ng-container>
           </a>
         </div>
       </div>
@@ -55,58 +56,66 @@
     </div>
   </mat-card>
   <div class="quick-actions-section">
-    <h2 class="quick-actions-title">Quick Actions</h2>
+    <h2 class="quick-actions-title" i18n="@@home.quickActions.title">Actions Rapides</h2>
 
     <div class="quick-actions-grid">
       <a class="action-card" routerLink="/vets">
         <div class="action-card-header">
-          <h3>Veterinarians</h3>
-          <span class="action-tag">SCHEDULES & SPECIALTIES</span>
+          <h3 i18n="@@home.quickActions.vetsTitle">Vétérinaires</h3>
+          <span class="action-tag" i18n="@@home.quickActions.vetsTag">HORAIRES ET SPÉCIALITÉS</span>
         </div>
-        <p class="action-card-desc">
-          Access vet profiles, assigned specialties, and daily availability calendars.
+        <p class="action-card-desc" i18n="@@home.quickActions.vetsDescription">
+          Consultez les profils des vétérinaires, leurs spécialités et leurs disponibilités
+          quotidiennes.
         </p>
         <div class="action-card-footer">
-          <span class="footer-label">Active Staff</span>
+          <span class="footer-label" i18n="@@home.quickActions.vetsFooter">Personnel actif</span>
         </div>
       </a>
 
       <a class="action-card" routerLink="/cust">
         <div class="action-card-header">
-          <h3>Customers & Owners</h3>
-          <span class="action-tag">CLIENT RECORDS</span>
+          <h3 i18n="@@home.quickActions.custTitle">Clients et Propriétaires</h3>
+          <span class="action-tag" i18n="@@home.quickActions.custTag">DOSSIERS CLIENTS</span>
         </div>
-        <p class="action-card-desc">
-          Register new clients, manage pet profiles, and update contact details.
+        <p class="action-card-desc" i18n="@@home.quickActions.custDescription">
+          Inscrivez des clients, gérez leurs animaux et mettez à jour leurs coordonnées.
         </p>
         <div class="action-card-footer">
-          <span class="footer-label">Patient Database</span>
+          <span class="footer-label" i18n="@@home.quickActions.custFooter"
+            >Base de données des patients</span
+          >
         </div>
       </a>
 
       <a class="action-card" routerLink="/bill">
         <div class="action-card-header">
-          <h3>Bills & Invoices</h3>
-          <span class="action-tag">FINANCIAL MANAGEMENT</span>
+          <h3 i18n="@@home.quickActions.billTitle">Factures</h3>
+          <span class="action-tag" i18n="@@home.quickActions.billTag">GESTION FINANCIÈRE</span>
         </div>
-        <p class="action-card-desc">
-          Track pending payments, generate clinic invoices, and process billing.
+        <p class="action-card-desc" i18n="@@home.quickActions.billDescription">
+          Suivez les paiements en attente, générez les factures de la clinique et traitez la
+          facturation.
         </p>
         <div class="action-card-footer">
-          <span class="footer-label">Invoicing System</span>
+          <span class="footer-label" i18n="@@home.quickActions.billFooter"
+            >Système de Facturation</span
+          >
         </div>
       </a>
 
       <a class="action-card" routerLink="/invt">
         <div class="action-card-header">
-          <h3>Inventory & Stock</h3>
-          <span class="action-tag">SUPPLY MONITORING</span>
+          <h3 i18n="@@home.quickActions.invtTitle">Inventaire et Stock</h3>
+          <span class="action-tag" i18n="@@home.quickActions.invtTag">SUIVI DE L’INVENTAIRE</span>
         </div>
-        <p class="action-card-desc">
-          Monitor pharmaceutical stocks, equipment levels, and restock alerts.
+        <p class="action-card-desc" i18n="@@home.quickActions.invtDescription">
+          Surveillez les stocks de médicaments, l’équipement et les alertes de réapprovisionnement.
         </p>
         <div class="action-card-footer">
-          <span class="footer-label">Stock Control</span>
+          <span class="footer-label" i18n="@@home.quickActions.invtFooter"
+            >Contrôle des stocks</span
+          >
         </div>
       </a>
     </div>
