@@ -79,7 +79,18 @@
       "terms": "Terms of Service",
       "copyright": "© 2026 Champlain Pet Clinic. All rights reserved."
     },
+    "visit": {
+      "pages": {
+        "buttonName": "Show filters"
+      },
+      "components": {
+        "filterbutton": "Filter By"
+      }
+    },
     "visits": {
+      "nextappointement": {
+        "title": "Next upcoming visit"
+      },
       "showFilters": "Show filters",
       "filterButton": "Filter By",
       "hideFilters": "Hide filters",
@@ -87,6 +98,10 @@
       "statusMenuLabel": "Visit statuses",
       "listLabel": "Visit list",
       "title": "List of Visits",
+      "nextAppointmentTitle": "Next appointment",
+      "nextAppointmentLoading": "Loading next appointment...",
+      "nextAppointmentError": "Could not load the next appointment.",
+      "noUpcomingAppointment": "No upcoming appointments.",
       "visitId": "Visit ID",
       "veterinarianFullName": "Veterinarian full name",
       "petName": "Pet name",
