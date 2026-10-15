@@ -18,7 +18,6 @@ void i18n
             'customers',
             'faq',
             'home',
-            'inventories',
             'products',
             'promos',
             'users',
