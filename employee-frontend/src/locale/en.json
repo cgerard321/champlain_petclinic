@@ -214,6 +214,19 @@
         "noVisitId": "No visit ID was provided.",
         "notFound": "Visit not found.",
         "loadError": "Unable to load visit details."
+      },
+      "calendar": {
+        "open": "Weekly Calendar view",
+        "title": "Weekly Calendar",
+        "back": "Return to visits list",
+        "previous": "Previous Week",
+        "current": "Current Week",
+        "next": "Next Week",
+        "empty": "No appointments found for this day.",
+        "loading": "Loading visits...",
+        "error": "Unable to load visits.",
+        "owner": "Owner",
+        "type": "Appointment type"
       }
     },
     "vets": {
