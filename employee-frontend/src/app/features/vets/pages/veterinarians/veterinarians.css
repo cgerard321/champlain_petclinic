@@ -3,6 +3,10 @@
   color: #214b3e;
 }
 
+:host-context(.dark-mode) {
+  color: white !important;
+}
+
 .vets-page {
   max-width: 1120px;
   margin: 0 auto;
@@ -31,6 +35,10 @@ h1 {
   margin: 14px 0 0;
   color: #596c62;
   font-size: 16px;
+}
+
+:host-context(.dark-mode) .page-description{
+  color: white;
 }
 
 .feature-grid {
@@ -214,4 +222,48 @@ h1 {
     box-shadow: 0 12px 28px rgb(33 75 62 / 12%);
     border-color: #91ad83;
   }
+}
+
+:host-context(.dark-mode) .directory-card {
+  background-color: #2b3d34 !important;
+  border: 1px solid rgb(255 255 255 / 12%)  !important;
+
+}
+
+:host-context(.dark-mode) .directory-card:hover {
+  border-color: #91ad83 !important;
+}
+
+:host-context(.dark-mode) .feature-card {
+  background-color: var(--mat-sys-surface-container-highest) !important;
+  border: 1px solid rgb(255 255 255 / 12%)  !important;
+}
+
+:host-context(.dark-mode) .feature-card:hover {
+  border-color: #2e523e !important;
+}
+
+:host-context(.dark-mode) .icon-badge {
+  background: #254e3e !important;
+}
+
+:host-context(.dark-mode) .icon-badge mat-icon,
+:host-context(.dark-mode) .icon-badge .mat-icon {
+  color: #fff !important;
+}
+
+:host-context(.dark-mode) .card-description,
+:host-context(.dark-mode) .feature-card p,
+:host-context(.dark-mode) .sample-team p,
+:host-context(.dark-mode) .preview-note {
+  color: #a3b8ac !important;
+}
+
+:host-context(.dark-mode) .coming-soon {
+  background: #2b3d34 !important;
+  color: #a3b8ac !important;
+}
+
+:host-context(.dark-mode) .avatars {
+  color: var(--mat-sys-surface-container-highest) !important;
 }

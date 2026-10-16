@@ -51,3 +51,26 @@ tr:last-child td {
 tr:hover td {
   background: #f5f5f5;
 }
+
+.title {
+  color: var(--mat-sys-surface-container-highest);
+}
+
+:host-context(.dark-mode) .title {
+  color: white;
+}
+
+:host-context(.dark-mode) table {
+  border-bottom: 1px solid rgb(255 255 255 / 12%)  !important;
+  background: var(--mat-sys-surface-container-highest);
+}
+
+:host-context(.dark-mode) td {
+  border-bottom: 1px solid #111 !important;
+  color: white;
+}
+
+
+:host-context(.dark-mode) tr:hover td {
+  background: var(--mat-sys-surface-container);
+}
