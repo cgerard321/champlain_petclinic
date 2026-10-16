@@ -34,15 +34,3 @@ p {
     gap: 16px;
   }
 }
-
-:host-context(.dark-mode) {
-  .visits-page__show-sidebar {
-    background: var(--mat-sys-surface-container-highest);
-    border: 1px solid rgb(255 255 255 / 12%) !important;
-    color: #fff !important;
-  }
-
-  .visits-page__show-sidebar:hover {
-    background: #315842;
-  }
-}

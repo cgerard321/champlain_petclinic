@@ -25,18 +25,3 @@ th {
 tbody tr:last-child td {
   border-bottom: none;
 }
-
-/* Dark mode compatibility */
-:host-context(.dark-mode) th {
-  background: #1b1b1b;
-  border: 1px solid var(--mat-sys-surface);
-}
-
-:host-context(.dark-mode) .table-container {
-  border: 1px solid var(--mat-sys-surface);
-  background: var(--mat-sys-surface-container-highest);
-}
-
-:host-context(.dark-mode) td {
-  border-bottom: 1px solid #111
-}

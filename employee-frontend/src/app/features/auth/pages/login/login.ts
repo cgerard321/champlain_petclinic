@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 import { isApiError } from '@core/models/api-error';
 import { LoginRequest } from '@features/auth/models/loginRequest';
 import { Auth } from '@features/auth/services/auth';
-import { ThemeService } from '@features/settings/services/themeservice';
+
 @Component({
   selector: 'app-login',
   imports: [
@@ -29,7 +29,6 @@ import { ThemeService } from '@features/settings/services/themeservice';
 export class LoginPage {
   private readonly auth = inject(Auth);
   private readonly router = inject(Router);
-  private readonly themeService = inject(ThemeService);
 
   protected readonly hidePassword = signal(true);
   protected readonly isSubmitting = signal(false);
@@ -59,7 +58,6 @@ export class LoginPage {
     this.auth.login(this.model()).subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        this.themeService.setCurrentUser(this.model().emailOrUsername);
         this.router.navigateByUrl('/');
       },
       error: (err: unknown) => {

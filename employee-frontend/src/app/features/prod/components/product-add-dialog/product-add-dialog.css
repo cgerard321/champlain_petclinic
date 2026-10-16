@@ -115,7 +115,3 @@ mat-dialog-actions {
     grid-template-columns: 1fr;
   }
 }
-
-:host-context(.dark-mode) mat-dialog-actions {
-  background: var(--mat-sys-surface-container-high);
-}

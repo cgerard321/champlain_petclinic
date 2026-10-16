@@ -5,138 +5,34 @@
 // custom components at https://material.angular.dev/guide/theming
 @use '@angular/material' as mat;
 
-$app-structure-theme: mat.define-theme((
-  color: (
-    theme-type: light
-  ),
-  typography: (
-    brand-family: 'Roboto',
-    plain-family: 'Roboto',
-  ),
-  density: (
-    scale: 0
-  ),
-));
-$light-theme: mat.define-theme((
-  color: (
-    theme-type: light,
-    primary: mat.$azure-palette,
-  )));
-$dark-theme: mat.define-theme((
-  color: (
-    theme-type: dark,
-    primary: mat.$azure-palette,
-  )
-));
-
 html {
-  // Global font family and size
-  @include mat.all-component-themes($app-structure-theme);
-
-  // Default theme
-  @include mat.all-component-colors($light-theme);
-
-  color-scheme: light;
-
-  &.dark-mode {
-    @include mat.all-component-colors($dark-theme);
-
-    color-scheme: dark;
-
-    // Defining custom dark colors instead of absolute black set default by Angular Mat
-    --mat-sys-surface-container: #2b2d31 !important;
-    --mat-sys-surface-container-highest: #1e1f22 !important;
-    --mat-sys-outline-variant: #3f4147 !important;
-    --mat-sys-outline: #4e5058 !important;
-  }
-
+  height: 100%;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
 }
-
 
 body {
   // Default the application to a light color theme. This can be changed to
   // `dark` to enable the dark color theme, or to `light dark` to defer to the
   // user's system settings.
+  color-scheme: light;
+
   // Set a default background, font and text colors for the application using
   // Angular Material's system-level CSS variables. Learn more about these
   // variables at https://material.angular.dev/guide/system-variables
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
 
   // Reset the user agent margin.
   margin: 0;
   height: 100%;
-}
-
-body, html, .mat-typography {
-  font-family: Roboto, sans-serif !important;
-}
-
-/* Bill Payment Styles */
-.bill-payment {
-  padding: 32px;
-  color: #1c4030;
-
-  h2 {
-    margin: 0 0 12px;
-    font-size: 28px;
-  }
-
-  p {
-    margin: 0 0 24px;
-  }
-
-  form {
-    display: grid;
-    gap: 12px;
-  }
-
-  label {
-    font-weight: 600;
-  }
-
-  input {
-    box-sizing: border-box;
-    width: 100%;
-    min-width: 0;
-    padding: 12px;
-    border: 1px solid #b8cbbf;
-    border-radius: 8px;
-    background: white;
-    font: inherit;
-
-    &:focus {
-      outline: 2px solid #1c4030;
-      outline-offset: 2px;
-    }
-  }
-
-  button {
-    width: 100%;
-
-    &[type='submit'] {
-      margin-top: 12px;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-  }
-
-  .bill-details-error {
-    color: #b42318;
-  }
-}
-
-html.dark-mode {
-  .bill-payment {
-    color: #e6efe9;
-
-    input {
-      background: var(--mat-sys-surface-container-highest);
-      border-color: #315842;
-      color: #8dbb8f;
-    }
-  }
 }

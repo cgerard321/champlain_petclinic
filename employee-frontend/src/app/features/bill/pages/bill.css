@@ -90,6 +90,7 @@
   font-size: 1.25rem;
 }
 
+/* Bill filter */
 .bill-filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -125,12 +126,6 @@
   font-weight: 400;
 }
 
-.bill-lookup input {
-  flex: 1;
-  padding: 12px;
-  border-radius: 10px;
-}
-
 .bill-filters input:focus-visible,
 .bill-filters select:focus-visible {
   outline: 3px solid #8dbb8f;
@@ -141,6 +136,8 @@
   align-self: end;
   min-height: 42px;
 }
+
+/* Bill lookup */
 
 .bill-lookup {
   display: grid;
@@ -191,6 +188,8 @@
   opacity: 0.6;
 }
 
+/* Bill table */
+
 .bill-table-wrapper {
   overflow-x: auto;
   border-top: 1px solid #e0eae0;
@@ -226,6 +225,8 @@
   width: 26%;
 }
 
+/* Bill actions */
+
 .bill-row-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -248,7 +249,9 @@
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 .bill-table-button--outline {
@@ -279,6 +282,8 @@
   cursor: not-allowed;
 }
 
+/* Empty and error states */
+
 .bill-empty-state {
   border-top: 1px solid #e0eae0;
   padding: 48px 24px;
@@ -302,6 +307,8 @@
 .bill-permission-note {
   margin: 16px 0;
 }
+
+/* Archive bills */
 
 .bill-archive-action {
   display: inline-flex;
@@ -371,6 +378,8 @@
   color: #52616b;
 }
 
+/* Active and archived bill views */
+
 .bill-view-actions {
   display: flex;
   align-items: center;
@@ -407,10 +416,13 @@
   outline-offset: 2px;
 }
 
+/* Existing CPC-1913 styling */
+
 @media (width <= 640px) {
-  .bill-page {
-    padding: 16px 12px 24px;
-  }
+    .bill-page {
+      padding: 16px 12px 24px;
+    }
+  
 
   .bill-header {
     align-items: flex-start;
@@ -426,63 +438,58 @@
   }
 }
 
-:host-context(.dark-mode) {
-  .bill-card, .bill-card__header, .bill-empty-state {
-    background: var(--mat-sys-surface-container-highest);
-  }
+.bill-payment {
+  padding: 32px;
+  color: #1c4030;
+}
 
-  .bill-card, .bill-table-wrapper {
-    border: 1px solid rgb(255 255 255 / 12%) !important;
-  }
+.bill-payment h2 {
+  margin: 0 0 12px;
+  font-size: 28px;
+}
 
-  .bill-eyebrow, .bill-header h1, .bill-table th, .bill-card__header h2, .bill-table td, .bill-empty-state h3 {
-    color: #fff !important;
-  }
+.bill-payment p {
+  margin: 0 0 24px;
+}
 
-  .bill-lookup {
-    border: none;
-  }
+.bill-payment form {
+  display: grid;
+  gap: 12px;
+}
 
-  .bill-table th, .bill-filters {
-    background-color: var(--mat-sys-surface-container);
-  }
+.bill-payment label {
+  font-weight: 600;
+}
 
-  .bill-table td {
-    border-top: 1px solid #111;
-    border-bottom: 1px solid #111;
-  }
+.bill-payment input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #b8cbbf;
+  border-radius: 8px;
+  background: white;
+  font: inherit;
+}
 
-  .bill-secondary-action {
-    background: var(--mat-sys-surface-container-highest);
-    border: none;
-    color: #8dbb8f;
-  }
+.bill-payment input:focus {
+  outline: 2px solid #1c4030;
+  outline-offset: 2px;
+}
 
-  .bill-secondary-action:hover, .bill-view-action:hover, .bill-table-button:hover {
-    background: #315842;
-  }
+.bill-payment button {
+  width: 100%;
+}
 
-  .bill-filters label {
-    color: #e0e0e0;
-  }
+.bill-payment button[type='submit'] {
+  margin-top: 12px;
+}
 
-  .bill-lookup select, .bill-lookup input, .bill-filters input, .bill-filters select {
-    background-color: var(--mat-sys-surface-container-lowest);
-    border: 1px solid #315842;
-    color: #8dbb8f;
-  }
+.bill-payment button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-  .bill-view-action, .bill-table-button {
-    background: var(--mat-sys-surface);
-    color: #8dbb8f;
-  }
-
-  .bill-view-action--selected, .bill-view-action--selected:hover, .bill-table-button--primary, .bill-table-button--primary:hover {
-    background-color: #315842;
-    color: #fff;
-  }
-
-  .bill-view-action:focus-visible, .bill-table-button:focus-visible {
-    outline: 3px solid #8dbb8f;
-  }
+.bill-payment .bill-details-error {
+  color: #b42318;
 }

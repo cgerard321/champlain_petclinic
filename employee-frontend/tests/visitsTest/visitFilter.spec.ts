@@ -78,8 +78,8 @@ async function expectAllStatusesChecked(page: Page, language: Language): Promise
 }
 
 test('opens and closes the status menu with every localized visit status selected', async ({
-                                                                                             page,
-                                                                                           }) => {
+  page,
+}) => {
   await openVisitsPage(page);
 
   const filterButton = page.getByRole('button', { name: 'Filtrer Par' });
@@ -101,8 +101,8 @@ test('opens and closes the status menu with every localized visit status selecte
 });
 
 test('filters visits, preserves choices when the sidebar is toggled, and translates filter controls', async ({
-                                                                                                               page,
-                                                                                                             }) => {
+  page,
+}) => {
   await openVisitsPage(page);
 
   await expect(page.getByRole('complementary', { name: 'Filtres de visite' })).toBeVisible();

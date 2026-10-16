@@ -6,8 +6,8 @@
 }
 
 .welcome-card {
-  background: var(--mat-sys-surface-container-highest)  !important;
-  border: 1px solid #e0eae0;
+  background: #fff !important;
+  border: 1px solid #e0eae0 !important;
   border-radius: 16px !important;
   box-shadow: 0 4px 20px rgb(27 56 43 / 5%) !important;
   padding: 36px 40px !important;
@@ -63,7 +63,7 @@
 .welcome-description {
   font-size: 15px;
   line-height: 1.6;
-  color: var(--mat-sys-on-surface);
+  color: #4a6353;
   margin: 0;
   max-width: 620px;
 }
@@ -131,15 +131,17 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  background-color: #f7faf7;
   padding: 16px 24px;
   border-radius: 14px;
-  box-shadow: 0 2px 8px rgb(27 56 43 / 5%);
+  border: 1px solid #e0eae0;
+  box-shadow: 0 2px 8px rgb(27 56 43 / 4%);
 }
 
 .brand-title {
   font-size: 26px;
   font-weight: 800;
-  color: var(--mat-sys-on-surface);
+  color: #1b382b;
   letter-spacing: -0.5px;
 }
 
@@ -195,10 +197,9 @@
   display: block;
   text-decoration: none;
   color: inherit;
-  background-color: var(--mat-sys-surface-container-highest);
+  background-color: #fff;
   border: 1px solid #e0eae0;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgb(27 56 43 / 5%) !important;
   padding: 1.25rem 1.5rem;
   cursor: pointer;
   transition:
@@ -217,7 +218,7 @@
   width: 90px;
   height: 90px;
   border-radius: 50%;
-  background: rgb(199 217 178 / 5%);
+  background: rgb(199 217 178 / 25%);
   pointer-events: none;
   transition: transform 300ms ease;
 }
@@ -231,7 +232,7 @@
 .action-card-header h3 {
   font-size: 1.1rem;
   font-weight: 700;
-  color: var(--mat-sys-on-surface);
+  color: #1b382b;
   margin: 0 0 0.25rem;
 }
 
@@ -292,24 +293,4 @@
   .quick-actions-grid {
     grid-template-columns: 1fr; /* Stack into 1 column on mobile */
   }
-}
-
-:host-context(.dark-mode) .welcome-title, .quick-actions-title{
-  color: #fff !important;
-}
-
-:host-context(.dark-mode) .brand-highlight {
-  color: #fff !important;
-}
-
-:host-context(.dark-mode) .welcome-card, .action-card {
-  border: 1px solid rgb(255 255 255 / 12%)  !important;
-}
-
-:host-context(.dark-mode) .action-card-desc{
-  color: #a3b8ac;
-}
-
-:host-context(.dark-mode) .action-card:hover {
-  border-color: #2e523e !important;
 }

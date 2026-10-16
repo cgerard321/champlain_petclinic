@@ -108,7 +108,3 @@ mat-dialog-actions {
     padding-right: 16px;
   }
 }
-
-:host-context(.dark-mode) mat-dialog-actions {
-  background: var(--mat-sys-surface-container-high);
-}
