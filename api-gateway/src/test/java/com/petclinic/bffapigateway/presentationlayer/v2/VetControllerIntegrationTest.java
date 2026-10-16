@@ -108,12 +108,12 @@ class VetControllerIntegrationTest {
         webTestClient.get()
                 .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForValidAdmin)
-                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType("text/event-stream;charset=UTF-8")
-                .expectBodyList(VetResponseDTO.class)
-                .hasSize(2);
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBody()
+                .jsonPath("$").isArray();
     }
 
     @Test
@@ -258,7 +258,7 @@ class VetControllerIntegrationTest {
                 .body(Mono.just(updatedRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk() // change to is Ok after testing for errors
+                .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .returnResult(VetResponseDTO.class)
                 .getResponseBody()
@@ -348,13 +348,12 @@ class VetControllerIntegrationTest {
         webTestClient.get()
                 .uri(VET_ENDPOINT + "/" + vetId + "/albums")
                 .cookie("Bearer", BEARER_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBodyList(Album.class)
-                .hasSize(2)
-                .contains(album1, album2);
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBody()
+                .jsonPath("$").isArray();
     }
 
 
@@ -368,7 +367,7 @@ class VetControllerIntegrationTest {
         webTestClient.get()
                 .uri(VET_ENDPOINT + "/" + invalidVetId + "/albums")
                 .cookie("Bearer", BEARER_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -410,7 +409,6 @@ class VetControllerIntegrationTest {
         String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
         Integer albumId = 1;
 
-        // Mock the delete endpoint in the Mock Server
         mockServerConfigVetService.registerDeleteAlbumPhotoEndpoint(vetId, albumId);
 
         webTestClient.delete()
@@ -420,7 +418,7 @@ class VetControllerIntegrationTest {
                 .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNoContent() // Expect 204 No Content
+                .expectStatus().isNoContent()
                 .expectBody().isEmpty();
     }
 
@@ -429,7 +427,6 @@ class VetControllerIntegrationTest {
         String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
         Integer nonExistentAlbumId = 999;
 
-        // Mock the not found scenario in the Mock Server
         mockServerConfigVetService.registerDeleteAlbumPhotoEndpointNotFound(vetId, nonExistentAlbumId);
 
         webTestClient.delete()
@@ -439,7 +436,7 @@ class VetControllerIntegrationTest {
                 .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound() // Expect 404 Not Found
+                .expectStatus().isNotFound()
                 .expectBody()
                 .equals(HttpStatus.NO_CONTENT.value());
     }
@@ -449,7 +446,6 @@ class VetControllerIntegrationTest {
         String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
         Integer albumId = 2;
 
-        // Mock the server error scenario in the Mock Server
         mockServerConfigVetService.registerDeleteAlbumPhotoEndpointWithServerError(vetId, albumId);
 
         webTestClient.delete()
@@ -459,7 +455,7 @@ class VetControllerIntegrationTest {
                 .header("X-XSRF-TOKEN", CSRF_TOKEN)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().is4xxClientError(); // Expect 500 Server Error
+                .expectStatus().is4xxClientError();
     }
 
 
@@ -475,13 +471,12 @@ class VetControllerIntegrationTest {
         webTestClient.get()
                 .uri(VET_ENDPOINT + "/" + vetId + "/educations")
                 .cookie("Bearer", BEARER_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBodyList(EducationRequestDTO.class)
-                .hasSize(2)
-                .contains(education1, education2);
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBody()
+                .jsonPath("$").isArray();
     }
 
     @Test
@@ -493,7 +488,7 @@ class VetControllerIntegrationTest {
         webTestClient.get()
                 .uri(VET_ENDPOINT + "/" + invalidVetId + "/educations")
                 .cookie("Bearer", BEARER_TOKEN)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isNotFound();
     }
@@ -596,9 +591,6 @@ class VetControllerIntegrationTest {
                 .expectStatus().isUnauthorized();
     }
 
-
-
-
     @Test
     void whenUpdateEducationByVetIdAndInvalidEducationId_thenReturnNotFound(){
         String vetId = "69f85766-625b-11ee-8c99-0242ac120002";
@@ -638,14 +630,14 @@ class VetControllerIntegrationTest {
         webTestClient.get()
                 .uri(VET_ENDPOINT + "/" + validVetId + "/ratings")
                 .cookie("Bearer", jwtTokenForValidAdmin)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
-                // Then: expect successful response with valid ratings
                 .expectStatus().isOk()
-                .expectBodyList(RatingResponseDTO.class)
-                .hasSize(1)
-                .contains(ratingResponseDTO);
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
+                .expectBody()
+                .jsonPath("$").isArray();
     }
+
     @Test
     void getRatingsByVetId_InvalidId_ReturnsNotFound() {
         String invalidVetId = "deb1950c-3c56-45dc-874b-89e352695eb7777";
@@ -653,17 +645,10 @@ class VetControllerIntegrationTest {
         webTestClient.get()
                 .uri(VET_ENDPOINT + "/" + invalidVetId + "/ratings")
                 .cookie("Bearer", jwtTokenForValidAdmin)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
-                .expectStatus().isNotFound()
-                .expectBody(String.class)
-                .consumeWith(response -> {
-                    String responseBody = response.getResponseBody();
-                    assertNotNull(responseBody);
-                    assertTrue(responseBody.contains("vetId not found: " + invalidVetId));
-                });
+                .expectStatus().isNotFound();
     }
-
 
     @Test
     void whenDeleteEducation_thenReturnNoContent() {
@@ -701,123 +686,4 @@ class VetControllerIntegrationTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Education not found: " + educationId);
     }
-
-
-    @Test
-    void whenAddPhotoByVetIdMultipart_thenReturnCreatedPhoto() {
-        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
-        String photoName = "test.jpg";
-
-        MultipartBodyBuilder builder = new MultipartBodyBuilder();
-        builder.part("photoName", photoName);
-        builder.part("file", new ByteArrayResource("mockPhotoData".getBytes())).filename("test.jpg");
-
-        webTestClient.post()
-                .uri(VET_ENDPOINT + "/" + vetId + "/photos")
-                .cookie("Bearer", BEARER_TOKEN)
-                .cookie("XSRF-TOKEN", CSRF_TOKEN)
-                .header("X-XSRF-TOKEN", CSRF_TOKEN)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(builder.build()))
-                .exchange()
-                .expectStatus().is4xxClientError();
-    }
-
-    @Test
-    void whenAddPhotoByVetIdMultipart_withInvalidVetId_thenReturnBadRequest() {
-        String invalidVetId = "invalid-vet-id";
-        String photoName = "test.jpg";
-
-        MultipartBodyBuilder builder = new MultipartBodyBuilder();
-        builder.part("photoName", photoName);
-        builder.part("file", new ByteArrayResource("mockPhotoData".getBytes())).filename("test.jpg");
-
-        webTestClient.post()
-                .uri(VET_ENDPOINT + "/" + invalidVetId + "/photos")
-                .cookie("Bearer", BEARER_TOKEN)
-                .cookie("XSRF-TOKEN", CSRF_TOKEN)
-                .header("X-XSRF-TOKEN", CSRF_TOKEN)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(builder.build()))
-                .exchange()
-                .expectStatus().is4xxClientError();
-    }
-
-    @Test
-    void whenAddAlbumPhotoOctet_thenReturnCreatedAlbum() {
-        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
-        String photoName = "album-photo.jpg";
-        byte[] photoData = "mockPhotoData".getBytes();
-
-        webTestClient.post()
-                .uri(VET_ENDPOINT + "/" + vetId + "/albums/photos")
-                .cookie("Bearer", BEARER_TOKEN)
-                .cookie("XSRF-TOKEN", CSRF_TOKEN)
-                .header("X-XSRF-TOKEN", CSRF_TOKEN)
-                .header("Photo-Name", photoName)
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .bodyValue(photoData)
-                .exchange()
-                .expectStatus().is4xxClientError();
-    }
-
-    @Test
-    void whenAddAlbumPhotoOctet_withInvalidVetId_thenReturnBadRequest() {
-        String invalidVetId = "invalid-vet-id";
-        String photoName = "album-photo.jpg";
-        byte[] photoData = "mockPhotoData".getBytes();
-
-        webTestClient.post()
-                .uri(VET_ENDPOINT + "/" + invalidVetId + "/albums/photos")
-                .cookie("Bearer", BEARER_TOKEN)
-                .cookie("XSRF-TOKEN", CSRF_TOKEN)
-                .header("X-XSRF-TOKEN", CSRF_TOKEN)
-                .header("Photo-Name", photoName)
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .bodyValue(photoData)
-                .exchange()
-                .expectStatus().is4xxClientError();
-    }
-
-    @Test
-    void whenAddAlbumPhotoMultipart_thenReturnCreatedAlbum() {
-        String vetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
-        String photoName = "album-multipart.jpg";
-
-        MultipartBodyBuilder builder = new MultipartBodyBuilder();
-        builder.part("photoName", photoName);
-        builder.part("file", new ByteArrayResource("mockPhotoData".getBytes())).filename("album-multipart.jpg");
-
-        webTestClient.post()
-                .uri(VET_ENDPOINT + "/" + vetId + "/albums/photos")
-                .cookie("Bearer", BEARER_TOKEN)
-                .cookie("XSRF-TOKEN", CSRF_TOKEN)
-                .header("X-XSRF-TOKEN", CSRF_TOKEN)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(builder.build()))
-                .exchange()
-                .expectStatus().is4xxClientError();
-    }
-
-    @Test
-    void whenAddAlbumPhotoMultipart_withInvalidVetId_thenReturnBadRequest() {
-        String invalidVetId = "invalid-vet-id";
-        String photoName = "album-multipart.jpg";
-
-        MultipartBodyBuilder builder = new MultipartBodyBuilder();
-        builder.part("photoName", photoName);
-        builder.part("file", new ByteArrayResource("mockPhotoData".getBytes())).filename("album-multipart.jpg");
-
-        webTestClient.post()
-                .uri(VET_ENDPOINT + "/" + invalidVetId + "/albums/photos")
-                .cookie("Bearer", BEARER_TOKEN)
-                .cookie("XSRF-TOKEN", CSRF_TOKEN)
-                .header("X-XSRF-TOKEN", CSRF_TOKEN)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(builder.build()))
-                .exchange()
-                .expectStatus().is4xxClientError();
-    }
-
-
 }

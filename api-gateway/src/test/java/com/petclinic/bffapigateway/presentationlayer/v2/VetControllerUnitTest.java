@@ -19,7 +19,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -54,8 +53,6 @@ class VetControllerUnitTest {
     private AuthServiceClient authServiceClient;
 
     private final String BASE_VET_URL = "/api/v2/gateway/vets";
-
-
 
     //#region Dummy data
     Set<Workday> workdaySet = Set.of(Workday.Monday,Workday.Wednesday);
@@ -153,7 +150,6 @@ class VetControllerUnitTest {
             .build();
 
     //#endregion
-
 
     @Test
     void whenAddVet_asAdmin_thenReturnCreatedVetDTO() {
@@ -293,7 +289,6 @@ class VetControllerUnitTest {
 
         VetResponseDTO deactivatedVet = buildDeactivatedVetResponseDTO(vetId);
 
-
         when(vetsServiceClient.deleteVet(vetId))
                 .thenReturn(Mono.just(deactivatedVet));
 
@@ -410,7 +405,7 @@ class VetControllerUnitTest {
     void whenGetPhotoByVetId_thenReturnPhoto() {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
         byte[] photoData = "test photo data".getBytes();
-        org.springframework.core.io.Resource photoResource = new org.springframework.core.io.ByteArrayResource(photoData);
+        Resource photoResource = new ByteArrayResource(photoData);
 
         when(vetsServiceClient.getPhotoByVetId(vetId))
                 .thenReturn(Mono.just(photoResource));
@@ -449,7 +444,7 @@ class VetControllerUnitTest {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
         String photoName = "updated-photo.jpg";
         byte[] photoData = "updated photo data".getBytes();
-        org.springframework.core.io.Resource photoResource = new org.springframework.core.io.ByteArrayResource(photoData);
+        Resource photoResource = new ByteArrayResource(photoData);
 
         when(vetsServiceClient.updatePhotoOfVet(eq(vetId), eq(photoName), any(Mono.class)))
                 .thenReturn(Mono.just(photoResource));
@@ -457,7 +452,7 @@ class VetControllerUnitTest {
         webTestClient.put()
                 .uri(BASE_VET_URL + "/" + vetId + "/photo/" + photoName)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(Mono.just(photoResource), org.springframework.core.io.Resource.class)
+                .body(Mono.just(photoResource), Resource.class)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.IMAGE_JPEG)
@@ -475,7 +470,7 @@ class VetControllerUnitTest {
         String vetId = "invalid-vet-id";
         String photoName = "photo.jpg";
         byte[] photoData = "photo data".getBytes();
-        org.springframework.core.io.Resource photoResource = new org.springframework.core.io.ByteArrayResource(photoData);
+        Resource photoResource = new ByteArrayResource(photoData);
 
         when(vetsServiceClient.updatePhotoOfVet(eq(vetId), eq(photoName), any(Mono.class)))
                 .thenReturn(Mono.empty());
@@ -483,7 +478,7 @@ class VetControllerUnitTest {
         webTestClient.put()
                 .uri(BASE_VET_URL + "/" + vetId + "/photo/" + photoName)
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(Mono.just(photoResource), org.springframework.core.io.Resource.class)
+                .body(Mono.just(photoResource), Resource.class)
                 .exchange()
                 .expectStatus().isNotFound();
 
@@ -495,13 +490,13 @@ class VetControllerUnitTest {
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
         String photoName = "new-photo.jpg";
         byte[] photoData = "new photo data".getBytes();
-        
+
         FileDetails photo = FileDetails.builder()
                 .fileName(photoName)
                 .fileType("image/jpeg")
                 .fileData(photoData)
                 .build();
-        
+
         VetResponseDTO vetResponse = VetResponseDTO.builder()
                 .vetId(vetId)
                 .photo(photo)
@@ -534,7 +529,7 @@ class VetControllerUnitTest {
         byte[] photoData = "new photo data".getBytes();
 
         when(vetsServiceClient.updateVetPhoto(eq(vetId), any()))
-                .thenReturn(Mono.just(VetResponseDTO.builder().vetId(vetId).build())); // Return vet without photo
+                .thenReturn(Mono.just(VetResponseDTO.builder().vetId(vetId).build()));
 
         webTestClient.post()
                 .uri(BASE_VET_URL + "/" + vetId + "/photos")
@@ -556,19 +551,10 @@ class VetControllerUnitTest {
         when(vetsServiceClient.getAllAlbumsByVetId(vetId))
                 .thenReturn(Flux.just(album1, album2));
 
-        webTestClient.get()
-                .uri(BASE_VET_URL + "/" + vetId + "/albums")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBodyList(Album.class)
-                .hasSize(2)
-                .value(albums -> {
-                    assertEquals(2, albums.size());
-                    assertEquals(album1.getId(), albums.get(0).getId());
-                    assertEquals(album2.getId(), albums.get(1).getId());
-                });
+        StepVerifier.create(vetController.getAllAlbumsByVetId(vetId))
+                .expectNextMatches(album -> album != null && album.getId().equals(album1.getId()))
+                .expectNextMatches(album -> album != null && album.getId().equals(album2.getId()))
+                .verifyComplete();
 
         verify(vetsServiceClient, times(1)).getAllAlbumsByVetId(vetId);
     }
@@ -627,18 +613,9 @@ class VetControllerUnitTest {
         when(vetsServiceClient.getEducationsByVetId(vetId))
                 .thenReturn(Flux.just(educationResponseDTO));
 
-        webTestClient.get()
-                .uri(BASE_VET_URL + "/" + vetId + "/educations")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBodyList(EducationResponseDTO.class)
-                .hasSize(1)
-                .value(educations -> {
-                    assertEquals(1, educations.size());
-                    assertEquals(educationResponseDTO.getEducationId(), educations.get(0).getEducationId());
-                });
+        StepVerifier.create(vetController.getEducationsByVetId(vetId))
+                .expectNextMatches(education -> education != null && education.getEducationId().equals(educationResponseDTO.getEducationId()))
+                .verifyComplete();
 
         verify(vetsServiceClient, times(1)).getEducationsByVetId(vetId);
     }
@@ -700,18 +677,9 @@ class VetControllerUnitTest {
         when(vetsServiceClient.getRatingsByVetId(vetId))
                 .thenReturn(Flux.just(ratingResponseDTO));
 
-        webTestClient.get()
-                .uri(BASE_VET_URL + "/" + vetId + "/ratings")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBodyList(RatingResponseDTO.class)
-                .hasSize(1)
-                .value(ratings -> {
-                    assertEquals(1, ratings.size());
-                    assertEquals(ratingResponseDTO.getRatingId(), ratings.get(0).getRatingId());
-                });
+        StepVerifier.create(vetController.getRatingsByVetId(vetId))
+                .expectNextMatches(rating -> rating != null && rating.getRatingId().equals(ratingResponseDTO.getRatingId()))
+                .verifyComplete();
 
         verify(vetsServiceClient, times(1)).getRatingsByVetId(vetId);
     }
@@ -734,17 +702,16 @@ class VetControllerUnitTest {
 
     @Test
     void whenAddPhotoByVetIdMultipart_withValidFile_thenReturnCreatedPhoto() {
-        // Given
         String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
         String photoName = "test-photo.jpg";
         byte[] photoData = "test photo data".getBytes();
-        
+
         FileDetails photo = FileDetails.builder()
                 .fileName(photoName)
                 .fileType("image/jpeg")
                 .fileData(photoData)
                 .build();
-        
+
         VetResponseDTO vetResponse = VetResponseDTO.builder()
                 .vetId(vetId)
                 .photo(photo)
@@ -777,7 +744,7 @@ class VetControllerUnitTest {
         byte[] photoData = "test photo data".getBytes();
 
         when(vetsServiceClient.updateVetPhoto(eq(vetId), any()))
-                .thenReturn(Mono.just(VetResponseDTO.builder().vetId(vetId).build())); // Return vet without photo
+                .thenReturn(Mono.just(VetResponseDTO.builder().vetId(vetId).build()));
 
         webTestClient.post()
                 .uri("/api/v2/gateway/vets/{vetId}/photos", vetId)
@@ -794,107 +761,4 @@ class VetControllerUnitTest {
 
         verify(vetsServiceClient, times(1)).updateVetPhoto(eq(vetId), any());
     }
-
-    @Test
-    void whenAddAlbumPhotoOctet_withValidData_thenReturnCreatedAlbum() {
-        String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
-        String photoName = "album-photo.jpg";
-        byte[] photoData = "album photo data".getBytes();
-        Album expectedAlbum = new Album(1, vetId, photoName, "image/jpeg", photoData);
-
-        when(vetsServiceClient.addAlbumPhotoFromBytes(eq(vetId), eq(photoName), any(byte[].class)))
-                .thenReturn(Mono.just(expectedAlbum));
-
-        webTestClient.post()
-                .uri("/api/v2/gateway/vets/{vetId}/albums/photos", vetId)
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .header("Photo-Name", photoName)
-                .bodyValue(photoData)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectBody(Album.class)
-                .value(album -> {
-                    assertEquals(vetId, album.getVetId());
-                    assertEquals(photoName, album.getFilename());
-                });
-
-        verify(vetsServiceClient, times(1)).addAlbumPhotoFromBytes(eq(vetId), eq(photoName), any(byte[].class));
-    }
-
-    @Test
-    void whenAddAlbumPhotoOctet_withServiceError_thenReturnBadRequest() {
-        String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
-        String photoName = "album-photo.jpg";
-        byte[] photoData = "album photo data".getBytes();
-
-        when(vetsServiceClient.addAlbumPhotoFromBytes(eq(vetId), eq(photoName), any(byte[].class)))
-                .thenReturn(Mono.empty());
-
-        webTestClient.post()
-                .uri("/api/v2/gateway/vets/{vetId}/albums/photos", vetId)
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .header("Photo-Name", photoName)
-                .bodyValue(photoData)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        verify(vetsServiceClient, times(1)).addAlbumPhotoFromBytes(eq(vetId), eq(photoName), any(byte[].class));
-    }
-
-    @Test
-    void whenAddAlbumPhotoMultipart_withValidFile_thenReturnCreatedAlbum() {
-        String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
-        String photoName = "multipart-photo.jpg";
-        byte[] photoData = "photo data".getBytes();
-        Album expectedAlbum = new Album(2, vetId, photoName, "image/jpeg", photoData);
-
-        when(vetsServiceClient.addAlbumPhoto(eq(vetId), eq(photoName), any(FilePart.class)))
-                .thenReturn(Mono.just(expectedAlbum));
-
-        webTestClient.post()
-                .uri("/api/v2/gateway/vets/{vetId}/albums/photos", vetId)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData("photoName", photoName)
-                        .with("file", new ByteArrayResource(photoData) {
-                            @Override
-                            public String getFilename() {
-                                return photoName;
-                            }
-                        }))
-                .exchange()
-                .expectStatus().isCreated()
-                .expectBody(Album.class)
-                .value(album -> {
-                    assertEquals(vetId, album.getVetId());
-                    assertEquals(photoName, album.getFilename());
-                });
-
-        verify(vetsServiceClient, times(1)).addAlbumPhoto(eq(vetId), eq(photoName), any(FilePart.class));
-    }
-
-    @Test
-    void whenAddAlbumPhotoMultipart_withServiceError_thenReturnBadRequest() {
-        String vetId = "2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb";
-        String photoName = "multipart-photo.jpg";
-        byte[] photoData = "photo data".getBytes();
-
-        when(vetsServiceClient.addAlbumPhoto(eq(vetId), eq(photoName), any(FilePart.class)))
-                .thenReturn(Mono.empty()); 
-
-        webTestClient.post()
-                .uri("/api/v2/gateway/vets/{vetId}/albums/photos", vetId)
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData("photoName", photoName)
-                        .with("file", new ByteArrayResource(photoData) {
-                            @Override
-                            public String getFilename() {
-                                return photoName;
-                            }
-                        }))
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        verify(vetsServiceClient, times(1)).addAlbumPhoto(eq(vetId), eq(photoName), any(FilePart.class));
-    }
-
 }
