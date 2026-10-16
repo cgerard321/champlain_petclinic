@@ -53,7 +53,9 @@
 
                   <dt>{{ labels.pet }}</dt>
                   <dd>
-                    {{ petDetails().get(visit.petId)?.petName || visit.petName || labels.notAvailable }}
+                    {{
+                      petDetails().get(visit.petId)?.petName || visit.petName || labels.notAvailable
+                    }}
                   </dd>
 
                   <dt>{{ labels.owner }}</dt>
