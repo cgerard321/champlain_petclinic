@@ -26,6 +26,7 @@ export class NextAppointment implements OnInit {
   private readonly authState = inject(AuthState);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private notificationShown = false;
   private readonly untilDestroyed = takeUntilDestroyed<Visit>();
   protected readonly visit = signal<Visit[]>([]);
   private readonly currentTime = signal(Date.now());
@@ -60,20 +61,67 @@ export class NextAppointment implements OnInit {
       .getAllVisits()
       .pipe(this.untilDestroyed)
       .subscribe({
-        next: (visits) =>
-          this.visit.update((visit) =>
-            [...visit, visits].sort(
+        next: (visits) => {
+          this.visit.update((currentVisits) =>
+            [...currentVisits, visits].sort(
               (a, b) => new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime(),
             ),
-          ),
+          );
+        },
         error: () => {
           this.isLoading.set(false);
           this.errorMessage.set(
             $localize`:@@visitListLoadError:Unable to load visits. Please try again later`,
           );
         },
-        complete: () => this.isLoading.set(false),
+        complete: () => {
+          this.isLoading.set(false);
+          this.notifyUpcomingAppointment();
+        },
       });
+  }
+
+  private notifyUpcomingAppointment(): void {
+    const now = Date.now();
+    const sevenDaysFromNow = now + 7 * 24 * 60 * 60 * 1000;
+
+    if (this.notificationShown) {
+      return;
+    }
+
+    const upcomingVisit = this.visit()
+      .filter((visit) => {
+        const visitTime = new Date(visit.visitDate).getTime();
+
+        return (
+          visitTime >= now &&
+          visitTime <= sevenDaysFromNow &&
+          [Status.UPCOMING, Status.SCHEDULED, Status.CONFIRMED].includes(visit.status)
+        );
+      })
+      .sort((a, b) => new Date(a.visitDate).getTime() - new Date(b.visitDate).getTime())[0];
+
+    if (!upcomingVisit) {
+      return;
+    }
+
+    const lang = localStorage.getItem('lang') ?? 'fr';
+    const isEnglish = lang.startsWith('en');
+
+    const appointmentDate = new Date(upcomingVisit.visitDate).toLocaleString(
+      isEnglish ? 'en-CA' : 'fr-CA',
+    );
+
+    const message = isEnglish
+      ? `Your next appointment for ${upcomingVisit.petName} is on ${appointmentDate}.`
+      : `Votre prochain rendez-vous pour ${upcomingVisit.petName} est le ${appointmentDate}.`;
+
+    this.notificationShown = true;
+
+    this.snackBar.open(message, '', {
+      duration: 6000,
+      verticalPosition: 'top',
+    });
   }
 
   protected openFollowUpVisit(visit: Visit): void {
