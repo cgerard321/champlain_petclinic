@@ -1,7 +1,9 @@
 package com.petclinic.inventoryservice.businesslayer;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.pdf.PdfWriter;
+import org.mockito.MockedStatic;
+import java.io.OutputStream;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
@@ -2269,18 +2271,18 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.findAllProductsByInventoryId(inventoryId))
                 .thenReturn(Flux.just(product1, product2));
 
-        // Mock PdfWriter.getInstance to throw DocumentException
-        mockStatic(PdfWriter.class);
-        when(PdfWriter.getInstance(any(Document.class), any(ByteArrayOutputStream.class)))
-                .thenThrow(new DocumentException("PDF generation error"));
 
-        // Call the method and expect an error
-        Mono<byte[]> result = productInventoryService.createSupplyPdf(inventoryId);
+        try (MockedStatic<PdfWriter> pdfWriter = mockStatic(PdfWriter.class)) {
+            pdfWriter.when(() -> PdfWriter.getInstance(any(Document.class), any(OutputStream.class)))
+                    .thenThrow(new DocumentException("PDF generation error"));
 
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
-                        throwable.getMessage().equals("Error generating PDF"))
-                .verify();
+            Mono<byte[]> result = productInventoryService.createSupplyPdf(inventoryId);
+
+            StepVerifier.create(result)
+                    .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                            throwable.getMessage().equals("Error generating PDF"))
+                    .verify();
+        }
 
         // Verify the interaction with the repository
         verify(productRepository, times(1)).findAllProductsByInventoryId(inventoryId);
