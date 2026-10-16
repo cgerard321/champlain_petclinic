@@ -89,7 +89,8 @@
         }
       },
       "display": {
-        "title": "Display"
+        "title": "Display",
+        "toggle": "Toggle Theme"
       },
       "leave": {
         "title": "Unsaved changes",

@@ -76,3 +76,19 @@ input.right-align::-webkit-inner-spin-button {
   border-radius: 10px;
   background: #f7faf7;
 }
+
+:host-context(.dark-mode) {
+  h1, label {
+    color: #fff !important;
+  }
+
+  .bill-create-form {
+    background-color: var(--mat-sys-surface-container);
+    border: 1px solid rgb(255 255 255 / 12%) !important;
+  }
+
+  mat-card {
+    background: var(--mat-sys-surface-container-highest);
+    color: #fff;
+  }
+}
