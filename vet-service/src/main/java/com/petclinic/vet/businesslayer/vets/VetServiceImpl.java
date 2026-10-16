@@ -104,27 +104,42 @@ public class VetServiceImpl implements VetService {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
                 .flatMap(p -> vetDTOMono
-                        .flatMap(requestDTO->{
-                            if(requestDTO.getFirstName().length()>30||requestDTO.getFirstName().length()<2)
-                                return Mono.error(new InvalidInputException("firstName length should be between 2 and 20 characters: "+requestDTO.getFirstName()));
-                            if(requestDTO.getLastName().length()>30||requestDTO.getLastName().length()<2)
-                                return Mono.error(new InvalidInputException("lastName length should be between 2 and 20 characters: "+requestDTO.getLastName()));
-                            if(requestDTO.getPhoneNumber().length()!=20)
-                                return Mono.error(new InvalidInputException("phoneNumber length not equal to 20 characters: "+requestDTO.getPhoneNumber()));
-                            if(requestDTO.getEmail().length()<6||requestDTO.getEmail().length()>320)
-                                return Mono.error(new InvalidInputException("email length should be between 6 and 320 characters: "+requestDTO.getEmail()));
-                            if(requestDTO.getResume().length()<10)
-                                return Mono.error(new InvalidInputException("resume length should be more than 10 characters: "+requestDTO.getResume()));
-                            if(requestDTO.getSpecialties()==null)
-                                return Mono.error(new InvalidInputException("invalid specialties"));
-                            return Mono.just(requestDTO);
-                        })
+                        .flatMap(this::validateProfileUpdate)
                         .map(EntityDtoUtil::vetRequestDtoToEntity)
                         .doOnNext(e -> e.setVetId(p.getVetId()))
                         .doOnNext(e -> e.setId(p.getId()))
+                        .doOnNext(e -> e.setImageId(p.getImageId()))
+                        .doOnNext(e -> e.setPhotoId(p.getPhotoId()))
                 )
                 .flatMap(vetRepository::save)
                 .map(EntityDtoUtil::vetEntityToResponseDTO);
+    }
+
+    private Mono<VetRequestDTO> validateProfileUpdate(VetRequestDTO request) {
+        if (request.getFirstName() == null || request.getFirstName().trim().length() < 2
+                || request.getFirstName().trim().length() > 30
+                || request.getLastName() == null || request.getLastName().trim().length() < 2
+                || request.getLastName().trim().length() > 30) {
+            return Mono.error(new InvalidInputException("Names must contain between 2 and 30 characters"));
+        }
+        if (request.getPhoneNumber() == null || !request.getPhoneNumber().matches(
+                "^(?:\\+?1[ .-]?)?\\(?\\d{3}\\)?[ .-]?\\d{3}[ .-]?\\d{4}(?:\\s*(?:#|ext\\.?|x)\\s*\\d{1,6})?$")) {
+            return Mono.error(new InvalidInputException("A valid phone number is required"));
+        }
+        if (request.getEmail() == null || request.getEmail().length() < 6
+                || request.getEmail().length() > 320
+                || !request.getEmail().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            return Mono.error(new InvalidInputException("A valid email address is required"));
+        }
+        if (request.getResume() == null || request.getResume().trim().length() < 10) {
+            return Mono.error(new InvalidInputException("Biography must contain at least 10 characters"));
+        }
+        if (request.getSpecialties() == null) {
+            return Mono.error(new InvalidInputException("Specialties must not be null"));
+        }
+        request.setFirstName(request.getFirstName().trim());
+        request.setLastName(request.getLastName().trim());
+        return Mono.just(request);
     }
 
     @Override

@@ -1,10 +1,7 @@
 package com.petclinic.inventoryservice.businesslayer;
 
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.lowagie.text.DocumentException;
 import com.mongodb.internal.connection.tlschannel.NeedsWriteException;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryNameRepository;
@@ -16,6 +13,7 @@ import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.InventoryValidator;
+import com.petclinic.inventoryservice.utils.SupplyReportPdfGenerator;
 import com.petclinic.inventoryservice.utils.exceptions.*;
 import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditAction;
 import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditEntry;
@@ -28,7 +26,6 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.data.domain.Pageable;
 
 import javax.security.auth.callback.TextInputCallback;
-import java.io.ByteArrayOutputStream;
 import java.time.Instant;
 import java.util.Comparator;
 import java.time.LocalDateTime;
@@ -759,30 +756,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         return Mono.error(new NotFoundException("No products found for inventory ID: " + inventoryId));
                     }
                     try {
-                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                        Document document = new Document();
-                        PdfWriter.getInstance(document, byteArrayOutputStream);
-
-                        document.open();
-                        document.add(new Paragraph("Supplies Report for Inventory ID: " + inventoryId));
-                        document.add(new Paragraph(" ")); // Blank line
-
-                        for (Product supply : supplies) {
-                            Double cost = supply.getProductPrice();
-                            Double sell = supply.getProductSalePrice();
-                            Double profit = sell - cost;
-                            document.add(new Paragraph("Product Name: " + supply.getProductName()));
-                            document.add(new Paragraph("Quantity: " + supply.getProductQuantity()));
-                            document.add(new Paragraph("Description: " + supply.getProductDescription()));
-                            document.add(new Paragraph("Regular Price: $" + supply.getProductPrice()));
-                            document.add(new Paragraph("Sale Price: $" + supply.getProductSalePrice()));
-                            document.add(new Paragraph("Profit Margin: $" + profit));
-                            document.add(new Paragraph(" "));
-                        }
-
-                        document.close();
-
-                        return Mono.just(byteArrayOutputStream.toByteArray());
+                        return Mono.just(SupplyReportPdfGenerator.generate(inventoryId, supplies));
                     } catch (DocumentException e) {
                         return Mono.error(new UnprocessableEntityException("Error generating PDF"));
                     }

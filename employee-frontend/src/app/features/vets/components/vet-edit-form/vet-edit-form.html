@@ -1,0 +1,68 @@
+<form [formGroup]="form" (ngSubmit)="save()" aria-labelledby="edit-title">
+  <h2 id="edit-title" i18n="@@vets.edit.title">Modifier le profil</h2>
+  <p i18n="@@vets.edit.description">
+    Tous les champs sont obligatoires. Les spécialités, le statut et les horaires sont conservés.
+  </p>
+  <fieldset [disabled]="saving()">
+    <legend class="visually-hidden" i18n="@@vets.edit.legend">Informations du vétérinaire</legend>
+    @for (field of fields; track field.key) {
+      <div class="field">
+        <label [for]="field.key">{{ field.label }}</label>
+        @if (field.type === 'textarea') {
+          <textarea
+            [id]="field.key"
+            [formControlName]="field.key"
+            rows="5"
+            required
+            [attr.aria-describedby]="field.key + '-hint'"
+            [attr.aria-invalid]="
+              form.controls[field.key].touched && form.controls[field.key].invalid
+            "
+          ></textarea>
+        } @else {
+          <input
+            [id]="field.key"
+            [type]="field.type"
+            [formControlName]="field.key"
+            required
+            [attr.aria-describedby]="field.key + '-hint'"
+            [attr.aria-invalid]="
+              form.controls[field.key].touched && form.controls[field.key].invalid
+            "
+          />
+        }
+        <p
+          class="hint"
+          [id]="field.key + '-hint'"
+          [class.invalid]="form.controls[field.key].touched && form.controls[field.key].invalid"
+        >
+          {{ field.hint }}
+        </p>
+      </div>
+    }
+    <div class="actions">
+      <button type="submit" [disabled]="saving()">
+        @if (saving()) {
+          <span i18n="@@vets.edit.saving">Enregistrement…</span>
+        } @else {
+          <span i18n="@@vets.actions.save">Enregistrer</span>
+        }
+      </button>
+      <button
+        class="secondary"
+        type="button"
+        (click)="cancelled.emit()"
+        [disabled]="saving()"
+        i18n="@@vets.actions.cancel"
+      >
+        Annuler
+      </button>
+    </div>
+  </fieldset>
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  @if (saving()) {
+    <p role="status" i18n="@@vets.edit.saving">Enregistrement…</p>
+  }
+</form>

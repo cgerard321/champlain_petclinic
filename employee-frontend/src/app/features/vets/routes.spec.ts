@@ -1,13 +1,39 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
+import { of } from 'rxjs';
 
+import { VetResponse } from '@features/vets/models/vet-api.model';
 import routes from '@features/vets/routes';
+import { VetService } from '@features/vets/services/vet.service';
 
 describe('Veterinarian directory navigation', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideRouter([{ path: 'vets', children: routes }])],
+      providers: [
+        provideRouter([{ path: 'vets', children: routes }]),
+        {
+          provide: VetService,
+          useValue: {
+            getVets: () =>
+              of(
+                ['Alex Morin', 'Julie Lambert', 'Sam Tremblay'].map((name, index): VetResponse => ({
+                  vetId: `test-vet-${index}`,
+                  firstName: name.split(' ')[0] ?? '',
+                  lastName: name.split(' ')[1] ?? '',
+                  vetBillId: null,
+                  email: null,
+                  phoneNumber: null,
+                  resume: null,
+                  workday: [],
+                  workHoursJson: null,
+                  active: true,
+                  specialties: [],
+                })),
+              ),
+          },
+        },
+      ],
     });
   });
 
@@ -22,7 +48,7 @@ describe('Veterinarian directory navigation', () => {
 
     expect(TestBed.inject(Router).url).toBe('/vets/list');
     expect(harness.routeNativeElement?.querySelectorAll('app-vet-profile-card').length).toBe(3);
-    expect(harness.routeNativeElement?.textContent).toContain('Profils fictifs');
+    expect(harness.routeNativeElement?.querySelectorAll('.profile-link').length).toBe(3);
 
     harness.routeNativeElement?.querySelector<HTMLAnchorElement>('a[href="/vets"]')?.click();
     await harness.fixture.whenStable();
@@ -41,8 +67,6 @@ describe('Veterinarian directory navigation', () => {
       'Julie Lambert',
       'Sam Tremblay',
     ]);
-    expect(harness.routeNativeElement?.textContent).toContain(
-      'Les coordonnées et les horaires sont fictifs.',
-    );
+    expect(harness.routeNativeElement?.textContent).not.toContain('Profils fictifs');
   });
 });
