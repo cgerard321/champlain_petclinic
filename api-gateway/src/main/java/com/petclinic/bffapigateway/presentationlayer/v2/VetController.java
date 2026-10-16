@@ -10,6 +10,7 @@ import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +18,6 @@ import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v2/gateway/vets")
@@ -132,19 +130,14 @@ public class VetController {
     public Mono<ResponseEntity<byte[]>> addPhotoByVetIdMultipart(@PathVariable String vetId, @RequestPart("file") Mono<FilePart> filePartMono, @RequestPart(value = "photoName", required = false) String photoName) {
         return filePartMono.flatMap(filePart -> {
             String name = photoName != null ? photoName : filePart.filename();
-            return filePart.content()
-                    .reduce(new ByteArrayOutputStream(), (os, data) -> {
-                        try {
-                            byte[] bytes = new byte[data.readableByteCount()];
-                            data.read(bytes);
-                            os.write(bytes);
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                        return os;
+            return DataBufferUtils.join(filePart.content())
+                    .map(dataBuffer -> {
+                        byte[] bytes = new byte[dataBuffer.readableByteCount()];
+                        dataBuffer.read(bytes);
+                        DataBufferUtils.release(dataBuffer);
+                        return bytes;
                     })
-                    .flatMap(os -> {
-                        byte[] bytes = os.toByteArray();
+                    .flatMap(bytes -> {
                         FileDetails fileDetails = FileDetails.builder()
                                 .fileName(name)
                                 .fileType("image/jpeg")
