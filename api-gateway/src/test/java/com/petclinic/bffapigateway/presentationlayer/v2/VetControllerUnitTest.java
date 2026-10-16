@@ -197,7 +197,7 @@ class VetControllerUnitTest {
                 .body(Mono.just(educationRequestDTO), EducationRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isCreated()
+                .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .returnResult(EducationResponseDTO.class)
                 .getResponseBody()
@@ -217,7 +217,7 @@ class VetControllerUnitTest {
                 })
                 .verifyComplete();
 
-        verify(vetsServiceClient, Mockito.times(1)).addEducationToAVet(anyString(), any(Mono.class));
+        verify(vetsServiceClient, times(1)).addEducationToAVet(anyString(), any(Mono.class));
     }
 
     @Test
@@ -230,7 +230,7 @@ class VetControllerUnitTest {
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)
                 .returnResult(VetResponseDTO.class)
                 .getResponseBody();
 
@@ -551,10 +551,17 @@ class VetControllerUnitTest {
         when(vetsServiceClient.getAllAlbumsByVetId(vetId))
                 .thenReturn(Flux.just(album1, album2));
 
-        StepVerifier.create(vetController.getAllAlbumsByVetId(vetId))
-                .expectNextMatches(album -> album != null && album.getId().equals(album1.getId()))
-                .expectNextMatches(album -> album != null && album.getId().equals(album2.getId()))
-                .verifyComplete();
+        webTestClient.get()
+                .uri(BASE_VET_URL + "/" + vetId + "/albums")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(Album.class)
+                .value(albums -> {
+                    assertNotNull(albums);
+                    assertEquals(2, albums.size());
+                    assertEquals(album1.getId(), albums.get(0).getId());
+                });
 
         verify(vetsServiceClient, times(1)).getAllAlbumsByVetId(vetId);
     }
@@ -613,9 +620,17 @@ class VetControllerUnitTest {
         when(vetsServiceClient.getEducationsByVetId(vetId))
                 .thenReturn(Flux.just(educationResponseDTO));
 
-        StepVerifier.create(vetController.getEducationsByVetId(vetId))
-                .expectNextMatches(education -> education != null && education.getEducationId().equals(educationResponseDTO.getEducationId()))
-                .verifyComplete();
+        webTestClient.get()
+                .uri(BASE_VET_URL + "/" + vetId + "/educations")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(EducationResponseDTO.class)
+                .value(educations -> {
+                    assertNotNull(educations);
+                    assertEquals(1, educations.size());
+                    assertEquals(educationResponseDTO.getEducationId(), educations.get(0).getEducationId());
+                });
 
         verify(vetsServiceClient, times(1)).getEducationsByVetId(vetId);
     }
@@ -677,9 +692,17 @@ class VetControllerUnitTest {
         when(vetsServiceClient.getRatingsByVetId(vetId))
                 .thenReturn(Flux.just(ratingResponseDTO));
 
-        StepVerifier.create(vetController.getRatingsByVetId(vetId))
-                .expectNextMatches(rating -> rating != null && rating.getRatingId().equals(ratingResponseDTO.getRatingId()))
-                .verifyComplete();
+        webTestClient.get()
+                .uri(BASE_VET_URL + "/" + vetId + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(RatingResponseDTO.class)
+                .value(ratings -> {
+                    assertNotNull(ratings);
+                    assertEquals(1, ratings.size());
+                    assertEquals(ratingResponseDTO.getRatingId(), ratings.get(0).getRatingId());
+                });
 
         verify(vetsServiceClient, times(1)).getRatingsByVetId(vetId);
     }

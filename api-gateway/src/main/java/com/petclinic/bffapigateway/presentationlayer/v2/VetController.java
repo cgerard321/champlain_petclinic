@@ -182,7 +182,8 @@ public class VetController {
     public Mono<ResponseEntity<Void>> deleteAlbumPhotoById(@PathVariable String vetId, @PathVariable Integer albumId) {
         return vetsServiceClient.deleteAlbumPhotoById(vetId, albumId)
                 .map(v -> ResponseEntity.noContent().<Void>build())
-                .defaultIfEmpty(ResponseEntity.noContent().build());
+                .defaultIfEmpty(ResponseEntity.noContent().build())
+                .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
