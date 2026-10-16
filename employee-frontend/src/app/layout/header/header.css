@@ -1,6 +1,6 @@
 .title {
   font-weight: 500;
-  color: rgb(5 73 52);
+  color: inherit;
   padding-right: 20px;
 }
 
@@ -47,6 +47,12 @@
   font-weight: 600;
 }
 
+
 mat-toolbar {
-  background-color: #c2daae;
+  background-color: #c2daae !important;
 }
+
+:host-context(.dark-mode) mat-toolbar {
+  background-color: #1b382b !important;
+}
+
