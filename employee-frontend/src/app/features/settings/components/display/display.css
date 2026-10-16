@@ -1,0 +1,9 @@
+.theme-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.theme-container span {
+  font-weight: normal;
+}

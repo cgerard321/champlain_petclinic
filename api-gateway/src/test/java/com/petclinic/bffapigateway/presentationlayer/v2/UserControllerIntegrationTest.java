@@ -91,7 +91,7 @@ class UserControllerIntegrationTest {
     @Test
     void whenUpdateUserRoles_asAdmin_thenReturnUpdatedUserResponseDTO() {
         RolesChangeRequestDTO requestModel = new RolesChangeRequestDTO();
-        requestModel.setRoles(List.of("OWNER", "ADMIN"));
+        requestModel.setRoles(List.of("CUST", "ADMIN"));
 
         webTestClient.patch()
                 .uri("/api/v2/gateway/users/e6248486-d3df-47a5-b2e0-84d31c47533a")

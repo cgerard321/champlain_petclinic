@@ -66,3 +66,7 @@
 .image-error {
   color: #b00020;
 }
+
+:host-context(.dark-mode) .image-actions button {
+  color: #111;
+}
