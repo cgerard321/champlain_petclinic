@@ -602,6 +602,19 @@
         "nameRequired": "Inventory name is required.",
         "typeRequired": "Inventory type is required.",
         "descriptionRequired": "Description is required."
+      },
+      "calendar": {
+        "open": "Weekly Calendar view",
+        "title": "Weekly Calendar",
+        "back": "Return to visits list",
+        "previous": "Previous Week",
+        "current": "Current Week",
+        "next": "Next Week",
+        "empty": "No appointments found for this day.",
+        "loading": "Loading visits...",
+        "error": "Unable to load visits.",
+        "owner": "Owner",
+        "type": "Appointment type"
       }
     }
   }
