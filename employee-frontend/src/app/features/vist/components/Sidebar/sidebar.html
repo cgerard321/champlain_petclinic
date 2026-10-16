@@ -12,6 +12,13 @@
       <span aria-hidden="true">‹</span>
     </button>
   </div>
+
+  @if (canViewCalendar()) {
+    <a class="sidebar__calendar" routerLink="/vist/calendar" i18n="@@visits.calendar.open">
+      Vue du calendrier semaine
+    </a>
+  }
+
   <app-filter-button
     [selectedStatuses]="selectedStatuses()"
     (statusSelectionChange)="statusSelectionChange.emit($event)"

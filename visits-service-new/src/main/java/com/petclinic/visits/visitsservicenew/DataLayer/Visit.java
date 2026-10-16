@@ -45,4 +45,6 @@ public class Visit {
     private CancellationReason cancellationReason;
     private String cancellationReasonDetails;
 
+    private String vetNote;
+
 }

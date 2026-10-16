@@ -19,6 +19,35 @@
       "settings": "Settings",
       "logout": "Logout"
     },
+    "home": {
+      "loadError": "Failed to load user information. Please try again later.",
+      "welcomeBack": "Welcome back, {$INTERPOLATION}!",
+      "welcomeDefault": "Welcome to Champlain Petclinic",
+      "badge": "EMPLOYEE PORTAL",
+      "title": "Clinic Management Dashboard",
+      "description": "Manage appointments, oversee daily clinic operations, access patient medical records, and monitor inventory seamlessly in one central location!",
+      "viewVisits": "View Visits",
+      "browseProducts": "Browse Products",
+      "quickActions": {
+        "title": "Quick Actions",
+        "vetsTitle": "Veterinarians",
+        "vetsTag": "SCHEDULES & SPECIALTIES",
+        "vetsDescription": "Access vet profiles, assigned specialties, and daily availability calendars.",
+        "vetsFooter": "Active Staff",
+        "custTitle": "Customers & Owners",
+        "custTag": "CLIENT RECORDS",
+        "custDescription": "Register new clients, manage pet profiles, and update contact details.",
+        "custFooter": "Patient Database",
+        "billTitle": "Bills & Invoices",
+        "billTag": "FINANCIAL MANAGEMENT",
+        "billDescription": "Track pending payments, generate clinic invoices, and process billing.",
+        "billFooter": "Invoicing System",
+        "invtTitle": "Inventory & Stock",
+        "invtTag": "SUPPLY MONITORING",
+        "invtDescription": "Monitor pharmaceutical stocks, equipment levels, and restock alerts.",
+        "invtFooter": "Stock Control"
+      }
+    },
     "settings": {
       "title": "Settings",
       "save": "Save",
@@ -49,10 +78,25 @@
             "noSpaceNoAt": "No spaces or \"@\"",
             "noTrailing": "Doesn't end with an underscore, and no two in a row"
           }
+        },
+        "password": {
+          "title": "Password",
+          "intro": "Get a link by email to choose a new password.",
+          "label": "Email",
+          "send": "Send the link",
+          "retryIn": "New link in",
+          "sent": "If this email matches an account, a reset link has been sent."
         }
       },
       "display": {
-        "title": "Display"
+        "title": "Display",
+        "toggle": "Toggle Theme"
+      },
+      "leave": {
+        "title": "Unsaved changes",
+        "message": "Your changes are not saved. Do you want to leave this page?",
+        "confirm": "Leave",
+        "cancel": "Stay"
       }
     },
     "role": {
@@ -138,6 +182,38 @@
         "slotsError": "Could not load available times.",
         "scheduleError": "Could not schedule the follow-up.",
         "confirmation": "The follow-up visit was scheduled."
+      },
+      "note": {
+        "button": "Add note",
+        "title": "Add a note",
+        "note": "Note for the pet owner",
+        "noteRequired": "Note is required",
+        "noteInvalid": "Note must be at least 5 characters",
+        "save": "Save",
+        "saveError": "Could not save the note.",
+        "confirmation": "The note was saved."
+      },
+      "details": {
+        "back": "Back to visits",
+        "title": "Visit Details",
+        "loading": "Loading visit details...",
+        "visitInfo": "Visit Information",
+        "visitId": "Visit ID",
+        "description": "Description",
+        "start": "Start",
+        "end": "End",
+        "status": "Status",
+        "petInfo": "Pet Information",
+        "name": "Name",
+        "birthDate": "Birth Date",
+        "vetInfo": "Veterinarian Information",
+        "email": "Email",
+        "phone": "Phone",
+        "customerInfo": "Customer Information",
+        "notAvailable": "Not available",
+        "noVisitId": "No visit ID was provided.",
+        "notFound": "Visit not found.",
+        "loadError": "Unable to load visit details."
       }
     },
     "vets": {
@@ -199,6 +275,334 @@
       "specialties": {
         "heading": "Specialties",
         "description": "Discover the clinic's different areas of care."
+      }
+    },
+    "cust": {
+      "customerList": "Customer List",
+      "customerListLoading": "Loading customers...",
+      "noCustomers": "No customers registered.",
+      "searchCustomers": "Search customers",
+      "searchPlaceholder": "Search customer by name, Id, address, city or phone number",
+      "customerDetails": {
+        "title": "Registered customers and contact information",
+        "name": "Name",
+        "address": "Address",
+        "city": "City",
+        "phone": "Phone number",
+        "pets": "Pets"
+      },
+      "detailErrors": {
+        "notAvailable": "Not available"
+      },
+      "petsButton": "Registered Pets",
+      "noCustFound": "No customers found.",
+      "tryAgain": "Try a different name, ID, or phone number."
+    },
+    "pet": {
+      "petDetailsTitle": "Pet Details",
+      "petDetailsSubtitle": "Registered pets and their information",
+      "closeButton": "Close",
+      "loadingPets": "Loading pets...",
+      "noPetsFound": "No registered found for this customer.",
+      "petDetails": {
+        "pets": "Pets",
+        "species": "Species",
+        "age": "Age",
+        "years": "years",
+        "year": "year",
+        "weight": "Weight"
+      },
+      "types": {
+        "cat": "Cat",
+        "dog": "Dog",
+        "lizard": "Lizard",
+        "snake": "Snake",
+        "bird": "Bird",
+        "hamster": "Hamster",
+        "others": "Others"
+      }
+    },
+    "modal": {
+      "actions": { "cancel": "Cancel", "save": "Save" },
+      "validation": {
+        "required": "{$label} is required.",
+        "min": "{$label} must be at least {$minimum}.",
+        "max": "{$label} must be at most {$maximum}.",
+        "minDate": "{$label} cannot be before {$earliest}.",
+        "invalid": "Invalid value."
+      }
+    },
+    "image": {
+      "actions": {
+        "choose": "Choose {$label}",
+        "change": "Change image",
+        "add": "Add image",
+        "remove": "Remove image"
+      },
+      "previewAlt": "{$label} preview",
+      "noPhoto": "No photo selected",
+      "errors": {
+        "type": "Choose a JPG, PNG, or WebP image.",
+        "size": "Choose an image smaller than {$limit}."
+      },
+      "hint": "JPG, PNG, or WebP. Maximum {$INTERPOLATION}."
+    },
+    "supply": {
+      "title": "Supplies",
+      "description": "View and manage the supplies associated with this inventory.",
+      "data": {
+        "names": {
+          "benzodiazepines": "Benzodiazepines",
+          "trazodone": "Trazodone",
+          "carprofen": "Carprofen",
+          "selfAdhesiveBandages": "Self-adhesive Bandages",
+          "gauzePads": "Gauze Pads",
+          "hydrogenPeroxide": "Hydrogen Peroxide",
+          "mriMachine": "MRI Machine",
+          "rabiesVaccine": "Rabies Vaccine",
+          "endoscope": "Endoscope",
+          "ultrasoundMachine": "Ultrasound Machine",
+          "elasticBandage": "Elastic Bandage",
+          "antisepticWipes": "Antiseptic Wipes",
+          "insulinSyringes": "Insulin Syringes",
+          "ivCatheters": "IV Catheters",
+          "antihistamines": "Antihistamines",
+          "antibioticOintment": "Antibiotic Ointment",
+          "bloodGlucoseTestKits": "Blood Glucose Test Kits",
+          "urinalysisTestKits": "Urinalysis Test Kits",
+          "hydrogelDressing": "Hydrogel Dressing",
+          "suturesKit": "Sutures Kit",
+          "anesthesiaMachines": "Anesthesia Machines",
+          "anestheticMasks": "Anesthetic Masks",
+          "surgicalScissors": "Surgical Scissors",
+          "hemostats": "Hemostats",
+          "needleHolders": "Needle Holders",
+          "petCarrierAccessories": "Pet Carrier Accessories",
+          "carrierCleaningSupplies": "Carrier Cleaning Supplies",
+          "comfortPads": "Comfort Pads",
+          "parvovirusTestKits": "Parvovirus Test Kits",
+          "felineLeukemiaTestKits": "Feline Leukemia Test Kits",
+          "heartwormTestKits": "Heartworm Test Kits"
+        },
+        "descriptions": {
+          "benzodiazepines": "Drugs for sleep",
+          "trazodone": "Drugs for anxiety/stress",
+          "carprofen": "Non-steroidal anti-inflammatory drug",
+          "selfAdhesiveBandages": "Bandages for wound care",
+          "gauzePads": "Absorbent pads for wound care",
+          "hydrogenPeroxide": "Antiseptic for wound cleaning",
+          "mriMachine": "Imaging machine for diagnostics",
+          "rabiesVaccine": "Core vaccine for rabies prevention",
+          "endoscope": "Endoscope for internal examinations",
+          "ultrasoundMachine": "Ultrasound machine for diagnostic imaging",
+          "elasticBandage": "Elastic bandage for flexible wound support",
+          "antisepticWipes": "Antiseptic wipes for cleaning wounds",
+          "insulinSyringes": "Syringes for administering insulin",
+          "ivCatheters": "Intravenous catheters for fluid administration",
+          "antihistamines": "Antihistamines for allergic reactions",
+          "antibioticOintment": "Topical antibiotic ointment for wound care",
+          "bloodGlucoseTestKits": "Test kits for measuring blood glucose levels",
+          "urinalysisTestKits": "Test kits for analyzing urine samples",
+          "hydrogelDressing": "Hydrogel dressing for moist wound healing",
+          "suturesKit": "Kit containing sutures for wound closure",
+          "anesthesiaMachines": "Machines for administering anesthesia",
+          "anestheticMasks": "Masks for delivering anesthesia",
+          "surgicalScissors": "Scissors for cutting tissues during surgery",
+          "hemostats": "Clamps for controlling bleeding during surgery",
+          "needleHolders": "Hold needles securely during suturing",
+          "petCarrierAccessories": "Accessories like water bowls and food trays for pet carriers",
+          "carrierCleaningSupplies": "Cleaning sprays and wipes for pet carriers",
+          "comfortPads": "Comfortable pads for lining pet carriers",
+          "parvovirusTestKits": "Test kits for detecting canine parvovirus",
+          "felineLeukemiaTestKits": "Test kits for detecting feline leukemia virus",
+          "heartwormTestKits": "Test kits for detecting heartworm infection"
+        }
+      },
+      "table": { "label": "Supplies in this inventory" },
+      "supplier": { "notRecorded": "Not recorded" },
+      "fields": {
+        "name": "Name",
+        "supplyName": "Supply name",
+        "supplier": "Supplier",
+        "supplierName": "Supplier name",
+        "description": "Description",
+        "costPrice": "Cost Price (CAD)",
+        "salePrice": "Sale Price (CAD)",
+        "quantity": "Quantity",
+        "expiration": "Expiration Date",
+        "status": "Status",
+        "actions": "Actions",
+        "photo": "Supply photo"
+      },
+      "filters": {
+        "aria": "Filter supplies",
+        "heading": "Find a supply",
+        "help": "Filter by name, supplier, description, or status.",
+        "clear": "Clear filters",
+        "namePlaceholder": "Search by name",
+        "supplierPlaceholder": "Search by supplier",
+        "descriptionPlaceholder": "Search by description",
+        "allStatuses": "All statuses"
+      },
+      "status": { "available": "Available", "reOrder": "Re order", "outOfStock": "Out of stock" },
+      "loading": "Loading supplies...",
+      "empty": "No supplies found for this inventory.",
+      "noResults": {
+        "heading": "No matching supplies",
+        "message": "No supplies match your filters in this inventory. Try changing or clearing the filters."
+      },
+      "expiration": { "expired": "Expired", "soon": "Expiring soon", "none": "No expiration" },
+      "actions": {
+        "add": "Add Supply",
+        "edit": "Edit",
+        "history": "History",
+        "delete": "Delete",
+        "deleteButton": "Delete",
+        "editTitle": "Edit Supply",
+        "saveChanges": "Save Changes",
+        "cancel": "Cancel",
+        "deleteTitle": "Delete Supply",
+        "deleteConfirm": "Are you sure you want to delete {$name}?",
+        "download": "Download PDF",
+        "downloading": "Downloading PDF...",
+        "consume": "Consume supply",
+        "consuming": "Consuming...",
+        "consumeButton": "Consume",
+        "cannotConsumeStock": "Cannot consume - out of stock",
+        "cannotConsumeExpired": "Cannot consume - expired"
+      },
+      "history": {
+        "ariaLabel": "History for {$name}",
+        "title": "History: {$INTERPOLATION}",
+        "loading": "Loading history...",
+        "error": "Unable to load supply history.",
+        "empty": "No audit history is available for this supply.",
+        "by": "By {$INTERPOLATION}",
+        "close": "Close",
+        "actions": {
+          "created": "Created",
+          "quantityUpdated": "Quantity updated",
+          "consumed": "Consumed",
+          "deleted": "Deleted"
+        }
+      },
+      "validation": {
+        "supplierWhitespace": "Supplier name cannot be only whitespace.",
+        "expirationPast": "Expiration date cannot be in the past."
+      },
+      "errors": {
+        "load": "Unable to load supplies.",
+        "create": "Unable to add supply or photo.",
+        "update": "Unable to update supply or photo.",
+        "delete": "Unable to delete supply.",
+        "consume": "Unable to consume supply.",
+        "download": "Unable to download PDF.",
+        "missingInventory": "Unable to delete supply: the inventory ID is missing."
+      }
+    },
+    "inventory": {
+      "title": "Inventory",
+      "data": {
+        "names": {
+          "medicalEquipment": "Medical equipment",
+          "firstAid": "First-Aid",
+          "vaccines": "Vaccines",
+          "medications": "Medications",
+          "petCarriers": "Pet Carriers",
+          "diagnosticKits": "Diagnostic Kits",
+          "surgicalInstruments": "Surgical Instruments",
+          "anesthesiaSupplies": "Anesthesia Supplies",
+          "woundCareSupplies": "Wound Care Supplies",
+          "infectiousDiseaseTestKits": "Infectious Disease Test Kits"
+        },
+        "types": {
+          "equipment": "Equipment",
+          "bandages": "Bandages",
+          "injections": "Injections",
+          "medications": "Medications",
+          "diagnosticKits": "Diagnostic Kits"
+        },
+        "descriptions": {
+          "medicalEquipment": "Medical equipment for surgery",
+          "firstAid": "First-aid supplies for pet emergencies",
+          "vaccines": "Supplies for disease prevention",
+          "medications": "Antibiotics for pet infections",
+          "petCarriers": "Carriers for transporting pets",
+          "diagnosticKits": "Kits for diagnosing various pet illnesses and conditions",
+          "surgicalInstruments": "Tools for performing surgical procedures on pets",
+          "anesthesiaSupplies": "Supplies for administering anesthesia during surgeries",
+          "woundCareSupplies": "Supplies for treating and dressing wounds",
+          "infectiousDiseaseTestKits": "Kits for testing infectious diseases in pets"
+        }
+      },
+      "fields": {
+        "name": "Inventory name",
+        "type": "Inventory type",
+        "description": "Description"
+      },
+      "filters": {
+        "aria": "Filter inventories",
+        "heading": "Find an inventory",
+        "help": "Filter by name, type, or description.",
+        "clear": "Clear filters",
+        "namePlaceholder": "Search by name",
+        "descriptionPlaceholder": "Search by description",
+        "loadingTypes": "Loading types…",
+        "allTypes": "All types",
+        "favoritesOnly": "Favorites only"
+      },
+      "loading": "Loading inventories…",
+      "noResults": {
+        "heading": "No matching inventory",
+        "message": "No inventory matched your search. Try a different name or description, or clear the filters."
+      },
+      "empty": {
+        "heading": "No inventories available",
+        "noFavorites": "No favorite inventories found.",
+        "message": "There are no inventories to display right now."
+      },
+      "quantity": {
+        "one": "{$count} item in stock",
+        "other": "{$count} items in stock",
+        "unavailable": "Quantity unavailable"
+      },
+      "favorite": {
+        "add": "Add {$name} to favorites",
+        "remove": "Remove {$name} from favorites"
+      },
+      "pagination": {
+        "aria": "Inventory pages",
+        "previous": "Previous page",
+        "next": "Next page"
+      },
+      "errors": {
+        "favorite": "Could not update the favorite for {$name}.",
+        "types": "Could not load inventory types. Try refreshing the page.",
+        "noTypes": "No inventory types are available.",
+        "load": "Failed to load inventories.",
+        "typesLoading": "Inventory types are still loading. Try again in a moment.",
+        "update": "Unable to update inventory.",
+        "create": "Unable to create inventory.",
+        "delete": "Unable to delete inventory."
+      },
+      "access": {
+        "denied": "Inventory access is not available for your role."
+      },
+      "actions": {
+        "saving": "Saving...",
+        "add": "Add Inventory",
+        "edit": "Edit",
+        "delete": "Delete",
+        "editTitle": "Edit Inventory",
+        "saveChanges": "Save Changes",
+        "deleteTitle": "Delete Inventory",
+        "deleteConfirm": "Are you sure you want to delete {$name}?",
+        "cancel": "Cancel"
+      },
+      "validation": {
+        "nameRequired": "Inventory name is required.",
+        "typeRequired": "Inventory type is required.",
+        "descriptionRequired": "Description is required."
       }
     }
   }

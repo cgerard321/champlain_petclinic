@@ -86,7 +86,7 @@ const AllRoles: FC = (): JSX.Element => {
             {roles.map(role => (
               <tr key={role.id}>
                 <td>{role.id}</td>
-                <td>{role.name}</td>
+                <td>{role.name === 'CUST' ? 'Customer' : role.name}</td>
                 <td>
                   <button
                     onClick={() => {
