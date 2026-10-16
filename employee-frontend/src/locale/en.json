@@ -99,6 +99,7 @@
       "listLabel": "Visit list",
       "title": "List of Visits",
       "nextAppointmentTitle": "Next appointment",
+      "upcomingAppointmentNotification": "Your next appointment for {$petName} is on {$appointmentDate}.",
       "nextAppointmentLoading": "Loading next appointment...",
       "nextAppointmentError": "Could not load the next appointment.",
       "noUpcomingAppointment": "No upcoming appointments.",
