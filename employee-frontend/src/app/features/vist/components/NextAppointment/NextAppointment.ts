@@ -122,7 +122,6 @@ export class NextAppointment implements OnInit {
       duration: 6000,
       verticalPosition: 'top',
     });
-
   }
 
   protected openFollowUpVisit(visit: Visit): void {
