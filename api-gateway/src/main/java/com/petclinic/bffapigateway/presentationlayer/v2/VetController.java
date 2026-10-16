@@ -135,7 +135,9 @@ public class VetController {
             return filePart.content()
                     .reduce(new ByteArrayOutputStream(), (os, data) -> {
                         try {
-                            os.write(data.asByteBuffer().array());
+                            byte[] bytes = new byte[data.readableByteCount()];
+                            data.read(bytes);
+                            os.write(bytes);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
