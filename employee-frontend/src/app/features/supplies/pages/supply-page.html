@@ -1,8 +1,10 @@
 <section class="supply-page">
   <div class="page-header">
     <div>
-      <h1>Supplies</h1>
-      <p class="page-description">View and manage the supplies associated with this inventory.</p>
+      <h1 i18n="@@supply.title">Articles</h1>
+      <p class="page-description" i18n="@@supply.description">
+        Consulter et gérer les articles de cet inventaire.
+      </p>
     </div>
 
     @if (canManageSupplies()) {
@@ -12,15 +14,17 @@
           class="download-pdf-button"
           [class.expanded]="downloadingPdf()"
           [disabled]="downloadingPdf() || loading() || supplies().length === 0"
-          [attr.aria-label]="downloadingPdf() ? 'Downloading PDF' : 'Download PDF'"
+          [attr.aria-label]="downloadingPdf() ? downloadingLabel : downloadLabel"
           (click)="downloadPdf()"
         >
           <mat-icon aria-hidden="true">download</mat-icon>
-          <span class="download-label">{{ downloadingPdf() ? 'Downloading...' : 'Download' }}</span>
+          <span class="download-label">{{
+            downloadingPdf() ? downloadingLabel : downloadLabel
+          }}</span>
         </button>
 
         <button type="button" class="add-supply-button" (click)="openAddDialog()">
-          Add Supply
+          <ng-container i18n="@@supply.actions.add">Ajouter un article</ng-container>
         </button>
       </div>
     }
@@ -34,11 +38,15 @@
     <p class="field-error" role="alert">{{ deleteError() }}</p>
   }
 
-  <section class="supply-filters" aria-label="Filter supplies">
+  <section
+    class="supply-filters"
+    aria-label="Filtrer les articles"
+    i18n-aria-label="@@supply.filters.aria"
+  >
     <div class="filter-heading">
       <div>
-        <h2>Find a supply</h2>
-        <p>Filter by name, supplier, description, or status.</p>
+        <h2 i18n="@@supply.filters.heading">Trouver un article</h2>
+        <p i18n="@@supply.filters.help">Filtrer par nom, fournisseur, description ou état.</p>
       </div>
       <button
         class="clear-filters-button"
@@ -46,44 +54,47 @@
         (click)="clearFilters()"
         [disabled]="!hasActiveFilters()"
       >
-        Clear filters
+        <ng-container i18n="@@supply.filters.clear">Effacer les filtres</ng-container>
       </button>
     </div>
     <div class="supply-filter-grid">
       <label class="filter-field">
-        <span>Supply name</span>
+        <span i18n="@@supply.fields.supplyName">Nom de l'article</span>
         <input
           type="search"
-          placeholder="Search by name"
+          placeholder="Rechercher par nom"
+          i18n-placeholder="@@supply.filters.namePlaceholder"
           [value]="filters().productName"
           (input)="setFilter('productName', $event)"
         />
       </label>
       <label class="filter-field">
-        <span>Supplier name</span>
+        <span i18n="@@supply.fields.supplierName">Nom du fournisseur</span>
         <input
           type="search"
-          placeholder="Search by supplier"
+          placeholder="Rechercher par fournisseur"
+          i18n-placeholder="@@supply.filters.supplierPlaceholder"
           [value]="filters().supplierName"
           (input)="setFilter('supplierName', $event)"
         />
       </label>
       <label class="filter-field">
-        <span>Description</span>
+        <span i18n="@@supply.fields.description">Description</span>
         <input
           type="search"
-          placeholder="Search by description"
+          placeholder="Rechercher par description"
+          i18n-placeholder="@@supply.filters.descriptionPlaceholder"
           [value]="filters().productDescription"
           (input)="setFilter('productDescription', $event)"
         />
       </label>
       <label class="filter-field">
-        <span>Status</span>
+        <span i18n="@@supply.fields.status">État</span>
         <select [value]="filters().status" (change)="setFilter('status', $event)">
-          <option value="">All statuses</option>
-          <option value="AVAILABLE">Available</option>
-          <option value="RE_ORDER">Re order</option>
-          <option value="OUT_OF_STOCK">Out of stock</option>
+          <option value="" i18n="@@supply.filters.allStatuses">Tous les états</option>
+          <option value="AVAILABLE" i18n="@@supply.status.available">Disponible</option>
+          <option value="RE_ORDER" i18n="@@supply.status.reOrder">À commander</option>
+          <option value="OUT_OF_STOCK" i18n="@@supply.status.outOfStock">Rupture de stock</option>
         </select>
       </label>
     </div>
@@ -93,22 +104,27 @@
   }
 
   @if (loading()) {
-    <p class="state-message">Loading supplies...</p>
+    <p class="state-message" i18n="@@supply.loading">Chargement des articles…</p>
   } @else if (error()) {
-    <p class="state-message error-message" role="alert">Unable to load supplies.</p>
+    <p class="state-message error-message" role="alert" i18n="@@supply.errors.load">
+      Impossible de charger les articles.
+    </p>
   } @else if (supplies().length === 0) {
-    <p class="state-message">No supplies found for this inventory.</p>
+    <p class="state-message" i18n="@@supply.empty">Aucun article trouvé dans cet inventaire.</p>
   } @else if (filteredSupplies().length === 0) {
     <div class="state-message" role="status">
-      <h2>No matching supplies</h2>
-      <p>No supplies match your filters in this inventory. Try changing or clearing the filters.</p>
+      <h2 i18n="@@supply.noResults.heading">Aucun article correspondant</h2>
+      <p i18n="@@supply.noResults.message">
+        Aucun article ne correspond à vos filtres dans cet inventaire. Modifiez ou effacez les
+        filtres.
+      </p>
       <button class="clear-filters-button" type="button" (click)="clearFilters()">
-        Clear filters
+        <ng-container i18n="@@supply.filters.clear">Effacer les filtres</ng-container>
       </button>
     </div>
   } @else {
     <app-table
-      label="Supplies in this inventory"
+      [label]="tableLabel"
       [rows]="filteredSupplies()"
       [columns]="columns()"
       [rowId]="supplyRowId"
@@ -119,15 +135,15 @@
 <ng-template #nameCell let-supply>
   <div class="supply-details">
     @if (supplyPhotoUrl(supply); as photo) {
-      <img class="supply-photo" [src]="photo" [alt]="supply.productName" />
+      <img class="supply-photo" [src]="photo" [alt]="localizedSupplyName(supply.productName)" />
     }
 
-    <span class="supply-name">{{ supply.productName }}</span>
+    <span class="supply-name">{{ localizedSupplyName(supply.productName) }}</span>
   </div>
 </ng-template>
 
 <ng-template #priceCell let-supply>
-  {{ supply.productPrice | currency }}
+  {{ supply.productPrice | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
 </ng-template>
 
 <ng-template #statusCell let-supply>
@@ -144,11 +160,49 @@
 <ng-template #actionsCell let-supply>
   <div class="action-buttons">
     @if (canManageSupplies()) {
-      <button type="button" class="history-button" (click)="openSupplyHistory(supply)">
-        History
+      <button
+        type="button"
+        class="edit-button desktop-action-button"
+        (click)="editSupply(supply)"
+        i18n="@@supply.actions.edit"
+      >
+        Modifier
       </button>
-      <button type="button" class="edit-button" (click)="editSupply(supply)">Edit</button>
-      <button type="button" class="delete-button" (click)="deleteSupply(supply)">Delete</button>
+      <button
+        type="button"
+        class="delete-button desktop-action-button"
+        (click)="deleteSupply(supply)"
+        i18n="@@supply.actions.deleteButton"
+      >
+        Supprimer
+      </button>
+      <button
+        type="button"
+        class="history-button desktop-action-button"
+        (click)="openSupplyHistory(supply)"
+        i18n="@@supply.actions.history"
+      >
+        Historique
+      </button>
+      <button
+        type="button"
+        class="history-button mobile-actions-button"
+        [matMenuTriggerFor]="supplyActionsMenu"
+        i18n="@@supply.fields.actions"
+      >
+        Actions
+      </button>
+      <mat-menu #supplyActionsMenu="matMenu">
+        <button mat-menu-item (click)="editSupply(supply)" i18n="@@supply.actions.edit">
+          Modifier
+        </button>
+        <button mat-menu-item (click)="deleteSupply(supply)" i18n="@@supply.actions.deleteButton">
+          Supprimer
+        </button>
+        <button mat-menu-item (click)="openSupplyHistory(supply)" i18n="@@supply.actions.history">
+          Historique
+        </button>
+      </mat-menu>
     }
     @if (canConsumeSupplies()) {
       <button
@@ -162,13 +216,13 @@
         "
         [attr.aria-label]="
           supply.productQuantity <= 0
-            ? 'Cannot consume - out of stock'
+            ? cannotConsumeStockLabel
             : expirationState(supply) === 'expired'
-              ? 'Cannot consume - expired'
-              : 'Consume supply'
+              ? cannotConsumeExpiredLabel
+              : consumeLabel
         "
       >
-        {{ consumingSupplyId() === supply.productId ? 'Consuming...' : 'Consume' }}
+        {{ consumingSupplyId() === supply.productId ? consumingLabel : consumeButtonLabel }}
       </button>
     }
   </div>
@@ -178,11 +232,13 @@
   @if (supply.expirationDate) {
     {{ supply.expirationDate }}
     @if (expirationState(supply) === 'expired') {
-      <span class="expiration-badge expired">Expired</span>
+      <span class="expiration-badge expired" i18n="@@supply.expiration.expired">Périmé</span>
     } @else if (expirationState(supply) === 'soon') {
-      <span class="expiration-badge expiring-soon">Expiring soon</span>
+      <span class="expiration-badge expiring-soon" i18n="@@supply.expiration.soon"
+        >Expire bientôt</span
+      >
     }
   } @else {
-    <span class="no-expiration">No expiration</span>
+    <span class="no-expiration" i18n="@@supply.expiration.none">Aucune date d'expiration</span>
   }
 </ng-template>
