@@ -98,7 +98,7 @@ public class VetController {
         if (queryParams.containsKey("year")) {
             String year = queryParams.get("year");
             if (!year.matches("^\\d{4}$")) {
-                throw new InvalidInputException("Invalid year format. Please enter a valid year.");
+                throw new NotFoundException("Invalid year format. Please enter a valid year.");
             }
         }
         return ratingService.getRatingsOfAVetBasedOnDate(vetId, queryParams)
