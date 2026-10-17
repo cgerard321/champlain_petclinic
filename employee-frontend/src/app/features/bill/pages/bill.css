@@ -248,7 +248,9 @@
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 .bill-table-button--outline {
@@ -427,15 +429,23 @@
 }
 
 :host-context(.dark-mode) {
-  .bill-card, .bill-card__header, .bill-empty-state {
+  .bill-card,
+  .bill-card__header,
+  .bill-empty-state {
     background: var(--mat-sys-surface-container-highest);
   }
 
-  .bill-card, .bill-table-wrapper {
+  .bill-card,
+  .bill-table-wrapper {
     border: 1px solid rgb(255 255 255 / 12%) !important;
   }
 
-  .bill-eyebrow, .bill-header h1, .bill-table th, .bill-card__header h2, .bill-table td, .bill-empty-state h3 {
+  .bill-eyebrow,
+  .bill-header h1,
+  .bill-table th,
+  .bill-card__header h2,
+  .bill-table td,
+  .bill-empty-state h3 {
     color: #fff !important;
   }
 
@@ -443,7 +453,8 @@
     border: none;
   }
 
-  .bill-table th, .bill-filters {
+  .bill-table th,
+  .bill-filters {
     background-color: var(--mat-sys-surface-container);
   }
 
@@ -458,16 +469,22 @@
     color: #8dbb8f;
   }
 
-  .bill-secondary-action:hover, .bill-view-action:hover, .bill-table-button:hover {
+  .bill-secondary-action:hover,
+  .bill-view-action:hover,
+  .bill-table-button:hover {
     background: #315842;
   }
 
-  .bill-filters, .bill-filters label {
+  .bill-filters,
+  .bill-filters label {
     color: #e0e0e0;
     border: none;
   }
 
-  .bill-lookup select, .bill-lookup input, .bill-filters input, .bill-filters select {
+  .bill-lookup select,
+  .bill-lookup input,
+  .bill-filters input,
+  .bill-filters select {
     background-color: var(--mat-sys-surface-container-lowest);
     border: 1px solid #315842;
     color: #8dbb8f;
@@ -477,17 +494,23 @@
     background-color: #2b2d31;
   }
 
-  .bill-view-action, .bill-table-button, .bill-action-message{
+  .bill-view-action,
+  .bill-table-button,
+  .bill-action-message {
     background: var(--mat-sys-surface);
     color: #8dbb8f;
   }
 
-  .bill-view-action--selected, .bill-view-action--selected:hover, .bill-table-button--primary, .bill-table-button--primary:hover {
+  .bill-view-action--selected,
+  .bill-view-action--selected:hover,
+  .bill-table-button--primary,
+  .bill-table-button--primary:hover {
     background-color: #315842;
     color: #fff;
   }
 
-  .bill-view-action:focus-visible, .bill-table-button:focus-visible {
+  .bill-view-action:focus-visible,
+  .bill-table-button:focus-visible {
     outline: 3px solid #8dbb8f;
   }
 }

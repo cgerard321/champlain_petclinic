@@ -32,7 +32,8 @@ mat-form-field {
 }
 
 :host-context(.dark-mode) {
-  .bill-update-summary, .bill-update-summary p {
+  .bill-update-summary,
+  .bill-update-summary p {
     background: var(--mat-sys-surface);
     border: none;
     color: #8dbb8f;

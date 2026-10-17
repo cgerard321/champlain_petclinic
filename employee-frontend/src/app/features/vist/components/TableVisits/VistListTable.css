@@ -61,7 +61,7 @@ tr:hover td {
 }
 
 :host-context(.dark-mode) table {
-  border-bottom: 1px solid rgb(255 255 255 / 12%)  !important;
+  border-bottom: 1px solid rgb(255 255 255 / 12%) !important;
   background: var(--mat-sys-surface-container-highest);
 }
 
@@ -69,7 +69,6 @@ tr:hover td {
   border-bottom: 1px solid #111 !important;
   color: white;
 }
-
 
 :host-context(.dark-mode) tr:hover td {
   background: var(--mat-sys-surface-container);
@@ -85,7 +84,6 @@ tr:hover td {
   border: 1px solid #111;
   color: #a3b8ac !important;
 }
-
 
 :host-context(.dark-mode) td a:hover,
 :host-context(.dark-mode) td button:hover,

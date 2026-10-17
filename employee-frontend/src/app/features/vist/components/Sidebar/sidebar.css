@@ -67,7 +67,7 @@
     color: #e0e0e0;
   }
 
-  .sidebar__calendar:hover{
+  .sidebar__calendar:hover {
     background: var(--mat-sys-surface-container-lowest);
     border: none;
     color: #e0e0e0;

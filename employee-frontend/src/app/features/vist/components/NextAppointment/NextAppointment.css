@@ -45,7 +45,8 @@ tr:hover td {
 }
 
 :host-context(.dark-mode) {
-  table, th {
+  table,
+  th {
     background: #1f2c26;
     color: #d5ebd8;
   }
@@ -54,6 +55,6 @@ tr:hover td {
     color: #e0e0e0;
   }
   tr:hover td {
-    background: var(--mat-sys-surface-container-highest)
+    background: var(--mat-sys-surface-container-highest);
   }
 }
