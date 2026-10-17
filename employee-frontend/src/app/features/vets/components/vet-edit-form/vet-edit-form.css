@@ -109,3 +109,46 @@ button:focus-visible {
     padding: 16px;
   }
 }
+
+:host-context(.dark-mode) {
+  form {
+    background-color: var(--mat-sys-surface-container) !important;
+    border: 1px solid var(--mat-sys-surface-container-high) !important;
+    color: #a3b8ac !important;
+  }
+
+  h2 {
+    color: #a3b8ac !important;
+  }
+
+  form > p {
+    color: white !important;
+  }
+
+  label {
+    color: white !important;
+  }
+
+  input,
+  textarea {
+    background-color: var(--mat-sys-surface-container-highest) !important;
+    border: 1px solid rgb(255 255 255 / 12%) !important;
+    color: white !important;
+  }
+
+  .hint {
+    color: #a3b8ac !important;
+  }
+
+  .secondary {
+    background-color: var(--mat-sys-surface-container-highest) !important;
+    border: 1px solid rgb(255 255 255 / 12%) !important;
+    color: #a3b8ac !important;
+  }
+
+  input:focus-visible,
+  textarea:focus-visible,
+  button:focus-visible {
+    outline: 3px solid #a3b8ac !important;
+  }
+}
