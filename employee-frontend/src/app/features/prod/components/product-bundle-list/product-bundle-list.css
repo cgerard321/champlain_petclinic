@@ -1,0 +1,167 @@
+.bundle-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.bundle-header h1 {
+  margin: 0;
+}
+
+.bundle-header p {
+  margin: 8px 0 0;
+}
+
+.bundle-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+}
+
+
+.bundle-card mat-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.bundle-card dl {
+  margin: 16px 0 0;
+}
+
+.bundle-card dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 4px 0;
+}
+
+.bundle-card dt {
+  font-weight: 600;
+}
+
+.bundle-card dd {
+  margin: 0;
+  text-align: right;
+}
+
+.bundle-card .original-price {
+  opacity: 0.7;
+  text-decoration: line-through;
+}
+
+.bundle-items-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 16px 0 4px;
+}
+
+.bundle-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 4px 10px 10px;
+  list-style: none;
+  overflow-wrap: anywhere;
+  max-height: calc(4 * 48px + 3 * 8px);
+  overflow-y: auto;
+  background: var(--mat-sys-surface-container-highest, #e6e6e6);
+  border-radius: 8px;
+}
+
+.bundle-item {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bundle-item-link {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 4px;
+  border-radius: 6px;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 150ms ease;
+}
+
+.bundle-item-link:hover {
+  background-color: rgb(0 92 187 / 16%);
+}
+
+.bundle-item-link:active {
+  background-color: rgb(0 92 187 / 26%);
+}
+
+.bundle-item-link:focus-visible {
+  outline: 2px solid var(--mat-sys-primary, #005cbb);
+  outline-offset: 1px;
+}
+
+.bundle-item-thumbnail {
+  --product-thumbnail-height: 40px;
+
+  flex: none;
+  width: 40px;
+  font-size: 10px;
+  line-height: 1.1;
+}
+
+.bundle-card-actions {
+  box-sizing: border-box;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-left: 12px;
+  padding-right: 12px;
+  width: 100%;
+}
+
+.bundle-card-actions button {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  padding-left: 8px;
+  padding-right: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bundle-card-actions .delete-button {
+  --mdc-outlined-button-outline-color: var(--mat-sys-error, #d32f2f);
+
+  border-color: var(--mat-sys-error, #d32f2f);
+  color: var(--mat-sys-error, #d32f2f);
+}
+
+.bundle-card-actions .delete-button:hover {
+  background-color: rgb(211 47 47 / 8%);
+}
+
+
+.bundle-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.bundle-state-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 180px;
+  text-align: center;
+}
+
+.bundle-error-message {
+  color: var(--mat-sys-error, #b00020);
+  flex-direction: column;
+}
