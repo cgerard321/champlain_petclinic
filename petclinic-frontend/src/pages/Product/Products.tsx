@@ -131,11 +131,13 @@ export default function Products(): JSX.Element {
     updateTempFilter(key, next.join(','));
   };
   const selectPricePreset = (preset: PricePreset): void => {
-    setSelectedPricePreset(preset.key);
+    const isAlreadySelected = selectedPricePreset === preset.key;
+
+    setSelectedPricePreset(isAlreadySelected ? null : preset.key);
     setTempFilters(previous => ({
       ...previous,
-      minPrice: preset.minPrice,
-      maxPrice: preset.maxPrice,
+      minPrice: isAlreadySelected ? undefined : preset.minPrice,
+      maxPrice: isAlreadySelected ? undefined : preset.maxPrice,
     }));
   };
   const clearFilters = (): void => {
