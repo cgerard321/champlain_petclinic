@@ -462,8 +462,9 @@
     background: #315842;
   }
 
-  .bill-filters label {
+  .bill-filters, .bill-filters label {
     color: #e0e0e0;
+    border: none;
   }
 
   .bill-lookup select, .bill-lookup input, .bill-filters input, .bill-filters select {
@@ -472,7 +473,11 @@
     color: #8dbb8f;
   }
 
-  .bill-view-action, .bill-table-button {
+  .bill-filters select option {
+    background-color: #2b2d31;
+  }
+
+  .bill-view-action, .bill-table-button, .bill-action-message{
     background: var(--mat-sys-surface);
     color: #8dbb8f;
   }
