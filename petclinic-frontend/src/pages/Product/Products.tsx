@@ -3,22 +3,35 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import ProductsList from '@/features/products/ProductsList.tsx';
 import './Products.css';
 import TrendingList from '@/features/products/TrendingList.tsx';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import ProductSearch from '@/features/products/components/ProductSearch';
-import StarRating from '@/features/products/components/StarRating';
+import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import { ProductTypeModel } from '@/features/products/models/ProductModels/ProductTypeModel.ts';
+import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
 import { getProductTypes } from '@/features/products/api/getProductTypes.ts';
+
+type ProductFilters = {
+  minPrice?: number;
+  maxPrice?: number;
+  ratingSort: string;
+  minStars: number;
+  maxStars: number;
+  deliveryType: string;
+  productType: string;
+  availability: string;
+};
 
 export default function Products(): JSX.Element {
   const { t } = useTranslation('products');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [validationMessage, setValidationMessage] = useState<string>('');
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [sortCriteria, setSortCriteria] = useState('default');
   const [productTypes, setProductTypes] = useState<ProductTypeModel[]>([]);
+  const [allProducts, setAllProducts] = useState<ProductModel[]>([]);
+  const [matchingProductCount, setMatchingProductCount] = useState(0);
 
-  const defaultFilters = useMemo(
+  const defaultFilters = useMemo<ProductFilters>(
     () => ({
       minPrice: undefined,
       maxPrice: undefined,
@@ -27,6 +40,7 @@ export default function Products(): JSX.Element {
       maxStars: 5,
       deliveryType: '',
       productType: '',
+      availability: '',
     }),
     []
   );
@@ -34,9 +48,79 @@ export default function Products(): JSX.Element {
   const [tempFilters, setTempFilters] = useState(defaultFilters);
 
   const [appliedFilters, setAppliedFilters] = useState(defaultFilters);
+  const [selectedPricePreset, setSelectedPricePreset] = useState<string | null>(
+    null
+  );
 
-  const toggleSidebar = (): void => setIsSidebarOpen(!isSidebarOpen);
-  const handleOverlayClick = (): void => setIsSidebarOpen(false);
+  const filterPanelRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
+
+  const closeSidebar = (): void => {
+    setIsSidebarOpen(false);
+    requestAnimationFrame(() => filterButtonRef.current?.focus());
+  };
+  const toggleSidebar = (): void => {
+    if (isSidebarOpen) closeSidebar();
+    else setIsSidebarOpen(true);
+  };
+  const handleOverlayClick = (): void => closeSidebar();
+
+  const activeFilterCount = useMemo(() => {
+    return [
+      appliedFilters.minPrice !== undefined ||
+        appliedFilters.maxPrice !== undefined,
+      appliedFilters.productType !== '',
+      appliedFilters.deliveryType !== '',
+      appliedFilters.minStars > 0 || appliedFilters.maxStars < 5,
+      appliedFilters.availability !== '',
+    ].filter(Boolean).length;
+  }, [appliedFilters]);
+
+  useEffect(() => {
+    if (!isSidebarOpen) return;
+
+    const previousPosition = document.body.style.position;
+    const previousTop = document.body.style.top;
+    const previousLeft = document.body.style.left;
+    const previousRight = document.body.style.right;
+    const previousWidth = document.body.style.width;
+    const previousOverflowY = document.documentElement.style.overflowY;
+    const scrollPosition = window.scrollY;
+
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollPosition}px`;
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+    document.documentElement.style.overflowY = 'scroll';
+
+    closeButtonRef.current?.focus();
+    const handleEscape = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') closeSidebar();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.position = previousPosition;
+      document.body.style.top = previousTop;
+      document.body.style.left = previousLeft;
+      document.body.style.right = previousRight;
+      document.body.style.width = previousWidth;
+      document.documentElement.style.overflowY = previousOverflowY;
+      window.scrollTo({
+        top: scrollPosition,
+        left: 0,
+        behavior: 'instant',
+      });
+    };
+  }, [isSidebarOpen]);
+
+  useEffect(() => {
+    getAllProducts()
+      .then(products => setAllProducts(products.filter(p => !p.isUnlisted)))
+      .catch(() => setAllProducts([]));
+  }, []);
 
   const handleSort = (criteria: string): void => {
     setSortCriteria(criteria);
@@ -47,16 +131,234 @@ export default function Products(): JSX.Element {
     setTempFilters(prev => ({ ...prev, [key]: value }));
   };
 
+  const priceError =
+    tempFilters.minPrice !== undefined &&
+    tempFilters.maxPrice !== undefined &&
+    tempFilters.minPrice > tempFilters.maxPrice;
+
   const applyFilters = (): void => {
+    if (priceError) return;
     setAppliedFilters(tempFilters);
-    setIsSidebarOpen(false);
+    closeSidebar();
   };
 
   const clearFilters = (): void => {
     setTempFilters(defaultFilters);
     setAppliedFilters(defaultFilters);
-    setValidationMessage('');
+    setSelectedPricePreset(null);
   };
+
+  const selectedTypes = tempFilters.productType
+    ? tempFilters.productType.split(',').filter(Boolean)
+    : [];
+  const selectedAvailability = tempFilters.availability
+    ? tempFilters.availability.split(',').filter(Boolean)
+    : [];
+
+  const pricePresets = [
+    { label: 'Under $25', minPrice: undefined, maxPrice: 25 },
+    { label: '$25–$50', minPrice: 25, maxPrice: 50 },
+    { label: '$50–$100', minPrice: 50, maxPrice: 100 },
+    { label: '$100+', minPrice: 100, maxPrice: undefined },
+  ];
+
+  const selectPricePreset = (preset: (typeof pricePresets)[number]): void => {
+    setSelectedPricePreset(preset.label);
+    setTempFilters(previous => ({
+      ...previous,
+      minPrice: preset.minPrice,
+      maxPrice: preset.maxPrice,
+    }));
+  };
+
+  const matchesFilterOption = (
+    product: ProductModel,
+    excludedFilter: 'productType' | 'deliveryType' | 'availability',
+    option?: string
+  ): boolean => {
+    if (
+      excludedFilter !== 'productType' &&
+      tempFilters.productType &&
+      !tempFilters.productType.split(',').includes(product.productType)
+    ) {
+      return false;
+    }
+    if (
+      tempFilters.minPrice !== undefined &&
+      product.productSalePrice < tempFilters.minPrice
+    ) {
+      return false;
+    }
+    if (
+      tempFilters.maxPrice !== undefined &&
+      product.productSalePrice > tempFilters.maxPrice
+    ) {
+      return false;
+    }
+    if (
+      tempFilters.minStars > 0 &&
+      product.averageRating < tempFilters.minStars
+    ) {
+      return false;
+    }
+    if (
+      tempFilters.maxStars < 5 &&
+      product.averageRating > tempFilters.maxStars
+    ) {
+      return false;
+    }
+    if (
+      excludedFilter !== 'deliveryType' &&
+      tempFilters.deliveryType &&
+      String(product.deliveryType).toUpperCase() !==
+        String(tempFilters.deliveryType).toUpperCase()
+    ) {
+      return false;
+    }
+    if (excludedFilter === 'productType' && option) {
+      return product.productType === option;
+    }
+    if (excludedFilter === 'deliveryType' && option) {
+      return (
+        String(product.deliveryType).toUpperCase() ===
+        String(option).toUpperCase()
+      );
+    }
+    if (excludedFilter === 'availability' && option) {
+      return option === 'in-stock'
+        ? product.productQuantity > 0 &&
+            product.productStatus !== 'OUT_OF_STOCK'
+        : option === 'pre-order'
+          ? product.productStatus === 'PRE_ORDER'
+          : product.productQuantity <= 0 ||
+            product.productStatus === 'OUT_OF_STOCK';
+    }
+    if (excludedFilter !== 'availability' && tempFilters.availability) {
+      const selected = tempFilters.availability.split(',');
+      const isInStock =
+        product.productQuantity > 0 && product.productStatus !== 'OUT_OF_STOCK';
+      const matchesAvailability = selected.some(value =>
+        value === 'in-stock'
+          ? isInStock
+          : value === 'pre-order'
+            ? product.productStatus === 'PRE_ORDER'
+            : !isInStock
+      );
+      if (!matchesAvailability) return false;
+    }
+    return true;
+  };
+
+  const getOptionCount = (
+    filter: 'productType' | 'deliveryType' | 'availability',
+    option?: string
+  ): number | undefined =>
+    allProducts.length === 0
+      ? undefined
+      : allProducts.filter(product =>
+          matchesFilterOption(product, filter, option)
+        ).length;
+
+  const updateMultiSelectFilter = (
+    key: 'productType' | 'availability',
+    value: string,
+    selected: string[]
+  ): void => {
+    const next = selected.includes(value)
+      ? selected.filter(item => item !== value)
+      : [...selected, value];
+    updateTempFilter(key, next.join(','));
+  };
+
+  const removeFilter = (key: string, value?: string): void => {
+    const next = { ...appliedFilters };
+    if (key === 'productType' || key === 'availability') {
+      const selected = (next[key] || '').split(',').filter(Boolean);
+      next[key] = selected.filter(item => item !== value).join(',');
+    } else if (key === 'rating') {
+      next.minStars = 0;
+      next.maxStars = 5;
+    } else if (key === 'price') {
+      next.minPrice = undefined;
+      next.maxPrice = undefined;
+      setSelectedPricePreset(null);
+    } else if (key === 'minPrice') {
+      next.minPrice = undefined;
+    } else if (key === 'maxPrice') {
+      next.maxPrice = undefined;
+    } else if (key === 'deliveryType') {
+      next.deliveryType = '';
+    }
+    setAppliedFilters(next);
+    setTempFilters(next);
+  };
+
+  const getTypeLabel = (type: string): string =>
+    t(`types.${type.toUpperCase()}`, { defaultValue: type });
+  const getAvailabilityLabel = (availability: string): string =>
+    ({
+      'in-stock': 'In stock',
+      'pre-order': 'Pre-order',
+      'out-of-stock': 'Out of stock',
+    })[availability] ?? availability;
+  const getDeliveryLabel = (delivery: string): string =>
+    ({
+      DELIVERY: t('delivery'),
+      PICKUP: t('pickup'),
+      DELIVERY_AND_PICKUP: t('deliveryPickup'),
+      NO_DELIVERY_OPTION: t('noDelivery'),
+    })[delivery] ?? delivery;
+
+  const activeFilterChips: { key: string; value?: string; label: string }[] =
+    [];
+  if (
+    appliedFilters.minPrice !== undefined ||
+    appliedFilters.maxPrice !== undefined
+  ) {
+    const min = appliedFilters.minPrice;
+    const max = appliedFilters.maxPrice;
+    activeFilterChips.push({
+      key: 'price',
+      label:
+        min !== undefined && max !== undefined
+          ? `$${min}–$${max}`
+          : min !== undefined
+            ? `From $${min}`
+            : `Under $${max}`,
+    });
+  }
+  appliedFilters.productType
+    .split(',')
+    .filter(Boolean)
+    .forEach(type =>
+      activeFilterChips.push({
+        key: 'productType',
+        value: type,
+        label: getTypeLabel(type),
+      })
+    );
+  if (appliedFilters.deliveryType) {
+    activeFilterChips.push({
+      key: 'deliveryType',
+      label: getDeliveryLabel(appliedFilters.deliveryType),
+    });
+  }
+  appliedFilters.availability
+    .split(',')
+    .filter(Boolean)
+    .forEach(value =>
+      activeFilterChips.push({
+        key: 'availability',
+        value,
+        label: getAvailabilityLabel(value),
+      })
+    );
+  if (appliedFilters.minStars > 0) {
+    activeFilterChips.push({
+      key: 'rating',
+      label: `${appliedFilters.minStars}★ & up`,
+    });
+  }
 
   useEffect(() => {
     getProductTypes()
@@ -64,7 +366,9 @@ export default function Products(): JSX.Element {
       .catch(() => setProductTypes([]));
   }, []);
 
-  const filters = useMemo(() => appliedFilters, [appliedFilters]);
+  // While the drawer is open, the catalog previews the pending selection so
+  // the result count stays current before the user presses Apply.
+  const filters = isSidebarOpen ? tempFilters : appliedFilters;
 
   return (
     <div>
@@ -83,12 +387,15 @@ export default function Products(): JSX.Element {
 
       <div className="search-and-filter">
         <button
+          ref={filterButtonRef}
           className="toggle-sidebar-button"
+          type="button"
           onClick={toggleSidebar}
           aria-expanded={isSidebarOpen}
           aria-controls="products-sidebar"
         >
           {t('filterButton')}
+          {activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
         </button>
 
         <div className="search-wrapper">
@@ -132,102 +439,300 @@ export default function Products(): JSX.Element {
       </div>
 
       {isSidebarOpen && (
-        <div className="overlay" onClick={handleOverlayClick}></div>
+        <div
+          className="overlay"
+          onClick={handleOverlayClick}
+          aria-hidden="true"
+        />
       )}
 
       {isSidebarOpen && (
-        <div className={`products-sidebar ${isSidebarOpen ? 'open' : ''}`}>
-          <button
-            className="close-button"
-            onClick={toggleSidebar}
-            aria-label={t('closeFilters')}
-          >
-            &times;
-          </button>
-          <div className="filter-container">
-            <h2>{t('filters')}</h2>
-
-            <label>
-              {t('minPrice')}
-              <input
-                type="number"
-                value={tempFilters.minPrice ?? ''}
-                onChange={e =>
-                  updateTempFilter(
-                    'minPrice',
-                    e.target.value ? +e.target.value : undefined
-                  )
-                }
-              />
-            </label>
-
-            <label>
-              {t('maxPrice')}
-              <input
-                type="number"
-                value={tempFilters.maxPrice ?? ''}
-                onChange={e =>
-                  updateTempFilter(
-                    'maxPrice',
-                    e.target.value ? +e.target.value : undefined
-                  )
-                }
-              />
-            </label>
-
-            <label>
-              {t('itemType')}
-              <select
-                value={tempFilters.productType}
-                onChange={e => updateTempFilter('productType', e.target.value)}
-              >
-                <option value="">{t('allTypes')}</option>
-                {productTypes.map(type => (
-                  <option key={type.typeName} value={type.typeName}>
-                    {t(`types.${type.typeName.toUpperCase()}`, {
-                      defaultValue: type.typeName,
-                    })}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label>
-              {t('deliveryType')}
-              <select
-                value={tempFilters.deliveryType}
-                onChange={e => updateTempFilter('deliveryType', e.target.value)}
-              >
-                <option value="">{t('allDelivery')}</option>
-                <option value="DELIVERY">{t('delivery')}</option>
-                <option value="PICKUP">{t('pickup')}</option>
-                <option value="DELIVERY_AND_PICKUP">
-                  {t('deliveryPickup')}
-                </option>
-                <option value="NO_DELIVERY_OPTION">{t('noDelivery')}</option>
-              </select>
-            </label>
-
-            <div className="star-rating-container">
-              <h2>{t('filterRating')}</h2>
-              <StarRating
-                currentRating={tempFilters.minStars}
-                viewOnly={false}
-                updateRating={value => updateTempFilter('minStars', value)}
-              />
-              <StarRating
-                currentRating={tempFilters.maxStars}
-                viewOnly={false}
-                updateRating={value => updateTempFilter('maxStars', value)}
-              />
+        <div
+          ref={filterPanelRef}
+          className="products-sidebar open"
+          id="products-sidebar"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="products-filter-heading"
+        >
+          <div className="filter-drawer-header">
+            <div>
+              <h2 id="products-filter-heading">
+                {t('filters')}
+                {activeFilterCount > 0 ? ` · ${activeFilterCount}` : ''}
+              </h2>
+              <span className="filter-count-label">
+                {activeFilterCount > 0
+                  ? `${activeFilterCount} active`
+                  : 'Refine your results'}
+              </span>
             </div>
-
-            <button onClick={applyFilters}>{t('apply')}</button>
-            <button onClick={clearFilters}>{t('clear')}</button>
-            {validationMessage && (
-              <span style={{ color: 'red' }}>{validationMessage}</span>
-            )}
+            <button
+              ref={closeButtonRef}
+              className="close-button"
+              type="button"
+              onClick={closeSidebar}
+              aria-label={t('closeFilters')}
+            >
+              &times;
+            </button>
           </div>
+          <div className="filter-container">
+            <section className="filter-section">
+              <span className="filter-section-label">Price</span>
+              <div className="price-presets" aria-label="Price presets">
+                {pricePresets.map(preset => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    className={`filter-pill ${selectedPricePreset === preset.label ? 'selected' : ''}`}
+                    aria-pressed={selectedPricePreset === preset.label}
+                    onClick={() => selectPricePreset(preset)}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+              <div className="price-inputs">
+                <label htmlFor="filter-min-price">
+                  <span>Min</span>
+                  <span className="currency-input price-field">
+                    <span aria-hidden="true">$</span>
+                    <input
+                      id="filter-min-price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      inputMode="decimal"
+                      value={tempFilters.minPrice ?? ''}
+                      onChange={e => {
+                        setSelectedPricePreset(null);
+                        updateTempFilter(
+                          'minPrice',
+                          e.target.value ? +e.target.value : undefined
+                        );
+                      }}
+                    />
+                  </span>
+                </label>
+                <label htmlFor="filter-max-price">
+                  <span>Max</span>
+                  <span className="currency-input price-field">
+                    <span aria-hidden="true">$</span>
+                    <input
+                      id="filter-max-price"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      inputMode="decimal"
+                      value={tempFilters.maxPrice ?? ''}
+                      onChange={e => {
+                        setSelectedPricePreset(null);
+                        updateTempFilter(
+                          'maxPrice',
+                          e.target.value ? +e.target.value : undefined
+                        );
+                      }}
+                    />
+                  </span>
+                </label>
+              </div>
+              {priceError && (
+                <p className="filter-error" role="alert">
+                  Minimum price must be less than maximum price.
+                </p>
+              )}
+            </section>
+
+            <section className="filter-section">
+              <span className="filter-section-label">Item type</span>
+              <div className="filter-pills" role="group" aria-label="Item type">
+                {productTypes.map(type => (
+                  <button
+                    key={type.typeName}
+                    type="button"
+                    className={`filter-pill ${selectedTypes.includes(type.typeName) ? 'selected' : ''}`}
+                    aria-pressed={selectedTypes.includes(type.typeName)}
+                    disabled={
+                      getOptionCount('productType', type.typeName) === 0 &&
+                      !selectedTypes.includes(type.typeName)
+                    }
+                    onClick={() =>
+                      updateMultiSelectFilter(
+                        'productType',
+                        type.typeName,
+                        selectedTypes
+                      )
+                    }
+                  >
+                    <span className="filter-pill-label">
+                      {getTypeLabel(type.typeName)}
+                    </span>
+                    <span className="filter-option-count">
+                      ({getOptionCount('productType', type.typeName) ?? '…'})
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            <section className="filter-section">
+              <span className="filter-section-label">Delivery type</span>
+              <div
+                className="segmented-control"
+                role="radiogroup"
+                aria-label="Delivery type"
+              >
+                {[
+                  ['', 'Any'],
+                  ['DELIVERY', t('delivery')],
+                  ['PICKUP', t('pickup')],
+                  ['DELIVERY_AND_PICKUP', t('deliveryPickup')],
+                  ['NO_DELIVERY_OPTION', t('noDelivery')],
+                ].map(([value, label]) => (
+                  <label key={value || 'any'} className="segment-option">
+                    <input
+                      type="radio"
+                      name="delivery-type"
+                      value={value}
+                      checked={tempFilters.deliveryType === value}
+                      disabled={
+                        value !== '' &&
+                        getOptionCount('deliveryType', value) === 0 &&
+                        tempFilters.deliveryType !== value
+                      }
+                      onChange={e =>
+                        updateTempFilter('deliveryType', e.target.value)
+                      }
+                    />
+                    <span>
+                      <span className="filter-pill-label">{label}</span>
+                      <span className="filter-option-count">
+                        ({getOptionCount('deliveryType', value) ?? '…'})
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </section>
+
+            <section className="filter-section">
+              <span className="filter-section-label">Availability</span>
+              <div className="availability-options">
+                {[
+                  ['in-stock', 'In stock'],
+                  ['pre-order', 'Pre-order'],
+                  ['out-of-stock', 'Out of stock'],
+                ].map(([value, label]) => (
+                  <label
+                    key={value}
+                    className={`check-option ${
+                      getOptionCount('availability', value) === 0 &&
+                      !selectedAvailability.includes(value)
+                        ? 'disabled'
+                        : ''
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedAvailability.includes(value)}
+                      disabled={
+                        getOptionCount('availability', value) === 0 &&
+                        !selectedAvailability.includes(value)
+                      }
+                      onChange={() =>
+                        updateMultiSelectFilter(
+                          'availability',
+                          value,
+                          selectedAvailability
+                        )
+                      }
+                    />
+                    <span className="check-indicator" aria-hidden="true" />
+                    <span>
+                      <span className="filter-pill-label">{label}</span>
+                      <span className="filter-option-count">
+                        ({getOptionCount('availability', value) ?? '…'})
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </section>
+
+            <section className="filter-section">
+              <span className="filter-section-label">Rating</span>
+              <div className="rating-options">
+                {[
+                  [4, '4★ & up'],
+                  [3, '3★ & up'],
+                  [2, '2★ & up'],
+                  [1, '1★ & up'],
+                  [0, 'Any'],
+                ].map(([value, label]) => (
+                  <label key={value} className="rating-option">
+                    <input
+                      type="radio"
+                      name="minimum-rating"
+                      checked={tempFilters.minStars === value}
+                      onChange={() => {
+                        updateTempFilter('minStars', value);
+                        updateTempFilter('maxStars', 5);
+                      }}
+                    />
+                    <span className="rating-stars" aria-hidden="true">
+                      {'\u2605'.repeat(Number(value))}
+                      {'\u2606'.repeat(5 - Number(value))}
+                    </span>
+                    <span>{label}</span>
+                  </label>
+                ))}
+              </div>
+            </section>
+          </div>
+          <div className="filter-drawer-footer">
+            <button
+              type="button"
+              className="clear-filter-button"
+              onClick={clearFilters}
+            >
+              Clear all
+            </button>
+            <button
+              type="button"
+              className="apply-filter-button"
+              onClick={applyFilters}
+              disabled={priceError}
+            >
+              {priceError
+                ? 'Fix price range'
+                : `Show ${matchingProductCount} results`}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {activeFilterChips.length > 0 && (
+        <div className="active-filter-bar" aria-label="Active filters">
+          <span className="active-filter-title">Active filters:</span>
+          {activeFilterChips.map(chip => (
+            <button
+              key={`${chip.key}-${chip.value ?? chip.label}`}
+              type="button"
+              className="active-filter-chip"
+              onClick={() => removeFilter(chip.key, chip.value)}
+              aria-label={`Remove ${chip.label} filter`}
+            >
+              {chip.label} <span aria-hidden="true">&times;</span>
+            </button>
+          ))}
+          <button
+            type="button"
+            className="active-filter-clear"
+            onClick={clearFilters}
+          >
+            Clear all
+          </button>
         </div>
       )}
 
@@ -236,6 +741,8 @@ export default function Products(): JSX.Element {
         searchQuery={searchQuery}
         filters={filters}
         sortCriteria={sortCriteria}
+        onResultCountChange={setMatchingProductCount}
+        onClearFilters={clearFilters}
       />
 
       <div className="block">
@@ -246,7 +753,11 @@ export default function Products(): JSX.Element {
         <hr />
       </div>
 
-      <ProductsList view="extras" searchQuery={searchQuery} filters={filters} />
+      <ProductsList
+        view="extras"
+        searchQuery={searchQuery}
+        filters={appliedFilters}
+      />
     </div>
   );
 }

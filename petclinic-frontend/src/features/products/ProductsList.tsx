@@ -35,8 +35,11 @@ interface ProductsListProps {
     maxStars?: number;
     deliveryType?: string;
     productType?: string;
+    availability?: string;
   };
   sortCriteria?: string;
+  onResultCountChange?: (count: number) => void;
+  onClearFilters?: () => void;
 }
 
 const ProductList = function Productlist({
@@ -44,6 +47,8 @@ const ProductList = function Productlist({
   view,
   filters,
   sortCriteria,
+  onResultCountChange,
+  onClearFilters,
 }: ProductsListProps): JSX.Element {
   const { t, i18n } = useTranslation('products');
   const language = i18n.resolvedLanguage || i18n.language || 'en';
@@ -77,7 +82,7 @@ const ProductList = function Productlist({
         filters.minStars,
         filters.maxStars,
         filters.deliveryType ?? '',
-        filters.productType ?? ''
+        filters.productType?.includes(',') ? '' : filters.productType ?? ''
       );
       const visible = list.filter(p => !p.isUnlisted);
       setProductList(visible);
@@ -133,25 +138,63 @@ const ProductList = function Productlist({
         break;
     }
 
-    if (searchQuery === '') {
-      setFilteredList(sorted);
-    } else {
-      const query = normalizeProductSearch(searchQuery);
-      setFilteredList(
-        sorted.filter(
-          p =>
-            normalizeProductSearch(localizedProduct(p, language).name).includes(
-              query
-            ) ||
-            normalizeProductSearch(
-              t(`types.${(p.productType || '').toUpperCase()}`, {
-                defaultValue: p.productType || '',
-              })
-            ).includes(query)
-        )
-      );
-    }
-  }, [sortCriteria, productList, searchQuery, language, t]);
+    const query = normalizeProductSearch(searchQuery);
+    setFilteredList(
+      sorted.filter(p => {
+        const matchesSearch =
+          query === '' ||
+          normalizeProductSearch(localizedProduct(p, language).name).includes(
+            query
+          ) ||
+          normalizeProductSearch(
+            t(`types.${(p.productType || '').toUpperCase()}`, {
+              defaultValue: p.productType || '',
+            })
+          ).includes(query);
+
+        const selectedTypes = filters.productType
+          ? filters.productType.split(',').filter(Boolean)
+          : [];
+        const matchesType =
+          selectedTypes.length === 0 || selectedTypes.includes(p.productType);
+
+        const selectedAvailability = filters.availability
+          ? filters.availability.split(',').filter(Boolean)
+          : [];
+        const matchesAvailability =
+          selectedAvailability.length === 0 ||
+          selectedAvailability.some(value =>
+            value === 'in-stock'
+              ? p.productQuantity > 0 && p.productStatus !== 'OUT_OF_STOCK'
+              : value === 'pre-order'
+                ? p.productStatus === 'PRE_ORDER'
+                : p.productQuantity <= 0 || p.productStatus === 'OUT_OF_STOCK'
+          );
+
+        const matchesDelivery =
+          !filters.deliveryType ||
+          String(p.deliveryType).toUpperCase() ===
+            String(filters.deliveryType).toUpperCase();
+
+        return (
+          matchesSearch && matchesType && matchesAvailability && matchesDelivery
+        );
+      })
+    );
+  }, [
+    sortCriteria,
+    productList,
+    searchQuery,
+    language,
+    t,
+    filters.productType,
+    filters.availability,
+    filters.deliveryType,
+  ]);
+
+  useEffect(() => {
+    onResultCountChange?.(filteredList.length);
+  }, [filteredList, onResultCountChange]);
 
   const totalPages = Math.ceil(filteredList.length / CATALOG_PAGE_SIZE);
   const firstVisibleProduct = currentPage * CATALOG_PAGE_SIZE + 1;
@@ -238,9 +281,26 @@ const ProductList = function Productlist({
                   ))}
                 </div>
               ) : (
-                <p style={{ textAlign: 'center', margin: '40px 0' }}>
-                  {t('noItems')}
-                </p>
+                <div className="no-products-results">
+                  <p>
+                    {filters.availability ||
+                    filters.minPrice !== undefined ||
+                    filters.maxPrice !== undefined ||
+                    filters.deliveryType ||
+                    filters.productType ||
+                    (filters.minStars ?? 0) > 0 ||
+                    (filters.maxStars ?? 5) < 5
+                      ? t('noFilteredItems', {
+                          defaultValue: 'No products match your filters',
+                        })
+                      : t('noItems')}
+                  </p>
+                  {onClearFilters && (
+                    <button type="button" onClick={onClearFilters}>
+                      Clear filters
+                    </button>
+                  )}
+                </div>
               )}
               {!isLoading && filteredList.length > 0 && (
                 <div className="catalog-pagination-container">
