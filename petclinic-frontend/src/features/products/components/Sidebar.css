@@ -35,7 +35,7 @@
   left: 0;
 }
 
-.close-button {
+.products-sidebar .close-button {
   align-self: flex-end;
   background: none;
   border: none;
@@ -44,7 +44,7 @@
   margin-bottom: 20px;
 }
 
-.close-button:hover {
+.products-sidebar .close-button:hover {
   background-color: none;
 }
 
@@ -152,7 +152,7 @@
   font-size: 0.82rem;
 }
 
-.close-button {
+.products-sidebar .close-button {
   width: 40px;
   height: 40px;
   margin: -8px -8px 0 12px;
@@ -161,8 +161,8 @@
   font-size: 1.8rem;
 }
 
-.close-button:hover,
-.close-button:focus-visible {
+.products-sidebar .close-button:hover,
+.products-sidebar .close-button:focus-visible {
   color: #1d4ed8;
   background-color: #eff6ff;
 }

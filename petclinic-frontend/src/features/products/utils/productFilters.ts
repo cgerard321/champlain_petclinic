@@ -2,7 +2,7 @@ import { TFunction } from 'i18next';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import { localizedProduct, normalizeProductSearch } from './localizedProduct';
 
-export type AvailabilityFilter = 'in-stock' | 'pre-order' | 'out-of-stock';
+export type AvailabilityFilter = 'in-stock' | 'out-of-stock';
 
 export type ProductFilters = {
   minPrice?: number;
@@ -31,7 +31,6 @@ export const matchesAvailability = (
     product.productQuantity > 0 && product.productStatus !== 'OUT_OF_STOCK';
 
   if (value === 'in-stock') return isInStock;
-  if (value === 'pre-order') return product.productStatus === 'PRE_ORDER';
   return !isInStock;
 };
 

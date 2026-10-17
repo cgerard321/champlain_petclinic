@@ -18,7 +18,6 @@
   "max": "Max",
   "any": "Tous",
   "inStockFilter": "En stock",
-  "preOrderFilter": "Précommande",
   "outOfStockFilter": "Rupture de stock",
   "priceError": "Le prix minimum doit être inférieur au prix maximum.",
   "priceRange": "De {{min}} $ à {{max}} $",

@@ -203,7 +203,6 @@ export default function Products(): JSX.Element {
       .forEach(value => {
         const labels: Record<string, string> = {
           'in-stock': 'inStockFilter',
-          'pre-order': 'preOrderFilter',
           'out-of-stock': 'outOfStockFilter',
         };
         chips.push({

@@ -20,7 +20,6 @@ export const DELIVERY_OPTIONS = [
 
 export const AVAILABILITY_OPTIONS = [
   { value: 'in-stock', labelKey: 'inStockFilter' },
-  { value: 'pre-order', labelKey: 'preOrderFilter' },
   { value: 'out-of-stock', labelKey: 'outOfStockFilter' },
 ] as const;
 
