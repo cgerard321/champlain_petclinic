@@ -48,15 +48,15 @@
 }
 
 .bill-primary-action {
+  padding: 0.7rem 1.25rem;
   border: 1px solid #1b382b;
   border-radius: 10px;
-  padding: 0.7rem 1.25rem;
   background: #1b382b;
   color: #fff;
-  cursor: pointer;
   font-size: 0.95rem;
   font-weight: 700;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .bill-primary-action:hover {
@@ -125,14 +125,9 @@
   font-weight: 400;
 }
 
-.bill-lookup input {
-  flex: 1;
-  padding: 12px;
-  border-radius: 10px;
-}
-
 .bill-filters input:focus-visible,
-.bill-filters select:focus-visible {
+.bill-filters select:focus-visible,
+.bill-lookup input:focus-visible {
   outline: 3px solid #8dbb8f;
   outline-offset: 2px;
 }
@@ -166,29 +161,26 @@
   font: inherit;
 }
 
-.bill-lookup input:focus-visible {
-  outline: 3px solid #8dbb8f;
-  outline-offset: 2px;
-}
-
 .bill-secondary-action {
   padding: 10px 16px;
   border: 1px solid #1b382b;
   border-radius: 10px;
   background: #fff;
   color: #1b382b;
-  cursor: pointer;
   font: inherit;
   font-weight: 600;
+  cursor: pointer;
 }
 
 .bill-secondary-action:hover {
   background: #e5efe4;
 }
 
-.bill-secondary-action:disabled {
-  cursor: not-allowed;
+.bill-secondary-action:disabled,
+.bill-table-button:disabled,
+.bill-archive-action:disabled {
   opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .bill-table-wrapper {
@@ -203,22 +195,24 @@
   text-align: left;
 }
 
-.bill-table th {
+.bill-table th,
+.bill-table td {
   padding: 14px 10px;
+  overflow-wrap: anywhere;
+}
+
+.bill-table th {
   background: #f7faf7;
   color: #4a6353;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  overflow-wrap: anywhere;
 }
 
 .bill-table td {
-  padding: 14px 10px;
   border-top: 1px solid #e0eae0;
   vertical-align: middle;
-  overflow-wrap: anywhere;
 }
 
 .bill-table th:last-child,
@@ -248,9 +242,7 @@
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition:
-    background-color 150ms ease,
-    color 150ms ease;
+  transition: background-color 150ms ease, color 150ms ease;
 }
 
 .bill-table-button--outline {
@@ -271,19 +263,16 @@
   background: #315842;
 }
 
-.bill-table-button:focus-visible {
+.bill-table-button:focus-visible,
+.bill-archive-action:focus-visible,
+.bill-view-action:focus-visible {
   outline: 3px solid #8dbb8f;
   outline-offset: 2px;
 }
 
-.bill-table-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
 .bill-empty-state {
-  border-top: 1px solid #e0eae0;
   padding: 48px 24px;
+  border-top: 1px solid #e0eae0;
   background: #fbfdfb;
   text-align: center;
 }
@@ -325,16 +314,6 @@
 
 .bill-archive-action:hover:not(:disabled) {
   background: #1b382b;
-}
-
-.bill-archive-action:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
-.bill-archive-action:focus-visible {
-  outline: 3px solid #8dbb8f;
-  outline-offset: 2px;
 }
 
 .bill-archive-message {
@@ -404,19 +383,14 @@
   color: #fff;
 }
 
-.bill-view-action:focus-visible {
-  outline: 3px solid #8dbb8f;
-  outline-offset: 2px;
-}
-
 @media (width <= 640px) {
   .bill-page {
     padding: 16px 12px 24px;
   }
 
   .bill-header {
-    align-items: flex-start;
     flex-direction: column;
+    align-items: flex-start;
   }
 
   .bill-primary-action {
@@ -464,8 +438,8 @@
   }
 
   .bill-secondary-action {
-    background: var(--mat-sys-surface-container-highest);
     border: none;
+    background: var(--mat-sys-surface-container-highest);
     color: #8dbb8f;
   }
 
@@ -477,16 +451,16 @@
 
   .bill-filters,
   .bill-filters label {
-    color: #e0e0e0;
     border: none;
+    color: #e0e0e0;
   }
 
   .bill-lookup select,
   .bill-lookup input,
   .bill-filters input,
   .bill-filters select {
-    background-color: var(--mat-sys-surface-container-lowest);
     border: 1px solid #315842;
+    background-color: var(--mat-sys-surface-container-lowest);
     color: #8dbb8f;
   }
 
