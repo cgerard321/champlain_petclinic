@@ -365,10 +365,7 @@
     :hover,
     :has(input:focus-visible)
   ),
-.rating-option:not(:has(input:checked)):is(
-    :hover,
-    :has(input:focus-visible)
-  ) {
+.rating-option:not(:has(input:checked)):is(:hover, :has(input:focus-visible)) {
   color: #1d4ed8;
   background: #eff6ff;
   border-color: #93c5fd;

@@ -1,8 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import {
-  localizedProduct,
-  normalizeProductSearch,
-} from '@/features/products/utils/localizedProduct';
+import { matchesFilters } from '@/features/products/utils/productFilters';
 import * as React from 'react';
 import { useState, useEffect, useCallback, useMemo, useRef, JSX } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
@@ -136,59 +133,12 @@ const ProductList = function Productlist({
         break;
     }
 
-    const query = normalizeProductSearch(searchQuery);
     setFilteredList(
-      sorted.filter(p => {
-        const matchesSearch =
-          query === '' ||
-          normalizeProductSearch(localizedProduct(p, language).name).includes(
-            query
-          ) ||
-          normalizeProductSearch(
-            t(`types.${(p.productType || '').toUpperCase()}`, {
-              defaultValue: p.productType || '',
-            })
-          ).includes(query);
-
-        const selectedTypes = filters.productType
-          ? filters.productType.split(',').filter(Boolean)
-          : [];
-        const matchesType =
-          selectedTypes.length === 0 || selectedTypes.includes(p.productType);
-
-        const selectedAvailability = filters.availability
-          ? filters.availability.split(',').filter(Boolean)
-          : [];
-        const matchesAvailability =
-          selectedAvailability.length === 0 ||
-          selectedAvailability.some(value =>
-            value === 'in-stock'
-              ? p.productQuantity > 0 && p.productStatus !== 'OUT_OF_STOCK'
-              : value === 'pre-order'
-                ? p.productStatus === 'PRE_ORDER'
-                : p.productQuantity <= 0 || p.productStatus === 'OUT_OF_STOCK'
-          );
-
-        const matchesDelivery =
-          !filters.deliveryType ||
-          String(p.deliveryType).toUpperCase() ===
-            String(filters.deliveryType).toUpperCase();
-
-        return (
-          matchesSearch && matchesType && matchesAvailability && matchesDelivery
-        );
-      })
+      sorted.filter(product =>
+        matchesFilters(product, filters, { query: searchQuery, language, t })
+      )
     );
-  }, [
-    sortCriteria,
-    productList,
-    searchQuery,
-    language,
-    t,
-    filters.productType,
-    filters.availability,
-    filters.deliveryType,
-  ]);
+  }, [sortCriteria, productList, searchQuery, language, t, filters]);
 
   const totalPages = Math.ceil(filteredList.length / CATALOG_PAGE_SIZE);
   const firstVisibleProduct = currentPage * CATALOG_PAGE_SIZE + 1;
