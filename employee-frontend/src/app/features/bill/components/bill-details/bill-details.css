@@ -203,9 +203,11 @@
 
 :host-context(.dark-mode) {
   color: white;
+
   .bill-details-header h2 {
     color: white;
   }
+
   .bill-details-footer,
   .bill-details-total,
   .bill-details-total dt {
@@ -219,6 +221,7 @@
     border: var(--mat-sys-surface-container-highest);
     color: white;
   }
+
   .bill-details-section dd {
     color: #8dbb8f;
   }

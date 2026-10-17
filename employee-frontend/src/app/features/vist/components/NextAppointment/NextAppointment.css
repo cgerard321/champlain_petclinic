@@ -50,10 +50,12 @@ tr:hover td {
     background: #1f2c26;
     color: #d5ebd8;
   }
+
   tr td {
     background: #2b3d34;
     color: #e0e0e0;
   }
+
   tr:hover td {
     background: var(--mat-sys-surface-container-highest);
   }
