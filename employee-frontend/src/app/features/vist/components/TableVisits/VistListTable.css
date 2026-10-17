@@ -74,3 +74,21 @@ tr:hover td {
 :host-context(.dark-mode) tr:hover td {
   background: var(--mat-sys-surface-container);
 }
+
+:host-context(.dark-mode) td a,
+:host-context(.dark-mode) td .actions a {
+  color: #a3b8ac !important;
+}
+
+:host-context(.dark-mode) td button {
+  background: #191919;
+  border: 1px solid #111;
+  color: #a3b8ac !important;
+}
+
+
+:host-context(.dark-mode) td a:hover,
+:host-context(.dark-mode) td button:hover,
+:host-context(.dark-mode) td .actions a:hover {
+  opacity: 0.8;
+}
