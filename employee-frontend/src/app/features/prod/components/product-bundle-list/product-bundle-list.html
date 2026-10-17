@@ -1,0 +1,83 @@
+<div class="bundle-header">
+  <div>
+    <h1>Bundles</h1>
+    <p>Manage bundles available to the clinic.</p>
+  </div>
+  @if (canManageBundles()) {
+    <button mat-flat-button color="primary" type="button" (click)="openAddBundle()">
+      Add Bundle
+    </button>
+  }
+</div>
+@if (isLoading()) {
+  <div class="bundle-state-container" role="status">
+    <mat-progress-spinner mode="indeterminate" diameter="40" />
+    <span>Loading bundles...</span>
+  </div>
+} @else if (bundlesError()) {
+  <div class="state-container bundle-error-message" role="alert">
+    <p>{{ bundlesError() }}</p>
+    <button mat-stroked-button type="button" (click)="loadBundles()">Try again</button>
+  </div>
+} @else {
+  <div class="bundle-grid">
+    @for (bundle of bundles(); track bundle.bundleId) {
+      <mat-card class="bundle-card">
+        <mat-card-header>
+          <mat-card-title>{{ bundle.bundleName }}</mat-card-title>
+          <mat-card-subtitle>{{ bundle.productIds.length }} items</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ bundle.bundleDescription }}</p>
+          <dl>
+            <div>
+              <dt>Original price</dt>
+              <dd class="original-price">{{ bundle.originalTotalPrice | currency }}</dd>
+            </div>
+            <div>
+              <dt>Bundle price</dt>
+              <dd>{{ bundle.bundlePrice | currency }}</dd>
+            </div>
+          </dl>
+          <h3 class="bundle-items-title">Bundle items</h3>
+          <ul class="bundle-items">
+            @for (bundleItem of bundle.products; track bundleItem.productId) {
+              <li class="bundle-item">
+                <a
+                  class="bundle-item-link"
+                  [href]="customerPortal + '/products/' + bundleItem.productId"
+                  target="_blank"
+                  rel="noopener"
+                >
+                  <app-product-thumbnail
+                    class="bundle-item-thumbnail"
+                    imageId="{{ bundleItem.imageId }}"
+                  />
+                  <span>{{ bundleItem.productName }}</span>
+                </a>
+              </li>
+            }
+          </ul>
+        </mat-card-content>
+        <mat-card-actions class="product-card-actions" align="end">
+          @if (canManageBundles()) {
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+            >
+              Update
+            </button>
+            <button
+              mat-stroked-button
+              class="delete-button"
+              type="button"
+            >
+              Delete
+            </button>
+          }
+        </mat-card-actions>
+      </mat-card>
+    }
+  </div>
+}

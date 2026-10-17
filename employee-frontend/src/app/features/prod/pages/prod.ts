@@ -31,6 +31,8 @@ import { Product } from '@features/prod/models/product.model';
 import { ProductService } from '@features/prod/services/product.service';
 import { ReviewSettingsService } from '@features/prod/services/review-settings.service';
 import { Roles } from '@shared/models/roles';
+import { MatTab, MatTabGroup } from '@angular/material/tabs';
+import { ProductBundleList } from '@features/prod/components/product-bundle-list/product-bundle-list';
 
 @Component({
   imports: [
@@ -43,6 +45,9 @@ import { Roles } from '@shared/models/roles';
     MatInputModule,
     MatProgressSpinnerModule,
     ProductThumbnail,
+    MatTabGroup,
+    MatTab,
+    ProductBundleList,
   ],
   selector: 'app-prod',
   styleUrl: './prod.css',
