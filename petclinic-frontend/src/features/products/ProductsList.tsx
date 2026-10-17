@@ -38,7 +38,6 @@ interface ProductsListProps {
     availability?: string;
   };
   sortCriteria?: string;
-  onResultCountChange?: (count: number) => void;
   onClearFilters?: () => void;
 }
 
@@ -47,7 +46,6 @@ const ProductList = function Productlist({
   view,
   filters,
   sortCriteria,
-  onResultCountChange,
   onClearFilters,
 }: ProductsListProps): JSX.Element {
   const { t, i18n } = useTranslation('products');
@@ -192,10 +190,6 @@ const ProductList = function Productlist({
     filters.deliveryType,
   ]);
 
-  useEffect(() => {
-    onResultCountChange?.(filteredList.length);
-  }, [filteredList, onResultCountChange]);
-
   const totalPages = Math.ceil(filteredList.length / CATALOG_PAGE_SIZE);
   const firstVisibleProduct = currentPage * CATALOG_PAGE_SIZE + 1;
   const lastVisibleProduct = Math.min(
@@ -290,14 +284,12 @@ const ProductList = function Productlist({
                     filters.productType ||
                     (filters.minStars ?? 0) > 0 ||
                     (filters.maxStars ?? 5) < 5
-                      ? t('noFilteredItems', {
-                          defaultValue: 'No products match your filters',
-                        })
+                      ? t('noFilteredItems')
                       : t('noItems')}
                   </p>
                   {onClearFilters && (
                     <button type="button" onClick={onClearFilters}>
-                      Clear filters
+                      {t('clearFilters')}
                     </button>
                   )}
                 </div>
@@ -306,15 +298,15 @@ const ProductList = function Productlist({
                 <div className="catalog-pagination-container">
                   <nav
                     className="catalog-pagination"
-                    aria-label="Product pages"
+                    aria-label={t('productPages')}
                   >
                     <button
                       type="button"
                       className="catalog-pagination-button"
                       onClick={() => handlePageChange(-1)}
                       disabled={currentPage === 0}
-                      aria-label="Previous product page"
-                      title="Previous page"
+                      aria-label={t('previousProductPage')}
+                      title={t('previousPage')}
                     >
                       <span aria-hidden="true">&lsaquo;</span>
                     </button>
@@ -322,7 +314,9 @@ const ProductList = function Productlist({
                     <span
                       className="catalog-page-number active"
                       aria-current="page"
-                      aria-label={`Current product page ${currentPage + 1}`}
+                      aria-label={t('currentProductPage', {
+                        count: currentPage + 1,
+                      })}
                     >
                       {currentPage + 1}
                     </span>
@@ -332,8 +326,8 @@ const ProductList = function Productlist({
                       className="catalog-pagination-button"
                       onClick={() => handlePageChange(1)}
                       disabled={currentPage + 1 >= totalPages}
-                      aria-label="Next product page"
-                      title="Next page"
+                      aria-label={t('nextProductPage')}
+                      title={t('nextPage')}
                     >
                       <span aria-hidden="true">&rsaquo;</span>
                     </button>

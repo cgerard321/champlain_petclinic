@@ -3,12 +3,16 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import ProductsList from '@/features/products/ProductsList.tsx';
 import './Products.css';
 import TrendingList from '@/features/products/TrendingList.tsx';
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import ProductSearch from '@/features/products/components/ProductSearch';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import { ProductTypeModel } from '@/features/products/models/ProductModels/ProductTypeModel.ts';
 import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
 import { getProductTypes } from '@/features/products/api/getProductTypes.ts';
+import {
+  localizedProduct,
+  normalizeProductSearch,
+} from '@/features/products/utils/localizedProduct';
 
 type ProductFilters = {
   minPrice?: number;
@@ -21,15 +25,42 @@ type ProductFilters = {
   availability: string;
 };
 
+const PRICE_PRESETS = [
+  {
+    key: 'under25',
+    translationKey: 'under',
+    minPrice: undefined,
+    maxPrice: 25,
+  },
+  {
+    key: '25to50',
+    translationKey: 'range',
+    minPrice: 25,
+    maxPrice: 50,
+  },
+  {
+    key: '50to100',
+    translationKey: 'range',
+    minPrice: 50,
+    maxPrice: 100,
+  },
+  {
+    key: '100plus',
+    translationKey: 'over',
+    minPrice: 100,
+    maxPrice: undefined,
+  },
+] as const;
+
 export default function Products(): JSX.Element {
-  const { t } = useTranslation('products');
+  const { t, i18n } = useTranslation('products');
+  const language = i18n.resolvedLanguage || i18n.language || 'en';
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showSortOptions, setShowSortOptions] = useState(false);
   const [sortCriteria, setSortCriteria] = useState('default');
   const [productTypes, setProductTypes] = useState<ProductTypeModel[]>([]);
   const [allProducts, setAllProducts] = useState<ProductModel[]>([]);
-  const [matchingProductCount, setMatchingProductCount] = useState(0);
 
   const defaultFilters = useMemo<ProductFilters>(
     () => ({
@@ -56,10 +87,23 @@ export default function Products(): JSX.Element {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
 
-  const closeSidebar = (): void => {
-    setIsSidebarOpen(false);
-    requestAnimationFrame(() => filterButtonRef.current?.focus());
-  };
+  const closeSidebar = useCallback(
+    (keepPendingFilters = false): void => {
+      if (!keepPendingFilters) {
+        setTempFilters(appliedFilters);
+        setSelectedPricePreset(
+          PRICE_PRESETS.find(
+            preset =>
+              preset.minPrice === appliedFilters.minPrice &&
+              preset.maxPrice === appliedFilters.maxPrice
+          )?.key ?? null
+        );
+      }
+      setIsSidebarOpen(false);
+      requestAnimationFrame(() => filterButtonRef.current?.focus());
+    },
+    [appliedFilters]
+  );
   const toggleSidebar = (): void => {
     if (isSidebarOpen) closeSidebar();
     else setIsSidebarOpen(true);
@@ -114,7 +158,7 @@ export default function Products(): JSX.Element {
         behavior: 'instant',
       });
     };
-  }, [isSidebarOpen]);
+  }, [closeSidebar, isSidebarOpen]);
 
   useEffect(() => {
     getAllProducts()
@@ -139,7 +183,7 @@ export default function Products(): JSX.Element {
   const applyFilters = (): void => {
     if (priceError) return;
     setAppliedFilters(tempFilters);
-    closeSidebar();
+    closeSidebar(true);
   };
 
   const clearFilters = (): void => {
@@ -155,15 +199,8 @@ export default function Products(): JSX.Element {
     ? tempFilters.availability.split(',').filter(Boolean)
     : [];
 
-  const pricePresets = [
-    { label: 'Under $25', minPrice: undefined, maxPrice: 25 },
-    { label: '$25–$50', minPrice: 25, maxPrice: 50 },
-    { label: '$50–$100', minPrice: 50, maxPrice: 100 },
-    { label: '$100+', minPrice: 100, maxPrice: undefined },
-  ];
-
-  const selectPricePreset = (preset: (typeof pricePresets)[number]): void => {
-    setSelectedPricePreset(preset.label);
+  const selectPricePreset = (preset: (typeof PRICE_PRESETS)[number]): void => {
+    setSelectedPricePreset(preset.key);
     setTempFilters(previous => ({
       ...previous,
       minPrice: preset.minPrice,
@@ -259,6 +296,32 @@ export default function Products(): JSX.Element {
           matchesFilterOption(product, filter, option)
         ).length;
 
+  const matchingProductCount = allProducts.filter(product => {
+    const selectedProductTypes = tempFilters.productType
+      ? tempFilters.productType.split(',').filter(Boolean)
+      : [];
+    const matchesProductType =
+      selectedProductTypes.length === 0 ||
+      selectedProductTypes.includes(product.productType);
+    const query = normalizeProductSearch(searchQuery);
+    const matchesSearch =
+      query === '' ||
+      normalizeProductSearch(localizedProduct(product, language).name).includes(
+        query
+      ) ||
+      normalizeProductSearch(
+        t(`types.${(product.productType || '').toUpperCase()}`, {
+          defaultValue: product.productType || '',
+        })
+      ).includes(query);
+
+    return (
+      matchesProductType &&
+      matchesSearch &&
+      matchesFilterOption(product, 'productType')
+    );
+  }).length;
+
   const updateMultiSelectFilter = (
     key: 'productType' | 'availability',
     value: string,
@@ -297,9 +360,9 @@ export default function Products(): JSX.Element {
     t(`types.${type.toUpperCase()}`, { defaultValue: type });
   const getAvailabilityLabel = (availability: string): string =>
     ({
-      'in-stock': 'In stock',
-      'pre-order': 'Pre-order',
-      'out-of-stock': 'Out of stock',
+      'in-stock': t('inStockFilter'),
+      'pre-order': t('preOrderFilter'),
+      'out-of-stock': t('outOfStockFilter'),
     })[availability] ?? availability;
   const getDeliveryLabel = (delivery: string): string =>
     ({
@@ -321,10 +384,10 @@ export default function Products(): JSX.Element {
       key: 'price',
       label:
         min !== undefined && max !== undefined
-          ? `$${min}–$${max}`
+          ? t('priceRange', { min, max })
           : min !== undefined
-            ? `From $${min}`
-            : `Under $${max}`,
+            ? t('priceFrom', { min })
+            : t('priceUnder', { max }),
     });
   }
   appliedFilters.productType
@@ -356,7 +419,7 @@ export default function Products(): JSX.Element {
   if (appliedFilters.minStars > 0) {
     activeFilterChips.push({
       key: 'rating',
-      label: `${appliedFilters.minStars}★ & up`,
+      label: t('ratingAtLeast', { count: appliedFilters.minStars }),
     });
   }
 
@@ -366,9 +429,7 @@ export default function Products(): JSX.Element {
       .catch(() => setProductTypes([]));
   }, []);
 
-  // While the drawer is open, the catalog previews the pending selection so
-  // the result count stays current before the user presses Apply.
-  const filters = isSidebarOpen ? tempFilters : appliedFilters;
+  const filters = appliedFilters;
 
   return (
     <div>
@@ -463,15 +524,15 @@ export default function Products(): JSX.Element {
               </h2>
               <span className="filter-count-label">
                 {activeFilterCount > 0
-                  ? `${activeFilterCount} active`
-                  : 'Refine your results'}
+                  ? t('activeFiltersCount', { count: activeFilterCount })
+                  : t('refineResults')}
               </span>
             </div>
             <button
               ref={closeButtonRef}
               className="close-button"
               type="button"
-              onClick={closeSidebar}
+              onClick={() => closeSidebar()}
               aria-label={t('closeFilters')}
             >
               &times;
@@ -479,23 +540,26 @@ export default function Products(): JSX.Element {
           </div>
           <div className="filter-container">
             <section className="filter-section">
-              <span className="filter-section-label">Price</span>
-              <div className="price-presets" aria-label="Price presets">
-                {pricePresets.map(preset => (
+              <span className="filter-section-label">{t('filterPrice')}</span>
+              <div className="price-presets" aria-label={t('pricePresets')}>
+                {PRICE_PRESETS.map(preset => (
                   <button
-                    key={preset.label}
+                    key={preset.key}
                     type="button"
-                    className={`filter-pill ${selectedPricePreset === preset.label ? 'selected' : ''}`}
-                    aria-pressed={selectedPricePreset === preset.label}
+                    className={`filter-pill ${selectedPricePreset === preset.key ? 'selected' : ''}`}
+                    aria-pressed={selectedPricePreset === preset.key}
                     onClick={() => selectPricePreset(preset)}
                   >
-                    {preset.label}
+                    {t(`pricePreset.${preset.translationKey}`, {
+                      min: preset.minPrice,
+                      max: preset.maxPrice,
+                    })}
                   </button>
                 ))}
               </div>
               <div className="price-inputs">
                 <label htmlFor="filter-min-price">
-                  <span>Min</span>
+                  <span>{t('min')}</span>
                   <span className="currency-input price-field">
                     <span aria-hidden="true">$</span>
                     <input
@@ -516,7 +580,7 @@ export default function Products(): JSX.Element {
                   </span>
                 </label>
                 <label htmlFor="filter-max-price">
-                  <span>Max</span>
+                  <span>{t('max')}</span>
                   <span className="currency-input price-field">
                     <span aria-hidden="true">$</span>
                     <input
@@ -539,14 +603,20 @@ export default function Products(): JSX.Element {
               </div>
               {priceError && (
                 <p className="filter-error" role="alert">
-                  Minimum price must be less than maximum price.
+                  {t('priceError')}
                 </p>
               )}
             </section>
 
             <section className="filter-section">
-              <span className="filter-section-label">Item type</span>
-              <div className="filter-pills" role="group" aria-label="Item type">
+              <span className="filter-section-label">
+                {t('filterItemType')}
+              </span>
+              <div
+                className="filter-pills"
+                role="group"
+                aria-label={t('filterItemType')}
+              >
                 {productTypes.map(type => (
                   <button
                     key={type.typeName}
@@ -577,14 +647,16 @@ export default function Products(): JSX.Element {
             </section>
 
             <section className="filter-section">
-              <span className="filter-section-label">Delivery type</span>
+              <span className="filter-section-label">
+                {t('filterDeliveryType')}
+              </span>
               <div
                 className="segmented-control"
                 role="radiogroup"
-                aria-label="Delivery type"
+                aria-label={t('filterDeliveryType')}
               >
                 {[
-                  ['', 'Any'],
+                  ['', t('any')],
                   ['DELIVERY', t('delivery')],
                   ['PICKUP', t('pickup')],
                   ['DELIVERY_AND_PICKUP', t('deliveryPickup')],
@@ -617,12 +689,14 @@ export default function Products(): JSX.Element {
             </section>
 
             <section className="filter-section">
-              <span className="filter-section-label">Availability</span>
+              <span className="filter-section-label">
+                {t('filterAvailability')}
+              </span>
               <div className="availability-options">
                 {[
-                  ['in-stock', 'In stock'],
-                  ['pre-order', 'Pre-order'],
-                  ['out-of-stock', 'Out of stock'],
+                  ['in-stock', t('inStockFilter')],
+                  ['pre-order', t('preOrderFilter')],
+                  ['out-of-stock', t('outOfStockFilter')],
                 ].map(([value, label]) => (
                   <label
                     key={value}
@@ -661,14 +735,16 @@ export default function Products(): JSX.Element {
             </section>
 
             <section className="filter-section">
-              <span className="filter-section-label">Rating</span>
+              <span className="filter-section-label">
+                {t('filterRatingLabel')}
+              </span>
               <div className="rating-options">
                 {[
-                  [4, '4★ & up'],
-                  [3, '3★ & up'],
-                  [2, '2★ & up'],
-                  [1, '1★ & up'],
-                  [0, 'Any'],
+                  [4, t('ratingAtLeast', { count: 4 })],
+                  [3, t('ratingAtLeast', { count: 3 })],
+                  [2, t('ratingAtLeast', { count: 2 })],
+                  [1, t('ratingAtLeast', { count: 1 })],
+                  [0, t('any')],
                 ].map(([value, label]) => (
                   <label key={value} className="rating-option">
                     <input
@@ -696,7 +772,7 @@ export default function Products(): JSX.Element {
               className="clear-filter-button"
               onClick={clearFilters}
             >
-              Clear all
+              {t('clearAll')}
             </button>
             <button
               type="button"
@@ -705,23 +781,23 @@ export default function Products(): JSX.Element {
               disabled={priceError}
             >
               {priceError
-                ? 'Fix price range'
-                : `Show ${matchingProductCount} results`}
+                ? t('fixPriceRange')
+                : t('showResults', { count: matchingProductCount })}
             </button>
           </div>
         </div>
       )}
 
       {activeFilterChips.length > 0 && (
-        <div className="active-filter-bar" aria-label="Active filters">
-          <span className="active-filter-title">Active filters:</span>
+        <div className="active-filter-bar" aria-label={t('activeFilters')}>
+          <span className="active-filter-title">{t('activeFilters')}</span>
           {activeFilterChips.map(chip => (
             <button
               key={`${chip.key}-${chip.value ?? chip.label}`}
               type="button"
               className="active-filter-chip"
               onClick={() => removeFilter(chip.key, chip.value)}
-              aria-label={`Remove ${chip.label} filter`}
+              aria-label={t('removeFilter', { label: chip.label })}
             >
               {chip.label} <span aria-hidden="true">&times;</span>
             </button>
@@ -731,7 +807,7 @@ export default function Products(): JSX.Element {
             className="active-filter-clear"
             onClick={clearFilters}
           >
-            Clear all
+            {t('clearAll')}
           </button>
         </div>
       )}
@@ -741,7 +817,6 @@ export default function Products(): JSX.Element {
         searchQuery={searchQuery}
         filters={filters}
         sortCriteria={sortCriteria}
-        onResultCountChange={setMatchingProductCount}
         onClearFilters={clearFilters}
       />
 
