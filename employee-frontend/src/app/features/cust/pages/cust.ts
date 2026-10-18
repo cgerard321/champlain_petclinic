@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { Router } from '@angular/router';
 
 import { PetDetails } from '@features/cust/components/customer-pet-details/customer-pet-details';
 import { Customer } from '@features/cust/models/customer.model';
@@ -15,6 +16,7 @@ import { CustomerService } from '@features/cust/services/customer-service';
   templateUrl: './cust.html',
 })
 export class Cust implements OnInit {
+  private readonly router = inject(Router);
   private readonly customerService = inject(CustomerService);
   private readonly dialog = inject(MatDialog);
   private readonly untilDestroyed = takeUntilDestroyed<Customer>();
@@ -70,4 +72,8 @@ export class Cust implements OnInit {
       ),
     );
   });
+
+  protected checkCustomerDetails(customerId: string) {
+    this.router.navigateByUrl('/customerDetails');
+  }
 }

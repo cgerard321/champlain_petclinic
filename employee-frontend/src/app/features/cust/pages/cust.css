@@ -180,6 +180,7 @@ td button {
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
+  grid-row: 1;
   transition:
     color 160ms ease,
     background-color 160ms ease;
@@ -275,6 +276,13 @@ td button:focus-visible {
   .table-container {
     border-radius: 16px;
   }
+.customer-page {
+  display: inline-grid;
+  grid-auto-columns: 1fr;
+}
+.container button {
+  grid-row: 1;
+}
 
   th,
   td,
