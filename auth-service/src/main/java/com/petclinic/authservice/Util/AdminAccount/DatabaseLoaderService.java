@@ -31,7 +31,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
     public void run(String... args) {
         legacyCustomerRoleMigration.migrate();
 
-       // if items in the database, do not run this
+        // if items in the database, do not run this
         if (userRepo.count() > 0 || roleRepo.count() > 0)
             return;
         
@@ -243,9 +243,16 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
 
+        User vet8 = User.builder()
+                .username("Vet8")
+                .userIdentifier(new UserIdentifier("c02cbf82-625b-11ee-8c99-0242ac120003"))
+                .roles(roles2)
+                .email("ionascueric0@gmail.com")
+                .password(passwordEncoder.encode("pwd"))
+                .verified(true)
+                .build();
 
-
-        userRepo.saveAll(List.of(vet1, vet2, vet3, vet4, vet5, vet6, vet7));
+        userRepo.saveAll(List.of(vet1, vet2, vet3, vet4, vet5, vet6, vet7, vet8));
 
         userRepo.saveAll(List.of(owner1, owner2, owner3, owner4, owner5, owner6, owner7, owner8, owner9, owner10));
     }
