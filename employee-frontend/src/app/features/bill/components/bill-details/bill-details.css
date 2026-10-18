@@ -200,3 +200,29 @@
     width: 100%;
   }
 }
+
+:host-context(.dark-mode) {
+  color: white;
+
+  .bill-details-header h2 {
+    color: white;
+  }
+
+  .bill-details-footer,
+  .bill-details-total,
+  .bill-details-total dt {
+    background: var(--mat-sys-surface-container-highest);
+    border: none;
+    color: #607868;
+  }
+
+  .bill-details-section,
+  .bill-details-section h3 {
+    border: var(--mat-sys-surface-container-highest);
+    color: white;
+  }
+
+  .bill-details-section dd {
+    color: #8dbb8f;
+  }
+}

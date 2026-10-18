@@ -221,7 +221,7 @@
       }
 
       @if (billActionSuccess(); as message) {
-        <p role="status">{{ message }}</p>
+        <p class="bill-action-message" role="status">{{ message }}</p>
       }
 
       @if (errorMessage()) {
