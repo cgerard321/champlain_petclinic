@@ -8,6 +8,18 @@
   </head>
   <body>
     <h1 i18n="@@visits.title">Liste des visites</h1>
+    @if (canSearch) {
+      <div class="search-container">
+        <label for="visit-search" i18n="@@visits.searchVisits">Rechercher des visites</label>
+        <input
+          id="visit-search"
+          type="search"
+          [placeholder]="searchPlaceholder"
+          [value]="searchText()"
+          (input)="searchVisits($any($event.target).value)"
+        />
+      </div>
+    }
     <table>
       <tr>
         <th i18n="@@visits.visitId">Identifiant de la visite</th>
@@ -56,6 +68,14 @@
             </td>
           }
         </tr>
+      } @empty {
+        @if (canSearch && !isLoading()) {
+          <tr>
+            <td [attr.colspan]="canScheduleFollowUp ? 8 : 7" class="no-visits" role="status">
+              <span i18n="@@visits.noVisitsFound">Aucune visite trouvée.</span>
+            </td>
+          </tr>
+        }
       }
     </table>
   </body>
