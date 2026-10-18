@@ -397,27 +397,19 @@ td button:focus-visible {
 
 .AddButton {
   align-self: center;
-
   min-height: 42px;
-
   margin-top: 0.25rem;
   margin-left: 1.2rem;
   padding: 0.55rem 1rem;
-
   border: 1px solid #244b3f;
   border-radius: 10px;
-
   color: #fff;
   background: #244b3f;
-
   font: inherit;
   font-size: 0.87rem;
   font-weight: 700;
-
   white-space: nowrap;
-
   cursor: pointer;
-
   transition:
     color 160ms ease,
     background-color 160ms ease,

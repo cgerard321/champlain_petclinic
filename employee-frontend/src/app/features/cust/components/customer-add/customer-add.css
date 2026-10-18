@@ -3,24 +3,18 @@
   --sage-100: #edf3e7;
   --sage-300: #c7d9b2;
   --sage-400: #afc79a;
-
   --forest-700: #244b3f;
   --forest-800: #1c3d33;
-
   --cream: #fffdf8;
   --white: #fff;
-
   --text-primary: #263832;
   --text-secondary: #66766d;
   --text-muted: #7d8982;
-
   --border: rgb(36 75 63 / 14%);
   --border-strong: rgb(36 75 63 / 22%);
-
   --error: #9a3d32;
   --error-background: #fff3ef;
   --error-border: #ebcfc9;
-
   --shadow-sm:
     0 2px 6px rgb(28 61 51 / 6%),
     0 1px 2px rgb(28 61 51 / 5%);
@@ -41,20 +35,15 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
-
   padding: 1.5rem;
-
   border-bottom: 1px solid #e0e7de;
-
   background: var(--white);
 }
 
 .dialog-title {
   margin: 0;
   padding: 0;
-
   color: var(--forest-700);
-
   font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.3;
@@ -67,24 +56,16 @@
 
 .dialog-close-button {
   display: grid;
-
   flex: 0 0 auto;
-
   width: 40px;
   height: 40px;
-
   padding: 0;
-
   place-items: center;
-
   border: 1px solid var(--border);
   border-radius: 50%;
-
   color: var(--text-secondary);
   background: var(--sage-50);
-
   cursor: pointer;
-
   transition:
     color 160ms ease,
     background-color 160ms ease,
@@ -105,7 +86,6 @@
 .dialog-close-button mat-icon {
   width: 20px;
   height: 20px;
-
   font-size: 20px;
 }
 
@@ -116,15 +96,10 @@
 .details-content {
   width: 100%;
   min-width: 0;
-
   max-height: min(75vh, 700px);
-
   box-sizing: border-box;
-
   padding: 1.5rem;
-
   overflow: hidden auto;
-
   background:
     radial-gradient(
       circle at 100% 0%,
@@ -141,25 +116,19 @@
 form {
   display: flex;
   flex-direction: column;
-
   width: 100%;
   max-width: 650px;
-
   box-sizing: border-box;
-
   margin: 0 auto;
   padding: 1.5rem;
-
   border: 1px solid var(--border);
   border-radius: 18px;
-
   background:
     linear-gradient(
       145deg,
       var(--white),
       var(--cream)
     );
-
   box-shadow: var(--shadow-sm);
 }
 
@@ -169,11 +138,8 @@ form {
 
 form label {
   display: block;
-
   margin-bottom: 0.45rem;
-
   color: var(--forest-700);
-
   font-size: 0.88rem;
   font-weight: 650;
   line-height: 1.4;
@@ -187,20 +153,14 @@ form input,
 form select {
   width: 100%;
   min-height: 46px;
-
   box-sizing: border-box;
-
   padding: 0.65rem 0.8rem;
-
   border: 1px solid var(--border-strong);
   border-radius: 11px;
-
   color: var(--text-primary);
   background-color: var(--white);
-
   font: inherit;
   font-size: 0.95rem;
-
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease,
@@ -215,9 +175,7 @@ form select:hover {
 form input:focus,
 form select:focus {
   border-color: var(--forest-700);
-
   outline: none;
-
   box-shadow:
     0 0 0 3px rgb(36 75 63 / 14%);
 }
@@ -232,7 +190,6 @@ form input::placeholder {
 
 form select {
   appearance: auto;
-
   cursor: pointer;
 }
 
@@ -253,9 +210,7 @@ form select option {
 
 form br {
   display: block;
-
   height: 0.9rem;
-
   content: '';
 }
 
@@ -265,11 +220,8 @@ form br {
 
 .error {
   display: block;
-
   margin-top: 0.45rem;
-
   color: var(--error);
-
   font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.45;
@@ -278,15 +230,11 @@ form br {
 form > .error{
   margin-top: 0.75rem;
   margin-bottom: 0.5rem;
-
   padding: 0.85rem 1rem;
-
   border: 1px solid var(--error-border);
   border-radius: 10px;
-
   color: var(--error);
   background: var(--error-background);
-
   font-size: 0.87rem;
   font-weight: 600;
 }
@@ -297,24 +245,17 @@ form > .error{
 
 form button[type='submit'] {
   width: 100%;
-
   min-height: 46px;
-
   margin-top: 1.25rem;
   padding: 0.65rem 1rem;
-
   border: 1px solid var(--forest-700);
   border-radius: 11px;
-
   color: var(--white);
   background: var(--forest-700);
-
   font: inherit;
   font-size: 0.92rem;
   font-weight: 700;
-
   cursor: pointer;
-
   transition:
     color 160ms ease,
     background-color 160ms ease,
@@ -324,7 +265,6 @@ form button[type='submit'] {
 
 form button[type='submit']:hover {
   border-color: var(--forest-800);
-
   color: var(--white);
   background: var(--forest-800);
 }
@@ -340,7 +280,6 @@ form button[type='submit']:active {
 
 form button[type='submit']:disabled {
   opacity: 0.55;
-
   cursor: not-allowed;
 }
 
@@ -363,7 +302,6 @@ form button[type='submit']:disabled {
 
   form {
     padding: 1.15rem;
-
     border-radius: 15px;
   }
 
@@ -422,7 +360,6 @@ form button[type='submit']:disabled {
 
 :host-context(.dark-mode) .dialog-header {
   border-bottom: 1px solid var(--mat-sys-outline);
-
   background: var(--mat-sys-surface-container);
 }
 
@@ -434,7 +371,6 @@ form button[type='submit']:disabled {
 
 :host-context(.dark-mode) .dialog-close-button {
   border-color: var(--mat-sys-outline);
-
   color: #a3b8ac;
   background: var(--mat-sys-surface-container-highest);
 }
@@ -461,9 +397,7 @@ form button[type='submit']:disabled {
 
 :host-context(.dark-mode) form {
   border-color: var(--mat-sys-outline);
-
   background: var(--mat-sys-surface-container);
-
   box-shadow: none;
 }
 
@@ -478,7 +412,6 @@ form button[type='submit']:disabled {
 :host-context(.dark-mode) form input,
 :host-context(.dark-mode) form select {
   border-color: var(--mat-sys-outline);
-
   color: #e0e0e0;
   background: var(--mat-sys-surface-container-lowest);
 }
@@ -495,7 +428,6 @@ form button[type='submit']:disabled {
 :host-context(.dark-mode) form input:focus,
 :host-context(.dark-mode) form select:focus {
   border-color: #a3b8ac;
-
   box-shadow:
     0 0 0 3px rgb(163 184 172 / 15%);
 }
@@ -512,14 +444,12 @@ form button[type='submit']:disabled {
 :host-context(.dark-mode) form input.ng-touched.ng-invalid,
 :host-context(.dark-mode) form select.ng-touched.ng-invalid {
   border-color: #c87569;
-
   background: rgb(154 61 50 / 8%);
 }
 
 :host-context(.dark-mode) form input.ng-touched.ng-invalid:focus,
 :host-context(.dark-mode) form select.ng-touched.ng-invalid:focus {
   border-color: #d4877b;
-
   box-shadow:
     0 0 0 3px rgb(212 135 123 / 12%);
 }
@@ -532,7 +462,6 @@ form button[type='submit']:disabled {
 
 :host-context(.dark-mode) form > .error:last-of-type {
   border-color: rgb(212 135 123 / 25%);
-
   color: #e09a90;
   background: rgb(154 61 50 / 12%);
 }
@@ -541,14 +470,12 @@ form button[type='submit']:disabled {
 
 :host-context(.dark-mode) form button[type='submit'] {
   border-color: var(--forest-700);
-
   color: #e0e0e0;
   background: var(--forest-700);
 }
 
 :host-context(.dark-mode) form button[type='submit']:hover {
   border-color: var(--forest-800);
-
   color: #fff;
   background: var(--forest-800);
 }
