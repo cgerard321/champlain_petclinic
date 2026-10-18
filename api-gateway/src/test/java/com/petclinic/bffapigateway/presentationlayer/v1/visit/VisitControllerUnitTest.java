@@ -1323,6 +1323,14 @@ public class VisitControllerUnitTest {
     }
 
     @Test
+    void searchVisits_whenTokenIsMissing_thenThrowIllegalStateException() {
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(BASE_VISIT_URL));
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> visitsControllerV1.searchVisits("buddy", exchange));
+    }
+
+    @Test
     void searchVisits_byVetName_thenReturnEmptyFlux() {
         when(visitsServiceClient.getVisitByPractitionerId("PR001")).thenReturn(Flux.just(visitResponseDTO1));
 

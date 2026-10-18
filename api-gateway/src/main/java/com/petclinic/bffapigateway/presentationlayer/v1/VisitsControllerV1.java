@@ -55,6 +55,9 @@ public class VisitsControllerV1 {
     @GetMapping(value = "/search", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> searchVisits(@RequestParam String query, ServerWebExchange exchange) {
         TokenResponseDTO user = exchange.getAttribute("tokenValues");
+        if (user == null) {
+            throw new IllegalStateException("Authenticated user is missing from the validated token.");
+        }
         String search = query.trim().toLowerCase();
 
         return visitsServiceClient.getVisitByPractitionerId(user.getUserId())
