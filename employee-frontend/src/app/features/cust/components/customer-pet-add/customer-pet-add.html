@@ -47,7 +47,9 @@
       <input id="birthDate" type="date" formControlName="birthDate" />
 
       @if (petForm.controls.birthDate.invalid && petForm.controls.birthDate.touched) {
-        <span class="error-message" i18n="@@pet.error.date"> La date de naissance est requise. </span>
+        <span class="error-message" i18n="@@pet.error.date">
+          La date de naissance est requise.
+        </span>
       }
     </div>
 
