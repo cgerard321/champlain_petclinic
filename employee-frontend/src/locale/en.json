@@ -19,6 +19,35 @@
       "settings": "Settings",
       "logout": "Logout"
     },
+    "home": {
+      "loadError": "Failed to load user information. Please try again later.",
+      "welcomeBack": "Welcome back, {$INTERPOLATION}!",
+      "welcomeDefault": "Welcome to Champlain Petclinic",
+      "badge": "EMPLOYEE PORTAL",
+      "title": "Clinic Management Dashboard",
+      "description": "Manage appointments, oversee daily clinic operations, access patient medical records, and monitor inventory seamlessly in one central location!",
+      "viewVisits": "View Visits",
+      "browseProducts": "Browse Products",
+      "quickActions": {
+        "title": "Quick Actions",
+        "vetsTitle": "Veterinarians",
+        "vetsTag": "SCHEDULES & SPECIALTIES",
+        "vetsDescription": "Access vet profiles, assigned specialties, and daily availability calendars.",
+        "vetsFooter": "Active Staff",
+        "custTitle": "Customers & Owners",
+        "custTag": "CLIENT RECORDS",
+        "custDescription": "Register new clients, manage pet profiles, and update contact details.",
+        "custFooter": "Patient Database",
+        "billTitle": "Bills & Invoices",
+        "billTag": "FINANCIAL MANAGEMENT",
+        "billDescription": "Track pending payments, generate clinic invoices, and process billing.",
+        "billFooter": "Invoicing System",
+        "invtTitle": "Inventory & Stock",
+        "invtTag": "SUPPLY MONITORING",
+        "invtDescription": "Monitor pharmaceutical stocks, equipment levels, and restock alerts.",
+        "invtFooter": "Stock Control"
+      }
+    },
     "settings": {
       "title": "Settings",
       "save": "Save",
@@ -60,7 +89,8 @@
         }
       },
       "display": {
-        "title": "Display"
+        "title": "Display",
+        "toggle": "Toggle Theme"
       },
       "leave": {
         "title": "Unsaved changes",
@@ -113,6 +143,7 @@
       "listLabel": "Visit list",
       "title": "List of Visits",
       "nextAppointmentTitle": "Next appointment",
+      "upcomingAppointmentNotification": "Your next appointment for {$petName} is on {$appointmentDate}.",
       "nextAppointmentLoading": "Loading next appointment...",
       "nextAppointmentError": "Could not load the next appointment.",
       "noUpcomingAppointment": "No upcoming appointments.",
@@ -183,6 +214,19 @@
         "noVisitId": "No visit ID was provided.",
         "notFound": "Visit not found.",
         "loadError": "Unable to load visit details."
+      },
+      "calendar": {
+        "open": "Weekly Calendar view",
+        "title": "Weekly Calendar",
+        "back": "Return to visits list",
+        "previous": "Previous Week",
+        "current": "Current Week",
+        "next": "Next Week",
+        "empty": "No appointments found for this day.",
+        "loading": "Loading visits...",
+        "error": "Unable to load visits.",
+        "owner": "Owner",
+        "type": "Appointment type"
       }
     },
     "vets": {
@@ -289,6 +333,51 @@
         "title": "Veterinarian profile",
         "loading": "Loading profile…",
         "saved": "The profile has been saved."
+      }
+    },
+    "cust": {
+      "customerList": "Customer List",
+      "customerListLoading": "Loading customers...",
+      "noCustomers": "No customers registered.",
+      "searchCustomers": "Search customers",
+      "searchPlaceholder": "Search customer by name, Id, address, city or phone number",
+      "customerDetails": {
+        "title": "Registered customers and contact information",
+        "name": "Name",
+        "address": "Address",
+        "city": "City",
+        "phone": "Phone number",
+        "pets": "Pets"
+      },
+      "detailErrors": {
+        "notAvailable": "Not available"
+      },
+      "petsButton": "Registered Pets",
+      "noCustFound": "No customers found.",
+      "tryAgain": "Try a different name, ID, or phone number."
+    },
+    "pet": {
+      "petDetailsTitle": "Pet Details",
+      "petDetailsSubtitle": "Registered pets and their information",
+      "closeButton": "Close",
+      "loadingPets": "Loading pets...",
+      "noPetsFound": "No registered found for this customer.",
+      "petDetails": {
+        "pets": "Pets",
+        "species": "Species",
+        "age": "Age",
+        "years": "years",
+        "year": "year",
+        "weight": "Weight"
+      },
+      "types": {
+        "cat": "Cat",
+        "dog": "Dog",
+        "lizard": "Lizard",
+        "snake": "Snake",
+        "bird": "Bird",
+        "hamster": "Hamster",
+        "others": "Others"
       }
     },
     "modal": {

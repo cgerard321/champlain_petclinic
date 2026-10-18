@@ -51,3 +51,14 @@
 .filter-dropdown__option:hover {
   background: #f5f5f5;
 }
+
+:host-context(.dark-mode) .filter-dropdown__menu {
+  border-color: #3f3f3f;
+  background: #1e1e1e;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 40%);
+  color: #e0e0e0;
+}
+
+:host-context(.dark-mode) .filter-dropdown__option:hover {
+  background: #2d2d2d;
+}
