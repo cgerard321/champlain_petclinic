@@ -1,0 +1,77 @@
+<header class="dialog-header">
+  <div>
+    <h2 mat-dialog-title class="dialog-title" i18n="@@pet.petAddTitle">Ajouter un animal</h2>
+  </div>
+
+  <button mat-icon-button type="button" class="close-button" (click)="close()" aria-label="Fermer">
+    <mat-icon>close</mat-icon>
+  </button>
+</header>
+
+<mat-dialog-content>
+  <form [formGroup]="petForm" (ngSubmit)="onSubmit()">
+    <!-- Name -->
+    <div class="form-field">
+      <label for="name" i18n="@@pet.petDetails.name">Nom</label>
+
+      <input id="name" type="text" formControlName="name" />
+
+      @if (petForm.controls.name.invalid && petForm.controls.name.touched) {
+        <span class="error-message" i18n="@@pet.error.name"> Le nom est requis. </span>
+      }
+    </div>
+
+    <!-- Pet Type -->
+    <div class="form-field">
+      <label for="petTypeId" i18n="@@pet.petDetails.species">Espèce</label>
+
+      <select id="petTypeId" formControlName="petTypeId">
+        <option [ngValue]="null" disabled>Sélectionner un type</option>
+
+        @for (type of petTypeOptions; track type.petTypeId) {
+          <option [ngValue]="type.petTypeId">
+            {{ getPetTypeName(type) }}
+          </option>
+        }
+      </select>
+
+      @if (petForm.controls.petTypeId.invalid && petForm.controls.petTypeId.touched) {
+        <span class="error-message" i18n="@@pet.error.species"> Le type d'animal est requis. </span>
+      }
+    </div>
+
+    <!-- Birth Date -->
+    <div class="form-field">
+      <label for="birthDate" i18n="@@pet.petDetails.date">Date de naissance</label>
+
+      <input id="birthDate" type="date" formControlName="birthDate" />
+
+      @if (petForm.controls.birthDate.invalid && petForm.controls.birthDate.touched) {
+        <span class="error-message" i18n="@@pet.error.date"> La date de naissance est requise. </span>
+      }
+    </div>
+
+    <!-- Weight -->
+    <div class="form-field">
+      <label for="weight" i18n="@@pet.petDetails.weight">Poids</label>
+
+      <input id="weight" type="text" formControlName="weight" />
+
+      @if (petForm.controls.weight.invalid && petForm.controls.weight.touched) {
+        <span class="error-message" i18n="@@pet.error.weight"> Le poids est requis. </span>
+      }
+    </div>
+
+    <!-- API Error -->
+    @if (apiError) {
+      <div class="error-message api-error">
+        {{ apiError }}
+      </div>
+    }
+
+    <!-- Actions -->
+    <div class="dialog-actions">
+      <button mat-raised-button type="submit" i18n="@@pet.button.add">Ajouter</button>
+    </div>
+  </form>
+</mat-dialog-content>
