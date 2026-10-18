@@ -15,12 +15,6 @@
   box-shadow: 0 2px 8px rgb(0 0 0 / 8%);
 }
 
-.sidebar__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .sidebar__header h2 {
   margin: 0;
   color: #111;
@@ -66,6 +60,18 @@
     background: var(--mat-sys-surface-container-highest);
     border: 1px solid rgb(255 255 255 / 12%) !important;
     box-shadow: none;
+  }
+
+  .sidebar__calendar {
+    background: #111;
+    border: none;
+    color: #e0e0e0;
+  }
+
+  .sidebar__calendar:hover {
+    background: var(--mat-sys-surface-container-lowest);
+    border: none;
+    color: #e0e0e0;
   }
 
   .sidebar__header h2 {
