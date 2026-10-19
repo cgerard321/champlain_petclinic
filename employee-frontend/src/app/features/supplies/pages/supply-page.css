@@ -168,17 +168,9 @@
 
 .add-supply-button:hover,
 .edit-button:hover,
-.history-button:hover {
+.history-button:hover,
+.consume-button:hover {
   background: var(--forest-800);
-}
-
-.consume-button:hover:not(:disabled) {
-  background: var(--forest-800);
-}
-
-.consume-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
 }
 
 .add-supply-button:focus-visible,
@@ -191,6 +183,7 @@
   outline-offset: 3px;
 }
 
+.add-supply-button:disabled,
 .add-supply-button:disabled,
 .download-pdf-button:disabled,
 .clear-filters-button:disabled {
