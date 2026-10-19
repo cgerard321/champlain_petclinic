@@ -1,5 +1,6 @@
+import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { form, FormField, required, min } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +17,7 @@ import { MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AuthState } from '@core/services/auth-state';
+import { VISIT_PRICES } from '@features/bill/config/visit-prices';
 import { BillRequestModel } from '@features/bill/models/bill.model';
 import { Customer } from '@features/bill/models/customer.model';
 import { Veterinarian } from '@features/bill/models/vet.model';
@@ -23,6 +25,7 @@ import { BillService } from '@features/bill/services/bill-service';
 
 @Component({
   imports: [
+    CurrencyPipe,
     MatFormFieldModule,
     MatCardModule,
     MatCheckboxModule,
@@ -62,6 +65,32 @@ export class CreateBill implements OnInit {
     vetId: '',
     date: this.today,
     amount: null,
+  });
+
+  protected onVisitTypeChange(visitType: string): void {
+    const selectedVisit = VISIT_PRICES.find((visit) => visit.value === visitType);
+
+    this.billRequest.update((request) => ({
+      ...request,
+      visitType,
+      amount: selectedVisit?.price ?? null,
+    }));
+  }
+
+  protected readonly priceSummary = computed(() => {
+    const amount = this.billRequest().amount ?? 0;
+
+    const subtotalCents = Math.round(amount * 100);
+
+    const gstCents = Math.round(subtotalCents * 0.05);
+    const qstCents = Math.round(subtotalCents * 0.09975);
+
+    return {
+      subtotal: subtotalCents / 100,
+      gst: gstCents / 100,
+      qst: qstCents / 100,
+      total: (subtotalCents + gstCents + qstCents) / 100,
+    };
   });
 
   private _snackBar = inject(MatSnackBar);
