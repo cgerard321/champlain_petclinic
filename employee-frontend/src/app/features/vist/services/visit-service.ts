@@ -48,6 +48,17 @@ export class VisitService {
       );
   }
 
+  searchVisits(query: string): Observable<Visit> {
+    return this.sse
+      .stream(`/api/gateway/visits/search?query=${encodeURIComponent(query)}`, {
+        keepAlive: false,
+      })
+      .pipe(
+        filter((event): event is MessageEvent<string> => event.type !== 'error'),
+        map((event) => JSON.parse(event.data) as Visit),
+      );
+  }
+
   getVisitById(visitId: string): Observable<VisitResponseModel> {
     return this.http.get<VisitResponseModel>(`/api/gateway/visits/${encodeURIComponent(visitId)}`);
   }
