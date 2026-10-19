@@ -1291,6 +1291,53 @@ public class VisitControllerUnitTest {
         return exchange;
     }
 
+    private MockServerWebExchange exchangeForVet(String userId) {
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(BASE_VISIT_URL));
+        exchange.getAttributes().put("tokenValues",
+                TokenResponseDTO.builder().userId(userId).roles(List.of("VET")).build());
+        return exchange;
+    }
+
+    @Test
+    void searchVisits_asVet_thenReturnMatchingVisitsOfThatVet() {
+        VisitResponseDTO otherVisit = VisitResponseDTO.builder().visitId("V002").petName("Max").description("Vaccine").build();
+        when(visitsServiceClient.getVisitByPractitionerId("PR001")).thenReturn(Flux.just(visitResponseDTO1, otherVisit));
+
+        StepVerifier.create(visitsControllerV1.searchVisits(" buddy ", exchangeForVet("PR001")))
+                .expectNext(visitResponseDTO1)
+                .verifyComplete();
+
+        verify(visitsServiceClient, never()).getAllVisits(any());
+    }
+
+    @Test
+    void searchVisits_byDescriptionOrVisitId_thenReturnMatchingVisits() {
+        when(visitsServiceClient.getVisitByPractitionerId("PR001")).thenReturn(Flux.just(visitResponseDTO1));
+
+        StepVerifier.create(visitsControllerV1.searchVisits("check-up", exchangeForVet("PR001")))
+                .expectNext(visitResponseDTO1)
+                .verifyComplete();
+        StepVerifier.create(visitsControllerV1.searchVisits("v001", exchangeForVet("PR001")))
+                .expectNext(visitResponseDTO1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchVisits_whenTokenIsMissing_thenThrowIllegalStateException() {
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(BASE_VISIT_URL));
+
+        Assertions.assertThrows(IllegalStateException.class,
+                () -> visitsControllerV1.searchVisits("buddy", exchange));
+    }
+
+    @Test
+    void searchVisits_byVetName_thenReturnEmptyFlux() {
+        when(visitsServiceClient.getVisitByPractitionerId("PR001")).thenReturn(Flux.just(visitResponseDTO1));
+
+        StepVerifier.create(visitsControllerV1.searchVisits("john doe", exchangeForVet("PR001")))
+                .verifyComplete();
+    }
+
 
 
 

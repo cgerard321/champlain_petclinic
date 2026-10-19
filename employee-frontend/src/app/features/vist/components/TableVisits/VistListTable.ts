@@ -5,6 +5,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
+import {
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  EMPTY,
+  finalize,
+  startWith,
+  Subject,
+  switchMap,
+} from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
 import { FollowUpVisitDialog } from '@features/vist/components/FollowUpVisit/FollowUpVisitDialog';
@@ -37,26 +47,48 @@ export class VistListTable implements OnInit {
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly canScheduleFollowUp = this.authState.hasRole(Roles.vet);
+  protected readonly canSearch = this.authState.hasRole(Roles.vet);
+  protected readonly searchText = signal('');
+  protected readonly searchPlaceholder = $localize`:@@visits.searchPlaceholder:Rechercher par nom de l'animal, description ou identifiant`;
+  private readonly visitSearch = new Subject<string>();
 
   ngOnInit(): void {
-    this.visitService
-      .getAllVisits()
-      .pipe(this.untilDestroyed)
-      .subscribe({
-        next: (visits) =>
-          this.visit.update((visit) =>
-            [...visit, visits].sort(
-              (a, b) => new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime(),
-            ),
-          ),
-        error: () => {
-          this.isLoading.set(false);
-          this.errorMessage.set(
-            $localize`:@@visitListLoadError:Unable to load visits. Please try again later`,
+    this.visitSearch
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        startWith(''),
+        switchMap((query) => {
+          this.visit.set([]);
+          this.isLoading.set(true);
+          this.errorMessage.set(null);
+          const visits = query
+            ? this.visitService.searchVisits(query)
+            : this.visitService.getAllVisits();
+          return visits.pipe(
+            finalize(() => this.isLoading.set(false)),
+            catchError(() => {
+              this.errorMessage.set(
+                $localize`:@@visitListLoadError:Unable to load visits. Please try again later`,
+              );
+              return EMPTY;
+            }),
           );
-        },
-        complete: () => this.isLoading.set(false),
-      });
+        }),
+        this.untilDestroyed,
+      )
+      .subscribe((visits) =>
+        this.visit.update((visit) =>
+          [...visit, visits].sort(
+            (a, b) => new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime(),
+          ),
+        ),
+      );
+  }
+
+  protected searchVisits(query: string): void {
+    this.searchText.set(query);
+    this.visitSearch.next(query.trim());
   }
 
   protected openFollowUpVisit(visit: Visit): void {
