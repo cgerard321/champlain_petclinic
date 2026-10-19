@@ -394,7 +394,7 @@
         "saskatchewan": "Saskatchewan",
         "yukon": "Yukon"
       }
-      
+
     },
     "pet": {
       "petAddTitle" : "Add a new Pet",
@@ -430,7 +430,8 @@
         "name": "Name is required",
         "species": "Species is required",
         "date": "Date of Birth is required",
-        "weight": "Weight is required"
+        "weightR": "Weight is required",
+        "weightP": "Weight should be a valid number"
       }
     },
     "modal": {

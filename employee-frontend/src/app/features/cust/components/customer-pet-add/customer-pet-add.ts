@@ -53,7 +53,7 @@ export class AddPet implements OnInit {
 
     weight: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required],
+      validators: [Validators.required, Validators.pattern(/^\d+(?:[.,]\d{1,2})?$/)],
     }),
 
     isActive: new FormControl(true, {
