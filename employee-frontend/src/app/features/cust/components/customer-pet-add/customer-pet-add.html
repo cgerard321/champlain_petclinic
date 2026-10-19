@@ -60,9 +60,7 @@
       <input id="weight" type="text" formControlName="weight" />
 
       @if (petForm.controls.weight.hasError('required') && petForm.controls.weight.touched) {
-        <span class="error-message" i18n="@@pet.error.weightR">
-          Le poids est requis.
-        </span>
+        <span class="error-message" i18n="@@pet.error.weightR"> Le poids est requis. </span>
       }
       @if (petForm.controls.weight.hasError('pattern') && petForm.controls.weight.touched) {
         <span class="error-message" i18n="@@pet.error.weightP">
