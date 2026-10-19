@@ -184,8 +184,9 @@
 }
 
 .add-supply-button:disabled,
-.add-supply-button:disabled,
-.download-pdf-button:disabled,
+.edit-button:disabled,
+.history-button:disabled,
+.consume-button:disabled,
 .clear-filters-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
