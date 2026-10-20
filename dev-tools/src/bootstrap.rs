@@ -30,10 +30,10 @@ use crate::application::services::users::params::UserCreationParams;
 use crate::application::services::users::service::UsersService;
 use crate::domain::entities::service::DbType;
 use crate::shared::config::{
-    ADMIN_ROLE_UUID, AUTH_SERVICE_DEV_ROLE, BILLING_SERVICE_DEV_ROLE, CART_SERVICE_DEV_ROLE,
-    CUSTOMERS_SERVICE_DEV_ROLE, EDITOR_ROLE_UUID, INVENTORY_SERVICE_DEV_ROLE,
-    PRODUCTS_SERVICE_DEV_ROLE, READER_ROLE_UUID, SUDO_ROLE_UUID, VET_SERVICE_DEV_ROLE,
-    VISITS_SERVICE_DEV_ROLE,
+    ADMIN_ROLE_UUID, API_GATEWAY_DEV_ROLE, AUTH_SERVICE_DEV_ROLE, BILLING_SERVICE_DEV_ROLE,
+    CART_SERVICE_DEV_ROLE, CUSTOMERS_SERVICE_DEV_ROLE, EDITOR_ROLE_UUID,
+    INVENTORY_SERVICE_DEV_ROLE, PRODUCTS_SERVICE_DEV_ROLE, READER_ROLE_UUID, SUDO_ROLE_UUID,
+    VET_SERVICE_DEV_ROLE, VISITS_SERVICE_DEV_ROLE,
 };
 use bollard::Docker;
 use rocket::fairing::AdHoc;
@@ -257,6 +257,7 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     let cart_service_dev = CART_SERVICE_DEV_ROLE.hyphenated().to_string();
     let inventory_service_dev = INVENTORY_SERVICE_DEV_ROLE.hyphenated().to_string();
     let billing_service_dev = BILLING_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let api_gateway_dev = API_GATEWAY_DEV_ROLE.hyphenated().to_string();
 
     sqlx::query(
         r#"
@@ -273,7 +274,8 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
         (?, 'PRODUCTS_SERVICE_DEV',   'Products Service Dev'),
         (?, 'CART_SERVICE_DEV',       'Cart Service Dev'),
         (?, 'INVENTORY_SERVICE_DEV',  'Inventory Service Dev'),
-        (?, 'BILLING_SERVICE_DEV',    'Billing Service Dev');
+        (?, 'BILLING_SERVICE_DEV',    'Billing Service Dev'),
+        (?, 'API_GATEWAY_DEV',        'API Gateway Dev');
     "#,
     )
     .bind(&sudo)
@@ -288,6 +290,7 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     .bind(&cart_service_dev)
     .bind(&inventory_service_dev)
     .bind(&billing_service_dev)
+    .bind(&api_gateway_dev)
     .execute(pool)
     .await?;
     Ok(())
@@ -338,13 +341,13 @@ async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     use crate::shared::config::{
         AUTH_SERVICE_DEV_ROLE, BILLING_SERVICE_DEV_ROLE, CART_SERVICE_DEV_ROLE,
         CUSTOMERS_SERVICE_DEV_ROLE, INVENTORY_SERVICE_DEV_ROLE, PRODUCTS_SERVICE_DEV_ROLE,
-        VET_SERVICE_DEV_ROLE, VISITS_SERVICE_DEV_ROLE,
+        VET_SERVICE_DEV_ROLE, VISITS_SERVICE_DEV_ROLE, API_GATEWAY_DEV_ROLE,
     };
 
     let services = vec![
         ("petclinic-frontend", None),
         ("employee-frontend", None),
-        ("api-gateway", None),
+        ("api-gateway", Some(API_GATEWAY_DEV_ROLE)),
         ("mailer-service", None),
         ("files-service", None),
         ("visits-service-new", Some(VISITS_SERVICE_DEV_ROLE)),
