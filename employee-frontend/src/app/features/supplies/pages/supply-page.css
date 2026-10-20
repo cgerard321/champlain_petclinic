@@ -170,7 +170,7 @@
 .add-supply-button:hover,
 .edit-button:hover,
 .history-button:hover,
-.consume-button:hover {
+.consume-button:hover:not(:disabled) {
   background: var(--forest-800);
 }
 
