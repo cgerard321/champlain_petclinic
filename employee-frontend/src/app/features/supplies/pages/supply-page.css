@@ -191,7 +191,9 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
-
+.consume-button:disabled {
+  background: #9e9e9e;
+}
 .action-buttons {
   display: flex;
   flex-wrap: nowrap;
