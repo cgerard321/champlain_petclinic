@@ -1,35 +1,291 @@
+/* Global Variables */
+:host {
+  --sage-50: #f7faf3;
+  --sage-100: #edf3e7;
+  --sage-200: #dce8d2;
+  --sage-300: #c7d9b2;
+  --sage-400: #afc79a;
+  --forest-700: #244b3f;
+  --forest-800: #1c3d33;
+  --forest-900: #16332b;
+  --cream: #fffdf8;
+  --white: #fff;
+  --text-primary: #263832;
+  --text-secondary: #66766d;
+  --text-muted: #7d8982;
+  --border: rgb(36 75 63 / 14%);
+  --border-strong: rgb(36 75 63 / 22%);
+  --error: #9b1c31;
+  --shadow-sm: 0 2px 6px rgb(28 61 51 / 6%), 0 1px 2px rgb(28 61 51 / 5%);
+  --shadow-md: 0 10px 25px rgb(28 61 51 / 10%), 0 3px 8px rgb(28 61 51 / 6%);
+  --shadow-lg: 0 18px 40px rgb(28 61 51 / 14%), 0 6px 14px rgb(28 61 51 / 8%);
+
+  display: block;
+  min-height: 100%;
+}
+
 .login-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 40%);
+  min-height: 100vh;
+  color: var(--text-primary);
+  background: var(--cream);
+}
+
+
+/* If there is no photo, shows a gradient instead */
+.hero {
+  position: relative;
+  overflow: hidden;
+  background:
+    url('/login-hero.jpg') center / cover no-repeat,
+    linear-gradient(145deg, var(--sage-200) 0%, var(--sage-400) 100%);
+}
+
+/* Adds a subtle green tint to the hero photo */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(22 51 43 / 8%) 0%, rgb(22 51 43 / 38%) 100%);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  padding: 32px clamp(24px, 5vw, 80px) 48px;
+  background:
+    radial-gradient(circle at 100% 0%, rgb(199 217 178 / 28%), transparent 30rem),
+    radial-gradient(circle at 0% 100%, rgb(199 217 178 / 16%), transparent 28rem),
+    var(--cream);
+  box-shadow: -10px 0 30px rgb(28 61 51 / 8%);
+}
+
+.panel-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--forest-700);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  color: var(--forest-900);
+}
+
+.link-button:focus-visible,
+.toggle-password:focus-visible,
+.submit-button:focus-visible {
+  outline: 3px solid var(--border-strong);
+  outline-offset: 3px;
+}
+
+.lang-link {
+  align-self: flex-end;
+}
+
+.clinic {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 16px;
-  background: #f5f5f5;
+  gap: 12px;
+  margin-bottom: 56px;
+  color: var(--forest-700);
 }
 
-.login-card {
-  width: 100%;
-  max-width: 360px;
+.clinic-icon {
+  width: 44px;
+  height: 44px;
+  font-size: 44px;
 }
 
-.login-form {
+.clinic-name {
+  color: var(--forest-800);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.greeting {
+  position: relative;
+  margin: 0 0 2.5rem;
+  padding-bottom: 1rem;
+  color: var(--forest-700);
+  font-size: clamp(1.8rem, 3vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+.greeting::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 58px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--forest-700), var(--sage-400));
+}
+
+.form {
   display: flex;
   flex-direction: column;
 }
 
-.full-width {
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.input {
+  box-sizing: border-box;
   width: 100%;
+  height: 50px;
+  padding: 0 20px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--text-primary);
+  font: inherit;
+  box-shadow: var(--shadow-sm);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
-.submit-button {
-  margin-top: 8px;
-  height: 40px;
+.input::placeholder {
+  color: var(--text-muted);
 }
 
-.password-field {
-  margin-top: 8px;
+.input:focus {
+  border-color: var(--forest-700);
+  outline: none;
+  box-shadow: 0 0 0 4px rgb(36 75 63 / 16%);
+}
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper .input {
+  padding-right: 56px;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  display: flex;
+  padding: 4px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--forest-700);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.toggle-password:hover {
+  background: var(--sage-100);
+}
+
+.forgot-link {
+  align-self: flex-start;
+  margin-bottom: 32px;
+}
+
+.field-error {
+  margin: 0;
+  color: var(--error);
+  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .error-message {
-  color: var(--mat-sys-error, #b00020);
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid rgb(155 28 49 / 22%);
+  border-radius: 12px;
+  background: rgb(155 28 49 / 7%);
+  color: var(--error);
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.submit-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 60px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--forest-700) 0%, var(--forest-800) 100%);
+  color: var(--white);
+  font: inherit;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 220ms ease,
+    background 220ms ease;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--forest-800) 0%, var(--forest-900) 100%);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.submit-button mat-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: #fff;
+  --mat-progress-spinner-active-indicator-color: #fff;
+}
+
+@media (max-width: 900px) {
+  .login-page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hero {
+    display: none;
+  }
+
+  .panel {
+    box-shadow: none;
+  }
+
+  .brand {
+    margin-bottom: 40px;
+  }
 }

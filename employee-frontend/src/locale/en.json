@@ -2,10 +2,24 @@
   "locale": "en",
   "translations": {
     "login": {
-      "title": "Login",
-      "username": "Username or email",
-      "password": "Password",
-      "submit": "Sign in"
+      "title": "Welcome",
+      "usernamePlaceholder": "Enter your username or email",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot Password?",
+      "submit": "Login"
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "message": "Enter your email and we'll send you a reset link.",
+      "email": "Email",
+      "submit": "Send reset link",
+      "cancel": "Cancel",
+      "sent": "If an account exists for this address, a recovery email has just been sent.",
+      "errors": {
+        "emailRequired": "Email is required.",
+        "emailInvalid": "Enter a valid email.",
+        "unreachable": "Could not reach the server."
+      }
     },
     "navbar": {
       "home": "Home",

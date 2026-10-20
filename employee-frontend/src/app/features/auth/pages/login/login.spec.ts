@@ -19,10 +19,15 @@ import { LoginPage } from './login';
 
 /** The login subset of src/locale/en.json, kept in sync with that file. */
 const EN_LOGIN = {
-  'login.title': 'Login',
+  'login.title': 'Hello',
   'login.username': 'Username or email',
+  'login.usernamePlaceholder': 'Enter your username or email',
   'login.password': 'Password',
+  'login.passwordPlaceholder': 'Enter your password',
+  'login.forgotPassword': 'Forgot Password?',
   'login.submit': 'Sign in',
+  'login.noAccount': "Don't have an account?",
+  'login.signUp': 'Sign up',
 };
 
 describe('LoginPage', () => {
@@ -62,7 +67,7 @@ describe('LoginPage', () => {
     const page = await renderLogin();
 
     // Assert
-    expect(page.textContent).toContain('Connexion');
+    expect(page.textContent).toContain('Bienvenue');
     expect(page.textContent).toContain("Nom d'utilisateur ou courriel");
     expect(page.textContent).toContain('Mot de passe');
     expect(page.textContent).toContain('Se connecter');
@@ -76,10 +81,11 @@ describe('LoginPage', () => {
     const page = await renderLogin();
 
     // Assert
-    expect(page.textContent).toContain('Login');
+    expect(page.textContent).toContain('Welcome');
     expect(page.textContent).toContain('Username or email');
     expect(page.textContent).toContain('Password');
-    expect(page.textContent).toContain('Sign in');
+    expect(page.textContent).toContain('Login');
+
     expect(page.textContent).not.toContain('Mot de passe');
   });
 });
