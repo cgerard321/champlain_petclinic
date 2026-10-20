@@ -15,7 +15,7 @@ import reactor.core.publisher.Flux;
 public class OrderControllerV1 {
 
     private final CartServiceClient cartServiceClient;
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST, Roles.ADMIN})
     @GetMapping(
             value = "/customer/{customerId}",
             produces = MediaType.APPLICATION_JSON_VALUE

@@ -63,7 +63,7 @@ public class PetTypeControllerV1 {
     }
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.CUST})
     @PutMapping("/{petTypeId}")
     public Mono<ResponseEntity<PetTypeResponseDTO>> updatePetType(
             @PathVariable String petTypeId,
