@@ -656,18 +656,10 @@ public class VisitServiceImpl implements VisitService {
             }
         }
 
-        Mail mail = Mail.builder()
-                .emailSendTo(vet.getEmail())
-                .emailTitle("Your weekly PetClinic schedule")
-                .templateName("Default")
-                .header("Your weekly schedule")
-                .body(body.toString())
-                .footer("Thank you,\nPetClinic")
-                .correspondantName(vet.getFirstName())
-                .senderName("ChamplainPetClinic@gmail.com")
-                .build();
+        Mail mail = new Mail(
+                vet.getEmail(), "Your weekly PetClinic schedule", "Default", "Your weekly schedule",
+                body.toString(), "Thank you,\nPetClinic", vet.getFirstName(), "ChamplainPetClinic@gmail.com");
 
-        // MailService makes a blocking call to the configured mailer service.
         return Mono.fromCallable(() -> mailService.sendMail(mail))
                 .subscribeOn(Schedulers.boundedElastic());
     }
