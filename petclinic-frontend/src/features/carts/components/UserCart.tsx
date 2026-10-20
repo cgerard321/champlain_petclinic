@@ -933,10 +933,9 @@ const UserCart: React.FC = () => {
     }
   };
 
-
   const handleViewOrderReceipt = (order: OrderModel): void => {
     const discount = roundToCents(
-        order.subtotal * ((order.promoPercent ?? 0) / 100)
+      order.subtotal * ((order.promoPercent ?? 0) / 100)
     );
 
     const invoice: InvoiceFullType = {
@@ -951,9 +950,7 @@ const UserCart: React.FC = () => {
         quantity: item.quantityInCart,
       })),
       subtotal: order.subtotal,
-      taxableSubtotal: roundToCents(
-          order.total - order.tvq - order.tvc
-      ),
+      taxableSubtotal: roundToCents(order.total - order.tvq - order.tvc),
       tvq: order.tvq,
       tvc: order.tvc,
       discount,
@@ -965,7 +962,6 @@ const UserCart: React.FC = () => {
     setLastInvoice(invoice);
     setShowInvoiceModal(true);
   };
-
 
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
@@ -986,26 +982,24 @@ const UserCart: React.FC = () => {
       return;
     }
     try {
-        const usedBilling = billing ?? billingInfo;
+      const usedBilling = billing ?? billingInfo;
 
-        if (!usedBilling) {
-            setCheckoutMessage('Billing information is required.');
-            return;
-        }
-        const checkoutBilling = {
-            fullName: usedBilling.fullName,
-            email: usedBilling.email,
-            address: usedBilling.address,
-            city: usedBilling.city,
-            province: usedBilling.province,
-            postalCode: usedBilling.postalCode,
-        };
+      if (!usedBilling) {
+        setCheckoutMessage('Billing information is required.');
+        return;
+      }
+      const checkoutBilling = {
+        fullName: usedBilling.fullName,
+        email: usedBilling.email,
+        address: usedBilling.address,
+        city: usedBilling.city,
+        province: usedBilling.province,
+        postalCode: usedBilling.postalCode,
+      };
 
-        await axiosInstance.post(
-            `/carts/${cartId}/checkout`,
-             checkoutBilling ,
-            { useV2: false }
-        );
+      await axiosInstance.post(`/carts/${cartId}/checkout`, checkoutBilling, {
+        useV2: false,
+      });
 
       const invoiceItems: Invoice[] = cartItems.map(item => ({
         productId: item.productId,
@@ -1398,28 +1392,26 @@ const UserCart: React.FC = () => {
                 <div className="checkout-message">{checkoutMessage}</div>
               )}
 
-
               {orders.length > 0 && (
-                  <button
-                      type="button"
-                      className="view-receipt-btn cart-button cart-button--brand cart-button--block"
-                      onClick={() => {
-                        const latestOrder = orders.reduce((latest, order) =>
-                            new Date(order.orderDate).getTime() >
-                            new Date(latest.orderDate).getTime()
-                                ? order
-                                : latest
-                        );
+                <button
+                  type="button"
+                  className="view-receipt-btn cart-button cart-button--brand cart-button--block"
+                  onClick={() => {
+                    const latestOrder = orders.reduce((latest, order) =>
+                      new Date(order.orderDate).getTime() >
+                      new Date(latest.orderDate).getTime()
+                        ? order
+                        : latest
+                    );
 
-                        handleViewOrderReceipt(latestOrder);
-                      }}
-                      style={{ marginTop: '1rem' }}
-                      aria-label={t('cart.receiptLabel')}
-                  >
-                    {t('buttons.viewReceipt')}
-                  </button>
+                    handleViewOrderReceipt(latestOrder);
+                  }}
+                  style={{ marginTop: '1rem' }}
+                  aria-label={t('cart.receiptLabel')}
+                >
+                  {t('buttons.viewReceipt')}
+                </button>
               )}
-
             </div>
           )}
         </div>
@@ -1481,11 +1473,11 @@ const UserCart: React.FC = () => {
 
                   <div className="order-footer">
                     <button
-                        type="button"
-                        className="view-receipt-btn cart-button cart-button--brand cart-button--block"
-                        onClick={() => handleViewOrderReceipt(order)}
-                        style={{ marginTop: '1rem' }}
-                        aria-label={t('cart.receiptLabel')}
+                      type="button"
+                      className="view-receipt-btn cart-button cart-button--brand cart-button--block"
+                      onClick={() => handleViewOrderReceipt(order)}
+                      style={{ marginTop: '1rem' }}
+                      aria-label={t('cart.receiptLabel')}
                     >
                       {t('buttons.viewReceipt')}
                     </button>
