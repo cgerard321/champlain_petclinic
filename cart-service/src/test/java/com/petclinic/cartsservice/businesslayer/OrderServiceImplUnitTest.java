@@ -91,7 +91,7 @@ class OrderServiceUnitTest {
                 .orderId(ORDER_ID)
                 .customerId(CUSTOMER_ID)
                 .customerName(CUSTOMER_NAME)
-                .customerAddress(CUSTOMER_ADDRESS)
+                .address(CUSTOMER_ADDRESS)
                 .products(List.of(product1, product2))
                 .subtotal(125.0)
                 .tvq(12.47)
@@ -125,12 +125,12 @@ class OrderServiceUnitTest {
                     assertNotNull(response.getOrderId());
                     assertEquals(CUSTOMER_ID, response.getCustomerId());
                     assertEquals(CUSTOMER_NAME, response.getCustomerName());
-                    assertEquals(CUSTOMER_ADDRESS, response.getCustomerAddress());
+                    assertEquals(CUSTOMER_ADDRESS, response.getAddress());
                     assertEquals("Montreal", response.getCity());
                     assertEquals("Quebec", response.getProvince());
                     assertEquals("H1A 1A1", response.getPostalCode());
                     assertEquals("customer@example.com",
-                            response.getEMailAddress());
+                            response.getEmail());
                     assertEquals("invoice-123", response.getInvoiceId());
                     assertEquals(2, response.getProducts().size());
                     assertNotNull(response.getOrderDate());
@@ -146,12 +146,12 @@ class OrderServiceUnitTest {
 
         assertEquals(CUSTOMER_ID, savedOrder.getCustomerId());
         assertEquals(CUSTOMER_NAME, savedOrder.getCustomerName());
-        assertEquals(CUSTOMER_ADDRESS, savedOrder.getCustomerAddress());
+        assertEquals(CUSTOMER_ADDRESS, savedOrder.getAddress());
         assertEquals("Montreal", savedOrder.getCity());
         assertEquals("Quebec", savedOrder.getProvince());
         assertEquals("H1A 1A1", savedOrder.getPostalCode());
         assertEquals("customer@example.com",
-                savedOrder.getEMailAddress());
+                savedOrder.getEmail());
         assertEquals("invoice-123", savedOrder.getInvoiceId());
         assertEquals(2, savedOrder.getProducts().size());
         verify(customerClient).getCustomerById(CUSTOMER_ID);
@@ -423,6 +423,9 @@ class OrderServiceUnitTest {
 
         lenient().when(billing.getEmail())
                 .thenReturn("customer@example.com");
+
+        lenient().when(billing.getAddress())
+                .thenReturn(CUSTOMER_ADDRESS);
 
         return billing;
     }

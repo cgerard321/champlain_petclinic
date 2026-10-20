@@ -1,16 +1,15 @@
 package com.petclinic.cartsservice.presentationlayer;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class BillingRequestModel {
-    private String fullName;
+    private String customerName;
     private String email;
     private String address;
     private String city;

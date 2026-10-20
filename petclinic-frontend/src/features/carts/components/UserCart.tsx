@@ -938,10 +938,18 @@ const UserCart: React.FC = () => {
       order.subtotal * ((order.promoPercent ?? 0) / 100)
     );
 
+    const orderBilling = {
+      customerName: order.customerName,
+      email: order.email,
+      address: order.address,
+      city: order.city,
+      province: order.province,
+      postalCode: order.postalCode,
+    };
     const invoice: InvoiceFullType = {
       invoiceId: order.invoiceId || order.orderId,
       userId: order.customerId,
-      billing: null,
+      billing: orderBilling,
       date: order.orderDate,
       items: order.products.map(item => ({
         productId: item.productId,
@@ -989,7 +997,7 @@ const UserCart: React.FC = () => {
         return;
       }
       const checkoutBilling = {
-        fullName: usedBilling.fullName,
+        customerName: usedBilling.fullName,
         email: usedBilling.email,
         address: usedBilling.address,
         city: usedBilling.city,
@@ -1055,7 +1063,7 @@ const UserCart: React.FC = () => {
         userId: user?.userId || 'anonymous',
         billing: usedBilling
           ? {
-              fullName: usedBilling.fullName,
+              customerName: usedBilling.fullName,
               email: usedBilling.email,
               address: usedBilling.address,
               city: usedBilling.city,

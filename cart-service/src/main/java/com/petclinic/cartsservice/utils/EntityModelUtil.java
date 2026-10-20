@@ -141,9 +141,9 @@ public class EntityModelUtil {
                 .orderId(UUID.randomUUID().toString())
                 .customerId(customer.getCustomerId())
                 .customerName(customer.getFullName())
-                .customerAddress(customer.getAddress())
+                .address(billing.getAddress())
                 .city(billing.getCity())
-                .eMailAddress(billing.getEmail())
+                .email(billing.getEmail())
                 .postalCode(billing.getPostalCode())
                 .province(billing.getProvince())
                 .products(copyCartProducts(cart.getProducts()))
@@ -177,14 +177,10 @@ public class EntityModelUtil {
 
     public static Cart storeCartOrder(Cart cart) {
         Cart orderCart = new Cart();
-
         BeanUtils.copyProperties(cart, orderCart);
-
         List<CartProduct> products =
                 copyCartProducts(cart.getProducts());
-
         orderCart.setProducts(products);
-
         CartResponseModel calculatedCart =
                 toCartResponseModel(orderCart, products);
         orderCart.setSubtotal(calculatedCart.getSubtotal());
@@ -194,7 +190,6 @@ public class EntityModelUtil {
         orderCart.setTotal(calculatedCart.getTotal());
         orderCart.setShippingMethod(calculatedCart.getShippingMethod());
         orderCart.setShippingCost(calculatedCart.getShippingCost());
-
         return orderCart;
     }
 

@@ -19,7 +19,7 @@ export interface OrderModel {
   city: string;
   province?: string;
   postalCode: string;
-  customerEmail: string;
+  email: string;
   orderDate: string;
   products: OrderItemModel[];
   subtotal: number;
