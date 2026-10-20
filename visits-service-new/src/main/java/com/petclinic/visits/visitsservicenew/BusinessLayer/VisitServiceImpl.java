@@ -26,15 +26,24 @@ import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
 import com.petclinic.visits.visitsservicenew.Utils.IdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Comparator;
+import java.util.List;
 
 import static java.lang.String.format;
 
@@ -540,8 +549,6 @@ public class VisitServiceImpl implements VisitService {
      * @return The email built from the message
      */
     private Mail generateVisitRequestEmail(UserDetails user, String petName, LocalDateTime visitDate) {
-
-
         return new Mail(
                 user.getEmail(), "PetClinic Visit request", "Default", "PetClinic Visit request",
                 "Dear " + user.getUsername() + ",\n" +
@@ -600,6 +607,93 @@ public class VisitServiceImpl implements VisitService {
 //                .to(user.getEmail())
 //                .build();
     }
+
+
+    //Weekly email service
+    @Value("${app.weekly-schedule-email.cron:0 0 7 * * MON}")
+    public Mono<String> sendSchedule(String vetId, LocalDate weekStart) {
+        LocalDateTime start = weekStart.atStartOfDay();
+        LocalDateTime end = weekStart.plusDays(7).atStartOfDay();
+
+        return vetsClient.getVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(
+                        new NotFoundException("No veterinarian found with vetId: " + vetId)))
+                .flatMap(vet -> {
+                    if (vet.getEmail() == null || vet.getEmail().isBlank()) {
+                        return Mono.error(new IllegalArgumentException(
+                                "The veterinarian does not have an email address."));
+                    }
+
+                    return repo
+                            .findByPractitionerIdAndVisitDateBetween(vetId, start, end)
+                            .filter(visit -> visit.getStatus() == Status.UPCOMING)
+                            .sort(Comparator.comparing(Visit::getVisitDate))
+                            .collectList()
+                            .flatMap(visits -> sendEmail(vet, visits, weekStart));
+                });
+    }
+
+
+
+    public Mono<String> sendEmail(VetDTO vet, List<Visit> visits, LocalDate weekStart) {
+        StringBuilder body = new StringBuilder();
+        body.append("Your schedule for the week starting ")
+                .append(weekStart)
+                .append(":\n\n");
+
+        if (visits.isEmpty()) {
+            body.append("There are no appointments scheduled for this week.");
+        } else {
+            DateTimeFormatter formatter =
+                    DateTimeFormatter.ofPattern("EEEE, MMMM d 'at' h:mm a");
+
+            for (Visit visit : visits) {
+                body.append("- ")
+                        .append(visit.getVisitDate().format(formatter))
+                        .append(" | ")
+                        .append(visit.getDescription())
+                        .append(" | Status: ")
+                        .append(visit.getStatus())
+                        .append("\n\n");
+            }
+        }
+
+        Mail mail = Mail.builder()
+                .emailSendTo(vet.getEmail())
+                .emailTitle("Your weekly PetClinic schedule")
+                .templateName("Default")
+                .header("Your weekly schedule")
+                .body(body.toString())
+                .footer("Thank you,\nPetClinic")
+                .correspondantName(vet.getFirstName())
+                .senderName("ChamplainPetClinic@gmail.com")
+                .build();
+
+        // MailService makes a blocking call to the configured mailer service.
+        return Mono.fromCallable(() -> mailService.sendMail(mail))
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+
+    @Scheduled(
+            cron = "${app.weekly-schedule-email.cron:0 0 7 * * MON}",
+            zone = "America/Toronto")
+    public void sendWeeklySchedulesAutomatically() {
+        LocalDate weekStart = LocalDate.now()
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        vetsClient.getAllVets()
+                .filter(VetDTO::isActive)
+                .concatMap(vet -> sendSchedule(vet.getVetId(), weekStart)
+                        .doOnError(error -> log.error(
+                                "Could not send schedule to vet {}",
+                                vet.getVetId(),
+                                error)
+                        )
+                        .onErrorResume(error -> Mono.empty()))
+                .subscribe();
+    }
+
 
 
     @Override
