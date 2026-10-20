@@ -610,7 +610,6 @@ public class VisitServiceImpl implements VisitService {
 
 
     //Weekly email service
-    @Value("${app.weekly-schedule-email.cron:0 0 7 * * MON}")
     public Mono<String> sendSchedule(String vetId, LocalDate weekStart) {
         LocalDateTime start = weekStart.atStartOfDay();
         LocalDateTime end = weekStart.plusDays(7).atStartOfDay();
@@ -624,8 +623,7 @@ public class VisitServiceImpl implements VisitService {
                                 "The veterinarian does not have an email address."));
                     }
 
-                    return repo
-                            .findByPractitionerIdAndVisitDateBetween(vetId, start, end)
+                    return repo.findByPractitionerIdAndVisitDateBetween(vetId, start, end)
                             .filter(visit -> visit.getStatus() == Status.UPCOMING)
                             .sort(Comparator.comparing(Visit::getVisitDate))
                             .collectList()

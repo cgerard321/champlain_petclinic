@@ -107,4 +107,8 @@ export class VisitService {
   addVetNote(visitId: string, vetNote: string): Observable<Visit> {
     return this.http.patch<Visit>(`/api/gateway/visits/${visitId}/note`, { vetNote });
   }
+
+  sendWeeklyScheduleEmail(): Observable<string> {
+    return this.http.post<string>('/api/gateway/visits/weekly-email', {});
+  }
 }

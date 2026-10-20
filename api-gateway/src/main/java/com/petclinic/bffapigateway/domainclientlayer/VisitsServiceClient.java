@@ -223,6 +223,14 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitResponseDTO.class);
     }
 
+    public Mono<String> sendWeeklyScheduleEmail(String practitionerId) {
+        return webClient
+                .post()
+                .uri("/practitioner/{practitionerId}/weekly-email", practitionerId)
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
     /*
     public Flux<VisitDetails> getPreviousVisitsForPet(final String petId) {
         return webClient

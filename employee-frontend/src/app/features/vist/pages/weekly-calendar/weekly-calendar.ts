@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, DestroyRef, effect, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { catchError, map, Observable, of, shareReplay, switchMap } from 'rxjs';
+import { catchError, finalize, map, Observable, of, shareReplay, switchMap } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
 import { Customer } from '@features/cust/models/customer.model';
@@ -42,6 +42,8 @@ export class WeeklyCalendar implements OnInit {
   protected readonly isLoading = signal(true);
   protected readonly hasError = signal(false);
   protected readonly petDetails = signal(new Map<string, PetDetails>());
+  protected readonly isSendingEmail = signal(false);
+  protected readonly emailMessage = signal('');
 
   protected readonly labels = {
     title: $localize`:@@visits.calendar.title:Calendrier hebdomadaire`,
@@ -169,5 +171,21 @@ export class WeeklyCalendar implements OnInit {
     }
 
     return request;
+  }
+
+  protected sendWeeklyScheduleEmail(): void {
+    this.isSendingEmail.set(true);
+    this.emailMessage.set('');
+
+    this.visitService
+      .sendWeeklyScheduleEmail()
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        finalize(() => this.isSendingEmail.set(false)),
+      )
+      .subscribe({
+        next: (message) => this.emailMessage.set(message),
+        error: () => this.emailMessage.set('Could not send the schedule email.'),
+      });
   }
 }
