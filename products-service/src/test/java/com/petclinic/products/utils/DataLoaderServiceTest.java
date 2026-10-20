@@ -208,7 +208,7 @@ class DataLoaderServiceTest {
 
         dataLoaderService.run();
 
-        verify(ratingRepository, times(120)).save(any(Rating.class));
+        verify(ratingRepository, times(240)).save(any(Rating.class));
     }
 
     @Test
@@ -222,7 +222,7 @@ class DataLoaderServiceTest {
         dataLoaderService.run();
         dataLoaderService.run();
 
-        verify(ratingRepository, times(120)).save(any(Rating.class));
+        verify(ratingRepository, times(240)).save(any(Rating.class));
     }
 
     @Test
@@ -247,7 +247,7 @@ class DataLoaderServiceTest {
 
         dataLoaderService.run();
 
-        verify(ratingRepository, times(119)).save(any(Rating.class));
+        verify(ratingRepository, times(239)).save(any(Rating.class));
         verify(ratingRepository, never()).save(argThat(rating ->
                 existingProductId.equals(rating.getProductId())
                         && existingCustomerId.equals(rating.getCustomerId())));
