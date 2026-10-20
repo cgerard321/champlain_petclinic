@@ -289,19 +289,6 @@
   box-shadow: var(--shadow-sm);
 }
 
-.supply-filters::before {
-  position: absolute;
-  z-index: -1;
-  top: -75px;
-  right: -55px;
-  width: 190px;
-  height: 190px;
-  border-radius: 50%;
-  background: rgb(199 217 178 / 18%);
-  content: '';
-  pointer-events: none;
-}
-
 .filter-heading {
   display: flex;
   align-items: center;
@@ -315,12 +302,6 @@
   color: var(--forest-700);
   font-size: 1.1rem;
   font-weight: 700;
-}
-
-.filter-heading p {
-  margin: 0.3rem 0 0;
-  color: var(--text-secondary);
-  font-size: 0.9rem;
 }
 
 .supply-filter-grid {
@@ -359,27 +340,6 @@
   transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
 }
 
-.filter-field input::placeholder {
-  color: var(--text-muted);
-}
-
-.filter-field input:hover,
-.filter-field select:hover:not(:disabled) {
-  border-color: rgb(36 75 63 / 42%);
-}
-
-.filter-field input:focus-visible,
-.filter-field select:focus-visible {
-  border-color: var(--forest-700);
-  box-shadow: 0 0 0 3px rgb(36 75 63 / 14%);
-}
-
-.filter-field select:disabled {
-  cursor: not-allowed;
-  background-color: var(--sage-50);
-  opacity: 0.7;
-}
-
 .clear-filters-button {
   min-height: 40px;
   padding: 0.55rem 0.95rem;
@@ -400,16 +360,10 @@
   background-color: var(--forest-700);
 }
 
-.clear-filters-button:focus-visible {
-  outline: 3px solid rgb(36 75 63 / 22%);
-  outline-offset: 3px;
-}
-
 @media (width <= 1100px) {
   .desktop-action-button {
     display: none;
   }
-
   .mobile-actions-button {
     display: inline-block;
   }
@@ -425,7 +379,6 @@
   .supply-page {
     padding: 2rem 1rem 3rem;
   }
-
   .page-header {
     flex-direction: column;
     align-items: stretch;
@@ -437,26 +390,9 @@
     padding: 1.1rem;
     border-radius: 16px;
   }
-
   .supply-filter-grid {
     grid-template-columns: 1fr;
     gap: 0.85rem;
-  }
-
-  .filter-heading {
-    align-items: flex-start;
-  }
-}
-
-@media (width <= 420px) {
-  .filter-heading {
-    flex-direction: column;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .download-label {
-    transition: none;
   }
 }
 
@@ -474,26 +410,5 @@
 
   .supply-page {
     background: none;
-  }
-
-  .state-message {
-    background: var(--mat-sys-surface);
-    border: none;
-    box-shadow: none;
-  }
-
-  .add-supply-button,
-  .edit-button,
-  .clear-filters-button {
-    color: #111;
-  }
-
-  .filter-field input,
-  .filter-field select {
-    border-color: var(--sage-400);
-  }
-
-  .filter-field select {
-    color: #7f958a;
   }
 }
