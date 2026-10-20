@@ -7,6 +7,7 @@ pub const SUDO_ROLE_UUID: Uuid = uuid::uuid!("11111111-1111-1111-1111-1111111111
 pub const ADMIN_ROLE_UUID: Uuid = uuid::uuid!("a48d7b18-ceb7-435b-b8ff-b28531f1a09f");
 pub const READER_ROLE_UUID: Uuid = uuid::uuid!("51f20832-79a3-4c05-b4da-ca175cba2ffc");
 pub const EDITOR_ROLE_UUID: Uuid = uuid::uuid!("96ee5d72-c27b-4256-8db8-cf49d64e65de");
+pub const API_GATEWAY_DEV_ROLE: Uuid = uuid::uuid!("166ef69f-03bd-4f28-920c-0627aac2071d");
 pub const AUTH_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("7bbec248-56bd-4cde-bbc8-0f66d2155130");
 pub const VET_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("a99390f2-de4d-4616-88e9-9f7d4b8cdc7b");
 pub const VISITS_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("d30cfb07-2933-44d6-8035-924f850fc2ef");
