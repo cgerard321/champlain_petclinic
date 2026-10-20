@@ -357,15 +357,62 @@
       },
       "petsButton": "Registered Pets",
       "noCustFound": "No customers found.",
-      "tryAgain": "Try a different name, ID, or phone number."
+      "tryAgain": "Try a different name, ID, or phone number.",
+
+      "addCustomer": {
+        "title": "Add a Client",
+        "button": "Add Customer",
+        "submit": "Add",
+        "select": "Select Province",
+        "fields": {
+          "firstName": "First Name: ",
+          "lastName": "Last Name: ",
+          "address": "Address: ",
+          "city": "City: ",
+          "phone":"Phone Number: ",
+          "province": "Province: "
+        },
+        "error": {
+          "firstName": "First name is required.",
+          "lastName": "Last name is required.",
+          "address": "Address is required.",
+          "city": "City is required.",
+          "phoneM":"Telephone is required.",
+          "phoneL": "Telephone must contain exactly 10 digits.",
+          "province": "Province is required."
+        }
+      },
+      "provinces": {
+        "alberta": "Alberta",
+        "britishColumbia": "British Colombia",
+        "manitoba": "Manitoba",
+        "newBrunswick": "New Brunswick",
+        "newfoundlandAndLabrador": "Newfoundland and Labrador",
+        "northwestTerritories": "Northwest Territories",
+        "novaScotia": "Nova Scotia",
+        "nunavut": "Nunavut",
+        "ontario": "Ontario",
+        "princeEdwardIsland": "Prince Edward Island",
+        "quebec": "Quebec",
+        "saskatchewan": "Saskatchewan",
+        "yukon": "Yukon"
+      }
+
     },
     "pet": {
+      "petAddTitle" : "Add a new Pet",
       "petDetailsTitle": "Pet Details",
       "petDetailsSubtitle": "Registered pets and their information",
       "closeButton": "Close",
       "loadingPets": "Loading pets...",
       "noPetsFound": "No registered found for this customer.",
+      "button":{
+        "add": "Add",
+        "addAnimal": "Add an animal"
+      },
       "petDetails": {
+        "name": "Name",
+        "date": "Date of Birth",
         "pets": "Pets",
         "species": "Species",
         "age": "Age",
@@ -381,6 +428,13 @@
         "bird": "Bird",
         "hamster": "Hamster",
         "others": "Others"
+      },
+      "error": {
+        "name": "Name is required",
+        "species": "Species is required",
+        "date": "Date of Birth is required",
+        "weightR": "Weight is required",
+        "weightP": "Weight should be a valid number"
       }
     },
     "modal": {
