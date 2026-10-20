@@ -4,6 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+import { AddCustomer } from '@features/cust/components/customer-add/customer-add';
 import { PetDetails } from '@features/cust/components/customer-pet-details/customer-pet-details';
 import { Customer } from '@features/cust/models/customer.model';
 import { CustomerService } from '@features/cust/services/customer-service';
@@ -70,4 +71,11 @@ export class Cust implements OnInit {
       ),
     );
   });
+
+  protected addCustomerPopUp(): void {
+    this.dialog.open(AddCustomer, {
+      width: '650px',
+      maxWidth: '90vw',
+    });
+  }
 }
