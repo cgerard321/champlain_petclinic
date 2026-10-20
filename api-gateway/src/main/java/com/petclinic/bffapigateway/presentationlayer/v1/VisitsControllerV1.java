@@ -29,6 +29,8 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.stream.Stream;
+
 @RestController()
 @RequiredArgsConstructor
 @Slf4j
@@ -47,6 +49,27 @@ public class VisitsControllerV1 {
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<Flux<VisitResponseDTO>> getAllVisits(@RequestParam(required = false) String description){
         return ResponseEntity.ok().body(visitsServiceClient.getAllVisits(description));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.VET})
+    @GetMapping(value = "/search", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> searchVisits(@RequestParam String query, ServerWebExchange exchange) {
+        TokenResponseDTO user = exchange.getAttribute("tokenValues");
+        if (user == null) {
+            throw new IllegalStateException("Authenticated user is missing from the validated token.");
+        }
+        String search = query.trim().toLowerCase();
+
+        return visitsServiceClient.getVisitByPractitionerId(user.getUserId())
+                .filter(visit -> matchesSearch(visit, search));
+    }
+
+    private boolean matchesSearch(VisitResponseDTO visit, String search) {
+        return Stream.of(
+                        visit.getVisitId(),
+                        visit.getPetName(),
+                        visit.getDescription())
+                .anyMatch(value -> value != null && value.toLowerCase().contains(search));
     }
 
 //    @GetMapping(value ="/{visitId}")

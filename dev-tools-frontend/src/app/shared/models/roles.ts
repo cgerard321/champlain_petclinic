@@ -13,6 +13,7 @@ export const RoleId = {
   CartServiceDev: 'a51e4699-3250-4cf7-ac2a-836675f62175',
   InventoryServiceDev: 'a7975ad7-f86e-49b7-898d-95da0175f4e5',
   BillingServiceDev: 'd1d928c3-b8a8-4a01-8eaf-9f7dc1cf9739',
+  ApiGatewayDev: '166ef69f-03bd-4f28-920c-0627aac2071d',
 } as const;
 
 export type RoleId = (typeof RoleId)[keyof typeof RoleId];
