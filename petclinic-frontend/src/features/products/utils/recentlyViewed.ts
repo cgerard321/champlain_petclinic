@@ -6,10 +6,13 @@ import { getProduct } from '../api/getProduct';
 
 const MAX_RECENT = 5;
 
+function getStorageKey(userId?: string): string {
+  return `recentlyClickedProducts_${userId || 'guest'}`;
+}
+
 export function getRecentlyViewed(userId?: string): ProductModel[] {
-  if (!userId) return [];
   try {
-    const raw = localStorage.getItem(`recentlyClickedProducts_${userId}`);
+    const raw = localStorage.getItem(getStorageKey(userId));
     return raw ? (JSON.parse(raw) as ProductModel[]) : [];
   } catch {
     return [];
@@ -20,9 +23,8 @@ export function addProductToRecentlyViewed(
   product: ProductModel,
   userId?: string
 ): void {
-  if (!userId) return;
   try {
-    const key = `recentlyClickedProducts_${userId}`;
+    const key = getStorageKey(userId);
     const raw = localStorage.getItem(key);
     const list: ProductModel[] = raw ? JSON.parse(raw) : [];
     const updated = list.filter(p => p.productId !== product.productId);
@@ -38,10 +40,9 @@ export function addProductToRecentlyViewed(
 export async function loadRecentlyViewed(
   userId?: string
 ): Promise<ProductModel[]> {
-  if (!userId) return [];
   try {
     const saved: unknown = JSON.parse(
-      localStorage.getItem(`recentlyClickedProducts_${userId}`) || '[]'
+      localStorage.getItem(getStorageKey(userId)) || '[]'
     );
     if (!Array.isArray(saved)) return [];
     const ids = [

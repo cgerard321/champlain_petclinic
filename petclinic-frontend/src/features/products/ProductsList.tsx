@@ -183,7 +183,7 @@ const ProductList = function Productlist({
               .filter(p => !p.isUnlisted)
               .map((p, i) => (
                 <Reveal key={p.productId} delay={i * 60 + 120}>
-                  <Product product={p} />
+                  <Product product={p} recentlyViewed />
                 </Reveal>
               ))
           ) : (
@@ -196,6 +196,8 @@ const ProductList = function Productlist({
   return (
     <div className="product-list-container">
       <div className="main-content">
+        {view === 'catalog' && <RecentlyViewedProducts />}
+
         {view === 'catalog' && (
           <Reveal delay={80}>
             <div ref={catalogRef} className="products-section-container ">
@@ -314,10 +316,6 @@ const ProductList = function Productlist({
                 </div>
               </div>
             </Reveal>
-            <div>
-              <hr />
-            </div>
-            <RecentlyViewedProducts />
           </>
         )}
       </div>

@@ -42,7 +42,11 @@ export default function RecentlyViewedProducts(): JSX.Element {
                 onClick={() => handleProductClick(product.productId)}
                 style={{ cursor: 'pointer' }}
               >
-                <Product key={product.productId} product={product} />
+                <Product
+                  key={product.productId}
+                  product={product}
+                  recentlyViewed
+                />
               </div>
             ))
         ) : (
