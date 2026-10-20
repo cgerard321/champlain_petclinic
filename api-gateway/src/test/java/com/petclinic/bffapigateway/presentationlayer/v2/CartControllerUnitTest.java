@@ -711,17 +711,15 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 */
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
-import com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartShippingRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.WishlistItemRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockserver.model.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -733,10 +731,13 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import com.petclinic.bffapigateway.dtos.Cart.BillingRequestDTO;
+
 
 @ExtendWith(SpringExtension.class)
 class CartControllerUnitTest {
@@ -1004,25 +1005,74 @@ class CartControllerUnitTest {
                 .expectStatus().isNotFound();
     }
 
+
     @Test
     void checkoutCart_success_returns200() {
-        when(cartServiceClient.checkoutCart("c-1")).thenReturn(Mono.just(sampleCart("c-1")));
+        // Arrange
+        BillingRequestDTO billing = BillingRequestDTO.builder()
+                .fullName("Test Customer")
+                .email("customer@example.com")
+                .address("123 Test Street")
+                .city("Montreal")
+                .province("Quebec")
+                .postalCode("H1A 1A1")
+                .build();
 
+        when(cartServiceClient.checkoutCart(
+                eq("c-1"),
+                any(BillingRequestDTO.class)))
+                .thenReturn(Mono.just(sampleCart("c-1")));
+
+        // Act & Assert
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/checkout", "c-1")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)                .bodyValue(billing)
                 .exchange()
                 .expectStatus().isOk();
+
+        // Verify billing information was forwarded
+        ArgumentCaptor<BillingRequestDTO> billingCaptor =
+                ArgumentCaptor.forClass(BillingRequestDTO.class);
+        verify(cartServiceClient).checkoutCart(
+                eq("c-1"),
+                billingCaptor.capture());
+        BillingRequestDTO capturedBilling = billingCaptor.getValue();
+        assertEquals("Test Customer", capturedBilling.getFullName());
+        assertEquals("customer@example.com", capturedBilling.getEmail());
+        assertEquals("123 Test Street", capturedBilling.getAddress());
+        assertEquals("Montreal", capturedBilling.getCity());
+        assertEquals("Quebec", capturedBilling.getProvince());
+        assertEquals("H1A 1A1", capturedBilling.getPostalCode());
     }
+
+
 
     @Test
     void checkoutCart_missing_returns404() {
-        when(cartServiceClient.checkoutCart("missing")).thenReturn(Mono.empty());
-
+        // Arrange
+        BillingRequestDTO billing = BillingRequestDTO.builder()
+                .fullName("Test Customer")
+                .email("customer@example.com")
+                .address("123 Test Street")
+                .city("Montreal")
+                .province("Quebec")
+                .postalCode("H1A 1A1")
+                .build();
+        when(cartServiceClient.checkoutCart(
+                eq("missing"),
+                any(BillingRequestDTO.class)))
+                .thenReturn(Mono.empty());
+        // Act & Assert
         client.post()
                 .uri("/api/v2/gateway/carts/{cartId}/checkout", "missing")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)                .bodyValue(billing)
                 .exchange()
                 .expectStatus().isNotFound();
+        verify(cartServiceClient).checkoutCart(
+                eq("missing"),
+                any(BillingRequestDTO.class));
     }
+
 
     @Test
     void updateShippingMethod_success_returnsUpdatedCart() {

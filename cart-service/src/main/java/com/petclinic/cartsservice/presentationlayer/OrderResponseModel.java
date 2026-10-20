@@ -19,6 +19,10 @@ public class OrderResponseModel {
     private String customerId;
     private String customerName;
     private String customerAddress;
+    private String city;
+    private String province;
+    private String postalCode;
+    private String eMailAddress;
     private LocalDateTime orderDate;
     private List<CartProduct> products;
     private double subtotal;

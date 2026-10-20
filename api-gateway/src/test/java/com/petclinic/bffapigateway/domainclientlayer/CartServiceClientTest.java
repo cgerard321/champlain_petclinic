@@ -1154,19 +1154,37 @@ public class CartServiceClientTest {
 
     @Test
     void testCheckoutCart_Success200() {
+        // Arrange
         String cartId = "c-55";
+        BillingRequestDTO billing = BillingRequestDTO.builder()
+                .fullName("Test Customer")
+                .email("customer@example.com")
+                .address("123 Test Street")
+                .city("Montreal")
+                .province("Quebec")
+                .postalCode("H1A 1A1")
+                .build();
         String body = """
-      {"cartId":"c-55","customerId":"u-22","products":[]}
-    """;
-
+            {
+                "cartId": "c-55",
+                "customerId": "u-22",
+                "products": []
+            }
+            """;
         prepareResponse(r -> r
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(200)
                 .setBody(body)
         );
-
-        StepVerifier.create(mockCartServiceClient.checkoutCart(cartId))
-                .assertNext(resp -> { assert resp != null; })
+        // Act & Assert
+        StepVerifier.create(mockCartServiceClient.checkoutCart(cartId, billing))
+                .assertNext(response -> {
+                    assertNotNull(response);
+                    assertEquals(cartId, response.getCartId());
+                    assertEquals("u-22", response.getCustomerId());
+                    assertNotNull(response.getProducts());
+                    assertTrue(response.getProducts().isEmpty());
+                })
                 .verifyComplete();
     }
     @Test

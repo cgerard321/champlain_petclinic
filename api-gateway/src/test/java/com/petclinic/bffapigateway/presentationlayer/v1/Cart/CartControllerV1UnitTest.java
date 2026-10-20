@@ -508,41 +508,75 @@ public class CartControllerV1UnitTest {
     }
 
     // Tests for checkoutCart endpoint
+
     @Test
     @DisplayName("POST /api/gateway/carts/{cartId}/checkout - Should checkout cart successfully")
     void checkoutCart_withValidId_shouldCheckoutCart() {
         // Arrange
         String cartId = "cart-123";
+        BillingRequestDTO billing = BillingRequestDTO.builder()
+                .fullName("Test Customer")
+                .email("customer@example.com")
+                .address("123 Test Street")
+                .city("Montreal")
+                .province("Quebec")
+                .postalCode("H1A 1A1")
+                .build();
+
         CartResponseDTO checkedOutCart = buildCartResponseDTO();
-        when(cartServiceClient.checkoutCart(cartId))
+
+        when(cartServiceClient.checkoutCart(eq(cartId), any(BillingRequestDTO.class)))
                 .thenReturn(Mono.just(checkedOutCart));
 
         // Act & Assert
         webTestClient.post()
                 .uri(baseCartURL + "/" + cartId + "/checkout")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .bodyValue(billing)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(CartResponseDTO.class)
                 .isEqualTo(checkedOutCart);
 
-        verify(cartServiceClient, times(1)).checkoutCart(cartId);
+        ArgumentCaptor<BillingRequestDTO> billingCaptor =
+                ArgumentCaptor.forClass(BillingRequestDTO.class);
+        verify(cartServiceClient).checkoutCart(eq(cartId), billingCaptor.capture());
+        BillingRequestDTO capturedBilling = billingCaptor.getValue();
+        assertEquals("Test Customer", capturedBilling.getFullName());
+        assertEquals("customer@example.com", capturedBilling.getEmail());
+        assertEquals("123 Test Street", capturedBilling.getAddress());
+        assertEquals("Montreal", capturedBilling.getCity());
+        assertEquals("Quebec", capturedBilling.getProvince());
+        assertEquals("H1A 1A1", capturedBilling.getPostalCode());
     }
+
+
 
     @Test
     @DisplayName("POST /api/gateway/carts/{cartId}/checkout - Should return 404 when cart not found")
     void checkoutCart_withNonExistingId_shouldReturnNotFound() {
         // Arrange
         String cartId = "non-existent-cart";
-        when(cartServiceClient.checkoutCart(cartId))
+        BillingRequestDTO billing = BillingRequestDTO.builder()
+                .fullName("Test Customer")
+                .email("customer@example.com")
+                .address("123 Test Street")
+                .city("Montreal")
+                .province("Quebec")
+                .postalCode("H1A 1A1")
+                .build();
+        when(cartServiceClient.checkoutCart(eq(cartId), any(BillingRequestDTO.class)))
                 .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.post()
                 .uri(baseCartURL + "/" + cartId + "/checkout")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .bodyValue(billing)
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(cartServiceClient, times(1)).checkoutCart(cartId);
+        verify(cartServiceClient).checkoutCart(eq(cartId), any(BillingRequestDTO.class));
     }
 
     // Tests for wishlist operations

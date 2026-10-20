@@ -8,6 +8,7 @@ import com.petclinic.cartsservice.dataaccesslayer.PromoCode;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeResponseModel;
+import com.petclinic.cartsservice.presentationlayer.BillingRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
@@ -135,12 +136,16 @@ public class EntityModelUtil {
         return responseModel;
     }
 
-    public static Order toOrder(Cart cart, CustomerResponseModel customer) {
+    public static Order toOrder(Cart cart, CustomerResponseModel customer, BillingRequestModel billing) {
         return Order.builder()
                 .orderId(UUID.randomUUID().toString())
                 .customerId(customer.getCustomerId())
                 .customerName(customer.getFullName())
                 .customerAddress(customer.getAddress())
+                .city(billing.getCity())
+                .eMailAddress(billing.getEmail())
+                .postalCode(billing.getPostalCode())
+                .province(billing.getProvince())
                 .products(copyCartProducts(cart.getProducts()))
                 .subtotal(cart.getSubtotal())
                 .promoPercent(cart.getPromoPercent())
@@ -182,7 +187,6 @@ public class EntityModelUtil {
 
         CartResponseModel calculatedCart =
                 toCartResponseModel(orderCart, products);
-
         orderCart.setSubtotal(calculatedCart.getSubtotal());
         orderCart.setPromoPercent(calculatedCart.getPromoPercent());
         orderCart.setTvq(calculatedCart.getTvq());

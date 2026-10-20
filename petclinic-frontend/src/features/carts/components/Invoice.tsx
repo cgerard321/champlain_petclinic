@@ -11,7 +11,7 @@ import {
 import type { ShippingMethod } from '@/shared/api/cart';
 
 export interface InvoiceItem {
-  productId: number;
+  productId: string;
   productName: string;
   productSalePrice: number;
   quantity: number;

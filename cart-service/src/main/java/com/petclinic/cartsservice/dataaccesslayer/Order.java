@@ -24,6 +24,10 @@ public class Order {
     private String customerId;
     private String customerName;
     private String customerAddress;
+    private String city;
+    private String province;
+    private String postalCode;
+    private String eMailAddress;
     private double subtotal;
     private Double promoPercent;
     private double tvq;
