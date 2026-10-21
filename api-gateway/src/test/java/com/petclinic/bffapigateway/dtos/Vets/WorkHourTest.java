@@ -13,8 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class WorkHourTest {
 
     @Test
-    @DisplayName("Must validate the total quantity " +
-                "and values of the enum via values and valueOf")
+    @DisplayName("Verify WorkHour enum values array contains exact expected quantity")
 
     void workHour_values_shouldReturnAllEnumConstants(){
 
@@ -22,7 +21,7 @@ public class WorkHourTest {
 
 
         //this tests that the enum is not empty (hours are given)
-        assertThat(hours).isNotEmpty();
+        assertThat(hours).isNotEmpty().hasSize(12);
 
         assertEquals(WorkHour.Hour_8_9, WorkHour.valueOf("Hour_8_9"));
         assertEquals(WorkHour.Hour_19_20, WorkHour.valueOf("Hour_19_20"));
@@ -44,7 +43,7 @@ public class WorkHourTest {
 
     //this does not have enumSource but since the first test validates, this one should work if the previous one worked
     @Test
-    @DisplayName("")
+    @DisplayName("Must return the exact expected format for specific work hour constants")
     void getTimeRange_shouldReturnExactExpectedFormat() {
         assertEquals("8am-9am", WorkHour.Hour_8_9.getTimeRange());
         assertEquals("19pm-20pm", WorkHour.Hour_19_20.getTimeRange());
