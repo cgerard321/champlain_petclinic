@@ -37,16 +37,64 @@
 .hero {
   position: relative;
   overflow: hidden;
-  background:
-    url('/login-hero.jpg') center / cover no-repeat,
-    linear-gradient(145deg, var(--sage-200) 0%, var(--sage-400) 100%);
+  background: linear-gradient(145deg, var(--sage-200) 0%, var(--sage-400) 100%);
 }
 
-/* Adds a subtle green tint to the hero photo */
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0;
+  animation: hero-fade 18s infinite;
+}
+
+.hero-slide:nth-child(1) {
+  background-image: url('/login-hero-1.jpg');
+  animation-delay: 0s;
+}
+
+.hero-slide:nth-child(2) {
+  background-image: url('/login-hero-2.jpg');
+  animation-delay: 6s;
+}
+
+.hero-slide:nth-child(3) {
+  background-image: url('/login-hero-3.jpg');
+  animation-delay: 12s;
+}
+
+/* The different slides rotate with a fade-in animation */
+@keyframes hero-fade {
+  0% {
+    opacity: 0;
+  }
+
+  5% {
+    opacity: 1;
+  }
+
+  33% {
+    opacity: 1;
+  }
+
+  38% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Adds a subtle green tint to the hero photos */
 .hero::before {
   content: '';
   position: absolute;
   inset: 0;
+  z-index: 1;
   background: linear-gradient(180deg, rgb(22 51 43 / 8%) 0%, rgb(22 51 43 / 38%) 100%);
 }
 
