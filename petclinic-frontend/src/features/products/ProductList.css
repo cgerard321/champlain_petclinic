@@ -65,11 +65,12 @@ body,
   font-weight: bold;
   font-size: 12px;
   position: absolute;
-  top: 10px;
-  left: 5px;
+  right: 10px;
+  bottom: 10px;
   background: white;
   padding: 2px 5px;
   border-radius: 3px;
+  z-index: 2;
 }
 
 /* Styles for out of stock */
@@ -82,11 +83,12 @@ body,
   font-weight: bold;
   font-size: 12px;
   position: absolute;
-  top: 10px;
-  left: 16px;
+  right: 10px;
+  bottom: 10px;
   background: white;
   padding: 2px 5px;
   border-radius: 3px;
+  z-index: 2;
 }
 
 .product-bundles-grid {
