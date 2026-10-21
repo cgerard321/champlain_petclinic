@@ -140,7 +140,7 @@ public class EntityModelUtil {
         return Order.builder()
                 .orderId(UUID.randomUUID().toString())
                 .customerId(customer.getCustomerId())
-                .customerName(customer.getFullName())
+                .customerName(billing.getCustomerName())
                 .address(billing.getAddress())
                 .city(billing.getCity())
                 .email(billing.getEmail())

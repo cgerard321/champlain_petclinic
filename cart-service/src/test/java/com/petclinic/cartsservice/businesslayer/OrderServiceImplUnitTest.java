@@ -124,8 +124,8 @@ class OrderServiceUnitTest {
                 .assertNext(response -> {
                     assertNotNull(response.getOrderId());
                     assertEquals(CUSTOMER_ID, response.getCustomerId());
-                    assertEquals(CUSTOMER_NAME, response.getCustomerName());
-                    assertEquals(CUSTOMER_ADDRESS, response.getAddress());
+                    assertEquals(billing.getCustomerName(), response.getCustomerName());
+                    assertEquals(billing.getAddress(), response.getAddress());
                     assertEquals("Montreal", response.getCity());
                     assertEquals("Quebec", response.getProvince());
                     assertEquals("H1A 1A1", response.getPostalCode());
@@ -145,7 +145,7 @@ class OrderServiceUnitTest {
         Order savedOrder = orderCaptor.getValue();
 
         assertEquals(CUSTOMER_ID, savedOrder.getCustomerId());
-        assertEquals(CUSTOMER_NAME, savedOrder.getCustomerName());
+        assertEquals(billing.getCustomerName(), savedOrder.getCustomerName());
         assertEquals(CUSTOMER_ADDRESS, savedOrder.getAddress());
         assertEquals("Montreal", savedOrder.getCity());
         assertEquals("Quebec", savedOrder.getProvince());

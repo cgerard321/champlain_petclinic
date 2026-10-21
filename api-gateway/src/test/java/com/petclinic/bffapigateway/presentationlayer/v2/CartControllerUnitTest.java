@@ -1010,7 +1010,7 @@ class CartControllerUnitTest {
     void checkoutCart_success_returns200() {
         // Arrange
         BillingRequestDTO billing = BillingRequestDTO.builder()
-                .fullName("Test Customer")
+                .customerName("Test Customer")
                 .email("customer@example.com")
                 .address("123 Test Street")
                 .city("Montreal")
@@ -1037,7 +1037,7 @@ class CartControllerUnitTest {
                 eq("c-1"),
                 billingCaptor.capture());
         BillingRequestDTO capturedBilling = billingCaptor.getValue();
-        assertEquals("Test Customer", capturedBilling.getFullName());
+        assertEquals("Test Customer", capturedBilling.getCustomerName());
         assertEquals("customer@example.com", capturedBilling.getEmail());
         assertEquals("123 Test Street", capturedBilling.getAddress());
         assertEquals("Montreal", capturedBilling.getCity());
@@ -1051,7 +1051,7 @@ class CartControllerUnitTest {
     void checkoutCart_missing_returns404() {
         // Arrange
         BillingRequestDTO billing = BillingRequestDTO.builder()
-                .fullName("Test Customer")
+                .customerName("Test Customer")
                 .email("customer@example.com")
                 .address("123 Test Street")
                 .city("Montreal")

@@ -997,7 +997,7 @@ const UserCart: React.FC = () => {
         return;
       }
       const checkoutBilling = {
-        customerName: usedBilling.fullName,
+        customerName: usedBilling.customerName,
         email: usedBilling.email,
         address: usedBilling.address,
         city: usedBilling.city,
@@ -1063,7 +1063,7 @@ const UserCart: React.FC = () => {
         userId: user?.userId || 'anonymous',
         billing: usedBilling
           ? {
-              customerName: usedBilling.fullName,
+              customerName: usedBilling.customerName,
               email: usedBilling.email,
               address: usedBilling.address,
               city: usedBilling.city,

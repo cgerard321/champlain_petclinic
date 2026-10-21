@@ -1157,7 +1157,7 @@ public class CartServiceClientTest {
         // Arrange
         String cartId = "c-55";
         BillingRequestDTO billing = BillingRequestDTO.builder()
-                .fullName("Test Customer")
+                .customerName("Test Customer")
                 .email("customer@example.com")
                 .address("123 Test Street")
                 .city("Montreal")

@@ -515,7 +515,7 @@ public class CartControllerV1UnitTest {
         // Arrange
         String cartId = "cart-123";
         BillingRequestDTO billing = BillingRequestDTO.builder()
-                .fullName("Test Customer")
+                .customerName("Test Customer")
                 .email("customer@example.com")
                 .address("123 Test Street")
                 .city("Montreal")
@@ -542,7 +542,7 @@ public class CartControllerV1UnitTest {
                 ArgumentCaptor.forClass(BillingRequestDTO.class);
         verify(cartServiceClient).checkoutCart(eq(cartId), billingCaptor.capture());
         BillingRequestDTO capturedBilling = billingCaptor.getValue();
-        assertEquals("Test Customer", capturedBilling.getFullName());
+        assertEquals("Test Customer", capturedBilling.getCustomerName());
         assertEquals("customer@example.com", capturedBilling.getEmail());
         assertEquals("123 Test Street", capturedBilling.getAddress());
         assertEquals("Montreal", capturedBilling.getCity());
@@ -558,7 +558,7 @@ public class CartControllerV1UnitTest {
         // Arrange
         String cartId = "non-existent-cart";
         BillingRequestDTO billing = BillingRequestDTO.builder()
-                .fullName("Test Customer")
+                .customerName("Test Customer")
                 .email("customer@example.com")
                 .address("123 Test Street")
                 .city("Montreal")

@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BillingRequestDTO {
-    private String fullName;
+    private String customerName;
     private String email;
     private String address;
     private String city;
