@@ -1,0 +1,59 @@
+.average-review {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #d5dce2;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #263544;
+}
+
+.average-review h3 {
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+}
+
+.average-review-rows {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.average-review-row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) minmax(5rem, 2fr) auto;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+}
+
+.average-review-row meter {
+  width: 100%;
+  height: 1.25rem;
+  accent-color: #005a8b;
+}
+
+.average-review-count {
+  grid-column: 2 / -1;
+  font-size: 0.85rem;
+}
+
+.average-review-empty {
+  grid-column: 2 / -1;
+}
+
+.average-review-score {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .average-review-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .average-review-label {
+    grid-column: 1 / -1;
+  }
+
+  .average-review-count,
+  .average-review-empty {
+    grid-column: 1 / -1;
+  }
+}

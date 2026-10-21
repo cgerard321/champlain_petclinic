@@ -17,6 +17,7 @@ import { ProductModel } from '@/features/products/models/ProductModels/ProductMo
 import { Reveal } from '@/shared/components';
 import { MdClear } from 'react-icons/md';
 import './ReviewsList.css';
+import { AverageReview } from './AverageReview';
 import Stack from 'react-bootstrap/Stack';
 import { likeReview } from '@/features/products/api/likeReview.ts';
 
@@ -38,7 +39,11 @@ export function ReviewsList({
   currentProduct,
 }: ReviewListProps): JSX.Element {
   const { t } = useTranslation('products');
-  const [productReviews, setProductReviews] = useState<RatingModel[]>([]);
+  const [productRatings, setProductRatings] = useState<RatingModel[]>([]);
+  const [ratingsStatus, setRatingsStatus] = useState<
+    'loading' | 'ready' | 'error'
+  >('loading');
+  const productReviews = productRatings.filter(rating => rating.review !== '');
   const [currentUserReview, setCurrentUserReview] = useState<RatingModel>({
     rating: 0,
     review: '',
@@ -65,6 +70,7 @@ export function ReviewsList({
 
   const fetchReviews = async (): Promise<void> => {
     if (!productId) return;
+    setRatingsStatus('loading');
     try {
       let reviews: RatingModel[];
       try {
@@ -77,8 +83,10 @@ export function ReviewsList({
         );
         reviews = await getUserRatingsForProduct(productId);
       }
-      setProductReviews(reviews.filter((r: RatingModel) => r.review !== ''));
+      setProductRatings(reviews);
+      setRatingsStatus('ready');
     } catch (err) {
+      setRatingsStatus('error');
       console.error('Failed to fetch product ratings', err);
     }
   };
@@ -125,7 +133,7 @@ export function ReviewsList({
         throw err;
       }
     }
-    fetchReviews();
+    await fetchReviews();
   };
 
   useEffect(() => {
@@ -162,7 +170,7 @@ export function ReviewsList({
     }
 
     const result = await likeReview(productId, review.customerId);
-    setProductReviews(currentReviews =>
+    setProductRatings(currentReviews =>
       currentReviews.map(currentReview =>
         currentReview.customerId === review.customerId
           ? {
@@ -192,6 +200,7 @@ export function ReviewsList({
     <div className="review-section-container">
       <div className="reviewproduct-container">
         <h2>{t('customerReview')}</h2>
+        <AverageReview ratings={productRatings} status={ratingsStatus} />
 
         <div className="rating-summary-container">
           <div className="rating-left">

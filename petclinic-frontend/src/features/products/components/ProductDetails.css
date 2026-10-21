@@ -455,7 +455,7 @@
   flex: 1;
   max-width: 350px;
   margin-left: 80px;
-  margin-top: -60px;
+  margin-top: 0;
 }
 
 .rating-section-separator {
@@ -676,5 +676,36 @@
   .reviewsforproduct-container .reviewbox {
     width: 100%;
     max-width: calc(100vw - 4.5rem);
+  }
+}
+
+/* Keep the average box, rating distribution, and written reviews separate. */
+.reviewproduct-container > .average-review {
+  margin-bottom: 2rem;
+}
+
+.reviewproduct-container > .rating-summary-container {
+  gap: 2rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 0;
+}
+
+.reviewproduct-container .rating-breakdown {
+  margin-left: auto;
+}
+
+.reviewproduct-container > .rating-section-separator {
+  margin: 1.5rem 0;
+}
+
+@media (max-width: 700px) {
+  .reviewproduct-container > .rating-summary-container {
+    flex-direction: column;
+  }
+
+  .reviewproduct-container .rating-breakdown {
+    width: 100%;
+    max-width: none;
+    margin-left: 0;
   }
 }
