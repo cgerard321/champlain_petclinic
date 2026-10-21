@@ -10,6 +10,7 @@ import type { OrderModel } from '@/features/carts/models/OrderModel';
 import Invoice from '@/features/carts/components/Invoice';
 import type { InvoiceFull } from '@/features/carts/components/Invoice';
 import { roundToCents } from '@/features/carts/utils/taxUtils';
+import { useProductText } from '@/features/carts/utils/useProductText';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 
 export default function OrderDetailsPage(): JSX.Element {
@@ -21,7 +22,9 @@ export default function OrderDetailsPage(): JSX.Element {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [showInvoice, setShowInvoice] = useState(false);
-
+  const { localizedName, localizedDescription } = useProductText(
+    order?.products ?? []
+  );
   const locale = i18n.language.startsWith('fr') ? 'fr-CA' : 'en-CA';
 
   const formatCurrency = (value: number): string =>
@@ -160,12 +163,11 @@ export default function OrderDetailsPage(): JSX.Element {
                   key={`${product.productId}-${index}`}
                 >
                   <div className="customer-orders__product-info">
-                    <h5>{product.productName}</h5>
+                    <h5>{localizedName(product)}</h5>
 
                     <p className="customer-orders__muted">
-                      {product.productDescription}
+                      {localizedDescription(product)}
                     </p>
-
                     <p className="mb-0">
                       {t('orderHistory.quantity')}: {product.quantityInCart}
                     </p>
