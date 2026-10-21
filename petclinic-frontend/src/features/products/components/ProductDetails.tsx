@@ -35,7 +35,7 @@ export default function ProductDetails(): JSX.Element {
   const { t, i18n } = useTranslation('products');
   const language = i18n.resolvedLanguage || i18n.language || 'en';
   const isAdmin = IsAdmin();
-  const { user, isAuthenticated, isLoading: isUserLoading } = useUser();
+  const { user, isAuthenticated } = useUser();
   const isInventoryManager = IsInventoryManager();
   const isVet = IsVet();
   const isReceptionist = IsReceptionist();
@@ -95,6 +95,10 @@ export default function ProductDetails(): JSX.Element {
     getProduct(productId)
       .then(res => {
         setCurrentProduct(res);
+        if (!res.isUnlisted) {
+          addProductToRecentlyViewed(res, user.userId);
+        }
+
         setIsLoading(false);
       })
       .catch((err: AxiosError) => {
@@ -114,19 +118,6 @@ export default function ProductDetails(): JSX.Element {
     fetchProduct();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId, isAuthenticated]);
-
-  useEffect(() => {
-    if (
-      isUserLoading ||
-      isLoading ||
-      !currentProduct.productId ||
-      currentProduct.isUnlisted
-    ) {
-      return;
-    }
-
-    addProductToRecentlyViewed(currentProduct, user.userId);
-  }, [currentProduct, isLoading, isUserLoading, user.userId]);
 
   const isUnlisted = currentProduct.isUnlisted;
 
