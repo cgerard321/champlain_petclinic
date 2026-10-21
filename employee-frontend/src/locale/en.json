@@ -326,10 +326,21 @@
         "phone_hint": "Example: (514) 555-0123, with an optional extension #1234.",
         "biography_hint": "At least 10 characters.",
         "title": "Edit profile",
-        "description": "All fields are required. Specialties, status, and working hours are preserved.",
+        "description": "All fields are required. Specialties and status are preserved.",
         "legend": "Veterinarian information",
         "saving": "Saving…",
         "leave": "Leave this page and discard unsaved changes?"
+      },
+      "availability": {
+        "title": "Availability",
+        "description": "Remove a time slot or a whole day. Removals take effect when you save.",
+        "remove_day": "Remove this day",
+        "remove_hour": "Remove",
+        "no_hours": "No hours specified.",
+        "empty": "No availability on this profile.",
+        "confirm_title": "Remove this availability?",
+        "confirm_message": "The following availability will be removed from the profile: {$slots}. This cannot be undone once saved.",
+        "confirm": "Remove"
       },
       "detail": {
         "back": "Back to directory",

@@ -104,6 +104,85 @@ button:focus-visible {
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+.availability {
+  margin-bottom: 24px;
+}
+
+.availability h3 {
+  margin: 0 0 4px;
+  font-size: 18px;
+}
+
+.day-list,
+.hour-list {
+  list-style: none;
+  padding: 0;
+}
+
+.day-list {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0 0;
+}
+
+.day {
+  padding: 16px;
+  border: 1px solid #dce3d8;
+  border-radius: 12px;
+}
+
+.day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.day-label {
+  font-weight: 600;
+}
+
+.hour-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+
+.hour {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 6px 6px 12px;
+  border: 1px solid #7d9185;
+  border-radius: 999px;
+  background: #f4f7f2;
+}
+
+.remove-day {
+  padding: 8px 14px;
+  border-color: #a12020;
+  background: #fff;
+  color: #a12020;
+  font-size: 14px;
+}
+
+.remove-hour {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-color: #a12020;
+  border-radius: 50%;
+  background: #fff;
+  color: #a12020;
+  font-size: 18px;
+  line-height: 1;
+}
+
 @media (width <= 600px) {
   form {
     padding: 16px;
@@ -150,5 +229,27 @@ button:focus-visible {
   textarea:focus-visible,
   button:focus-visible {
     outline: 3px solid #a3b8ac !important;
+  }
+
+  h3,
+  .day-label {
+    color: white !important;
+  }
+
+  .day {
+    border-color: var(--mat-sys-surface-container-high) !important;
+  }
+
+  .hour {
+    background-color: var(--mat-sys-surface-container-highest) !important;
+    border: 1px solid rgb(255 255 255 / 12%) !important;
+    color: white !important;
+  }
+
+  .remove-day,
+  .remove-hour {
+    background-color: var(--mat-sys-surface-container-highest) !important;
+    border-color: #ff9c9c !important;
+    color: #ff9c9c !important;
   }
 }
