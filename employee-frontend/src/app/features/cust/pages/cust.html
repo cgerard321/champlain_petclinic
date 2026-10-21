@@ -39,14 +39,16 @@
             <tr>
               <td>
                 <div class="customer-name">
-                <button
-                  mat-flat-button
-                  color="primary"
-                  type="button"
-                  (click)="checkCustomerDetails(customer.customerId)"
-                  >
-                  {{ customer.firstName }} {{ customer.lastName }}
-                </button>
+                  @if (canViewCustomerDetails()) {
+                    <button
+                      type="button"
+                      (click)="checkCustomerDetails(customer.customerId)"
+                    >
+                      {{ customer.firstName }} {{ customer.lastName }}
+                    </button>
+                  } @else {
+                    <span>{{ customer.firstName }} {{ customer.lastName }}</span>
+                  }
                 </div>
               </td>
               <td>{{ customer.address || notAvailable }}</td>

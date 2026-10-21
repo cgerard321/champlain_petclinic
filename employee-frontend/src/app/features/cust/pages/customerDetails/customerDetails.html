@@ -1,1 +1,66 @@
-<h1>Hello World!</h1>
+<h1>Customer details</h1>
+@if (isLoading()) {
+  <p role="status">Loading customer...</p>
+}
+@if (errorMessage()) {
+  <p role="alert">{{ errorMessage() }}</p>
+}
+@if (customer(); as details) {
+  @if (isEditing()) {
+    <form [formGroup]="form" (ngSubmit)="handleCustomerUpdated()">
+      <label for="firstName">First name</label>
+      <input id="firstName" formControlName="firstName" [readOnly]="isSaving()" />
+      @if (form.controls.firstName.touched && form.controls.firstName.invalid) {
+        <p role="alert">First name is required.</p>
+      }
+      <label for="lastName">Last name</label>
+      <input id="lastName" formControlName="lastName" [readOnly]="isSaving()" />
+      @if (form.controls.lastName.touched && form.controls.lastName.invalid) {
+        <p role="alert">Last name is required.</p>
+      }
+      <label for="address">Address</label>
+      <input id="address" formControlName="address" [readOnly]="isSaving()" />
+      @if (form.controls.address.touched && form.controls.address.invalid) {
+        <p role="alert">Address is required.</p>
+      }
+      <label for="city">City</label>
+      <input id="city" formControlName="city" [readOnly]="isSaving()" />
+      @if (form.controls.city.touched && form.controls.city.invalid) {
+        <p role="alert">City is required.</p>
+      }
+      <label for="telephone">Telephone</label>
+      <input id="telephone" formControlName="telephone" [readOnly]="isSaving()" />
+      @if (form.controls.telephone.touched && form.controls.telephone.invalid) {
+        <p role="alert">Telephone is required.</p>
+      }
+      <label for="province">Province</label>
+      <select id="province" formControlName="province">
+        <option value="">Select a province</option>
+        @for (province of provinces; track province) {
+          <option [value]="province">{{ province }}</option>
+        }
+      </select>
+
+      @if (form.controls.province.touched && form.controls.province.invalid) {
+        <p role="alert">Province is required.</p>
+      }
+      <button type="submit" [disabled]="isSaving()">
+        {{ isSaving() ? 'Saving...' : 'Save' }}
+      </button>
+    </form>
+    <button
+      type="button"
+      (click)="isEditing.set(false)"
+      [disabled]="isSaving()"
+    >
+      Cancel
+    </button>
+  } @else {
+    <p>First name: {{ details.firstName }}</p>
+    <p>Last name: {{ details.lastName }}</p>
+    <p>Address: {{details.address}}</p>
+    <p>City: {{details.city}}</p>
+    <p>Telephone: {{details.telephone}}</p>
+    <button type="button" (click)="handleEditCustomer()">Edit</button>
+  }
+}

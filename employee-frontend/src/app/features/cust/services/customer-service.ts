@@ -1,17 +1,35 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, filter, map } from 'rxjs';
 
 import { SseClient } from '@core/services/sse-client';
 import { Customer, Pet, PetType } from '@features/cust/models/customer.model';
+import { CustomerRequestModel } from '@features/cust/models/customerRequestModel';
+import { CustomerResponseModel } from '@features/cust/models/customerResponseModel';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
+  private readonly http = inject(HttpClient);
   private readonly sse = inject(SseClient);
 
   getCustomers(): Observable<Customer> {
     return this.sse.stream('/api/gateway/customers', { keepAlive: false }).pipe(
       filter((event): event is MessageEvent<string> => event.type !== 'error'),
       map((event) => JSON.parse(event.data) as Customer),
+    );
+  }
+  getCustomer(customerId: string): Observable<CustomerResponseModel> {
+    return this.http.get<CustomerResponseModel>(
+      `/api/gateway/customers/detail/${encodeURIComponent(customerId)}`,
+    );
+  }
+  updateCustomer(
+    customerId: string,
+    customer: CustomerRequestModel,
+  ): Observable<CustomerResponseModel> {
+    return this.http.put<CustomerResponseModel>(
+      `/api/gateway/customers/${encodeURIComponent(customerId)}`,
+      customer,
     );
   }
   getPetDetails(customerId: string): Observable<Pet> {
