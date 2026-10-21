@@ -196,8 +196,9 @@ const ProductList = function Productlist({
   return (
     <div className="product-list-container">
       <div className="main-content">
-        {view === 'catalog' && <RecentlyViewedProducts />}
-
+        {view === 'catalog' && recentlyClickedProducts.length > 0 && (
+          <RecentlyViewedProducts />
+        )}
         {view === 'catalog' && (
           <Reveal delay={80}>
             <div ref={catalogRef} className="products-section-container ">
@@ -221,6 +222,10 @@ const ProductList = function Productlist({
                               current => current.productId === p.productId
                             ) ?? p
                           }
+                          recentlyViewed={recentlyClickedProducts.some(
+                            recentlyViewedProduct =>
+                              recentlyViewedProduct.productId === p.productId
+                          )}
                         />
                       </div>
                     </Reveal>

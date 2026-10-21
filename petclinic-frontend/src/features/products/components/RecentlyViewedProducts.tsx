@@ -7,7 +7,7 @@ import '@/features/products/ProductList.css';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
 
-export default function RecentlyViewedProducts(): JSX.Element {
+export default function RecentlyViewedProducts(): JSX.Element | null {
   const { t } = useTranslation('products');
   const { user } = useUser();
   const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
@@ -28,6 +28,10 @@ export default function RecentlyViewedProducts(): JSX.Element {
   const handleProductClick = (productId: string): void => {
     navigate(`/products/${productId}`);
   };
+
+  if (recentlyClickedProducts.length === 0) {
+    return null;
+  }
 
   return (
     <div className="products-section-container">
