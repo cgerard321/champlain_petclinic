@@ -70,6 +70,7 @@
   "bundles": "Ensembles",
   "recent": "Consultés récemment",
   "noRecent": "Aucun produit consulté récemment.",
+  "recentlyViewedBadge": "Consulté récemment",
   "loading": "Chargement des produits…",
   "noItems": "Aucun produit trouvé.",
   "noBundles": "Aucun ensemble disponible",

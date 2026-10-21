@@ -17,8 +17,13 @@ public class OrderResponseDTO {
     private String orderId;
     private String customerId;
     private String customerName;
-    private String customerAddress;
+    private String email;
     private LocalDateTime orderDate;
+    private String address;
+    private String city;
+    private String province;
+    private String postalCode;
+
 
     private List<CartProductResponseDTO> products;
 

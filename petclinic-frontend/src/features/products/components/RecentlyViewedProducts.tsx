@@ -7,7 +7,7 @@ import '@/features/products/ProductList.css';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
 
-export default function RecentlyViewedProducts(): JSX.Element {
+export default function RecentlyViewedProducts(): JSX.Element | null {
   const { t } = useTranslation('products');
   const { user } = useUser();
   const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
@@ -29,6 +29,10 @@ export default function RecentlyViewedProducts(): JSX.Element {
     navigate(`/products/${productId}`);
   };
 
+  if (recentlyClickedProducts.length === 0) {
+    return null;
+  }
+
   return (
     <div className="products-section-container">
       <h2 className="section-title">{t('recent')}</h2>
@@ -42,7 +46,11 @@ export default function RecentlyViewedProducts(): JSX.Element {
                 onClick={() => handleProductClick(product.productId)}
                 style={{ cursor: 'pointer' }}
               >
-                <Product key={product.productId} product={product} />
+                <Product
+                  key={product.productId}
+                  product={product}
+                  recentlyViewed
+                />
               </div>
             ))
         ) : (
