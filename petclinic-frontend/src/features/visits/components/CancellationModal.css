@@ -3,7 +3,19 @@
 }
 
 .cancellation-option {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    width: 100%;
     margin-bottom: 0.5rem;
+    text-align: left;
+}
+
+.basic-modal-body .cancellation-option input {
+    flex: 0 0 auto;
+    width: auto;
+    margin: 0;
 }
 
 .cancellation-other {
