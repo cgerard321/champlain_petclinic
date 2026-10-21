@@ -117,7 +117,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productId(product1.getProductId())
                 .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
                 .rating((byte) 5)
-                .review("My dog loves this food!")
+                .review("**My dog loves this food!**")
                 .build();
 
         Rating rating2prod1 = Rating.builder()
@@ -131,7 +131,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productId(product2.getProductId())
                 .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
                 .rating((byte) 4)
-                .review("Great litter, clumps well")
+                .review("**Great litter, clumps well**")
                 .build();
 
         Rating rating2prod2 = Rating.builder()
@@ -145,7 +145,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productId(product3.getProductId())
                 .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
                 .rating((byte) 3)
-                .review("Works well, but doesn't last long")
+                .review("**Works well, but doesn't last long**")
                 .build();
 
         Rating rating2prod3 = Rating.builder()
@@ -159,7 +159,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productId(product4.getProductId())
                 .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
                 .rating((byte) 5)
-                .review("Great cage, easy to clean")
+                .review("**Great cage, easy to clean**")
                 .build();
 
         Rating rating2prod4 = Rating.builder()
@@ -173,7 +173,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productId(product5.getProductId())
                 .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
                 .rating((byte) 4)
-                .review("Works well, but a bit noisy")
+                .review("**Works well, but a bit noisy**")
                 .build();
 
         Rating rating2prod5 = Rating.builder()
@@ -187,7 +187,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productId(product6.getProductId())
                 .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
                 .rating((byte) 5)
-                .review("Great saddle, very comfortable")
+                .review("**Great saddle, very comfortable**")
                 .build();
 
         Rating rating2prod6 = Rating.builder()
@@ -201,7 +201,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productId(product7.getProductId())
                 .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
                 .rating((byte) 4)
-                .review("Spacious hutch, easy to clean")
+                .review("**Spacious hutch, easy to clean**")
                 .build();
 
         Rating rating2prod7 = Rating.builder()
@@ -215,7 +215,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productId(product8.getProductId())
                 .customerId("810440e8-cae0-48f7-aa4f-830239b82b78")
                 .rating((byte) 3)
-                .review("Works well, but hard to adjust")
+                .review("**Works well, but hard to adjust**")
                 .build();
 
         Rating rating2prod8 = Rating.builder()
@@ -723,59 +723,59 @@ public class DataLoaderService implements CommandLineRunner {
                 .toList());
 
         List<Rating> additionalRatingSeeds = new ArrayList<>(List.of(
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7001", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "My senior dog moves more comfortably after using these chews.", "2026-01-08T09:15:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7001", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "**My senior dog moves more comfortably after using these chews.**", "2026-01-08T09:15:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7001", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 4, "The chews are easy to give and have helped during our daily walks.", "2026-02-14T14:20:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7002", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 4, "The tablets were simple to administer and gentle on my puppy.", "2026-01-19T11:05:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7002", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 4, "**The tablets were simple to administer and gentle on my puppy.**", "2026-01-19T11:05:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7002", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", 5, "The clear instructions made the treatment easy to follow.", "2026-03-02T16:40:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7003", "9fe8a36a-36f3-4198-a5cc-d96371083493", 5, "This solution makes routine ear cleaning quick and gentle.", "2026-01-27T10:10:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7003", "9fe8a36a-36f3-4198-a5cc-d96371083493", 5, "**This solution makes routine ear cleaning quick and gentle.**", "2026-01-27T10:10:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7003", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 4, "The bottle is easy to use and does not leave a strong smell.", "2026-04-11T13:30:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7004", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", 4, "The gel is easy to apply and our dog tolerates it well.", "2026-02-06T08:45:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7004", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", 4, "**The gel is easy to apply and our dog tolerates it well.**", "2026-02-06T08:45:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7004", "c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", 3, "The applicator works well, although the tube is small.", "2026-05-09T17:05:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7005", "b3d09eab-4085-4b2d-a121-78a0a2f9e501", 5, "My dog enjoys these calming chews before car trips.", "2026-02-22T12:00:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7005", "b3d09eab-4085-4b2d-a121-78a0a2f9e501", 5, "**My dog enjoys these calming chews before car trips.**", "2026-02-22T12:00:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7005", "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", 4, "They help make stressful visits feel more manageable.", "2026-06-03T15:25:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7006", "48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", 4, "This paste has helped reduce hairballs for our indoor cat.", "2026-01-15T09:50:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7006", "48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", 4, "**This paste has helped reduce hairballs for our indoor cat.**", "2026-01-15T09:50:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7006", "9f6accd1-e943-4322-932e-199d93824317", 3, "The paste is effective but takes some patience to serve.", "2026-03-18T18:10:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7008", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", 5, "The drops are easy to apply and our cat stayed comfortable.", "2026-02-28T11:35:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7008", "810440e8-cae0-48f7-aa4f-830239b82b78", 4, "The monthly treatment is convenient and easy to remember.", "2026-07-07T16:45:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7009", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 5, "The bowl is sturdy, easy to clean, and stays in place.", "2026-01-31T10:00:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7008", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", 5, "**The drops are easy to apply** and our cat stayed comfortable.", "2026-02-28T11:35:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7008", "810440e8-cae0-48f7-aa4f-830239b82b78", 4, "**The monthly treatment is convenient and easy to remember.**", "2026-07-07T16:45:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7009", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 5, "**The bowl is sturdy, easy to clean, and stays in place.**", "2026-01-31T10:00:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7009", "9fe8a36a-36f3-4198-a5cc-d96371083493", 4, "The non-slip base works well on our kitchen floor.", "2026-04-23T13:15:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7010", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 5, "The reflective strip makes evening walks feel much safer.", "2026-02-12T19:20:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7010", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 5, "**The reflective strip makes evening walks feel much safer.**", "2026-02-12T19:20:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7010", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", 4, "The leash is comfortable to hold and feels durable.", "2026-05-17T08:30:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7011", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 4, "The soft collar helped prevent scratching during recovery.", "2026-03-06T14:05:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7011", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 4, "**The soft collar helped prevent scratching during recovery.**", "2026-03-06T14:05:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7011", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", 3, "The adjustment is useful, though the fit took some trial and error.", "2026-06-21T12:40:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7013", "c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", 5, "The scratching post is compact and my cat uses it every day.", "2026-01-11T17:30:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7013", "c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", 5, "**The scratching post is compact and my cat uses it every day.**", "2026-01-11T17:30:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7013", "b3d09eab-4085-4b2d-a121-78a0a2f9e501", 4, "The toy attachment keeps our cat interested for longer.", "2026-04-02T09:40:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7014", "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", 4, "The brush removes loose fur without pulling.", "2026-02-03T11:25:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7014", "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", 4, "**The brush removes loose fur without pulling.**", "2026-02-03T11:25:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7014", "48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", 5, "The set has everything needed for our weekly grooming routine.", "2026-05-28T15:50:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7015", "9f6accd1-e943-4322-932e-199d93824317", 5, "The bottle does not leak in the car or on walks.", "2026-03-13T08:20:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7015", "9f6accd1-e943-4322-932e-199d93824317", 5, "**The bottle does not leak in the car or on walks.**", "2026-03-13T08:20:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7015", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", 4, "It is light enough to carry and easy for our dog to drink from.", "2026-07-19T10:45:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7017", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "This food is gentle on my dog's stomach and easy to digest.", "2026-01-23T13:10:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7017", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "**This food is gentle on my dog's stomach and easy to digest.**", "2026-01-23T13:10:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7017", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 4, "Our dog enjoys the food and has had fewer stomach upsets.", "2026-04-16T16:00:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7018", "9fe8a36a-36f3-4198-a5cc-d96371083493", 4, "The formula works well for our indoor cat's routine.", "2026-02-09T09:05:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7018", "9fe8a36a-36f3-4198-a5cc-d96371083493", 4, "**The formula works well for our indoor cat's routine.**", "2026-02-09T09:05:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7018", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 3, "The kibble size is good, but my cat needed time to switch foods.", "2026-06-12T14:35:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7019", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", 5, "The kittens took to this food right away.", "2026-01-06T10:55:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7019", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", 5, "**The kittens took to this food right away.**", "2026-01-06T10:55:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7019", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 4, "It provides a convenient starter diet for growing kittens.", "2026-05-04T12:25:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7020", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", 5, "The hay is fresh and our rabbits enjoy it every day.", "2026-02-18T08:10:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7020", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", 5, "**The hay is fresh and our rabbits enjoy it every day.**", "2026-02-18T08:10:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7020", "c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", 4, "The bag stays fresh and has very little dust.", "2026-07-02T17:15:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7021", "b3d09eab-4085-4b2d-a121-78a0a2f9e501", 5, "The flakes float well and the fish finish them quickly.", "2026-03-22T11:45:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7021", "b3d09eab-4085-4b2d-a121-78a0a2f9e501", 5, "**The flakes float well and the fish finish them quickly.**", "2026-03-22T11:45:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7021", "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", 4, "The flakes are a good size for our community tank.", "2026-08-08T09:30:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7022", "48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", 4, "The seed blend gives our parakeet a nice variety.", "2026-01-29T15:10:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7022", "48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", 4, "**The seed blend gives our parakeet a nice variety.**", "2026-01-29T15:10:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7022", "9f6accd1-e943-4322-932e-199d93824317", 5, "Our bird picks out the favorite seeds first every morning.", "2026-04-28T07:50:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7023", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", 5, "The wet food has a texture our senior cat accepts easily.", "2026-02-25T18:00:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7023", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", 5, "**The wet food has a texture our senior cat accepts easily.**", "2026-02-25T18:00:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7023", "810440e8-cae0-48f7-aa4f-830239b82b78", 4, "The small packs keep each meal fresh and convenient.", "2026-06-30T12:15:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7024", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 4, "The supplement mixes easily into our horse's water.", "2026-03-09T10:35:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7024", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 4, "**The supplement mixes easily into our horse's water.**", "2026-03-09T10:35:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7024", "9fe8a36a-36f3-4198-a5cc-d96371083493", 3, "The packaging is convenient for keeping portions dry.", "2026-09-01T14:50:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7025", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 5, "The scale gives consistent readings and is easy to use.", "2026-01-17T09:00:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7025", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 5, "**The scale gives consistent readings and is easy to use.**", "2026-01-17T09:00:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7025", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", 4, "The display is clear enough to read while holding our cat.", "2026-05-22T16:20:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7027", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 5, "The carrier has good airflow and feels secure in the car.", "2026-02-16T11:00:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7027", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 5, "**The carrier has good airflow and feels secure in the car.**", "2026-02-16T11:00:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7027", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", 4, "It is light enough to carry without feeling flimsy.", "2026-07-14T13:40:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7028", "c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", 4, "The test strips are clearly marked and easy to compare.", "2026-03-28T08:25:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7028", "c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", 4, "**The test strips are clearly marked and easy to compare.**", "2026-03-28T08:25:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7028", "b3d09eab-4085-4b2d-a121-78a0a2f9e501", 5, "This kit makes weekly water checks much less intimidating.", "2026-08-19T15:05:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7029", "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", 4, "The light is bright enough for careful home examinations.", "2026-04-07T10:45:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7029", "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", 4, "**The light is bright enough for careful home examinations.**", "2026-04-07T10:45:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7029", "48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", 5, "The rechargeable battery lasts through several checks.", "2026-09-12T17:30:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7030", "9f6accd1-e943-4322-932e-199d93824317", 5, "The grinder is quiet enough that our dog stays relaxed.", "2026-02-01T14:15:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7030", "9f6accd1-e943-4322-932e-199d93824317", 5, "**The grinder is quiet enough that our dog stays relaxed.**", "2026-02-01T14:15:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7030", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", 4, "The adjustable speed makes trimming small nails easier.", "2026-06-08T09:35:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7031", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "The exercise pen folds away easily and gives our puppy room to play.", "2026-03-15T12:05:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7031", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "**The exercise pen folds away easily and gives our puppy room to play.**", "2026-03-15T12:05:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7031", "9fe8a36a-36f3-4198-a5cc-d96371083493", 4, "The panels are simple to assemble and feel sturdy.", "2026-10-02T16:25:00")
         ));
 
@@ -786,20 +786,20 @@ public class DataLoaderService implements CommandLineRunner {
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7004", "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", 5, "Our vet recommended this gel and it is easy to use each night.", "2026-08-22T18:15:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7005", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", 3, "The chews help somewhat, though the herbal scent is noticeable.", "2026-09-18T11:30:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7006", "810440e8-cae0-48f7-aa4f-830239b82b78", 2, "It helped occasionally, but our cat still had some hairballs.", "2026-08-04T15:45:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7007", "810440e8-cae0-48f7-aa4f-830239b82b78", 2, "The spray is easy to apply, but the nozzle can clog.", "2026-02-05T10:15:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7007", "810440e8-cae0-48f7-aa4f-830239b82b78", 2, "**The spray is easy to apply, but the nozzle can clog.**", "2026-02-05T10:15:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7007", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 3, "It is useful to keep nearby for small scratches and scrapes.", "2026-04-19T14:35:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7007", "9fe8a36a-36f3-4198-a5cc-d96371083493", 1, "The spray did not work well for our pet's minor irritation.", "2026-07-11T08:50:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7008", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 1, "The applicator was difficult to use on our cat.", "2026-09-26T16:10:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7009", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 2, "The bowl is sturdy, but the base is larger than expected.", "2026-08-16T12:50:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7010", "9fe8a36a-36f3-4198-a5cc-d96371083493", 3, "The leash is good for evening walks, although the clasp is stiff.", "2026-09-09T18:05:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7011", "c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", 2, "The collar is comfortable, but it loosened during active play.", "2026-08-28T11:15:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7012", "810440e8-cae0-48f7-aa4f-830239b82b78", 4, "The bed provides excellent support for our older dog.", "2026-03-12T09:10:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7012", "810440e8-cae0-48f7-aa4f-830239b82b78", 4, "**The bed provides excellent support for our older dog.**", "2026-03-12T09:10:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7012", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 3, "The cover washes well, but the bed is quite firm.", "2026-06-26T15:20:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7012", "9fe8a36a-36f3-4198-a5cc-d96371083493", 1, "The shape did not fit comfortably in our pet's usual sleeping area.", "2026-09-30T13:05:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7013", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", 1, "The post was too short for our larger cat.", "2026-08-06T17:45:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7014", "810440e8-cae0-48f7-aa4f-830239b82b78", 2, "The brush works, but the handle is less comfortable than expected.", "2026-09-14T10:30:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7015", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 3, "The bottle is useful, though the cap takes two hands to open.", "2026-08-12T14:55:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7016", "810440e8-cae0-48f7-aa4f-830239b82b78", 1, "The blanket warmed slowly and did not cover our whole pet bed.", "2026-01-28T19:00:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7016", "810440e8-cae0-48f7-aa4f-830239b82b78", 1, "**The blanket warmed slowly and did not cover our whole pet bed.**", "2026-01-28T19:00:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7016", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 2, "The fleece is soft, but the heat setting was difficult to adjust.", "2026-05-15T12:35:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7016", "9fe8a36a-36f3-4198-a5cc-d96371083493", 3, "It adds some warmth on cool evenings when placed under a blanket.", "2026-08-31T16:40:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7017", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 2, "Our dog ate it reluctantly and needed time to adjust.", "2026-09-03T09:35:00"),
@@ -811,7 +811,7 @@ public class DataLoaderService implements CommandLineRunner {
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7023", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 2, "The texture was not a good match for our picky senior cat.", "2026-09-07T17:20:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7024", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 1, "Our horse did not seem to benefit from this supplement.", "2026-08-14T08:45:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7025", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 2, "The scale is accurate, but the display is hard to see in low light.", "2026-09-24T12:10:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7026", "810440e8-cae0-48f7-aa4f-830239b82b78", 4, "The feeder schedule is easy to set and keeps meals consistent.", "2026-05-07T09:25:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7026", "810440e8-cae0-48f7-aa4f-830239b82b78", 4, "**The feeder schedule is easy to set and keeps meals consistent.**", "2026-05-07T09:25:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7026", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 2, "The hopper is useful, but the portion size needed adjustment.", "2026-07-29T16:15:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7026", "9fe8a36a-36f3-4198-a5cc-d96371083493", 3, "The timer works well after the initial setup.", "2026-09-29T11:50:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7027", "c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", 3, "The carrier is comfortable, but the door latch feels tight.", "2026-08-09T14:30:00"),
@@ -819,7 +819,7 @@ public class DataLoaderService implements CommandLineRunner {
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7029", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", 1, "The light stopped holding a charge after only a few uses.", "2026-08-27T18:35:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7030", "810440e8-cae0-48f7-aa4f-830239b82b78", 2, "The grinder is quiet, but it takes a long time on thicker nails.", "2026-09-11T13:20:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7031", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 3, "The pen is useful indoors, but the panels can shift on smooth floors.", "2026-08-18T15:40:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7032", "810440e8-cae0-48f7-aa4f-830239b82b78", 4, "The kit has useful basics for handling small household accidents.", "2026-04-14T09:55:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7032", "810440e8-cae0-48f7-aa4f-830239b82b78", 4, "**The kit has useful basics for handling small household accidents.**", "2026-04-14T09:55:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7032", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 2, "The case is compact, but a few items are difficult to remove.", "2026-07-23T12:30:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7032", "9fe8a36a-36f3-4198-a5cc-d96371083493", 1, "The kit did not include everything we expected for larger emergencies.", "2026-09-27T16:05:00")
         ));
@@ -845,7 +845,7 @@ public class DataLoaderService implements CommandLineRunner {
                 seedRating("1501f30e-1db1-44b2-a555-bca6f64450e4", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", 1, "Fish Tank Heater works as expected, although there is room for improvement.", "2026-05-15T13:34:00"),
                 seedRating("1501f30e-1db1-44b2-a555-bca6f64450e4", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 3, "Fish Tank Heater was not the right fit for our pet, but the product is easy to use.", "2026-06-18T14:41:00"),
                 seedRating("1501f30e-1db1-44b2-a555-bca6f64450e4", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", 4, "The product is useful, though we noticed a few small limitations.", "2026-08-15T17:30:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7001", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 5, "Senior Dog Joint Supplement has been useful for our pet's daily routine.", "2026-07-21T15:48:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7001", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 5, "**Pros:** easy to give and helpful on daily walks.", "2026-07-21T15:48:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7002", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Puppy Deworming Tablets has been useful for our pet's daily routine.", "2026-01-04T09:09:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7002", "9fe8a36a-36f3-4198-a5cc-d96371083493", 1, "Puppy Deworming Tablets works as expected, although there is room for improvement.", "2026-02-07T10:16:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7003", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Ear Cleaning Solution has been useful for our pet's daily routine.", "2026-04-13T12:30:00"),
@@ -854,7 +854,7 @@ public class DataLoaderService implements CommandLineRunner {
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7004", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Veterinary Dental Gel has been useful for our pet's daily routine.", "2026-07-22T15:51:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7004", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 1, "Veterinary Dental Gel works as expected, although there is room for improvement.", "2026-08-25T16:58:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7004", "9fe8a36a-36f3-4198-a5cc-d96371083493", 3, "Veterinary Dental Gel was not the right fit for our pet, but the product is easy to use.", "2026-09-02T17:05:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7004", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 5, "The product is useful, though we noticed a few small limitations.", "2026-03-23T13:30:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7004", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 5, "**What I liked:** simple nightly application and a clean tube.", "2026-03-23T13:30:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7005", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Calming Chews has been useful for our pet's daily routine.", "2026-01-05T09:12:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7006", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 5, "Cat Hairball Remedy has been useful for our pet's daily routine.", "2026-04-14T12:33:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7006", "9fe8a36a-36f3-4198-a5cc-d96371083493", 1, "Cat Hairball Remedy works as expected, although there is room for improvement.", "2026-05-17T13:40:00"),
@@ -864,7 +864,7 @@ public class DataLoaderService implements CommandLineRunner {
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7008", "9fe8a36a-36f3-4198-a5cc-d96371083493", 5, "Flea Treatment Drops has been useful for our pet's daily routine.", "2026-01-06T09:15:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7008", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 1, "Flea Treatment Drops works as expected, although there is room for improvement.", "2026-02-09T10:22:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7008", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", 3, "Flea Treatment Drops was not the right fit for our pet, but the product is easy to use.", "2026-03-12T11:29:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7008", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 2, "The product is useful, though we noticed a few small limitations.", "2026-07-05T17:30:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7008", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 2, "**Pros:** easy to apply.\n\n- Compact bottle\n- Simple monthly routine", "2026-07-05T17:30:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7009", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Stainless Steel Food Bowl has been useful for our pet's daily routine.", "2026-04-15T12:36:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7010", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Reflective Dog Leash has been useful for our pet's daily routine.", "2026-07-24T15:57:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7010", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 1, "Reflective Dog Leash works as expected, although there is room for improvement.", "2026-08-01T16:04:00"),
@@ -874,7 +874,7 @@ public class DataLoaderService implements CommandLineRunner {
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7012", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 5, "Orthopedic Pet Bed has been useful for our pet's daily routine.", "2026-04-16T12:39:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7012", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", 1, "Orthopedic Pet Bed works as expected, although there is room for improvement.", "2026-05-19T13:46:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7012", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 3, "Orthopedic Pet Bed was not the right fit for our pet, but the product is easy to use.", "2026-06-22T14:53:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7012", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", 4, "The product is useful, though we noticed a few small limitations.", "2026-02-13T13:30:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7012", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", 4, "> Our dog finally settles comfortably in the new bed.\n\nThe washable cover is a big help.", "2026-02-13T13:30:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7013", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Cat Scratching Post has been useful for our pet's daily routine.", "2026-07-25T15:00:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7014", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 5, "Grooming Brush Set has been useful for our pet's daily routine.", "2026-01-08T09:21:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7014", "9fe8a36a-36f3-4198-a5cc-d96371083493", 1, "Grooming Brush Set works as expected, although there is room for improvement.", "2026-02-11T10:28:00"),
@@ -885,7 +885,7 @@ public class DataLoaderService implements CommandLineRunner {
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7016", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", 1, "Heated Pet Blanket works as expected, although there is room for improvement.", "2026-08-03T16:10:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7016", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", 3, "Heated Pet Blanket was not the right fit for our pet, but the product is easy to use.", "2026-09-06T17:17:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7016", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", 5, "The product is useful, though we noticed a few small limitations.", "2026-06-21T17:30:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7017", "9fe8a36a-36f3-4198-a5cc-d96371083493", 5, "Sensitive Stomach Dog Food has been useful for our pet's daily routine.", "2026-01-09T09:24:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7017", "9fe8a36a-36f3-4198-a5cc-d96371083493", 5, "## Food transition\n\nThe kibble was easy to introduce over one week.", "2026-01-09T09:24:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7018", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Indoor Cat Formula has been useful for our pet's daily routine.", "2026-04-18T12:45:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7018", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 1, "Indoor Cat Formula works as expected, although there is room for improvement.", "2026-05-21T13:52:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7019", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Kitten Starter Food has been useful for our pet's daily routine.", "2026-07-01T15:06:00"),
@@ -895,7 +895,7 @@ public class DataLoaderService implements CommandLineRunner {
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7020", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 1, "Small Animal Timothy Hay works as expected, although there is room for improvement.", "2026-02-13T10:34:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7020", "9fe8a36a-36f3-4198-a5cc-d96371083493", 3, "Small Animal Timothy Hay was not the right fit for our pet, but the product is easy to use.", "2026-03-16T11:41:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7020", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 2, "The product is useful, though we noticed a few small limitations.", "2026-01-03T13:30:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7021", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Tropical Fish Flakes has been useful for our pet's daily routine.", "2026-04-19T12:48:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7021", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "**Feeding note:** start with a small portion.\n\nThe fish accepted it quickly.", "2026-04-19T12:48:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7022", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Parakeet Seed Blend has been useful for our pet's daily routine.", "2026-07-02T15:09:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7022", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 1, "Parakeet Seed Blend works as expected, although there is room for improvement.", "2026-08-05T16:16:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7023", "9fe8a36a-36f3-4198-a5cc-d96371083493", 5, "Senior Cat Wet Food Pack has been useful for our pet's daily routine.", "2026-01-11T09:30:00"),
@@ -904,19 +904,19 @@ public class DataLoaderService implements CommandLineRunner {
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7024", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Equine Electrolyte Supplement has been useful for our pet's daily routine.", "2026-04-20T12:51:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7024", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 1, "Equine Electrolyte Supplement works as expected, although there is room for improvement.", "2026-05-23T13:58:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7024", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", 3, "Equine Electrolyte Supplement was not the right fit for our pet, but the product is easy to use.", "2026-06-26T14:05:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7024", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", 4, "The product is useful, though we noticed a few small limitations.", "2026-05-11T17:30:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7024", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", 4, "**Good for:** active horses.\n\nThe powder mixes easily with water.", "2026-05-11T17:30:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7025", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Digital Pet Scale has been useful for our pet's daily routine.", "2026-07-03T15:12:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7026", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 5, "Automatic Feeder has been useful for our pet's daily routine.", "2026-01-12T09:33:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7026", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", 1, "Automatic Feeder works as expected, although there is room for improvement.", "2026-02-15T10:40:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7027", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Compact Pet Carrier has been useful for our pet's daily routine.", "2026-04-21T12:54:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7027", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 1, "Compact Pet Carrier works as expected, although there is room for improvement.", "2026-05-24T13:01:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7027", "9fe8a36a-36f3-4198-a5cc-d96371083493", 3, "Compact Pet Carrier was not the right fit for our pet, but the product is easy to use.", "2026-06-01T14:08:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7027", "9fe8a36a-36f3-4198-a5cc-d96371083493", 3, "- Comfortable carrier\n- Secure latch\n\n**Good for short trips.**", "2026-06-01T14:08:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7028", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "Aquarium Water Test Kit has been useful for our pet's daily routine.", "2026-07-04T15:15:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7028", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 1, "Aquarium Water Test Kit works as expected, although there is room for improvement.", "2026-08-07T16:22:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7028", "9fe8a36a-36f3-4198-a5cc-d96371083493", 3, "Aquarium Water Test Kit was not the right fit for our pet, but the product is easy to use.", "2026-09-10T17:29:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7028", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 5, "The product is useful, though we noticed a few small limitations.", "2026-09-19T13:30:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7029", "810440e8-cae0-48f7-aa4f-830239b82b78", 5, "LED Examination Light has been useful for our pet's daily routine.", "2026-01-13T09:36:00"),
-                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7030", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 5, "Pet Nail Grinder has been useful for our pet's daily routine.", "2026-04-22T12:57:00"),
+                seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7030", "584c5329-2b9a-43d4-ad2b-debaa92d6c02", 5, "**Quiet motor** and a useful speed setting for careful trimming.", "2026-04-22T12:57:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7030", "9fe8a36a-36f3-4198-a5cc-d96371083493", 1, "Pet Nail Grinder works as expected, although there is room for improvement.", "2026-05-25T13:04:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7031", "f470653d-05c5-4c45-b7a0-7d70f003d2ac", 5, "Foldable Exercise Pen has been useful for our pet's daily routine.", "2026-07-05T15:18:00"),
                 seedRating("b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7031", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", 1, "Foldable Exercise Pen works as expected, although there is room for improvement.", "2026-08-08T16:25:00"),
