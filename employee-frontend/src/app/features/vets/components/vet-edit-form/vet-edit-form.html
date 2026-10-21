@@ -41,18 +41,24 @@
       </div>
     }
     <section class="availability" aria-labelledby="availability-title">
-      <h3 id="availability-title" i18n="@@vets.availability.title">Disponibilités</h3>
+      <h3 id="availability-title" tabindex="-1" i18n="@@vets.availability.title">Disponibilités</h3>
       <p class="hint" i18n="@@vets.availability.description">
         Retirez une plage horaire ou une journée entière. Les retraits prennent effet à
         l’enregistrement.
       </p>
+      <p class="visually-hidden" role="status" aria-live="polite">{{ announcement() }}</p>
       @if (availability().length) {
         <ul class="day-list">
           @for (entry of availability(); track entry.day) {
             <li class="day">
               <div class="day-header">
                 <span class="day-label">{{ entry.label }}</span>
-                <button class="remove-day" type="button" (click)="removeDay(entry.day)">
+                <button
+                  class="remove-day"
+                  type="button"
+                  [id]="'remove-day-' + entry.day"
+                  (click)="removeDay(entry.day)"
+                >
                   <span i18n="@@vets.availability.remove_day">Retirer la journée</span>
                   <span class="visually-hidden">{{ entry.label }}</span>
                 </button>
@@ -65,6 +71,7 @@
                       <button
                         class="remove-hour"
                         type="button"
+                        [id]="'remove-hour-' + entry.day + '-' + hour.value"
                         (click)="removeHour(entry.day, hour.value)"
                       >
                         <span aria-hidden="true">×</span>

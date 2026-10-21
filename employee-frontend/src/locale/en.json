@@ -336,6 +336,8 @@
         "description": "Remove a time slot or a whole day. Removals take effect when you save.",
         "remove_day": "Remove this day",
         "remove_hour": "Remove",
+        "removed_hour": "{$day} {$hour} removed.",
+        "removed_day": "{$day} removed.",
         "no_hours": "No hours specified.",
         "empty": "No availability on this profile.",
         "confirm_title": "Remove this availability?",

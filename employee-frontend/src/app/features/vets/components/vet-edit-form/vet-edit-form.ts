@@ -1,9 +1,12 @@
 import {
+  afterNextRender,
   Component,
   computed,
   DestroyRef,
   effect,
+  ElementRef,
   inject,
+  Injector,
   input,
   output,
   signal,
@@ -76,6 +79,9 @@ export class VetEditForm {
   private readonly initialSchedule = signal<Schedule>(emptySchedule());
   private readonly days = signal<readonly Workday[]>([]);
   private readonly schedule = signal<Schedule>(emptySchedule());
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
+  protected readonly announcement = signal('');
   protected readonly form = this.fb.nonNullable.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
@@ -166,6 +172,7 @@ export class VetEditForm {
       this.initialSchedule.set(schedule);
       this.days.set(days);
       this.schedule.set(schedule);
+      this.announcement.set('');
     });
   }
 
@@ -174,15 +181,38 @@ export class VetEditForm {
   }
 
   protected removeHour(day: Workday, hour: string): void {
-    this.schedule.update((current) => ({
-      ...current,
-      [day]: current[day].filter((item) => item !== hour),
-    }));
+    const hours = this.schedule()[day];
+    const index = hours.indexOf(hour);
+    const rest = hours.filter((item) => item !== hour);
+    const neighbour = rest[index] ?? rest[index - 1];
+    this.schedule.update((current) => ({ ...current, [day]: rest }));
+    this.announcement.set(
+      $localize`:@@vets.availability.removed_hour:${this.labels[day]}:day: ${hourLabel(hour)}:hour: retiré.`,
+    );
+    this.restoreFocus(neighbour ? `#remove-hour-${day}-${neighbour}` : `#remove-day-${day}`);
   }
 
   protected removeDay(day: Workday): void {
     this.days.update((current) => current.filter((item) => item !== day));
     this.schedule.update((current) => ({ ...current, [day]: [] }));
+    this.announcement.set(
+      $localize`:@@vets.availability.removed_day:Journée ${this.labels[day]}:day: retirée.`,
+    );
+    this.restoreFocus(null);
+  }
+
+  private restoreFocus(preferred: string | null): void {
+    afterNextRender(
+      () => {
+        const root = this.host.nativeElement;
+        const target =
+          (preferred && root.querySelector<HTMLElement>(preferred)) ||
+          root.querySelector<HTMLElement>('.remove-day') ||
+          root.querySelector<HTMLElement>('#availability-title');
+        target?.focus();
+      },
+      { injector: this.injector },
+    );
   }
 
   protected save(): void {
