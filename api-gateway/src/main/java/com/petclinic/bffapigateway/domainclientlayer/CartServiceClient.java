@@ -322,10 +322,12 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .bodyToMono(CartResponseDTO.class);
     }
 
-    public Mono<CartResponseDTO> checkoutCart(final String cartId) {
+    public Mono<CartResponseDTO> checkoutCart(final String cartId, BillingRequestDTO billing) {
         return webClientBuilder.build()
                 .post()
                 .uri(cartServiceUrl + "/" + cartId + "/checkout")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(billing)
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class);
     }
