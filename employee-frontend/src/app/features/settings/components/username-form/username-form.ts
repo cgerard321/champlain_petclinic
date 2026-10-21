@@ -8,7 +8,6 @@ import { MatSnackBar, MatSnackBarConfig } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 
 import { AuthState } from '@core/services/auth-state';
-import { employeeRoleLabel } from '@features/settings/models/role-label';
 import {
   checkUsernameRules,
   isReserved,
@@ -24,6 +23,7 @@ import {
   SettingsFormState,
   SettingsSectionForm,
 } from '@features/settings/services/settings-form-state';
+import { employeeRoleLabel } from '@shared/models/role-label';
 
 const SECTION_ID = 'username';
 
@@ -108,7 +108,7 @@ export class UsernameForm implements SettingsSectionForm {
     return '';
   });
 
-  protected readonly filled = computed(() => this.draft().length > 0);
+  protected readonly filled = computed(() => normalizeUsername(this.draft()).length > 0);
   protected readonly showSameAsCurrent = computed(() => this.filled() && this.sameAsCurrent());
   protected readonly showPreview = computed(() => this.valid() && !this.sameAsCurrent());
 

@@ -3,6 +3,7 @@ package com.petclinic.cartsservice.businesslayer;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.OrderRepository;
 import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
+import com.petclinic.cartsservice.presentationlayer.BillingRequestModel;
 import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
@@ -31,12 +32,12 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public Mono<OrderResponseModel> createOrder(Cart cart) {
+    public Mono<OrderResponseModel> createOrder(Cart cart, BillingRequestModel billing) {
         return customerClient.getCustomerById(cart.getCustomerId())
                         .switchIfEmpty(Mono.error(
                                 new NotFoundException("Customer not found")))
                         .map(customer ->
-                                EntityModelUtil.toOrder(cart, customer))
+                                EntityModelUtil.toOrder(cart, customer, billing))
                         .flatMap(orderRepository::save)
                         .map(EntityModelUtil::toOrderResponseModel);
     }

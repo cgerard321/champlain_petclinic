@@ -337,3 +337,7 @@
     margin-bottom: 40px;
   }
 }
+
+:host-context(.dark-mode) .login-page {
+  background: var(--mat-sys-surface);
+}

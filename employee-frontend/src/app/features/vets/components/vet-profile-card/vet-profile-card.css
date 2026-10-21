@@ -150,3 +150,78 @@ dd {
     flex-wrap: wrap;
   }
 }
+
+:host-context(.dark-mode) .profile-header {
+  background-color: var(--mat-sys-surface-container-highest) !important;
+  border: 1px solid rgb(255 255 255 / 12%)  !important;
+
+}
+
+:host-context(.dark-mode) .profile-card {
+  background-color: var(--mat-sys-surface-container) !important;
+  border: 1px solid var(--mat-sys-surface-container-high) !important;
+
+}
+
+:host-context(.dark-mode) .profile-header p{
+  color: white !important;
+}
+
+:host-context(.dark-mode) .profile-header h2{
+  color: #a3b8ac !important;
+}
+
+:host-context(.dark-mode) .avatars {
+  color: var(--mat-sys-surface-container-highest) !important;
+}
+
+/* card elements */
+:host-context(.dark-mode) .profile-body {
+  background-color: var(--mat-sys-surface-container) !important;
+}
+
+:host-context(.dark-mode) .profile-body h3 {
+  color: white !important;
+}
+
+:host-context(.dark-mode) .profile-body p {
+  color: #a3b8ac !important;
+}
+
+:host-context(.dark-mode) .profile-body span {
+  color: #a3b8ac !important;
+}
+
+:host-context(.dark-mode) .profile-body dt {
+  color: white !important;
+}
+
+:host-context(.dark-mode) .profile-body dd {
+  color: #a3b8ac !important;
+}
+
+:host-context(.dark-mode) .profile-body .hours {
+  border-top: 1px solid #111;
+}
+
+:host-context(.dark-mode) .specialties li {
+  background: var(--mat-sys-surface-container-highest);
+  color:#a3b8ac;
+}
+
+:host-context(.dark-mode) .status {
+  background: var(--forest-700);
+  color:#a3b8ac;
+}
+
+:host-context(.dark-mode) .status.inactive {
+  color: var(--sage-300);
+}
+
+:host-context(.dark-mode) .hours h3 {
+  color: white !important;
+}
+
+:host-context(.dark-mode) .hours ul {
+  color: #a3b8ac !important;
+}

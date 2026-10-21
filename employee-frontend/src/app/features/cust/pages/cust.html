@@ -1,54 +1,55 @@
 <section class="customer-page" [attr.aria-busy]="isLoading()">
-  <h1>Customer List</h1>
+  <h1 i18n="@@cust.customerList">Liste des Clients</h1>
   @if (isLoading()) {
     <div class="state-container" role="status">
       <mat-spinner diameter="40" aria-label="Loading customers" />
-      <p>Loading customers…</p>
+      <p i18n="@@cust.customerListLoading">Chargement des clients...</p>
     </div>
   } @else if (errorMessage(); as message) {
     <p role="alert">{{ message }}</p>
   } @else if (customers().length === 0) {
-    <p role="status">No customers registered.</p>
+    <p role="status" i18n="@@cust.noCustomers">Aucun client enregistré.</p>
   } @else {
     <div class="search-container">
-      <label for="customer-search">Search customers</label>
+      <label for="customer-search" i18n="@@cust.searchCustomers">Rechercher des clients</label>
       <input
         id="customer-search"
         type="search"
-        placeholder="Search customer by name, Id, address, city or phone number"
+        [placeholder]="searchPlaceholder"
         [value]="searchText()"
         (input)="searchText.set($any($event.target).value)"
       />
     </div>
     <div class="table-container">
       <table>
-        <caption>
-          Registered customers and contact information
+        <caption i18n="@@cust.customerDetails.title">
+          Clients enregistrés et informations de contact
         </caption>
         <thead>
           <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Address</th>
-            <th scope="col">City</th>
-            <th scope="col">Phone number</th>
-            <th scope="col">Pets</th>
+            <th scope="col" i18n="@@cust.customerDetails.name">Nom</th>
+            <th scope="col" i18n="@@cust.customerDetails.address">Adresse</th>
+            <th scope="col" i18n="@@cust.customerDetails.city">Ville</th>
+            <th scope="col" i18n="@@cust.customerDetails.phone">Numéro de téléphone</th>
+            <th scope="col" i18n="@@cust.customerDetails.pets">Animaux de compagnie</th>
           </tr>
         </thead>
         <tbody>
           @for (customer of filteredCustomers(); track customer.customerId) {
             <tr>
               <td>{{ customer.firstName }} {{ customer.lastName }}</td>
-              <td>{{ customer.address || 'Not available' }}</td>
-              <td>{{ customer.city || 'Not available' }}</td>
-              <td>{{ customer.telephone || 'Not available' }}</td>
+              <td>{{ customer.address || notAvailable }}</td>
+              <td>{{ customer.city || notAvailable }}</td>
+              <td>{{ customer.telephone || notAvailable }}</td>
               <td>
                 <button
                   mat-flat-button
                   color="primary"
                   type="button"
                   (click)="checkPetDetails(customer.customerId)"
+                  i18n="@@cust.petsButton"
                 >
-                  Registered Pets
+                  Animaux enregistrés
                 </button>
               </td>
             </tr>
@@ -56,14 +57,29 @@
             <tr class="no-customers-row">
               <td colspan="5">
                 <div class="no-customers-state" role="status">
-                  <h2>No customers found.</h2>
-                  <p>Try a different name, ID, or phone number.</p>
+                  <h2 i18n="@@cust.noCustFound">Aucun client trouvé.</h2>
+                  <p i18n="@@cust.tryAgain">
+                    Essayez un nom, un identifiant ou un numéro de téléphone différent.
+                  </p>
                 </div>
               </td>
             </tr>
           }
         </tbody>
       </table>
+    </div>
+
+    <div class="add-button-container">
+      <button
+        mat-flat-button
+        class="AddButton"
+        color="primary"
+        type="button"
+        (click)="addCustomerPopUp()"
+        i18n="@@cust.addCustomer.button"
+      >
+        Ajouter Client
+      </button>
     </div>
   }
 </section>

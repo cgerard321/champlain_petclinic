@@ -10,12 +10,9 @@ import { Router } from '@angular/router';
 import { isApiError } from '@core/models/api-error';
 import { LoginRequest } from '@features/auth/models/loginRequest';
 import { Auth } from '@features/auth/services/auth';
+import { ThemeService } from '@features/settings/services/themeservice';
 import { ModalForm } from '@shared/components/modal-form/modal-form';
-import {
-  ModalFormData,
-  ModalFormField,
-  ModalFormResult,
-} from '@shared/components/modal-form/modal-form-models';
+import { ModalFormData, ModalFormResult } from '@shared/components/modal-form/modal-form-models';
 
 interface ForgotPasswordFormValue {
   email: string;
@@ -32,6 +29,7 @@ export class LoginPage {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly themeService = inject(ThemeService);
 
   protected readonly hidePassword = signal(true);
   protected readonly isSubmitting = signal(false);
@@ -71,6 +69,7 @@ export class LoginPage {
     this.auth.login(this.model()).subscribe({
       next: () => {
         this.isSubmitting.set(false);
+        this.themeService.setCurrentUser(this.model().emailOrUsername);
         this.router.navigateByUrl('/');
       },
       error: (err: unknown) => {
