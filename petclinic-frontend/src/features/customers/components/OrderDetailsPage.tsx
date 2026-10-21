@@ -7,6 +7,9 @@ import { useUser } from '@/context/UserContext';
 import { NavBar } from '@/layouts/AppNavBar';
 import { getCustomerOrders } from '@/features/carts/api/getCustomerOrders';
 import type { OrderModel } from '@/features/carts/models/OrderModel';
+import Invoice from '@/features/carts/components/Invoice';
+import type { InvoiceFull } from '@/features/carts/components/Invoice';
+import { roundToCents } from '@/features/carts/utils/taxUtils';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 
 export default function OrderDetailsPage(): JSX.Element {
@@ -17,6 +20,7 @@ export default function OrderDetailsPage(): JSX.Element {
   const [order, setOrder] = useState<OrderModel | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
 
   const locale = i18n.language.startsWith('fr') ? 'fr-CA' : 'en-CA';
 
@@ -36,6 +40,7 @@ export default function OrderDetailsPage(): JSX.Element {
       setLoading(true);
       setError(false);
       setOrder(null);
+      setShowInvoice(false);
 
       if (!user.userId || !orderId) {
         setLoading(false);
@@ -71,6 +76,40 @@ export default function OrderDetailsPage(): JSX.Element {
       active = false;
     };
   }, [user.userId, orderId]);
+
+  // Convert the saved order into the Cart team's invoice format.
+  // Prices come from the original order, not the product catalogue.
+  const invoice: InvoiceFull | null = order
+    ? {
+        invoiceId: order.invoiceId || order.orderId,
+        userId: order.customerId,
+        billing: {
+          customerName: order.customerName,
+          email: order.email,
+          address: order.address,
+          city: order.city,
+          province: order.province,
+          postalCode: order.postalCode,
+        },
+        date: order.orderDate,
+        items: order.products.map(product => ({
+          productId: product.productId,
+          productName: product.productName,
+          productSalePrice: product.productSalePrice,
+          quantity: product.quantityInCart,
+        })),
+        subtotal: order.subtotal,
+        taxableSubtotal: roundToCents(order.total - order.tvq - order.tvc),
+        tvq: order.tvq,
+        tvc: order.tvc,
+        discount: roundToCents(
+          order.subtotal * ((order.promoPercent ?? 0) / 100)
+        ),
+        shippingMethod: order.shippingMethod ?? 'PICKUP',
+        shippingCost: order.shippingCost ?? 0,
+        total: order.total,
+      }
+    : null;
 
   return (
     <>
@@ -187,24 +226,26 @@ export default function OrderDetailsPage(): JSX.Element {
             </section>
 
             <div className="customer-orders__actions">
-              <div className="text-end">
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  disabled
-                  title={t('orderHistory.invoicePending')}
-                >
-                  {t('orderHistory.invoice')}
-                </button>
-
-                <p className="customer-orders__muted mt-2">
-                  {t('orderHistory.invoicePending')}
-                </p>
-              </div>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => setShowInvoice(true)}
+              >
+                {t('orderHistory.invoice')}
+              </button>
             </div>
           </>
         )}
       </main>
+
+      {showInvoice && invoice && (
+        <Invoice
+          invoices={[invoice]}
+          index={0}
+          onIndexChange={() => {}}
+          onClose={() => setShowInvoice(false)}
+        />
+      )}
     </>
   );
 }
