@@ -3,7 +3,6 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions.PrescriptionService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Review.ReviewService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
-import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitServiceImpl;
 import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
@@ -39,7 +38,6 @@ public class VisitController {
     private final VisitService visitService;
     private final ReviewService reviewService;
     private final PrescriptionService prescriptionService;
-    private final VisitServiceImpl weeklyScheduleEmailService;
     /**
      * Simple Get all Visits
      * Accessible through localhost:8080/visits
@@ -341,7 +339,7 @@ public class VisitController {
         LocalDate weekStart = LocalDate.now()
                 .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
-        return weeklyScheduleEmailService.sendSchedule(practitionerId, weekStart);
+        return visitService.sendSchedule(practitionerId, weekStart);
     }
 
 
