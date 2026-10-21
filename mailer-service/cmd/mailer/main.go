@@ -38,11 +38,6 @@ func main() {
 	user := util.Getenv("SMTP_USER")
 	pass := util.Getenv("SMTP_PASS")
 
-    // Old SMTP configuration:
-    // host := util.Getenv("SMTP_SERVER")
-    // user := util.Getenv("SMTP_USER")
-    // pass := util.Getenv("SMTP_PASS")
-
 	dialer := mailsvc.NewDialer(mailsvc.Config{
 		Host:               host,
 		Port:               587,

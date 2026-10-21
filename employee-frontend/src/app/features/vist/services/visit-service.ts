@@ -109,7 +109,12 @@ export class VisitService {
   }
 
   sendWeeklyScheduleEmail(): Observable<string> {
-    return this.http.post('/api/gateway/visits/weekly-email', {}, {
-      responseType: 'text',
-    });  }
+    return this.http.post(
+      '/api/gateway/visits/weekly-email',
+      {},
+      {
+        responseType: 'text',
+      },
+    );
+  }
 }
