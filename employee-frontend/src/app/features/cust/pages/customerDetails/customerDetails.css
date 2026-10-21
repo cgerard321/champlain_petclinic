@@ -1,0 +1,26 @@
+.profile-photo-container {
+  margin-block: 1rem;
+}
+
+.profile-photo {
+  display: block;
+  width: 120px;
+  height: 120px;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.pet-photo {
+  width: 96px;
+  height: 96px;
+}
+
+.photo-placeholder {
+  display: grid;
+  place-items: center;
+  background: #eee;
+  color: #444;
+  font-size: 2rem;
+  font-weight: 600;
+}

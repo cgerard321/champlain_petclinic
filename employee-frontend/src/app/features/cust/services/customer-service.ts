@@ -18,10 +18,16 @@ export class CustomerService {
       map((event) => JSON.parse(event.data) as Customer),
     );
   }
-  getCustomer(customerId: string): Observable<CustomerResponseModel> {
+  getCustomer(customerId: string, includePhoto = false): Observable<CustomerResponseModel> {
     return this.http.get<CustomerResponseModel>(
       `/api/gateway/customers/detail/${encodeURIComponent(customerId)}`,
+      { params: { includePhoto } },
     );
+  }
+  getPetWithPhoto(petId: string): Observable<Pet> {
+    return this.http.get<Pet>(`/api/gateway/pets/${encodeURIComponent(petId)}`, {
+      params: { includePhoto: true },
+    });
   }
   updateCustomer(
     customerId: string,

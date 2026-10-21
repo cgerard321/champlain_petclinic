@@ -6,6 +6,23 @@
   <p role="alert">{{ errorMessage() }}</p>
 }
 @if (customer(); as details) {
+  <div class="profile-photo-container">
+    @if (details.photo?.fileData) {
+      <img
+        class="profile-photo"
+        [src]="'data:' + details.photo!.fileType + ';base64,' + details.photo!.fileData"
+        [alt]="details.firstName + ' ' + details.lastName + ' profile photo'"
+      />
+    } @else {
+      <div
+        class="profile-photo photo-placeholder"
+        role="img"
+        aria-label="No customer profile photo"
+      >
+        {{ details.firstName.charAt(0) }}{{ details.lastName.charAt(0) }}
+      </div>
+    }
+  </div>
   @if (isEditing()) {
     <form [formGroup]="form" (ngSubmit)="handleCustomerUpdated()">
       <label for="firstName">First name</label>
@@ -48,19 +65,63 @@
         {{ isSaving() ? 'Saving...' : 'Save' }}
       </button>
     </form>
-    <button
-      type="button"
-      (click)="isEditing.set(false)"
-      [disabled]="isSaving()"
-    >
-      Cancel
-    </button>
+    <button type="button" (click)="isEditing.set(false)" [disabled]="isSaving()">Cancel</button>
   } @else {
     <p>First name: {{ details.firstName }}</p>
     <p>Last name: {{ details.lastName }}</p>
-    <p>Address: {{details.address}}</p>
-    <p>City: {{details.city}}</p>
-    <p>Telephone: {{details.telephone}}</p>
+    <p>Address: {{ details.address }}</p>
+    <p>City: {{ details.city }}</p>
+    <p>Telephone: {{ details.telephone }}</p>
     <button type="button" (click)="handleEditCustomer()">Edit</button>
   }
+
+  <section aria-labelledby="customer-pets-title">
+    <h2 id="customer-pets-title">Pets</h2>
+    @if (petTypesErrorMessage()) {
+      <p role="alert">{{ petTypesErrorMessage() }}</p>
+    }
+    @if (isLoadingPets()) {
+      <p role="status">Loading pets...</p>
+    } @else if (petErrorMessage()) {
+      <p role="alert">{{ petErrorMessage() }}</p>
+    } @else {
+      @for (pet of pets(); track pet.petId) {
+        <article>
+          <h3>{{ pet.name }}</h3>
+          @if (pet.photo?.fileData) {
+            <img
+              class="profile-photo pet-photo"
+              [src]="'data:' + pet.photo!.fileType + ';base64,' + pet.photo!.fileData"
+              [alt]="pet.name + ' profile photo'"
+              loading="lazy"
+            />
+          } @else {
+            <div
+              class="profile-photo pet-photo photo-placeholder"
+              role="img"
+              [attr.aria-label]="'No profile photo for ' + pet.name"
+            >
+              {{ pet.name.charAt(0) }}
+            </div>
+          }
+          <dl>
+            <dt>Type</dt>
+            <dd>{{ getPetTypeName(pet.petTypeId) }}</dd>
+            <dt>Birth date</dt>
+            <dd>{{ (pet.birthDate | date: 'mediumDate') || 'Unavailable' }}</dd>
+            <dt>Weight</dt>
+            <dd>{{ pet.weight }} kg</dd>
+          </dl>
+        </article>
+      } @empty {
+        <p>No pets registered for this customer.</p>
+      }
+    }
+  </section>
+  <button
+    type="button"
+    (click)="backToList()"
+  >
+    Retour à la liste des clients
+  </button>
 }

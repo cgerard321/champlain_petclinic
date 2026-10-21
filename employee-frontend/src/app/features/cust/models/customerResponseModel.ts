@@ -1,5 +1,6 @@
+import { ProfilePhoto } from '@features/cust/models/profile-photo.model';
+
 import { PetResponseModel } from './petsResponseModel';
-//import { FileDetails } from '@/shared/models/FileDetails';
 
 export interface CustomerResponseModel {
   customerId: string;
@@ -10,5 +11,5 @@ export interface CustomerResponseModel {
   province: string;
   telephone: string;
   pets: PetResponseModel[];
-  //photo?: FileDetails;
+  photo?: ProfilePhoto | null;
 }

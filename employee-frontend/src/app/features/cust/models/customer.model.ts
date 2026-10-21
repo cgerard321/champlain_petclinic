@@ -1,3 +1,5 @@
+import { ProfilePhoto } from '@features/cust/models/profile-photo.model';
+
 export interface Customer {
   customerId: string;
   firstName: string;
@@ -7,6 +9,7 @@ export interface Customer {
   city: string;
 }
 export interface Pet {
+  photo?: ProfilePhoto | null;
   customerId: string;
   petId: string;
   name: string;

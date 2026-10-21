@@ -1,22 +1,28 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { AuthState } from '@core/services/auth-state';
-import { Roles } from '@shared/models/roles';
+import { catchError, mergeMap, of } from 'rxjs';
+import { Router } from '@angular/router';
 
+import { Pet, PetType } from '@features/cust/models/customer.model';
 import { CustomerResponseModel } from '@features/cust/models/customerResponseModel';
 import { CustomerService } from '@features/cust/services/customer-service';
+import {MatDialogClose} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-customer-details',
-  imports: [ReactiveFormsModule],
+  imports: [DatePipe, ReactiveFormsModule, MatDialogClose],
   templateUrl: './customerDetails.html',
   styleUrl: './customerDetails.css',
 })
 export class CustomerDetails implements OnInit {
+  private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly customerService = inject(CustomerService);
   private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly form = this.fb.nonNullable.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
@@ -25,6 +31,12 @@ export class CustomerDetails implements OnInit {
     province: ['', Validators.required],
     telephone: ['', Validators.required],
   });
+
+  protected readonly pets = signal<Pet[]>([]);
+  protected readonly petTypes = signal<PetType[]>([]);
+  protected readonly isLoadingPets = signal(true);
+  protected readonly petErrorMessage = signal<string | null>(null);
+  protected readonly petTypesErrorMessage = signal<string | null>(null);
   protected readonly isSaving = signal(false);
   protected readonly isEditing = signal(false);
   protected readonly customer = signal<CustomerResponseModel | null>(null);
@@ -54,7 +66,7 @@ export class CustomerDetails implements OnInit {
       return;
     }
 
-    this.customerService.getCustomer(customerId).subscribe({
+    this.customerService.getCustomer(customerId, true).subscribe({
       next: (customer) => {
         this.customer.set(customer);
       },
@@ -69,11 +81,48 @@ export class CustomerDetails implements OnInit {
         this.errorMessage.set('Could not load customer details.');
       },
     });
+
+    this.customerService
+      .getPetDetails(customerId)
+      .pipe(
+        mergeMap(
+          (pet) => this.customerService.getPetWithPhoto(pet.petId).pipe(catchError(() => of(pet))),
+          4,
+        ),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (pet) => this.pets.update((pets) => [...pets, pet]),
+        complete: () => this.isLoadingPets.set(false),
+        error: () => {
+          this.isLoadingPets.set(false);
+          this.petErrorMessage.set('Could not load pets. Please try again later.');
+        },
+      });
+
+    this.customerService
+      .getPetTypes()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (petType) => this.petTypes.update((types) => [...types, petType]),
+        error: () => this.petTypesErrorMessage.set('Could not load pet types.'),
+      });
+  }
+
+  protected getPetTypeName(petTypeId: string): string {
+    return this.petTypes().find((type) => type.petTypeId === petTypeId)?.name ?? 'Unavailable';
   }
   protected handleEditCustomer(): void {
     const customer = this.customer();
     if (!customer) return;
-    this.form.reset({ firstName: customer.firstName, lastName: customer.lastName, address: customer.address, city: customer.city, province: customer.province, telephone: customer.telephone });
+    this.form.reset({
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+      address: customer.address,
+      city: customer.city,
+      province: customer.province,
+      telephone: customer.telephone,
+    });
     this.errorMessage.set(null);
     this.isEditing.set(true);
   }
@@ -108,7 +157,7 @@ export class CustomerDetails implements OnInit {
       })
       .subscribe({
         next: (updatedCustomer) => {
-          this.customer.set(updatedCustomer);
+          this.customer.set({ ...updatedCustomer, photo: updatedCustomer.photo ?? customer.photo });
           this.isEditing.set(false);
           this.isSaving.set(false);
         },
@@ -117,5 +166,8 @@ export class CustomerDetails implements OnInit {
           this.isSaving.set(false);
         },
       });
+  }
+  protected backToList(){
+    this.router.navigate(['/cust']);
   }
 }
