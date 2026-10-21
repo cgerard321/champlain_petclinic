@@ -21,11 +21,15 @@ import { useRemoveFromWishlistByIcon } from '@/features/carts/api/removeProductF
 import StarRating from './StarRating';
 import { FaHeart, FaRegHeart } from 'react-icons/fa';
 
+interface ProductProps {
+  product: ProductModel;
+  recentlyViewed?: boolean;
+}
+
 export default function Product({
   product,
-}: {
-  product: ProductModel;
-}): JSX.Element {
+  recentlyViewed = false,
+}: ProductProps): JSX.Element {
   const { t, i18n } = useTranslation('products');
   const language = i18n.resolvedLanguage || i18n.language || 'en';
   const { isAuthenticated } = useUser();
@@ -155,6 +159,12 @@ export default function Product({
       key={currentProduct.productId}
       style={{ position: 'relative' }}
     >
+      {recentlyViewed && (
+        <span className="recently-viewed-badge">
+          {t('recentlyViewedBadge')}
+        </span>
+      )}
+
       {currentProduct.productQuantity < 10 && (
         <span className="stock-label">
           {currentProduct.productQuantity === 0 ? t('outStock') : t('lowStock')}
