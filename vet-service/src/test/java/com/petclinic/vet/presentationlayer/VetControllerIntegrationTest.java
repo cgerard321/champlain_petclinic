@@ -1000,7 +1000,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("firstName length should be between 2 and 20 characters: "+updatedVet.getFirstName());
+                .jsonPath("$.message").isEqualTo("Names must contain between 2 and 30 characters");
     }
 
     @Test
@@ -1033,7 +1033,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("lastName length should be between 2 and 20 characters: "+updatedVet.getLastName());
+                .jsonPath("$.message").isEqualTo("Names must contain between 2 and 30 characters");
     }
 
     @Test
@@ -1067,7 +1067,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("phoneNumber length not equal to 20 characters: "+updatedVet.getPhoneNumber());
+                .jsonPath("$.message").isEqualTo("A valid phone number is required");
     }
 
     @Test
@@ -1109,7 +1109,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("email length should be between 6 and 320 characters: "+updatedVet.getEmail());
+                .jsonPath("$.message").isEqualTo("A valid email address is required");
     }
 
     @Test
@@ -1144,7 +1144,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("resume length should be more than 10 characters: "+updatedVet.getResume());
+                .jsonPath("$.message").isEqualTo("Biography must contain at least 10 characters");
     }
 
     @Test
@@ -1179,7 +1179,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("invalid specialties");
+                .jsonPath("$.message").isEqualTo("Specialties must not be null");
     }
 
     @Test

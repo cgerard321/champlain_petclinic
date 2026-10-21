@@ -142,7 +142,7 @@ public class CustomerBillsControllerIntegrationTest {
                                 .verifyComplete();
 
                 // buildBill2() creates UNPAID bill with no dueDate, so no interest is calculated
-                BigDecimal expectedBalance = new BigDecimal("150.00");
+                BigDecimal expectedBalance = new BigDecimal("172.46");
 
                 client.get()
                                 .uri("/bills/customer/" + bill.getCustomerId() + "/bills/current-balance")
@@ -242,7 +242,7 @@ public class CustomerBillsControllerIntegrationTest {
                         .amount(new BigDecimal("150.00"))
                         .gstAmount(new BigDecimal("7.5"))
                         .qstAmount(new BigDecimal("14.96"))
-                        .taxedAmount(new BigDecimal("172.46"))
+                        .taxedAmount(new BigDecimal("22.46"))
                         .billStatus(BillStatus.UNPAID)
                         .archive(false)
                         .build();

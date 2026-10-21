@@ -61,3 +61,45 @@
   border-radius: 6px;
   margin-top: 20px;
 }
+
+.active-filter-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 1400px;
+  margin: 18px auto 0;
+  padding: 0 24px;
+}
+
+.active-filter-title {
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.active-filter-chip {
+  min-height: 36px;
+  padding: 7px 11px;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.active-filter-chip:hover,
+.active-filter-chip:focus-visible,
+.active-filter-clear:hover,
+.active-filter-clear:focus-visible {
+  background: #dbeafe;
+}
+
+.active-filter-clear {
+  min-height: 36px;
+  padding: 7px 10px;
+  color: #1d4ed8;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}

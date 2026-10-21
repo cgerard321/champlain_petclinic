@@ -42,4 +42,5 @@ public class VisitResponseDTO {
     private FileResponseDTO prescription;
     private CancellationReason cancellationReason;
     private String cancellationReasonDetails;
+    private String vetNote;
 }

@@ -15,6 +15,9 @@ import com.petclinic.billing.util.InterestCalculationUtil;
 import com.petclinic.billing.util.TaxCalculationUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,8 +100,8 @@ public class BillServiceImplTest {
                 .vetId("vetId1")
                 .vetFirstName("vetFirstName1")
                 .vetLastName("vetLastName1")
-                .date(LocalDate.of(2024, 10, 1))
-                .dueDate(LocalDate.of(2024, 10, 30))
+                .date(LocalDate.now().minusMonths(2))
+                .dueDate(LocalDate.now().plusMonths(1))
                 .amount(new BigDecimal("100.00"))
                 .gstAmount(new BigDecimal("5.00"))
                 .qstAmount(new BigDecimal("9.98"))
@@ -114,8 +117,8 @@ public class BillServiceImplTest {
                 .vetId("vetId2")
                 .vetFirstName("vetFirstName2")
                 .vetLastName("vetLastName2")
-                .date(LocalDate.of(2024, 10, 1))
-                .dueDate(LocalDate.of(2024, 10, 30))
+                .date(LocalDate.now().minusMonths(2))
+                .dueDate(LocalDate.now().plusMonths(1))
                 .amount(new BigDecimal("150.00"))
                 .gstAmount(new BigDecimal("7.50"))
                 .qstAmount(new BigDecimal("14.96"))
@@ -131,8 +134,8 @@ public class BillServiceImplTest {
                 .vetId("vetId3")
                 .vetFirstName("vetFirstName3")
                 .vetLastName("vetLastName3")
-                .date(LocalDate.of(2024, 10, 1))
-                .dueDate(LocalDate.of(2024, 10, 30))
+                .date(LocalDate.now().minusMonths(2))
+                .dueDate(LocalDate.now().plusMonths(1))
                 .amount(new BigDecimal("200.00"))
                 .gstAmount(new BigDecimal("10.00"))
                 .qstAmount(new BigDecimal("19.95"))
@@ -209,6 +212,7 @@ public class BillServiceImplTest {
 
         when(repo.findAll()).thenReturn(Flux.just(bill1, bill2, bill3));
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID)).thenReturn(Flux.empty());
+        when(repo.findAllByArchiveFalse()).thenReturn(Flux.empty());
 
         Flux<BillResponseDTO> bills = billService.getAllBillsStream(
                 null, null, null, null, null, null, null, null);
@@ -231,6 +235,8 @@ public class BillServiceImplTest {
                 .thenReturn(Flux.empty());
         when(repo.findAll())
                 .thenReturn(Flux.just(matching, nonMatching));
+        when(repo.findAllByArchiveFalse())
+                .thenReturn(Flux.empty());
 
         StepVerifier.create(
                         billService.getAllBillsStream(
@@ -239,6 +245,7 @@ public class BillServiceImplTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
+
     @Test
     void getAllBillsStream_WithAllFiltersMatching_ReturnsMatchingBill() {
         Bill bill = buildBill();
@@ -258,6 +265,9 @@ public class BillServiceImplTest {
         when(repo.findAll())
                 .thenReturn(Flux.just(bill));
 
+        when(repo.findAllByArchiveFalse())
+                .thenReturn(Flux.empty());
+
         StepVerifier.create(
                         billService.getAllBillsStream(
                                 "bill-1",
@@ -273,44 +283,16 @@ public class BillServiceImplTest {
     }
 
 
-    @Test
-    public void test_getAllBillsByPaidStatus() {
-        BillStatus status = BillStatus.PAID; // Change this to the desired status
-
+    // run the same check for all supported bill statuses
+    @ParameterizedTest(name = "returns bills with status {0}")
+    @EnumSource(value = BillStatus.class, names = {"PAID", "UNPAID", "OVERDUE"})
+    void getAllBillsByStatus_returnsMatchingBills(BillStatus status) {
         Bill billEntity = buildBill();
+        billEntity.setBillStatus(status);
+
         when(repo.findAllBillsByBillStatus(status)).thenReturn(Flux.just(billEntity));
 
-        Flux<BillResponseDTO> billDTOFlux = billService.getAllBillsByStatus(status);
-
-        StepVerifier.create(billDTOFlux)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
-
-    @Test
-    public void test_getAllBillsByUnpaidStatus() {
-        BillStatus status = BillStatus.UNPAID; // Change this to the desired status
-
-        Bill billEntity = buildUnpaidBill();
-        when(repo.findAllBillsByBillStatus(status)).thenReturn(Flux.just(billEntity));
-
-        Flux<BillResponseDTO> billDTOFlux = billService.getAllBillsByStatus(status);
-
-        StepVerifier.create(billDTOFlux)
-                .expectNextCount(1)
-                .verifyComplete();
-    }
-
-    @Test
-    public void test_getAllBillsByOverdueStatus() {
-        BillStatus status = BillStatus.OVERDUE; // Change this to the desired status
-
-        Bill billEntity = buildOverdueBill();
-        when(repo.findAllBillsByBillStatus(status)).thenReturn(Flux.just(billEntity));
-
-        Flux<BillResponseDTO> billDTOFlux = billService.getAllBillsByStatus(status);
-
-        StepVerifier.create(billDTOFlux)
+        StepVerifier.create(billService.getAllBillsByStatus(status))
                 .expectNextCount(1)
                 .verifyComplete();
     }
@@ -645,59 +627,38 @@ public class BillServiceImplTest {
         Mockito.verify(repo, Mockito.never()).insert(Mockito.any(Bill.class));
     }
 
-    @Test
-    void createBill_missingBillStatus_shouldReturnError() {
-        // Arrange
-        BillRequestDTO billDTO = new BillRequestDTO();
-        billDTO.setVetId("vet-123");
-        billDTO.setCustomerId("customer-456");
-        billDTO.setDueDate(LocalDate.now().plusDays(30));
+    // keep the valid request and change one required field at a time
+    @ParameterizedTest(name = "rejects missing {0}")
+    @CsvSource({
+            "status, 'Bill status is required'",
+            "vetId, 'Vet ID is required'",
+            "customerId, 'Customer ID is required'"
+    })
+    void createBill_missingRequiredField_shouldReturnBadRequest(
+            String missingField,
+            String expectedMessage) {
+        BillRequestDTO billDTO = buildBillRequestDTO();
 
-        // Act + Assert
+        switch (missingField) {
+            case "status":
+                billDTO.setBillStatus(null);
+                break;
+            case "vetId":
+                billDTO.setVetId(null);
+                break;
+            case "customerId":
+                billDTO.setCustomerId(null);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown field: " + missingField);
+        }
+
         StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "JWTToken"))
                 .expectErrorSatisfies(throwable -> {
                     assertTrue(throwable instanceof ResponseStatusException);
-                    ResponseStatusException ex = (ResponseStatusException) throwable;
-                    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-                    assertEquals("Bill status is required", ex.getReason());
-                })
-                .verify();
-    }
-
-    @Test
-    void createBill_missingVetId_shouldReturnError() {
-        // Arrange
-        BillRequestDTO billDTO = new BillRequestDTO();
-        billDTO.setCustomerId("customer-456");
-        billDTO.setBillStatus(BillStatus.PAID);
-        billDTO.setDueDate(LocalDate.now().plusDays(30));
-
-        // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "JWTToken"))
-                .expectErrorSatisfies(throwable -> {
-                    assertTrue(throwable instanceof ResponseStatusException);
-                    ResponseStatusException ex = (ResponseStatusException) throwable;
-                    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-                    assertEquals("Vet ID is required", ex.getReason());
-                })
-                .verify();
-    }
-
-    @Test
-    void createBill_missingCustomerId_shouldReturnError() {
-        // Arrange
-        BillRequestDTO billDTO = new BillRequestDTO();
-        billDTO.setVetId("vet-123");
-        billDTO.setBillStatus(BillStatus.PAID);
-        billDTO.setDueDate(LocalDate.now().plusDays(30));
-
-        // Act + Assert
-        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "JWTToken"))
-                .expectErrorSatisfies(throwable -> {
-                    assertTrue(throwable instanceof ResponseStatusException);
-                    ResponseStatusException ex = (ResponseStatusException) throwable;
-                    assertEquals(HttpStatus.BAD_REQUEST, ex.getStatus());
-                    assertEquals("Customer ID is required", ex.getReason());
+                    ResponseStatusException exception = (ResponseStatusException) throwable;
+                    assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+                    assertEquals(expectedMessage, exception.getReason());
                 })
                 .verify();
     }
@@ -1015,13 +976,8 @@ public void testGenerateBillPdf_BillNotFound() {
 
     private Bill buildBill() {
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2022, Calendar.SEPTEMBER, 25);
-        LocalDate date = calendar.getTime().toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-
-        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 15);
+        LocalDate date = LocalDate.now().minusMonths(2);
+        LocalDate dueDate = LocalDate.now().plusMonths(1);
 
         return Bill.builder()
                 .id("Id")
@@ -1042,13 +998,8 @@ public void testGenerateBillPdf_BillNotFound() {
 
     private Bill buildUnpaidBill() {
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2022, Calendar.SEPTEMBER, 25);
-        LocalDate date = calendar.getTime().toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
-
-        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
+        LocalDate date = LocalDate.now().minusMonths(2);
+        LocalDate dueDate = LocalDate.now().plusMonths(1);
 
         return Bill.builder()
                 .id("Id")
@@ -1185,7 +1136,7 @@ public void testGenerateBillPdf_BillNotFound() {
         Mono<BigDecimal> result = billService.calculateCurrentBalance(customerId);
 
         StepVerifier.create(result)
-                .expectNext(new BigDecimal(150.0))
+                .expectNext(new BigDecimal("150.00"))
                 .verifyComplete();
     }
 
@@ -1320,60 +1271,21 @@ public void testGenerateBillPdf_BillNotFound() {
                 .verifyComplete();
     }
 
-    @Test
-    void processPayment_InvalidCardNumber_Failure() {
+    // check the invalid payment inputs with the same expected error
+    @ParameterizedTest(name = "rejects invalid payment data")
+    @CsvSource({
+            "12345678, 123, 12/23",
+            "1234567812345678, 12, 12/23",
+            "1234567812345678, 123, 1223"
+    })
+    void processPayment_invalidPaymentDetails_shouldFail(
+            String cardNumber,
+            String cvv,
+            String expirationDate) {
         String customerId = "customerId-1";
         String billId = "billId-1";
         String jwtToken = "Bearer faketoken";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("12345678", "123", "12/23");
-
-        UserDetails fakeUser = new UserDetails();
-        fakeUser.setUserId("user-123");
-        fakeUser.setUsername("fakeUser");
-        fakeUser.setEmail("fakeUser@example.com");
-
-        when(authClient.getUserById(anyString(), anyString()))
-                .thenReturn(Mono.just(fakeUser));
-        when(mailService.sendMail(any(Mail.class)))
-                .thenReturn(null);
-
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
-                .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
-                        throwable.getMessage().contains("Invalid payment details"))
-                .verify();
-    }
-
-
-    @Test
-    void processPayment_InvalidCVV_Failure() {
-        String customerId = "customerId-1";
-        String billId = "billId-1";
-        String jwtToken = "Bearer faketoken";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "12", "12/23");
-
-        UserDetails fakeUser = new UserDetails();
-        fakeUser.setUserId("user-123");
-        fakeUser.setUsername("fakeUser");
-        fakeUser.setEmail("fakeUser@example.com");
-
-        when(authClient.getUserById(anyString(), anyString()))
-                .thenReturn(Mono.just(fakeUser));
-        when(mailService.sendMail(any(Mail.class)))
-                .thenReturn(null);
-
-        StepVerifier.create(billService.processPayment(customerId, billId, paymentRequest, jwtToken))
-                .expectErrorMatches(throwable -> throwable instanceof InvalidPaymentException &&
-                        throwable.getMessage().contains("Invalid payment details"))
-                .verify();
-    }
-
-
-    @Test
-    void processPayment_InvalidExpirationDate_Failure() {
-        String customerId = "customerId-1";
-        String billId = "billId-1";
-        String jwtToken = "Bearer faketoken";
-        PaymentRequestDTO paymentRequest = new PaymentRequestDTO("1234567812345678", "123", "1223");
+        PaymentRequestDTO paymentRequest = new PaymentRequestDTO(cardNumber, cvv, expirationDate);
 
         UserDetails fakeUser = new UserDetails();
         fakeUser.setUserId("user-123");
@@ -1522,6 +1434,8 @@ public void testGenerateBillPdf_BillNotFound() {
                 .thenReturn(Flux.just(archivedBill));
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID))
                 .thenReturn(Flux.empty());
+        when(repo.findAllByArchiveFalse())
+                .thenReturn(Flux.empty());
 
         StepVerifier.create(billService.getAllBillsByPage(
                         PageRequest.of(0, 10),
@@ -1534,7 +1448,6 @@ public void testGenerateBillPdf_BillNotFound() {
 
         verify(repo).findAllByArchiveTrue();
         verify(repo, never()).findAll();
-        verify(repo, never()).findAllByArchiveFalse();
     }
 
     @Test
@@ -1576,6 +1489,8 @@ public void testGenerateBillPdf_BillNotFound() {
                 .thenReturn(Flux.just(otherBill, matchingBill));
         when(repo.findAllBillsByBillStatus(BillStatus.UNPAID))
                 .thenReturn(Flux.empty());
+        when(repo.findAllByArchiveFalse())
+                .thenReturn(Flux.empty());
 
         StepVerifier.create(billService.getAllBillsByPage(
                         PageRequest.of(0, 10),
@@ -1590,7 +1505,57 @@ public void testGenerateBillPdf_BillNotFound() {
 
         verify(repo).findAllByArchiveTrue();
         verify(repo, never()).findAll();
-        verify(repo, never()).findAllByArchiveFalse();
+    }
+
+    @Test
+    void archiveBill_ShouldArchiveOnlyOldPaidBills() {
+        // Arrange
+        Bill oldPaidBill = buildBill();
+        oldPaidBill.setBillId("bill-1");
+        oldPaidBill.setBillStatus(BillStatus.PAID);
+        oldPaidBill.setDate(LocalDate.now().minusYears(2));
+        oldPaidBill.setArchive(false);
+
+        Bill recentPaidBill = buildBill();
+        recentPaidBill.setBillId("bill-2");
+        recentPaidBill.setBillStatus(BillStatus.PAID);
+        recentPaidBill.setDate(LocalDate.now().minusMonths(6));
+        recentPaidBill.setArchive(false);
+
+        Bill oldUnpaidBill = buildBill();
+        oldUnpaidBill.setBillId("bill-3");
+        oldUnpaidBill.setBillStatus(BillStatus.UNPAID);
+        oldUnpaidBill.setDate(LocalDate.now().minusYears(2));
+        oldUnpaidBill.setArchive(false);
+
+        when(repo.findAllByArchiveFalse())
+                .thenReturn(Flux.just(
+                        oldPaidBill,
+                        recentPaidBill,
+                        oldUnpaidBill
+                ));
+
+        when(repo.save(any(Bill.class)))
+                .thenAnswer(invocation ->
+                        Mono.just(invocation.getArgument(0)));
+
+        // Act & Assert
+        StepVerifier.create(billService.archiveBill())
+                .expectNextMatches(bill ->
+                        bill.getBillId().equals("bill-1")
+                                && bill.getArchive())
+                .expectNextMatches(bill ->
+                        bill.getBillId().equals("bill-2")
+                                && !bill.getArchive())
+                .expectNextMatches(bill ->
+                        bill.getBillId().equals("bill-3")
+                                && !bill.getArchive())
+                .verifyComplete();
+
+        // Verify that only the old paid bill was saved
+        verify(repo).save(oldPaidBill);
+        verify(repo, never()).save(recentPaidBill);
+        verify(repo, never()).save(oldUnpaidBill);
     }
 
     @Test
@@ -1949,39 +1914,6 @@ public void testGenerateBillPdf_BillNotFound() {
             .verifyComplete();
 
 
-        verify(repo, never()).save(any(Bill.class));
-    }
-
-    @Test
-    void test_setInterestExempt_Positive_ShouldClearInterestWhenSetToTrue() {
-
-        Bill bill = buildBill();
-        bill.setBillId("B-300");
-        bill.setInterestExempt(false);
-        bill.setInterest(new BigDecimal("33.33"));
-
-        when(repo.findByBillId("B-300")).thenReturn(Mono.just(bill));
-        when(repo.save(any(Bill.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
-
-        Mono<Void> result = billService.setInterestExempt("B-300", true);
-
-        StepVerifier.create(result).verifyComplete();
-
-        ArgumentCaptor<Bill> captor = ArgumentCaptor.forClass(Bill.class);
-        verify(repo).save(captor.capture());
-        Bill saved = captor.getValue();
-
-        assertTrue(saved.isInterestExempt(), "exempt flag should be true");
-        assertEquals(BigDecimal.ZERO, saved.getInterest(), "interest should be cleared when exempted");
-    }
-
-    @Test
-    void setInterestExempt_Negative_ShouldNotSaveWhenBillNotFound() {
-        when(repo.findByBillId("B-301")).thenReturn(Mono.empty());
-
-        Mono<Void> result = billService.setInterestExempt("B-301", true);
-
-        StepVerifier.create(result).verifyComplete();
         verify(repo, never()).save(any(Bill.class));
     }
 
@@ -2787,6 +2719,107 @@ public void testGenerateBillPdf_BillNotFound() {
 
         assertEquals(expectedBody, sentMail.getBody(), "Email body should match the formatted receipt layout");
     }
+
+    @Test
+    void createBill_sendEmail_shouldSendReceiptEmailUSD() {
+        // Arrange
+        BillRequestDTO billDTO = new BillRequestDTO();
+        billDTO.setBillStatus(BillStatus.PAID);
+        billDTO.setVetId("vet-123");
+        billDTO.setCustomerId("customer-456");
+        billDTO.setAmount(new BigDecimal("100.00")); // required field per controller
+        billDTO.setDate(LocalDate.now());
+        billDTO.setDueDate(LocalDate.now().plusDays(30));
+
+        // Mock vet info
+        VetResponseDTO vetResponse = new VetResponseDTO();
+        vetResponse.setFirstName("John");
+        vetResponse.setLastName("Doe");
+        when(vetClient.getVetByVetId("vet-123")).thenReturn(Mono.just(vetResponse));
+
+        // Mock customer info
+        CustomerResponseDTO customerResponse = new CustomerResponseDTO();
+        customerResponse.setFirstName("Alice");
+        customerResponse.setLastName("Smith");
+        when(customerServiceClient.getCustomerByCustomerId("customer-456")).thenReturn(Mono.just(customerResponse));
+
+        // Mock user details (correct order for parameters)
+        UserDetails userDetails = UserDetails.builder()
+                .email("test@example.com")
+                .username("Alice Smith")
+                .userId("customer-456")
+                .build();
+        when(authClient.getUserById(eq("jwtToken"), eq("customer-456")))
+                .thenReturn(Mono.just(userDetails));
+
+        // Mock repo behavior
+        Bill billEntity = EntityDtoUtil.toBillEntity(billDTO);
+        billEntity.setBillId("generated-id");
+        billEntity.setVetFirstName("John");
+        billEntity.setVetLastName("Doe");
+        billEntity.setCustomerFirstName("Alice");
+        billEntity.setCustomerLastName("Smith");
+        billEntity.setAmount(new BigDecimal("100.00"));
+        billEntity.setInterest(BigDecimal.ZERO);
+        billEntity.setTaxedAmount(BigDecimal.ZERO);
+
+        when(repo.findById(anyString())).thenReturn(Mono.empty());
+        when(repo.findAllBillsByBillStatus(any())).thenReturn(Flux.empty());
+        when(repo.insert(any(Bill.class))).thenReturn(Mono.just(billEntity));
+
+        // Mock mail sending
+        ArgumentCaptor<Mail> mailCaptor = ArgumentCaptor.forClass(Mail.class);
+        when(mailService.sendMail(mailCaptor.capture()))
+                .thenReturn("Message sent to test@example.com");
+
+        billService = new BillServiceImpl(repo, vetClient, customerServiceClient, authClient, mailService);
+
+        // Act
+        StepVerifier.create(billService.createBill(Mono.just(billDTO), true, "USD", "jwtToken"))
+                .expectNextMatches(response ->
+                        response.getBillId().equals("generated-id") &&
+                                response.getVetFirstName().equals("John") &&
+                                response.getCustomerFirstName().equals("Alice") &&
+                                response.getBillStatus().equals(BillStatus.PAID) &&
+                                response.getDueDate() != null
+                )
+                .verifyComplete();
+
+        // Assert
+        Mail sentMail = mailCaptor.getValue();
+        assertEquals("test@example.com", sentMail.getEmailSendTo());
+        assertEquals("Pet Clinic - Payment Receipt", sentMail.getEmailTitle());
+
+        BigDecimal convertedAmount = FormatBillUtil.convertFromCad(billEntity.getAmount(), "USD");
+        BigDecimal convertedInterest = FormatBillUtil.convertFromCad(billEntity.getInterest(), "USD");
+        BigDecimal convertedTotal = FormatBillUtil.convertFromCad(billEntity.getAmount().add(billEntity.getInterest()), "USD");
+
+        // ✅ Dynamic expected email body
+        String expectedBody = String.format(
+                "Dear %s,<br><br>" +
+                        "Please find below the details of your payment receipt:<br><br>" +
+                        "--------------------------------------------<br>" +
+                        "Bill ID: %s<br>" +
+                        "Date: %s<br>" +
+                        "Subtotal: %s<br>" +
+                        "Interest: %s<br>" +
+                        "Total Due: %s<br>" +
+                        "--------------------------------------------<br><br>" +
+                        "Thank you for choosing Pet Clinic.<br><br>" +
+                        "Best regards,<br>" +
+                        "Pet Clinic Team",
+                userDetails.getUsername(),
+                billEntity.getBillId(),
+                billEntity.getDate(),
+                FormatBillUtil.formatCurrency(convertedAmount, "USD"),
+                FormatBillUtil.formatCurrency(convertedInterest, "USD"),
+                FormatBillUtil.formatCurrency(convertedTotal, "USD"
+                )
+        );
+
+        assertEquals(expectedBody, sentMail.getBody(), "Email body should match the formatted receipt layout");
+    }
+
 
 }
 

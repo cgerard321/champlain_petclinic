@@ -1,11 +1,16 @@
 package com.petclinic.inventoryservice.businesslayer;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.pdf.PdfWriter;
+import org.mockito.MockedStatic;
+import java.io.OutputStream;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
+import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditAction;
+import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditEntry;
+import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Status;
@@ -16,6 +21,8 @@ import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import com.petclinic.inventoryservice.utils.exceptions.UnprocessableEntityException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.mockito.ArgumentMatcher;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,6 +39,7 @@ import java.util.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Pattern;
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,6 +58,14 @@ class ProductInventoryServiceUnitTest {
     InventoryRepository inventoryRepository;
     @MockBean
     InventoryTypeRepository inventoryTypeRepository;
+    @MockBean
+    SupplyAuditRepository supplyAuditRepository;
+
+    @BeforeEach
+    void configureAuditRepository() {
+        when(supplyAuditRepository.insert(any(SupplyAuditEntry.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+    }
 
     //    ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
 //            .inventoryId("1")
@@ -451,17 +467,20 @@ class ProductInventoryServiceUnitTest {
     public void deleteProduct_validProductAndInventory_ShouldSucceed() {
         //arrange
         String productId = "123F567C9";
-        when(productRepository.deleteByProductId(productId)).thenReturn(Mono.empty());
-        when(inventoryRepository.existsByInventoryId(product.getInventoryId())).thenReturn(Mono.just(true));
-        when(productRepository.existsByProductId(productId)).thenReturn(Mono.just(true));
-        Mono<Void> deletedProduct = productInventoryService.deleteProductInInventory(product.getInventoryId(), productId);
+        when(inventoryRepository.findInventoryByInventoryId(product.getInventoryId()))
+                .thenReturn(Mono.just(inventory));
+        when(productRepository.findProductByInventoryIdAndProductId(product.getInventoryId(), productId))
+                .thenReturn(Mono.just(product));
+        when(productRepository.delete(product)).thenReturn(Mono.empty());
+        Mono<Void> deletedProduct = productInventoryService.deleteProductInInventory(
+                product.getInventoryId(), productId, "test-user");
         //act and assert
         StepVerifier
                 .create(deletedProduct)
                 .expectNextCount(0)
                 .verifyComplete();
 
-        verify(productRepository).deleteByProductId(productId);
+        verify(productRepository).delete(product);
     }
 
 
@@ -692,7 +711,8 @@ class ProductInventoryServiceUnitTest {
 
         // Act and Assert
         StepVerifier
-                .create(productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId))
+                .create(productInventoryService.updateProductInInventory(
+                        Mono.just(productRequestDTO), inventoryId, productId, "test-user"))
                 .expectNextMatches(responseDTO -> {
                     assertNotNull(responseDTO);
                     assertEquals(productId, responseDTO.getProductId());
@@ -706,6 +726,53 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
         verify(productRepository).save(argThat(savedProduct ->
                 "Original Supplier".equals(savedProduct.getSupplierName())));
+    }
+
+    @Test
+    void updateProductInInventory_withoutQuantityChange_shouldNotWriteAuditEntry() {
+        String inventoryId = "1";
+        String productId = UUID.randomUUID().toString();
+        ProductRequestDTO request = ProductRequestDTO.builder()
+                .productName("Updated Product Name")
+                .productDescription("Description")
+                .productPrice(99.99)
+                .productQuantity(10)
+                .productSalePrice(15.99)
+                .build();
+        Inventory inventory = Inventory.builder()
+                .inventoryId(inventoryId)
+                .inventoryType(inventoryType.getType())
+                .build();
+        Product existingProduct = Product.builder()
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Original Product Name")
+                .productQuantity(10)
+                .supplierName("Original Supplier")
+                .build();
+        Product savedProduct = Product.builder()
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Updated Product Name")
+                .productQuantity(10)
+                .productDescription("Description")
+                .productPrice(99.99)
+                .productSalePrice(15.99)
+                .supplierName("Original Supplier")
+                .build();
+
+        when(inventoryRepository.findInventoryByInventoryId(inventoryId)).thenReturn(Mono.just(inventory));
+        when(productRepository.findProductByProductId(productId)).thenReturn(Mono.just(existingProduct));
+        when(productRepository.existsByInventoryIdAndProductNameIgnoreCaseAndProductIdNot(
+                inventoryId, request.getProductName(), productId)).thenReturn(Mono.just(false));
+        when(productRepository.save(any(Product.class))).thenReturn(Mono.just(savedProduct));
+
+        StepVerifier.create(productInventoryService.updateProductInInventory(
+                        Mono.just(request), inventoryId, productId, "test-user"))
+                .expectNextMatches(response -> response.getProductQuantity() == 10)
+                .verifyComplete();
+
+        verify(supplyAuditRepository, never()).insert(any(SupplyAuditEntry.class));
     }
 
     @Test
@@ -724,6 +791,7 @@ class ProductInventoryServiceUnitTest {
                 .inventoryId(inventoryId)
                 .productId(productId)
                 .productName("Original Product Name")
+                .productQuantity(10)
                 .supplierName("Original Supplier")
                 .build();
 
@@ -735,7 +803,8 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.save(any(Product.class)))
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
-        StepVerifier.create(productInventoryService.updateProductInInventory(Mono.just(request), inventoryId, productId))
+        StepVerifier.create(productInventoryService.updateProductInInventory(
+                        Mono.just(request), inventoryId, productId, "test-user"))
                 .assertNext(response -> assertEquals("New Supplier", response.getSupplierName()))
                 .verifyComplete();
         verify(productRepository).save(argThat(savedProduct ->
@@ -760,7 +829,8 @@ class ProductInventoryServiceUnitTest {
 
         // Act and Assert
         StepVerifier
-                .create(productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId))
+                .create(productInventoryService.updateProductInInventory(
+                        Mono.just(productRequestDTO), inventoryId, productId, "test-user"))
                 .expectErrorMatches(throwable -> {
                     assertEquals("Inventory not found with id: " + inventoryId, throwable.getMessage());
                     return throwable instanceof NotFoundException;
@@ -793,11 +863,13 @@ class ProductInventoryServiceUnitTest {
                 .thenReturn(Mono.just(inventory));
 
         when(productRepository.findProductByProductId(eq(productId)))
-                .thenReturn(Mono.just(Product.builder().productId(productId).inventoryId(inventoryId).build()));
+                .thenReturn(Mono.just(Product.builder().productId(productId).inventoryId(inventoryId)
+                        .productQuantity(10).build()));
 
         // Assert
         assertThrows(InvalidInputException.class, () ->
-                productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId).block()
+                productInventoryService.updateProductInInventory(
+                        Mono.just(productRequestDTO), inventoryId, productId, "test-user").block()
         );
     }
 
@@ -825,12 +897,14 @@ class ProductInventoryServiceUnitTest {
                                 .productId(productId)
                                 .inventoryId(inventoryId)
                                 .productName("existing")
+                                .productQuantity(10)
                                 .build()
                 ));
 
 
         // Act and Assert
-        StepVerifier.create(productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId))
+        StepVerifier.create(productInventoryService.updateProductInInventory(
+                        Mono.just(productRequestDTO), inventoryId, productId, "test-user"))
                 .expectError(InvalidInputException.class)
                 .verify();
 
@@ -918,7 +992,8 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.save(any(Product.class)))
                 .thenReturn(Mono.just(product));
         //Act
-        Mono<ProductResponseDTO> result = productInventoryService.addSupplyToInventory(Mono.just(productRequestDTO), inventoryId);
+        Mono<ProductResponseDTO> result = productInventoryService.addSupplyToInventory(
+                Mono.just(productRequestDTO), inventoryId, "test-user");
         //Assert
         StepVerifier.create(result)
                 .assertNext(productResponseDTO -> {
@@ -952,7 +1027,8 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.save(any(Product.class)))
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
-        StepVerifier.create(productInventoryService.addSupplyToInventory(Mono.just(request), inventoryId))
+        StepVerifier.create(productInventoryService.addSupplyToInventory(
+                        Mono.just(request), inventoryId, "test-user"))
                 .assertNext(response -> assertEquals("Clinic Supplier", response.getSupplierName()))
                 .verifyComplete();
         verify(productRepository).save(argThat(savedProduct ->
@@ -975,7 +1051,8 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.existsByInventoryIdAndProductNameIgnoreCase(inventoryId, request.getProductName()))
                 .thenReturn(Mono.just(false));
 
-        StepVerifier.create(productInventoryService.addSupplyToInventory(Mono.just(request), inventoryId))
+        StepVerifier.create(productInventoryService.addSupplyToInventory(
+                        Mono.just(request), inventoryId, "test-user"))
                 .expectErrorSatisfies(error -> {
                     assertTrue(error instanceof InvalidInputException);
                     assertEquals("Supplier name cannot be empty.", error.getMessage());
@@ -994,7 +1071,7 @@ class ProductInventoryServiceUnitTest {
                 .thenReturn(Mono.just(true));
 
         Mono<ProductResponseDTO> result =
-                productInventoryService.addSupplyToInventory(Mono.just(productRequestDTO), inventoryId);
+                productInventoryService.addSupplyToInventory(Mono.just(productRequestDTO), inventoryId, "test-user");
 
         StepVerifier.create(result)
                 .expectErrorMatches(ex -> ex instanceof UnprocessableEntityException)
@@ -1007,7 +1084,8 @@ class ProductInventoryServiceUnitTest {
         Mockito.when(inventoryRepository.findInventoryByInventoryId(inventoryId))
                 .thenReturn(Mono.empty());
         //Act
-        Mono<ProductResponseDTO> result = productInventoryService.addSupplyToInventory(Mono.just(productRequestDTO), inventoryId);
+        Mono<ProductResponseDTO> result = productInventoryService.addSupplyToInventory(
+                Mono.just(productRequestDTO), inventoryId, "test-user");
         //Assert
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> {
@@ -1032,7 +1110,8 @@ class ProductInventoryServiceUnitTest {
         Mockito.when(inventoryRepository.findInventoryByInventoryId(inventoryId))
                 .thenReturn(Mono.just(inventory));
         //Act
-        Mono<ProductResponseDTO> result = productInventoryService.addSupplyToInventory(Mono.just(productRequestDTO), inventoryId);
+        Mono<ProductResponseDTO> result = productInventoryService.addSupplyToInventory(
+                Mono.just(productRequestDTO), inventoryId, "test-user");
         //Assert
         StepVerifier.create(result)
                 .expectErrorSatisfies(ex -> {
@@ -2059,7 +2138,7 @@ class ProductInventoryServiceUnitTest {
                 .thenReturn(Mono.just(updatedProduct));
 
         // Act
-        Mono<ProductResponseDTO> result = productInventoryService.consumeProduct(inventoryId, productId);
+        Mono<ProductResponseDTO> result = productInventoryService.consumeProduct(inventoryId, productId, "test-user");
 
         // Assert
         StepVerifier.create(result)
@@ -2073,6 +2152,21 @@ class ProductInventoryServiceUnitTest {
                     return true;
                 })
                 .verifyComplete();
+
+        verify(supplyAuditRepository).insert(argThat(new ArgumentMatcher<SupplyAuditEntry>() {
+            @Override
+            public boolean matches(SupplyAuditEntry entry) {
+                return inventoryId.equals(entry.inventoryId())
+                        && productId.equals(entry.supplyId())
+                        && "Product Name".equals(entry.supplyName())
+                        && entry.previousQuantity() == 10
+                        && entry.newQuantity() == 9
+                        && entry.quantityChange() == -1
+                        && entry.action() == SupplyAuditAction.CONSUMED
+                        && entry.changedAt() != null
+                        && "test-user".equals(entry.changedBy());
+            }
+        }));
     }
 
     @Test
@@ -2085,7 +2179,7 @@ class ProductInventoryServiceUnitTest {
                 .thenReturn(Mono.empty());
 
         // Act
-        Mono<ProductResponseDTO> result = productInventoryService.consumeProduct(inventoryId, productId);
+        Mono<ProductResponseDTO> result = productInventoryService.consumeProduct(inventoryId, productId, "test-user");
 
         // Assert
         StepVerifier.create(result)
@@ -2103,7 +2197,7 @@ class ProductInventoryServiceUnitTest {
                 .thenReturn(Mono.empty());
 
         // Act
-        Mono<ProductResponseDTO> result = productInventoryService.consumeProduct(inventoryId, productId);
+        Mono<ProductResponseDTO> result = productInventoryService.consumeProduct(inventoryId, productId, "test-user");
 
         // Assert
         StepVerifier.create(result)
@@ -2177,18 +2271,18 @@ class ProductInventoryServiceUnitTest {
         when(productRepository.findAllProductsByInventoryId(inventoryId))
                 .thenReturn(Flux.just(product1, product2));
 
-        // Mock PdfWriter.getInstance to throw DocumentException
-        mockStatic(PdfWriter.class);
-        when(PdfWriter.getInstance(any(Document.class), any(ByteArrayOutputStream.class)))
-                .thenThrow(new DocumentException("PDF generation error"));
 
-        // Call the method and expect an error
-        Mono<byte[]> result = productInventoryService.createSupplyPdf(inventoryId);
+        try (MockedStatic<PdfWriter> pdfWriter = mockStatic(PdfWriter.class)) {
+            pdfWriter.when(() -> PdfWriter.getInstance(any(Document.class), any(OutputStream.class)))
+                    .thenThrow(new DocumentException("PDF generation error"));
 
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
-                        throwable.getMessage().equals("Error generating PDF"))
-                .verify();
+            Mono<byte[]> result = productInventoryService.createSupplyPdf(inventoryId);
+
+            StepVerifier.create(result)
+                    .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
+                            throwable.getMessage().equals("Error generating PDF"))
+                    .verify();
+        }
 
         // Verify the interaction with the repository
         verify(productRepository, times(1)).findAllProductsByInventoryId(inventoryId);
@@ -2353,7 +2447,8 @@ class ProductInventoryServiceUnitTest {
                 .thenReturn(Mono.just(updatedProduct));
 
         // Act
-        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(inventoryId, productId, restockQuantity);
+        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(
+                inventoryId, productId, restockQuantity, "test-user");
 
         // Assert
         StepVerifier.create(result)
@@ -2380,12 +2475,13 @@ class ProductInventoryServiceUnitTest {
                 .thenReturn(Mono.empty());
 
         // Act
-        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(inventoryId, productId, restockQuantity);
+        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(
+                inventoryId, productId, restockQuantity, "test-user");
 
         // Assert
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
-                        throwable.getMessage().equals("Product with id: " + productId + "not found in inventory " + inventoryId))
+                        throwable.getMessage().equals("Product with id: " + productId + " not found in inventory " + inventoryId))
                 .verify();
 
         verify(productRepository).findProductByInventoryIdAndProductId(inventoryId, productId);
@@ -2414,7 +2510,8 @@ class ProductInventoryServiceUnitTest {
                 .thenReturn(Mono.just(product));
 
         // Act
-        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(inventoryId, productId, restockQuantity);
+        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(
+                inventoryId, productId, restockQuantity, "test-user");
 
         // Assert
         StepVerifier.create(result)
@@ -2422,7 +2519,7 @@ class ProductInventoryServiceUnitTest {
                         throwable.getMessage().equals("The restock quantity must be greater than 0."))
                 .verify();
 
-        verify(productRepository).findProductByInventoryIdAndProductId(inventoryId, productId);
+        verify(productRepository, never()).findProductByInventoryIdAndProductId(inventoryId, productId);
         verify(productRepository, never()).save(any(Product.class));
     }
 
@@ -2514,12 +2611,34 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
     }
 
+    @Test
+    void getSupplyHistory_returnsMostRecentAuditEntriesForSupply() {
+        String inventoryId = "inventory-1";
+        String productId = "product-1";
+        SupplyAuditEntry entry = new SupplyAuditEntry(
+                "audit-1",
+                inventoryId,
+                productId,
+                "Benzodiazepines",
+                8,
+                10,
+                2,
+                SupplyAuditAction.QUANTITY_UPDATED,
+                Instant.now(),
+                "test-user");
+        when(supplyAuditRepository.findTop20ByInventoryIdAndSupplyIdOrderByChangedAtDesc(
+                inventoryId, productId))
+                .thenReturn(Flux.just(entry));
+
+        StepVerifier.create(productInventoryService.getSupplyHistory(inventoryId, productId))
+                .expectNextMatches(actual -> actual.equals(entry)
+                        && actual.quantityChange() == 2
+                        && "test-user".equals(actual.changedBy()))
+                .verifyComplete();
+
+        verify(supplyAuditRepository)
+                .findTop20ByInventoryIdAndSupplyIdOrderByChangedAtDesc(inventoryId, productId);
+    }
+
 
 }
-
-
-
-
-
-
-

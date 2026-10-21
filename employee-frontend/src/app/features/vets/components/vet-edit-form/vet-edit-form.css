@@ -1,0 +1,154 @@
+:host {
+  display: block;
+}
+
+form {
+  padding: 24px;
+  border: 1px solid #dce3d8;
+  border-radius: 20px;
+  background: #fff;
+  color: #214b3e;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+fieldset {
+  padding: 0;
+  margin: 24px 0 0;
+  border: 0;
+  min-width: 0;
+}
+
+.field {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+input,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #7d9185;
+  border-radius: 8px;
+  font: inherit;
+  color: inherit;
+  background: #fff;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.hint {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #596c62;
+}
+
+.invalid,
+.error {
+  color: #a12020;
+}
+
+[aria-invalid='true'] {
+  border-color: #a12020;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 12px 20px;
+  border: 1px solid #254e3e;
+  border-radius: 8px;
+  background: #254e3e;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.secondary {
+  background: #fff;
+  color: #254e3e;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: 3px solid #254e3e;
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (width <= 600px) {
+  form {
+    padding: 16px;
+  }
+}
+
+:host-context(.dark-mode) {
+  form {
+    background-color: var(--mat-sys-surface-container) !important;
+    border: 1px solid var(--mat-sys-surface-container-high) !important;
+    color: #a3b8ac !important;
+  }
+
+  h2 {
+    color: #a3b8ac !important;
+  }
+
+  form > p {
+    color: white !important;
+  }
+
+  label {
+    color: white !important;
+  }
+
+  input,
+  textarea {
+    background-color: var(--mat-sys-surface-container-highest) !important;
+    border: 1px solid rgb(255 255 255 / 12%) !important;
+    color: white !important;
+  }
+
+  .hint {
+    color: #a3b8ac !important;
+  }
+
+  .secondary {
+    background-color: var(--mat-sys-surface-container-highest) !important;
+    border: 1px solid rgb(255 255 255 / 12%) !important;
+    color: #a3b8ac !important;
+  }
+
+  input:focus-visible,
+  textarea:focus-visible,
+  button:focus-visible {
+    outline: 3px solid #a3b8ac !important;
+  }
+}

@@ -6,6 +6,7 @@ import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductBundleRepository;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.products.ProductTypeRepository;
+import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,9 +16,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,15 +57,19 @@ class DataLoaderServiceTest {
 
     @BeforeEach
     void setUp() {
-        dataLoaderService = new DataLoaderService();
+        dataLoaderService = spy(new DataLoaderService());
         dataLoaderService.productRepository = productRepository;
         dataLoaderService.productBundleRepository = productBundleRepository;
         dataLoaderService.imageRepository = imageRepository;
         dataLoaderService.ratingRepository = ratingRepository;
         dataLoaderService.productTypeRepository = productTypeRepository;
 
-        when(productRepository.backfillFrenchName(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString())).thenReturn(Mono.just(0));
-        when(productRepository.backfillFrenchDescription(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString())).thenReturn(Mono.just(0));
+        lenient().when(productRepository.backfillFrenchName(org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString()))
+                .thenReturn(Mono.just(0));
+        lenient().when(productRepository.backfillFrenchDescription(org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString()))
+                .thenReturn(Mono.just(0));
 
         product = Product.builder()
                 .productId(PRODUCT_ID)
@@ -63,9 +79,15 @@ class DataLoaderServiceTest {
 
     @Test
     void restoresMissingBuiltInImageReferencedByExistingProduct() throws Exception {
+        doReturn(new byte[]{1, 2, 3}).when(dataLoaderService).loadImageData(anyString());
         when(productRepository.findAll())
                 .thenReturn(Flux.just(product), Flux.just(product));
-        when(imageRepository.findImageByImageId(IMAGE_ID)).thenReturn(Mono.empty());
+        when(imageRepository.findImageByImageId(anyString()))
+                .thenAnswer(invocation -> IMAGE_ID.equals(invocation.getArgument(0))
+                        ? Mono.empty()
+                        : Mono.just(Image.builder()
+                        .imageId(invocation.getArgument(0))
+                        .build()));
         when(imageRepository.save(org.mockito.ArgumentMatchers.any(Image.class)))
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
@@ -84,7 +106,7 @@ class DataLoaderServiceTest {
         Image existing = Image.builder().imageId(IMAGE_ID).build();
         when(productRepository.findAll())
                 .thenReturn(Flux.just(product), Flux.just(product));
-        when(imageRepository.findImageByImageId(IMAGE_ID))
+        when(imageRepository.findImageByImageId(anyString()))
                 .thenReturn(Mono.just(existing));
 
         dataLoaderService.run();
@@ -94,17 +116,9 @@ class DataLoaderServiceTest {
     @Test
     void freshCatalogIncludesFrenchNamesAndDescriptionsForEverySeed() throws Exception {
         when(productRepository.findAll()).thenReturn(Flux.empty());
-        when(productBundleRepository.findAll()).thenReturn(Flux.empty());
-        when(imageRepository.findAll()).thenReturn(Flux.empty());
-        when(ratingRepository.findAll()).thenReturn(Flux.empty());
-        when(productTypeRepository.findAll()).thenReturn(Flux.empty());
         when(productRepository.save(org.mockito.ArgumentMatchers.any(Product.class)))
                 .thenAnswer(call -> Mono.just(call.getArgument(0)));
-        when(productBundleRepository.save(org.mockito.ArgumentMatchers.any()))
-                .thenAnswer(call -> Mono.just(call.getArgument(0)));
         when(imageRepository.save(org.mockito.ArgumentMatchers.any()))
-                .thenAnswer(call -> Mono.just(call.getArgument(0)));
-        when(ratingRepository.save(org.mockito.ArgumentMatchers.any()))
                 .thenAnswer(call -> Mono.just(call.getArgument(0)));
         when(productTypeRepository.save(org.mockito.ArgumentMatchers.any()))
                 .thenAnswer(call -> Mono.just(call.getArgument(0)));
@@ -121,4 +135,183 @@ class DataLoaderServiceTest {
         }
     }
 
+    @Test
+    void emptyDatabaseInsertsAllSeededProducts() throws Exception {
+        stubMissingProducts();
+        when(productRepository.findAll()).thenReturn(Flux.empty());
+        stubExistingImages();
+
+        dataLoaderService.run();
+
+        verify(productRepository, times(40)).save(any(Product.class));
+    }
+
+    @Test
+    void existingProductsReceiveOnlyMissingProducts() throws Exception {
+        when(productRepository.findProductByProductId(anyString()))
+                .thenAnswer(invocation -> PRODUCT_ID.equals(invocation.getArgument(0))
+                        ? Mono.just(product)
+                        : Mono.empty());
+        when(productRepository.findByProductNameContainingIgnoreCase(anyString()))
+                .thenReturn(Flux.empty());
+        when(productRepository.save(any(Product.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(productRepository.findAllByProductIdIn(anyList())).thenReturn(Flux.empty());
+        when(productRepository.findAll()).thenReturn(Flux.just(product));
+        when(imageRepository.findImageByImageId(anyString()))
+                .thenReturn(Mono.just(Image.builder().build()));
+        when(ratingRepository.findRatingByCustomerIdAndProductId(anyString(), anyString()))
+                .thenReturn(Mono.just(com.petclinic.products.datalayer.ratings.Rating.builder().build()));
+
+        dataLoaderService.run();
+
+        verify(productRepository, never()).save(argThat(saved ->
+                PRODUCT_ID.equals(saved.getProductId())));
+        verify(productRepository, times(39)).save(argThat(saved ->
+                !PRODUCT_ID.equals(saved.getProductId())));
+    }
+
+    @Test
+    void runningLoaderTwiceDoesNotCreateDuplicateProducts() throws Exception {
+        Set<String> savedProductIds = new HashSet<>();
+        when(productRepository.findProductByProductId(anyString()))
+                .thenAnswer(invocation -> {
+                    String productId = invocation.getArgument(0);
+                    return savedProductIds.contains(productId)
+                            ? Mono.just(Product.builder().productId(productId).build())
+                            : Mono.empty();
+                });
+        when(productRepository.findByProductNameContainingIgnoreCase(anyString()))
+                .thenReturn(Flux.empty());
+        when(productRepository.save(any(Product.class)))
+                .thenAnswer(invocation -> {
+                    Product saved = invocation.getArgument(0);
+                    savedProductIds.add(saved.getProductId());
+                    return Mono.just(saved);
+                });
+        when(productRepository.findAllByProductIdIn(anyList())).thenReturn(Flux.empty());
+        when(productRepository.findAll()).thenReturn(Flux.empty());
+        stubExistingImages();
+
+        dataLoaderService.run();
+        dataLoaderService.run();
+
+        verify(productRepository, times(40)).save(any(Product.class));
+    }
+
+    @Test
+    void emptyDatabaseSavesEverySeededRatingOnce() throws Exception {
+        Set<String> savedProductIds = new HashSet<>();
+        stubStatefulProductRepository(savedProductIds);
+        stubRatingRepository(new HashSet<>());
+        stubExistingImages();
+
+        dataLoaderService.run();
+
+        verify(ratingRepository, times(220)).save(any(Rating.class));
+    }
+
+    @Test
+    void runningLoaderTwiceDoesNotCreateDuplicateRatings() throws Exception {
+        Set<String> savedProductIds = new HashSet<>();
+        Set<String> savedRatingKeys = new LinkedHashSet<>();
+        stubStatefulProductRepository(savedProductIds);
+        stubRatingRepository(savedRatingKeys);
+        stubExistingImages();
+
+        dataLoaderService.run();
+        dataLoaderService.run();
+
+        verify(ratingRepository, times(220)).save(any(Rating.class));
+    }
+
+    @Test
+    void existingRatingForSameCustomerAndProductIsNotOverwritten() throws Exception {
+        String existingProductId = "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7001";
+        String existingCustomerId = "810440e8-cae0-48f7-aa4f-830239b82b78";
+        Rating existingRating = Rating.builder()
+                .productId(existingProductId)
+                .customerId(existingCustomerId)
+                .rating((byte) 2)
+                .review("Existing customer review must remain unchanged.")
+                .build();
+        stubAllProductsExist();
+        when(ratingRepository.findRatingByCustomerIdAndProductId(anyString(), anyString()))
+                .thenAnswer(invocation -> existingProductId.equals(invocation.getArgument(1))
+                        && existingCustomerId.equals(invocation.getArgument(0))
+                        ? Mono.just(existingRating)
+                        : Mono.empty());
+        when(ratingRepository.save(any(Rating.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        stubExistingImages();
+
+        dataLoaderService.run();
+
+        verify(ratingRepository, times(219)).save(any(Rating.class));
+        verify(ratingRepository, never()).save(argThat(rating ->
+                existingProductId.equals(rating.getProductId())
+                        && existingCustomerId.equals(rating.getCustomerId())));
+    }
+
+    private void stubMissingProducts() {
+        when(productRepository.findProductByProductId(anyString())).thenReturn(Mono.empty());
+        when(productRepository.findByProductNameContainingIgnoreCase(anyString()))
+                .thenReturn(Flux.empty());
+        when(productRepository.save(any(Product.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(productRepository.findAllByProductIdIn(anyList())).thenReturn(Flux.empty());
+    }
+
+    private void stubExistingImages() {
+        when(imageRepository.findImageByImageId(anyString()))
+                .thenReturn(Mono.just(Image.builder().build()));
+    }
+
+    private void stubStatefulProductRepository(Set<String> savedProductIds) {
+        when(productRepository.findProductByProductId(anyString()))
+                .thenAnswer(invocation -> {
+                    String productId = invocation.getArgument(0);
+                    return savedProductIds.contains(productId)
+                            ? Mono.just(Product.builder().productId(productId).build())
+                            : Mono.empty();
+                });
+        when(productRepository.findByProductNameContainingIgnoreCase(anyString()))
+                .thenReturn(Flux.empty());
+        when(productRepository.save(any(Product.class)))
+                .thenAnswer(invocation -> {
+                    Product saved = invocation.getArgument(0);
+                    savedProductIds.add(saved.getProductId());
+                    return Mono.just(saved);
+                });
+        when(productRepository.findAll()).thenReturn(Flux.empty());
+        when(productRepository.findAllByProductIdIn(anyList())).thenReturn(Flux.empty());
+    }
+
+    private void stubAllProductsExist() {
+        when(productRepository.findProductByProductId(anyString()))
+                .thenReturn(Mono.just(product));
+        when(productRepository.findAll()).thenReturn(Flux.just(product));
+        when(productRepository.findAllByProductIdIn(anyList())).thenReturn(Flux.empty());
+    }
+
+    private void stubRatingRepository(Set<String> savedRatingKeys) {
+        when(ratingRepository.findRatingByCustomerIdAndProductId(anyString(), anyString()))
+                .thenAnswer(invocation -> {
+                    String customerId = invocation.getArgument(0);
+                    String productId = invocation.getArgument(1);
+                    String key = customerId + ":" + productId;
+                    return savedRatingKeys.contains(key)
+                            ? Mono.just(Rating.builder()
+                            .customerId(customerId)
+                            .productId(productId)
+                            .build())
+                            : Mono.empty();
+                });
+        when(ratingRepository.save(any(Rating.class)))
+                .thenAnswer(invocation -> {
+                    Rating saved = invocation.getArgument(0);
+                    savedRatingKeys.add(saved.getCustomerId() + ":" + saved.getProductId());
+                    return Mono.just(saved);
+                });
+    }
 }

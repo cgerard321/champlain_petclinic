@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -40,6 +41,7 @@ describe('VistListTable', () => {
 
   const dialogOpen = vi.fn();
   const snackBarOpen = vi.fn();
+  const searchVisits = vi.fn();
 
   async function render(
     role: string,
@@ -50,7 +52,11 @@ describe('VistListTable', () => {
     await TestBed.configureTestingModule({
       imports: [VistListTable],
       providers: [
-        { provide: VisitService, useValue: { getAllVisits: () => of(completedVisit) } },
+        provideRouter([]),
+        {
+          provide: VisitService,
+          useValue: { getAllVisits: () => of(completedVisit), searchVisits },
+        },
         { provide: AuthState, useValue: { hasRole: (value: string) => value === role } },
       ],
     })
@@ -64,6 +70,49 @@ describe('VistListTable', () => {
   }
 
   beforeEach(() => vi.clearAllMocks());
+  afterEach(() => vi.useRealTimers());
+
+  function search(fixture: ComponentFixture<VistListTable>, query: string): void {
+    const input = fixture.nativeElement.querySelector('input[type="search"]') as HTMLInputElement;
+    input.value = query;
+    input.dispatchEvent(new Event('input'));
+    vi.advanceTimersByTime(300);
+    fixture.detectChanges();
+  }
+
+  it('searches visits through the gateway after the user stops typing', async () => {
+    vi.useFakeTimers();
+    searchVisits.mockReturnValue(of(upcomingVisit));
+    const fixture = await render(Roles.vet);
+
+    search(fixture, ' VIST-2701 ');
+
+    expect(searchVisits).toHaveBeenCalledWith('VIST-2701');
+    expect(fixture.componentInstance['visit']()).toEqual([upcomingVisit]);
+  });
+
+  it('keeps the status filter applied to the search results', async () => {
+    vi.useFakeTimers();
+    searchVisits.mockReturnValue(of(completedVisit, upcomingVisit));
+    const fixture = await render(Roles.vet);
+    fixture.componentRef.setInput('selectedStatuses', [Status.UPCOMING]);
+
+    search(fixture, 'Leo');
+
+    expect(fixture.componentInstance['visibleVisits']()).toEqual([upcomingVisit]);
+  });
+
+  it('shows a message when no visits match the search', async () => {
+    vi.useFakeTimers();
+    searchVisits.mockReturnValue(of());
+    const fixture = await render(Roles.vet);
+
+    search(fixture, 'unknown');
+
+    expect(fixture.nativeElement.querySelector('.no-visits').textContent).toContain(
+      'Aucune visite trouvée.',
+    );
+  });
 
   it('shows the follow-up action for a veterinarian on completed visits', async () => {
     const fixture = await render(Roles.vet);
@@ -88,6 +137,28 @@ describe('VistListTable', () => {
     expect(dialogOpen).toHaveBeenCalled();
     expect(component['visit']()).toEqual([upcomingVisit, completedVisit]);
     expect(snackBarOpen).toHaveBeenCalledWith('La visite de suivi a été planifiée.', '', {
+      duration: 3000,
+      verticalPosition: 'top',
+    });
+  });
+
+  it('shows the add note action for a veterinarian on completed visits', async () => {
+    const fixture = await render(Roles.vet);
+    const buttons = fixture.nativeElement.querySelectorAll('td button');
+
+    expect(buttons[1].textContent).toContain('Ajouter une note');
+  });
+
+  it('updates the visit with the saved note and shows confirmation', async () => {
+    const visitWithNote = { ...completedVisit, vetNote: 'Keep giving the meds' };
+    const fixture = await render(Roles.vet, visitWithNote);
+    const component = fixture.componentInstance;
+
+    component['openVetNote'](completedVisit);
+
+    expect(dialogOpen).toHaveBeenCalled();
+    expect(component['visit']()).toEqual([visitWithNote]);
+    expect(snackBarOpen).toHaveBeenCalledWith('La note a été enregistrée.', '', {
       duration: 3000,
       verticalPosition: 'top',
     });

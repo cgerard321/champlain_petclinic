@@ -1,0 +1,266 @@
+.bill-page .bill-mobile-filters-toggle {
+  display: none;
+}
+
+@media (width <= 940px) {
+  body .bill-page {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 20px 12px 32px;
+  }
+
+  body .bill-page .bill-header,
+  body .bill-page .bill-card,
+  body .bill-page .bill-card__header {
+    min-width: 0;
+  }
+
+  body .bill-page .bill-card .bill-table-wrapper {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: visible;
+    padding: 12px;
+    background: #f7faf7;
+  }
+
+  body .bill-page .bill-card .bill-table {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    table-layout: auto;
+    border-collapse: separate;
+  }
+
+  /* Visually hide headings without removing them from assistive technology. */
+  body .bill-page .bill-card .bill-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  body .bill-page .bill-card .bill-table tbody {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    gap: 12px;
+  }
+
+  body .bill-page .bill-card .bill-table tbody tr {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid #dce7df;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgb(27 56 43 / 5%);
+  }
+
+  body .bill-page .bill-card .bill-table tbody td {
+    display: grid;
+    grid-template-columns: minmax(94px, 34%) minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    padding: 12px 14px;
+    border-top: 1px solid #edf2ed;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  body .bill-page .bill-card .bill-table tbody td:first-child {
+    border-top: 0;
+    background: #edf5ee;
+  }
+
+  body .bill-page .bill-card .bill-table tbody td::before {
+    content: attr(data-label);
+    display: block;
+    min-width: 0;
+    color: #526c5b;
+    font-weight: 700;
+    overflow-wrap: normal;
+  }
+
+  /* Override the desktop 26% width of the final column. */
+  body .bill-page .bill-card .bill-table tbody td:last-child {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Give the Actions field the full width of its card. */
+  body .bill-page .bill-card .bill-table tbody td[data-label='Actions'] {
+    display: block;
+  }
+
+  body .bill-page .bill-card .bill-table tbody td[data-label='Actions']::before {
+    margin-bottom: 10px;
+  }
+
+  body .bill-page .bill-card .bill-row-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    min-width: 0;
+  }
+
+  body .bill-page .bill-card .bill-row-actions .bill-table-button {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 8px;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+    line-height: 1.35;
+  }
+
+  body .bill-page .bill-card .bill-view-actions {
+    flex-wrap: wrap;
+  }
+
+  body .bill-page .bill-card .bill-archive-action {
+    min-height: 44px;
+    white-space: normal;
+  }
+
+  body .bill-page .bill-card .bill-filters {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+    min-width: 0;
+  }
+
+  /* Shared Angular Material overlay contains the receptionist payment form. */
+  body .cdk-overlay-container .bill-payment {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    padding: 18px;
+    overflow-wrap: anywhere;
+  }
+
+  body .cdk-overlay-container .bill-payment h2 {
+    font-size: 1.4rem;
+  }
+
+  body .cdk-overlay-container .bill-payment input,
+  body .cdk-overlay-container .bill-payment button {
+    box-sizing: border-box;
+    min-height: 44px;
+  }
+
+  body .cdk-overlay-container .bill-payment input {
+    font-size: 16px;
+  }
+}
+
+@media (width <= 480px) {
+  body .bill-page {
+    padding: 12px 8px 24px;
+  }
+
+  body .bill-page .bill-card .bill-table-wrapper {
+    padding: 8px;
+  }
+
+  body .bill-page .bill-card .bill-table tbody td {
+    grid-template-columns: minmax(84px, 36%) minmax(0, 1fr);
+    gap: 8px;
+    padding: 10px;
+  }
+
+  body .bill-page .bill-card .bill-row-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body .bill-page .bill-card .bill-filters {
+    grid-template-columns: minmax(0, 1fr);
+    margin: 0 12px 16px;
+    padding: 14px;
+  }
+}
+
+/* Only narrow portrait mode gets the Show/Hide Filters button.
+   In desktop and landscape, the filter panel is always displayed. */
+@media (width <= 820px) and (orientation: portrait) {
+  body .bill-page .bill-card .bill-mobile-filters-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: calc(100% - 32px);
+    min-height: 44px;
+    margin: 0 16px 16px;
+    padding: 10px 16px;
+    border: 1px solid #315842;
+    border-radius: 10px;
+    background: #f1f7f2;
+    color: #1b382b;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  body .bill-page .bill-card .bill-mobile-filters-toggle:focus-visible {
+    outline: 3px solid #8dbb8f;
+    outline-offset: 3px;
+  }
+
+  body .bill-page .bill-card .bill-filters-region .bill-filters {
+    display: none;
+  }
+
+  body .bill-page .bill-card .bill-filters-region--open .bill-filters {
+    display: grid;
+  }
+
+  body .bill-page .bill-card .bill-filters-region--open .bill-filter-chevron {
+    transform: rotate(180deg);
+  }
+}
+
+@media (height <= 500px) and (orientation: landscape) {
+  body .bill-page {
+    padding-top: 12px;
+    padding-bottom: 18px;
+  }
+
+  body .bill-page .bill-card .bill-mobile-filters-toggle {
+    display: none;
+  }
+
+  body .bill-page .bill-card .bill-filters-region .bill-filters {
+    display: grid;
+  }
+
+  body .cdk-overlay-container .bill-payment {
+    padding: 12px 16px;
+  }
+
+  body .cdk-overlay-container .bill-payment h2 {
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+  }
+
+  body .cdk-overlay-container .bill-payment p {
+    margin-bottom: 10px;
+  }
+
+  body .cdk-overlay-container .bill-payment form {
+    gap: 6px;
+  }
+}

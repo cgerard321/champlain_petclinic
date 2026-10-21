@@ -145,7 +145,7 @@ export const IsReceptionist = (): boolean => {
 
 export const IsCustomer = (): boolean => {
   const { roles } = useUser();
-  return Array.from(roles).some(role => role === 'OWNER');
+  return Array.from(roles).some(role => role === 'CUST');
 };
 
 export const IsVet = (): boolean => {
