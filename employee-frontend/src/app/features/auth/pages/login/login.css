@@ -320,7 +320,7 @@
   --mat-progress-spinner-active-indicator-color: #fff;
 }
 
-@media (width <= cd900px) {
+@media (width <= 900px) {
   .login-page {
     grid-template-columns: minmax(0, 1fr);
   }
