@@ -70,6 +70,7 @@
   "bundles": "Bundles",
   "recent": "Recently Seen",
   "noRecent": "No Recently Seen Items.",
+  "recentlyViewedBadge": "Recently Viewed",
   "loading": "Loading items...",
   "noItems": "No items found.",
   "noBundles": "No Bundles Available",
