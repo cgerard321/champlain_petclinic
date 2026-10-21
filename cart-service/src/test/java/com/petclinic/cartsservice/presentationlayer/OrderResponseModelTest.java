@@ -33,7 +33,7 @@ class OrderResponseModelUnitTest {
                 .orderId(orderId)
                 .customerId(customerId)
                 .customerName("Test Customer")
-                .customerAddress("123 Test Street")
+                .address("123 Test Street")
                 .orderDate(orderDate)
                 .products(List.of(product1))
                 .subtotal(100.0)
@@ -48,7 +48,7 @@ class OrderResponseModelUnitTest {
         assertEquals(orderId, response.getOrderId());
         assertEquals(customerId, response.getCustomerId());
         assertEquals("Test Customer", response.getCustomerName());
-        assertEquals("123 Test Street", response.getCustomerAddress());
+        assertEquals("123 Test Street", response.getAddress());
         assertEquals(orderDate, response.getOrderDate());
         assertEquals(1, response.getProducts().size());
         assertEquals(100.0, response.getSubtotal(), 0.001);
@@ -133,7 +133,7 @@ class OrderResponseModelUnitTest {
         response.setOrderId(orderId);
         response.setCustomerId(customerId);
         response.setCustomerName("Test Customer");
-        response.setCustomerAddress("123 Test Street");
+        response.setAddress("123 Test Street");
         response.setOrderDate(orderDate);
         response.setProducts(List.of(product1));
         response.setSubtotal(100.0);
@@ -147,7 +147,7 @@ class OrderResponseModelUnitTest {
         assertEquals(orderId, response.getOrderId());
         assertEquals(customerId, response.getCustomerId());
         assertEquals("Test Customer", response.getCustomerName());
-        assertEquals("123 Test Street", response.getCustomerAddress());
+        assertEquals("123 Test Street", response.getAddress());
         assertEquals(orderDate, response.getOrderDate());
         assertEquals(1, response.getProducts().size());
         assertEquals(100.0, response.getSubtotal(), 0.001);

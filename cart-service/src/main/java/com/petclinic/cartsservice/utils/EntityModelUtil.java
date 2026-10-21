@@ -8,6 +8,7 @@ import com.petclinic.cartsservice.dataaccesslayer.PromoCode;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeResponseModel;
+import com.petclinic.cartsservice.presentationlayer.BillingRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
@@ -135,12 +136,16 @@ public class EntityModelUtil {
         return responseModel;
     }
 
-    public static Order toOrder(Cart cart, CustomerResponseModel customer) {
+    public static Order toOrder(Cart cart, CustomerResponseModel customer, BillingRequestModel billing) {
         return Order.builder()
                 .orderId(UUID.randomUUID().toString())
                 .customerId(customer.getCustomerId())
-                .customerName(customer.getFullName())
-                .customerAddress(customer.getAddress())
+                .customerName(billing.getCustomerName())
+                .address(billing.getAddress())
+                .city(billing.getCity())
+                .email(billing.getEmail())
+                .postalCode(billing.getPostalCode())
+                .province(billing.getProvince())
                 .products(copyCartProducts(cart.getProducts()))
                 .subtotal(cart.getSubtotal())
                 .promoPercent(cart.getPromoPercent())
@@ -172,17 +177,12 @@ public class EntityModelUtil {
 
     public static Cart storeCartOrder(Cart cart) {
         Cart orderCart = new Cart();
-
         BeanUtils.copyProperties(cart, orderCart);
-
         List<CartProduct> products =
                 copyCartProducts(cart.getProducts());
-
         orderCart.setProducts(products);
-
         CartResponseModel calculatedCart =
                 toCartResponseModel(orderCart, products);
-
         orderCart.setSubtotal(calculatedCart.getSubtotal());
         orderCart.setPromoPercent(calculatedCart.getPromoPercent());
         orderCart.setTvq(calculatedCart.getTvq());
@@ -190,7 +190,6 @@ public class EntityModelUtil {
         orderCart.setTotal(calculatedCart.getTotal());
         orderCart.setShippingMethod(calculatedCart.getShippingMethod());
         orderCart.setShippingCost(calculatedCart.getShippingCost());
-
         return orderCart;
     }
 
