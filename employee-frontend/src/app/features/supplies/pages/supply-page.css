@@ -486,3 +486,21 @@
     color: #7f958a;
   }
 }
+.restock-submit-button {
+  background: #198754;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.restock-submit-button:hover:not(:disabled) {
+  background: #157347;
+}
+
+.restock-submit-button:disabled {
+  background: #d1d5db;
+  color: #4b5563;
+  cursor: not-allowed;
+}
