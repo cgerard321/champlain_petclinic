@@ -1,0 +1,81 @@
+<section class="calendar" aria-labelledby="calendar-title">
+  <header class="calendar__header">
+    <h1 id="calendar-title">{{ labels.title }}</h1>
+    <a class="calendar__button" routerLink="/vist">{{ labels.back }}</a>
+  </header>
+
+  <nav class="calendar__controls" [attr.aria-label]="labels.title">
+    <button type="button" (click)="changeWeek(-1)">{{ labels.previous }}</button>
+    <button type="button" (click)="currentWeek()">{{ labels.current }}</button>
+    <button type="button" (click)="changeWeek(1)">{{ labels.next }}</button>
+  </nav>
+
+  <p class="calendar__range" aria-live="polite">
+    {{ weekStart() | date: 'mediumDate' }} - {{ days()[6]?.date | date: 'mediumDate' }}
+  </p>
+
+  @if (isLoading()) {
+    <p role="status">{{ labels.loading }}</p>
+  }
+
+  @if (hasError()) {
+    <p role="alert">{{ labels.error }}</p>
+  }
+
+  <div class="calendar__scroll" tabindex="0" role="region" [attr.aria-label]="labels.title">
+    <div class="calendar__week" [attr.aria-busy]="isLoading()">
+      @for (day of days(); track day.date.getTime(); let index = $index) {
+        <section class="calendar__day" [attr.aria-labelledby]="'calendar-day-' + index">
+          <h2 [id]="'calendar-day-' + index">
+            <span>{{ day.date | date: 'EEEE' }}</span>
+            <span>{{ day.date | date: 'mediumDate' }}</span>
+          </h2>
+
+          <div class="calendar__appointments">
+            @for (visit of day.visits; track visit.visitId) {
+              <article
+                class="calendar__appointment"
+                [class.calendar__appointment--cancelled]="visit.status === 'CANCELLED'"
+                [class.calendar__appointment--completed]="visit.status === 'COMPLETED'"
+              >
+                <dl>
+                  <dt>{{ labels.start }}</dt>
+                  <dd>{{ visit.visitDate | date: 'shortTime' }}</dd>
+
+                  <dt>{{ labels.end }}</dt>
+                  <dd>
+                    {{
+                      visit.visitEndDate
+                        ? (visit.visitEndDate | date: 'shortTime')
+                        : labels.notAvailable
+                    }}
+                  </dd>
+
+                  <dt>{{ labels.pet }}</dt>
+                  <dd>
+                    {{
+                      petDetails().get(visit.petId)?.petName || visit.petName || labels.notAvailable
+                    }}
+                  </dd>
+
+                  <dt>{{ labels.owner }}</dt>
+                  <dd>{{ petDetails().get(visit.petId)?.ownerName || labels.notAvailable }}</dd>
+
+                  <dt>{{ labels.type }}</dt>
+                  <dd>{{ visit.description || labels.notAvailable }}</dd>
+
+                  <dt>{{ labels.status }}</dt>
+                  <dd class="calendar__status">{{ statusLabel(visit.status) }}</dd>
+                </dl>
+              </article>
+            } @empty {
+              @if (!isLoading() && !hasError()) {
+                <p class="calendar__empty">{{ labels.empty }}</p>
+              }
+            }
+          </div>
+        </section>
+      }
+    </div>
+  </div>
+</section>

@@ -11,6 +11,7 @@ import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -188,11 +189,20 @@ class ProductServiceImplUnitTest {
 
     @Test
     public void testDecreaseProductCount() {
+        assertDecreaseProductCount(20, 19);
+    }
+
+    @Test
+    public void testDecreaseProductCount_LastItem() {
+        assertDecreaseProductCount(1, 0);
+    }
+
+    private void assertDecreaseProductCount(int initialQuantity, int expectedQuantity) {
         String productId = "testProductId";
         Product product = new Product();
         product.setProductId(productId);
         product.setRequestCount(10);
-        product.setProductQuantity(20);
+        product.setProductQuantity(initialQuantity);
 
         when(productRepository.findProductByProductId(productId)).thenReturn(Mono.just(product));
         when(productRepository.save(any(Product.class))).thenReturn(Mono.just(product));
@@ -201,7 +211,12 @@ class ProductServiceImplUnitTest {
                 .verifyComplete();
 
         verify(productRepository).findProductByProductId(productId);
-        verify(productRepository).save(any(Product.class));
+        ArgumentCaptor<Product> savedProduct =
+                ArgumentCaptor.forClass(Product.class);
+        verify(productRepository, times(1)).save(savedProduct.capture());
+        assertEquals(productId, savedProduct.getValue().getProductId());
+        assertEquals(expectedQuantity, savedProduct.getValue().getProductQuantity());
+        assertEquals(10, savedProduct.getValue().getRequestCount());
     }
 
     @Test

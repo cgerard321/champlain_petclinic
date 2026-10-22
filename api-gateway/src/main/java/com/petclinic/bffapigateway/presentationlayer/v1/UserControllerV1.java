@@ -33,7 +33,7 @@ public class UserControllerV1 {
 
     private final AuthServiceClient authServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST, Roles.ADMIN})
     @GetMapping("/{userId}")
     public Mono<ResponseEntity<UserDetails>> getUserById(@PathVariable String userId, @CookieValue("Bearer") String token) {
         return authServiceClient.getUserById(token, userId)
@@ -52,7 +52,7 @@ public class UserControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER, Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST, Roles.ADMIN})
     @GetMapping("/username/check")
     public Mono<ResponseEntity<Boolean>> checkUsernameAvailability(
             @RequestParam String username,
@@ -93,6 +93,7 @@ public class UserControllerV1 {
         }
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PatchMapping(value = "/{userId}", consumes = "application/json", produces = "application/json")
     public Mono<ResponseEntity<UserResponseDTO>> updateUserRoles(final @PathVariable String userId, @RequestBody RolesChangeRequestDTO roleChangeDTO, @CookieValue("Bearer") String auth) {
         return authServiceClient.updateUsersRoles(userId, roleChangeDTO, auth)

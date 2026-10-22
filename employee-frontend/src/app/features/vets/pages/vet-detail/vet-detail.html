@@ -1,0 +1,32 @@
+<section class="detail-page">
+  <a class="back-link" routerLink="/vets/list" i18n="@@vets.detail.back">Retour au répertoire</a>
+  <h1 i18n="@@vets.detail.title">Profil vétérinaire</h1>
+  @if (loading()) {
+    <p role="status" i18n="@@vets.detail.loading">Chargement du profil…</p>
+  } @else if (error()) {
+    <p role="alert">{{ error() }}</p>
+    <button type="button" (click)="retry()" i18n="@@vets.actions.retry">Réessayer</button>
+  } @else if (vet(); as veterinarian) {
+    @if (saved()) {
+      <p class="success" role="status" i18n="@@vets.detail.saved">Le profil a été enregistré.</p>
+    }
+    @if (editing() && canEdit()) {
+      <app-vet-edit-form
+        [vet]="veterinarian"
+        [saving]="saving()"
+        [error]="saveError()"
+        (submitted)="save($event)"
+        (cancelled)="cancel()"
+      />
+    } @else {
+      @if (profile(); as displayProfile) {
+        <app-vet-profile-card [vet]="displayProfile" />
+      }
+      @if (canEdit()) {
+        <button class="edit-button" type="button" (click)="edit()" i18n="@@vets.actions.edit">
+          Modifier le profil
+        </button>
+      }
+    }
+  }
+</section>

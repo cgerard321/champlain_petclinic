@@ -182,8 +182,8 @@ public class CartController {
     }
 
     @PostMapping("/{cartId}/checkout")
-    public Mono<ResponseEntity<CartResponseModel>> checkoutCart(@PathVariable String cartId) {
-        return cartService.checkoutCart(cartId)
+    public Mono<ResponseEntity<CartResponseModel>> checkoutCart(@PathVariable String cartId, @RequestBody BillingRequestModel billing) {
+        return cartService.checkoutCart(cartId, billing)
                 .map(ResponseEntity::ok)
                 .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()))
                 .onErrorResume(InvalidInputException.class, e -> Mono.just(ResponseEntity.badRequest().body(null)));
@@ -292,6 +292,25 @@ public class CartController {
     public Mono<ResponseEntity<Void>> clearPromoFromCart(@PathVariable String cartId) {
         return cartService.applyPromoToCart(cartId, null)
                 .thenReturn(ResponseEntity.noContent().build());
+    }
+
+    @PutMapping("/{cartId}/shipping")
+    public Mono<ResponseEntity<CartResponseModel>> updateShippingMethod(
+            @PathVariable String cartId,
+            @RequestBody(required = false) CartShippingRequestModel shippingRequest) {
+        if (shippingRequest == null || shippingRequest.getShippingMethod() == null) {
+            CartResponseModel errorResponse = new CartResponseModel();
+            errorResponse.setMessage("shippingMethod must be provided");
+            return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+        }
+
+        return cartService.updateShippingMethod(cartId, shippingRequest.getShippingMethod())
+                .map(ResponseEntity::ok)
+                .onErrorResume(InvalidInputException.class, e -> {
+                    CartResponseModel errorResponse = new CartResponseModel();
+                    errorResponse.setMessage(e.getMessage());
+                    return Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(errorResponse));
+                });
     }
 
 }

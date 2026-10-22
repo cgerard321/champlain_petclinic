@@ -1,0 +1,305 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  color: #263832;
+  background: #f8faf7;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e0e7de;
+  background: #fff;
+}
+
+.dialog-title {
+  margin: 0;
+  padding: 0;
+  color: #244b3f;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+}
+
+.dialog-subtitle {
+  margin: 0.4rem 0 0;
+  color: #66766d;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.dialog-close-button {
+  display: grid;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #e0e7de;
+  border-radius: 50%;
+  color: #52675b;
+  background: #f8faf7;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease;
+}
+
+.dialog-close-button:hover {
+  color: #244b3f;
+  background: #edf3e7;
+}
+
+.dialog-close-button:focus-visible {
+  outline: 3px solid rgb(36 75 63 / 25%);
+  outline-offset: 3px;
+}
+
+.details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+  max-height: min(65vh, 640px);
+  box-sizing: border-box;
+  padding: 1.5rem;
+  overflow: hidden auto;
+}
+
+.pet-card {
+  flex: 0 0 auto;
+  padding: 1.25rem;
+  border: 1px solid #e0e7de;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgb(28 61 51 / 5%);
+}
+
+.pet-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.pet-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 12px;
+  color: #244b3f;
+  background: #edf3e7;
+}
+
+.pet-heading h3 {
+  margin: 0;
+  color: #263832;
+  font-size: 1.15rem;
+  font-weight: 650;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+dl div {
+  min-width: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: #f8faf7;
+}
+
+dt {
+  margin-bottom: 0.35rem;
+  color: #66766d;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+dd {
+  margin: 0;
+  color: #263832;
+  font-size: 0.95rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 200px;
+  padding: 1rem;
+  color: #66766d;
+  text-align: center;
+}
+
+.state p {
+  margin: 0;
+}
+
+.state > mat-icon {
+  width: 40px;
+  height: 40px;
+  color: #52675b;
+  font-size: 40px;
+}
+
+.error-message {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid #ebcfc9;
+  border-radius: 12px;
+  color: #9a3d32;
+  background: #fff3ef;
+  line-height: 1.5;
+}
+
+@media (width <= 560px) {
+  .dialog-header,
+  .details-content {
+    padding: 1.25rem 1rem;
+  }
+
+  .pet-card {
+    padding: 1rem;
+  }
+
+  dl {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  dl div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  dt {
+    margin: 0;
+  }
+
+  dd {
+    text-align: right;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog-close-button {
+    transition: none;
+  }
+}
+
+/* containers */
+:host-context(.dark-mode) .dialog-header {
+  background: var(--mat-sys-surface-container);
+  border-bottom: var(--mat-sys-surface-container-highest);
+}
+
+  :host-context(.dark-mode) .dialog-title {
+    color: #e0e0e0;
+  }
+
+  :host-context(.dark-mode) .dialog-subtitle {
+    color: #e0e0e0;
+  }
+
+:host-context(.dark-mode) .details-content {
+  background: var(--mat-sys-surface-container-highest);
+}
+
+:host-context(.dark-mode) .pet-card {
+  background: var(--mat-sys-surface-container);
+  border-color: var(--mat-sys-outline);
+  color: #e0e0e0;
+}
+
+:host-context(.dark-mode) .pet-card div {
+  background: var(--mat-sys-surface-container);
+  border-color: var(--mat-sys-outline);
+}
+
+  :host-context(.dark-mode) .pet-avatar {
+    background: #244b3f;
+    border-color: var(--mat-sys-outline);
+    color: #edf3e7;
+  }
+
+  :host-context(.dark-mode) .pet-card h3 {
+    color: #e0e0e0;
+  }
+
+  :host-context(.dark-mode) .pet-card dt {
+    color: #e0e0e0;
+  }
+
+  :host-context(.dark-mode) .pet-card dd {
+    color: #e0e0e0;
+  }
+
+/* =========================================================
+   ADD PET BUTTON
+   ========================================================= */
+
+.primary-button {
+  align-self: center;
+  min-height: 42px;
+  margin-top: 0.25rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid #244b3f;
+  border-radius: 10px;
+  color: #fff;
+  background: #244b3f;
+  font: inherit;
+  font-size: 0.87rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.primary-button:hover {
+  border-color: #1c3d33;
+  background: #1c3d33;
+}
+
+.primary-button:focus-visible {
+  outline: 3px solid rgb(36 75 63 / 22%);
+  outline-offset: 3px;
+}
+
+.primary-button:active {
+  transform: translateY(1px);
+}
+
+:host-context(.dark-mode) .primary-button {
+  border-color: #244b3f;
+  color: #e0e0e0;
+  background: #244b3f;
+}
+
+:host-context(.dark-mode) .primary-button:hover {
+  border-color: #1c3d33;
+  background: #1c3d33;
+}

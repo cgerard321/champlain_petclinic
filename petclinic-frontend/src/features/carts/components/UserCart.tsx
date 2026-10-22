@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useProductText } from '../utils/useProductText';
 import { useToast } from '@/shared/components/toast/ToastProvider';
 import CartBillingForm, { BillingInfo } from './CartBillingForm';
 import InvoiceComponent, {
@@ -11,7 +13,9 @@ import { ProductModel } from '../models/ProductModel';
 import './cart-shared.css';
 import './UserCart.css';
 import { NavBar } from '@/layouts/AppNavBar';
-import { FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart, FaHeart, FaRegHeart } from 'react-icons/fa';
+import { useAddToWishlist } from '../api/addToWishlistFromProducts';
+import { useRemoveFromWishlistByIcon } from '../api/removeProductFromWishlist';
 import ImageContainer from '@/features/products/components/ImageContainer';
 import axiosInstance from '@/shared/api/axiosInstance';
 import getErrorMessage from '@/shared/api/getErrorMessage';
@@ -19,7 +23,9 @@ import { formatPrice } from '../utils/formatPrice';
 import {
   applyPromo,
   clearPromo,
+  updateShippingMethod,
   type CartDetailsModel,
+  type ShippingMethod,
 } from '@/shared/api/cart';
 import {
   IsAdmin,
@@ -34,8 +40,15 @@ import {
   setCartCountInLS,
   setCartIdInLS,
 } from '../api/cartEvent';
-import { computeTaxes, formatTaxRate, roundToCents } from '../utils/taxUtils';
+import {
+  computeTaxes,
+  formatTaxRate,
+  roundToCents,
+  taxLabelKey,
+} from '../utils/taxUtils';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
+import { getCustomerOrders } from '../api/getCustomerOrders';
+import type { OrderModel } from '../models/OrderModel';
 interface ProductAPIResponse {
   productId: string;
   imageId?: string;
@@ -48,7 +61,7 @@ interface ProductAPIResponse {
 }
 
 interface Invoice {
-  productId: number;
+  productId: string;
   productName: string;
   productSalePrice: number;
   quantity: number;
@@ -61,6 +74,7 @@ interface Invoice {
  */
 const UserCart: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation('carts');
   const { cartId } = useParams<{ cartId?: string }>();
   const { confirm, ConfirmModal } = useConfirmModal();
   const { user } = useUser();
@@ -89,8 +103,39 @@ const UserCart: React.FC = () => {
   const [voucherError, setVoucherError] = useState<string | null>(null);
 
   const [movingAll, setMovingAll] = useState<boolean>(false);
+  const [orders, setOrders] = useState<OrderModel[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const [ordersError, setOrdersError] = useState<string | null>(null);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
+  const [shippingMethod, setShippingMethod] =
+    useState<ShippingMethod>('PICKUP');
+  const [shippingCost, setShippingCost] = useState<number>(0);
+
+  const fetchOrders = useCallback(async (): Promise<void> => {
+    if (!customerId) {
+      setOrders([]);
+      setOrdersLoading(false);
+      return;
+    }
+
+    setOrdersLoading(true);
+    setOrdersError(null);
+
+    try {
+      const data = await getCustomerOrders(customerId);
+      setOrders(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Failed to fetch orders:', error);
+      setOrdersError(t('orders.loadFailed'));
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, [customerId, t]);
+
+  useEffect(() => {
+    void fetchOrders();
+  }, [fetchOrders]);
 
   const toProductModel = useCallback(
     (product: ProductAPIResponse): ProductModel => ({
@@ -133,26 +178,27 @@ const UserCart: React.FC = () => {
 
   const apiErrorMessage = useCallback(
     (err: unknown, defaultMessage: string): string => {
-      if (getStatusCode(err) === 404) return 'Cart not found';
+      if (getStatusCode(err) === 404) return t('errors.cartNotFound');
       return getErrorMessage(err, { defaultMessage });
     },
-    [getStatusCode]
+    [getStatusCode, t]
   );
 
   const ensureCartId = useCallback((): string | undefined => {
     if (!cartId) {
-      const message = 'Invalid cart ID';
+      const message = 'errors.invalidCartId';
       setError(message);
-      showToast(message, 'error');
+      showToast(t(message), 'error');
       return undefined;
     }
     return cartId;
-  }, [cartId, setError, showToast]);
+  }, [cartId, setError, showToast, t]);
 
   const syncCartState = useCallback(
     (
       cartData: CartDetailsModel | null | undefined,
-      fallbackMessage?: string
+      fallbackMessage?: string,
+      options?: { preferFallback?: boolean }
     ) => {
       if (!cartData) return;
 
@@ -186,11 +232,17 @@ const UserCart: React.FC = () => {
       setPromoPercent(
         typeof cartData.promoPercent === 'number' ? cartData.promoPercent : null
       );
-
-      emitCartMessage(
-        typeof cartData.message === 'string' ? cartData.message : undefined,
-        fallbackMessage
+      setShippingMethod(cartData.shippingMethod ?? 'PICKUP');
+      setShippingCost(
+        typeof cartData.shippingCost === 'number' ? cartData.shippingCost : 0
       );
+
+      // sse are in english so prefer the localized fallback when asked
+      const serverMessage =
+        !options?.preferFallback && typeof cartData.message === 'string'
+          ? cartData.message
+          : undefined;
+      emitCartMessage(serverMessage, fallbackMessage);
     },
     [emitCartMessage, toProductModel]
   );
@@ -245,13 +297,47 @@ const UserCart: React.FC = () => {
         { useV2: false }
       );
 
-      syncCartState(data, `${item.productName} (x${quantity}) added to cart!`);
+      syncCartState(
+        data,
+        t('toasts.purchaseAdded', { name: localizedName(item), quantity })
+      );
     } catch (err: unknown) {
       showToast(
-        apiErrorMessage(err, `Failed to add ${item.productName} to cart.`),
+        apiErrorMessage(
+          err,
+          t('errors.addProductFailed', { name: localizedName(item) })
+        ),
         'error'
       );
     }
+  };
+
+  const { addToWishlist: addRecommendationToWishlist } = useAddToWishlist();
+  const { removeFromWishlistByIcon } = useRemoveFromWishlistByIcon();
+
+  const isInWishlist = (productId: string): boolean =>
+    wishlistItems.some(p => p.productId === productId);
+
+  const toggleRecommendationWishlist = async (
+    productId: string
+  ): Promise<void> => {
+    let success;
+    if (isInWishlist(productId)) {
+      success = await removeFromWishlistByIcon(productId);
+    } else {
+      success = await addRecommendationToWishlist(productId, 1);
+    }
+
+    if (!success) {
+      showToast(t('errors.updateWishlistFailed'), 'error');
+      return;
+    }
+
+    const { data } = await axiosInstance.get<CartDetailsModel>(
+      `/carts/${cartId}`,
+      { useV2: false }
+    );
+    syncCartState(data);
   };
 
   // Recommendation purchases state
@@ -273,6 +359,14 @@ const UserCart: React.FC = () => {
   ] = useState<{
     [productId: string]: number;
   }>({});
+
+  const { localizedName } = useProductText([
+    ...cartItems,
+    ...wishlistItems,
+    ...recentPurchases,
+    ...recommendationPurchases,
+    ...orders.flatMap(order => order.products),
+  ]);
 
   // Handle quantity change for recommendation purchases
   const handleRecommendationPurchaseQuantityChange = (
@@ -310,10 +404,16 @@ const UserCart: React.FC = () => {
         },
         { useV2: false }
       );
-      syncCartState(data, `${item.productName} (x${quantity}) added to cart!`);
+      syncCartState(
+        data,
+        t('toasts.purchaseAdded', { name: localizedName(item), quantity })
+      );
     } catch (err: unknown) {
       showToast(
-        apiErrorMessage(err, `Failed to add ${item.productName} to cart.`),
+        apiErrorMessage(
+          err,
+          t('errors.addProductFailed', { name: localizedName(item) })
+        ),
         'error'
       );
     }
@@ -333,12 +433,16 @@ const UserCart: React.FC = () => {
   const promoDiscount =
     promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
   const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
+  const effectiveShippingCost = cartItems.length > 0 ? shippingCost : 0;
+  const taxableSubtotal = roundToCents(
+    discountedSubtotal + effectiveShippingCost
+  );
   const resolvedTaxLines = computeTaxes(
-    discountedSubtotal,
+    taxableSubtotal,
     billingInfo?.province
   ).map(line => ({
     ...line,
-    amount: line.amount ?? roundToCents(discountedSubtotal * line.rate),
+    amount: line.amount ?? roundToCents(taxableSubtotal * line.rate),
   }));
   const totalTax = roundToCents(
     resolvedTaxLines.reduce((acc, line) => acc + (line.amount ?? 0), 0)
@@ -346,7 +450,7 @@ const UserCart: React.FC = () => {
 
   const effectiveDiscount = promoDiscount;
 
-  const total = roundToCents(discountedSubtotal + totalTax);
+  const total = roundToCents(taxableSubtotal + totalTax);
 
   const updateCartItemCount = useCallback(() => {
     const count = cartItems.reduce(
@@ -359,7 +463,7 @@ const UserCart: React.FC = () => {
   useEffect(() => {
     const fetchCartItems = async (): Promise<void> => {
       if (!cartId) {
-        setError('Invalid cart ID');
+        setError('errors.invalidCartId');
         setLoading(false);
         return;
       }
@@ -375,7 +479,7 @@ const UserCart: React.FC = () => {
         syncCartState(data);
       } catch (err: unknown) {
         console.error(err);
-        setError('Failed to fetch cart items');
+        setError('errors.fetchFailed');
       } finally {
         setLoading(false);
       }
@@ -435,11 +539,11 @@ const UserCart: React.FC = () => {
   const applyVoucherCode = async (): Promise<void> => {
     const existingCartId = ensureCartId();
     if (!existingCartId) {
-      setVoucherError('Invalid cart ID');
+      setVoucherError('errors.invalidCartId');
       return;
     }
     if (!voucherCode.trim()) {
-      setVoucherError('Please enter a promo code.');
+      setVoucherError('errors.promoRequired');
       return;
     }
 
@@ -451,32 +555,30 @@ const UserCart: React.FC = () => {
 
       const percent: number = Number(data?.discount);
       if (Number.isNaN(percent) || percent < 0 || percent > 100) {
-        setVoucherError('Received invalid discount from server.');
+        setVoucherError('errors.invalidDiscount');
         return;
       }
 
       const updated = await applyPromo(existingCartId, percent);
 
       setVoucherError(null);
-      const appliedMessage = `Promo applied${
-        updated?.promoPercent != null
-          ? `: ${updated.promoPercent}%`
-          : `: ${percent}%`
-      }`;
+      const appliedMessage = t('toasts.promoApplied', {
+        percent: updated?.promoPercent ?? percent,
+      });
       syncCartState(updated, appliedMessage);
     } catch (err) {
       console.error('Error validating promo code:', err);
-      setVoucherError('Promo code invalid or expired.');
+      setVoucherError('errors.promoInvalid');
     }
   };
 
   const blockIfReadOnly = useCallback((): boolean => {
     if (isStaff) {
-      showToast('Read-only mode: staff/admin cannot modify carts.', 'info');
+      showToast(t('toasts.readOnly'), 'info');
       return true;
     }
     return false;
-  }, [isStaff, showToast]);
+  }, [isStaff, showToast, t]);
 
   const changeItemQuantity = useCallback(
     async (
@@ -490,9 +592,15 @@ const UserCart: React.FC = () => {
       const newQuantity = Math.max(1, Number(event.target.value));
       const item = cartItems[index];
       if (newQuantity > item.productQuantity) {
+        let stockLimitMessage = t('errors.stockLimit', {
+          stock: item.productQuantity,
+        });
+        if (item.productQuantity === 1) {
+          stockLimitMessage = t('errors.stockLimitOne');
+        }
         setErrorMessages(prevErrors => ({
           ...prevErrors,
-          [index]: `You cannot add more than ${item.productQuantity} items. Only ${item.productQuantity} items left in stock.`,
+          [index]: stockLimitMessage,
         }));
         return;
       } else {
@@ -523,7 +631,7 @@ const UserCart: React.FC = () => {
 
           setErrorMessages(prevErrors => ({
             ...prevErrors,
-            [index]: data.message ?? 'Failed to update quantity',
+            [index]: data.message ?? t('errors.updateQuantityFailed'),
           }));
           syncCartState(data, data.message);
           return;
@@ -534,16 +642,16 @@ const UserCart: React.FC = () => {
           delete next[index];
           return next;
         });
-        syncCartState(data, 'Item quantity updated successfully.');
+        syncCartState(data, t('toasts.quantityUpdated'));
       } catch (err) {
         console.error('Error updating quantity:', err);
         setErrorMessages(prev => ({
           ...prev,
-          [index]: 'Failed to update quantity',
+          [index]: t('errors.updateQuantityFailed'),
         }));
       }
     },
-    [cartItems, blockIfReadOnly, ensureCartId, syncCartState]
+    [cartItems, blockIfReadOnly, ensureCartId, syncCartState, t]
   );
 
   const onClearPromo = async (): Promise<void> => {
@@ -552,9 +660,28 @@ const UserCart: React.FC = () => {
     try {
       await clearPromo(existingCartId);
       setPromoPercent(null);
-      showToast('Promo removed.', 'success');
+      showToast(t('toasts.promoRemoved'), 'success');
     } catch (err: unknown) {
-      showToast(apiErrorMessage(err, 'Failed to remove promo.'), 'error');
+      showToast(apiErrorMessage(err, t('errors.removePromoFailed')), 'error');
+    }
+  };
+
+  const onShippingMethodChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ): Promise<void> => {
+    if (blockIfReadOnly()) return;
+    const existingCartId = ensureCartId();
+    if (!existingCartId) return;
+
+    const nextShippingMethod = event.target.value as ShippingMethod;
+    try {
+      const updatedCart = await updateShippingMethod(
+        existingCartId,
+        nextShippingMethod
+      );
+      syncCartState(updatedCart, t('shipping.updated'));
+    } catch (err: unknown) {
+      showToast(apiErrorMessage(err, t('shipping.updateFailed')), 'error');
     }
   };
 
@@ -565,10 +692,10 @@ const UserCart: React.FC = () => {
       if (!existingCartId) return;
 
       const ok = await confirm({
-        title: 'Remove item',
-        message: 'Remove this item from your cart?',
-        confirmText: 'Remove',
-        cancelText: 'Cancel',
+        title: t('confirm.removeItemTitle'),
+        message: t('confirm.removeItemMessage'),
+        confirmText: t('buttons.remove'),
+        cancelText: t('buttons.cancel'),
         variant: 'danger',
       });
       if (!ok) return;
@@ -593,13 +720,16 @@ const UserCart: React.FC = () => {
           notifyCartChanged();
           return next;
         });
-        showToast('Item removed from cart.', 'success');
+        showToast(t('toasts.itemRemoved'), 'success');
       } catch (error) {
         console.error('Error deleting item: ', error);
-        showToast(apiErrorMessage(error, 'Failed to delete item.'), 'error');
+        showToast(
+          apiErrorMessage(error, t('errors.deleteItemFailed')),
+          'error'
+        );
       }
     },
-    [apiErrorMessage, blockIfReadOnly, confirm, ensureCartId, showToast]
+    [apiErrorMessage, blockIfReadOnly, confirm, ensureCartId, showToast, t]
   );
 
   const clearCart = async (): Promise<void> => {
@@ -608,10 +738,10 @@ const UserCart: React.FC = () => {
     if (!existingCartId) return;
 
     const ok = await confirm({
-      title: 'Clear cart',
-      message: 'Are you sure you want to clear the cart?',
-      confirmText: 'Clear cart',
-      cancelText: 'Cancel',
+      title: t('confirm.clearCartTitle'),
+      message: t('confirm.clearCartMessage'),
+      confirmText: t('confirm.clearCartTitle'),
+      cancelText: t('buttons.cancel'),
       variant: 'danger',
     });
     if (!ok) return;
@@ -624,10 +754,10 @@ const UserCart: React.FC = () => {
       setCartItemCount(0);
       setCartCountInLS(0);
       notifyCartChanged();
-      showToast('Cart has been cleared.', 'success');
+      showToast(t('toasts.cartCleared'), 'success');
     } catch (error) {
       console.error('Error clearing cart:', error);
-      showToast(apiErrorMessage(error, 'Failed to clear cart.'), 'error');
+      showToast(apiErrorMessage(error, t('errors.clearCartFailed')), 'error');
     }
   };
 
@@ -652,12 +782,14 @@ const UserCart: React.FC = () => {
         { useV2: false }
       );
 
-      const fallback = `${item.productName} has been added to your wishlist!`;
-      syncCartState(data, fallback);
+      const fallback = t('toasts.addedToWishlist', {
+        name: localizedName(item),
+      });
+      syncCartState(data, fallback, { preferFallback: true });
     } catch (error: unknown) {
       console.error('Error adding to wishlist:', error);
       showToast(
-        apiErrorMessage(error, 'Failed to add item to wishlist.'),
+        apiErrorMessage(error, t('errors.addToWishlistFailed')),
         'error'
       );
     }
@@ -670,10 +802,7 @@ const UserCart: React.FC = () => {
     if (!existingCartId) return;
 
     if (item.productQuantity <= 0) {
-      showToast(
-        `${item.productName} is out of stock and cannot be added to the cart.`,
-        'info'
-      );
+      showToast(t('toasts.outOfStock', { name: localizedName(item) }), 'info');
       return;
     }
     try {
@@ -691,11 +820,11 @@ const UserCart: React.FC = () => {
         { useV2: false }
       );
 
-      const fallback = `${item.productName} has been added to your cart!`;
-      syncCartState(data, fallback);
+      const fallback = t('toasts.addedToCart', { name: localizedName(item) });
+      syncCartState(data, fallback, { preferFallback: true });
     } catch (error: unknown) {
       console.error('Error adding to cart:', error);
-      showToast(apiErrorMessage(error, 'Failed to add item to cart.'), 'error');
+      showToast(apiErrorMessage(error, t('errors.addToCartFailed')), 'error');
     }
   };
 
@@ -706,10 +835,12 @@ const UserCart: React.FC = () => {
     if (!existingCartId) return;
 
     const ok = await confirm({
-      title: 'Remove from wishlist',
-      message: `Remove "${item.productName}" from wishlist?`,
-      confirmText: 'Remove',
-      cancelText: 'Cancel',
+      title: t('confirm.removeWishlistTitle'),
+      message: t('confirm.removeWishlistMessage', {
+        name: localizedName(item),
+      }),
+      confirmText: t('buttons.remove'),
+      cancelText: t('buttons.cancel'),
       variant: 'danger',
     });
 
@@ -727,7 +858,7 @@ const UserCart: React.FC = () => {
     } catch (e) {
       console.error(e);
       showToast(
-        apiErrorMessage(e, 'Could not remove item from wishlist.'),
+        apiErrorMessage(e, t('errors.removeFromWishlistFailed')),
         'error'
       );
     }
@@ -744,20 +875,21 @@ const UserCart: React.FC = () => {
       item => item.productQuantity == null || item.productQuantity > 0
     );
     if (movableItems.length === 0) {
-      showToast('All wishlist items are currently out of stock.', 'info');
+      showToast(t('toasts.wishlistAllOutOfStock'), 'info');
       return;
     }
 
     const blockedCount = wishlistItems.length - movableItems.length;
+    const counts = { movable: movableItems.length, blocked: blockedCount };
 
     const ok = await confirm({
-      title: 'Move all from wishlist',
+      title: t('confirm.moveAllTitle'),
       message:
         blockedCount > 0
-          ? `Move ${movableItems.length} in-stock item(s) to your cart? ${blockedCount} item(s) are out of stock and will remain in your wishlist.`
-          : `Move ${movableItems.length} item(s) to your cart?`,
-      confirmText: 'Move all',
-      cancelText: 'Cancel',
+          ? t('confirm.moveAllMessageBlocked', counts)
+          : t('confirm.moveAllMessage', counts),
+      confirmText: t('confirm.moveAllConfirm'),
+      cancelText: t('buttons.cancel'),
     });
     if (!ok) return;
 
@@ -770,7 +902,7 @@ const UserCart: React.FC = () => {
     );
 
     if (productIds.length === 0) {
-      showToast('No wishlist items are eligible to move.', 'info');
+      showToast(t('toasts.noEligible'), 'info');
       return;
     }
 
@@ -790,24 +922,59 @@ const UserCart: React.FC = () => {
 
       const fallback =
         blockedCount > 0
-          ? `Moved ${movableItems.length} item(s) to your cart. ${blockedCount} item(s) stayed in your wishlist because they are out of stock.`
-          : `Moved ${movableItems.length} item(s) from wishlist to cart.`;
-      syncCartState(data, fallback);
+          ? t('toasts.movedBlocked', counts)
+          : t('toasts.moved', counts);
+      syncCartState(data, fallback, { preferFallback: true });
     } catch (e) {
       console.error(e);
-      showToast(
-        apiErrorMessage(e, 'Unexpected error while moving wishlist items.'),
-        'error'
-      );
+      showToast(apiErrorMessage(e, t('errors.moveFailed')), 'error');
     } finally {
       setMovingAll(false);
     }
   };
 
+  const handleViewOrderReceipt = (order: OrderModel): void => {
+    const discount = roundToCents(
+      order.subtotal * ((order.promoPercent ?? 0) / 100)
+    );
+
+    const orderBilling = {
+      customerName: order.customerName,
+      email: order.email,
+      address: order.address,
+      city: order.city,
+      province: order.province,
+      postalCode: order.postalCode,
+    };
+    const invoice: InvoiceFullType = {
+      invoiceId: order.invoiceId || order.orderId,
+      userId: order.customerId,
+      billing: orderBilling,
+      date: order.orderDate,
+      items: order.products.map(item => ({
+        productId: item.productId,
+        productName: item.productName,
+        productSalePrice: item.productSalePrice,
+        quantity: item.quantityInCart,
+      })),
+      subtotal: order.subtotal,
+      taxableSubtotal: roundToCents(order.total - order.tvq - order.tvc),
+      tvq: order.tvq,
+      tvc: order.tvc,
+      discount,
+      shippingMethod: order.shippingMethod ?? 'PICKUP',
+      shippingCost: order.shippingCost ?? 0,
+      total: order.total,
+    };
+
+    setLastInvoice(invoice);
+    setShowInvoiceModal(true);
+  };
+
   const handleCheckoutConfirmation = (): void => {
     if (isStaff) {
       navigate(AppRoutePaths.Unauthorized, {
-        state: { message: 'Staff/Admin cannot perform checkout.' },
+        state: { message: t('toasts.staffCheckout') },
       });
       return;
     }
@@ -819,19 +986,31 @@ const UserCart: React.FC = () => {
     if (isStaff) return;
 
     if (!cartId) {
-      setCheckoutMessage('Invalid cart ID');
+      setCheckoutMessage(t('errors.invalidCartId'));
       return;
     }
-
     try {
-      await axiosInstance.post(
-        `/carts/${cartId}/checkout`,
-        {},
-        { useV2: false }
-      );
+      const usedBilling = billing ?? billingInfo;
+
+      if (!usedBilling) {
+        setCheckoutMessage('Billing information is required.');
+        return;
+      }
+      const checkoutBilling = {
+        customerName: usedBilling.customerName,
+        email: usedBilling.email,
+        address: usedBilling.address,
+        city: usedBilling.city,
+        province: usedBilling.province,
+        postalCode: usedBilling.postalCode,
+      };
+
+      await axiosInstance.post(`/carts/${cartId}/checkout`, checkoutBilling, {
+        useV2: false,
+      });
 
       const invoiceItems: Invoice[] = cartItems.map(item => ({
-        productId: Number(item.productId),
+        productId: item.productId,
         productName: item.productName,
         productSalePrice: item.productSalePrice,
         quantity: item.quantity || 1,
@@ -850,14 +1029,20 @@ const UserCart: React.FC = () => {
         0
       );
       const invoiceSubtotal = invoiceSubtotalCents / 100;
-      const usedBilling = billing ?? billingInfo ?? null;
+      const shippingCents = Math.round(effectiveShippingCost * 100);
+      const discountCents = Math.round(effectiveDiscount * 100);
+      const invoiceTaxableSubtotalCents = Math.max(
+        0,
+        invoiceSubtotalCents - discountCents + shippingCents
+      );
+      const invoiceTaxableSubtotal = invoiceTaxableSubtotalCents / 100;
 
       const invoiceTaxLines = computeTaxes(
-        invoiceSubtotal,
+        invoiceTaxableSubtotal,
         usedBilling?.province
       ).map(line => ({
         ...line,
-        amount: line.amount ?? roundToCents(invoiceSubtotal * line.rate),
+        amount: line.amount ?? roundToCents(invoiceTaxableSubtotal * line.rate),
       }));
       const invoiceTaxCents = invoiceTaxLines.map(line =>
         Math.round((line.amount ?? 0) * 100)
@@ -866,9 +1051,8 @@ const UserCart: React.FC = () => {
         (sum, cents) => sum + cents,
         0
       );
-      const discountCents = Math.round(effectiveDiscount * 100);
       const invoiceTotalCents =
-        invoiceSubtotalCents + invoiceTaxTotalCents - discountCents;
+        invoiceTaxableSubtotalCents + invoiceTaxTotalCents;
       const invoiceTvq = (invoiceTaxCents[0] ?? 0) / 100;
       const invoiceTvc =
         invoiceTaxCents.slice(1).reduce((sum, cents) => sum + cents, 0) / 100;
@@ -879,7 +1063,7 @@ const UserCart: React.FC = () => {
         userId: user?.userId || 'anonymous',
         billing: usedBilling
           ? {
-              fullName: usedBilling.fullName,
+              customerName: usedBilling.customerName,
               email: usedBilling.email,
               address: usedBilling.address,
               city: usedBilling.city,
@@ -890,20 +1074,40 @@ const UserCart: React.FC = () => {
         date: new Date().toISOString(),
         items: invoiceItemsForFull,
         subtotal: invoiceSubtotal,
+        taxableSubtotal: invoiceTaxableSubtotal,
         tvq: invoiceTvq,
         tvc: invoiceTvc,
         discount: effectiveDiscount,
+        shippingMethod,
+        shippingCost: effectiveShippingCost,
         total: invoiceTotal,
       };
       setLastInvoice(newInvoice);
       setShowInvoiceModal(true);
-      setCheckoutMessage('Checkout successful! Your order is being processed.');
+      setCheckoutMessage(t('toasts.checkoutSuccess'));
       setCartItems([]);
       setCartItemCount(0);
+      setShippingMethod('PICKUP');
+      setShippingCost(0);
       setIsCheckoutModalOpen(false);
 
       // Reset LS so navbar badge = 0 without API
       setCartCountInLS(0);
+
+      // Refresh cart data to retrieve the newly created order
+
+      await fetchOrders();
+
+      try {
+        const { data } = await axiosInstance.get<CartDetailsModel>(
+          `/carts/${cartId}`,
+          { useV2: false }
+        );
+
+        syncCartState(data);
+      } catch (err) {
+        console.error('Failed to refresh orders after checkout:', err);
+      }
 
       // Fetch recent purchases after checkout
       if (customerId) {
@@ -926,10 +1130,14 @@ const UserCart: React.FC = () => {
           error as { response?: { data?: { message?: string } } }
         ).response?.data;
         setCheckoutMessage(
-          `Checkout failed: ${errorData?.message || 'Unexpected error'}`
+          t('errors.checkoutFailed', {
+            message: errorData?.message || t('errors.unexpected'),
+          })
         );
       } else {
-        setCheckoutMessage('Checkout failed: Unexpected error');
+        setCheckoutMessage(
+          t('errors.checkoutFailed', { message: t('errors.unexpected') })
+        );
       }
     }
   };
@@ -939,12 +1147,12 @@ const UserCart: React.FC = () => {
       <div
         className="cart-loading-overlay"
         role="status"
-        aria-label="Loading cart items"
+        aria-label={t('cart.loading')}
       >
-        <span className="sr-only">Loading cart items...</span>
+        <span className="sr-only">{t('cart.loading')}...</span>
       </div>
     );
-  if (error) return <div className="error">{error}</div>;
+  if (error) return <div className="error">{t(error)}</div>;
 
   // Helper to filter out duplicate recent purchases by productId
   const uniqueRecentPurchases = recentPurchases.reduce<{
@@ -983,6 +1191,12 @@ const UserCart: React.FC = () => {
     item => item.productQuantity == null || item.productQuantity > 0
   );
 
+  const displayAddToCartOrPurchaseAgain = (productId: string): string => {
+    return recentPurchasesList.some(item => item.productId === productId)
+      ? t('buttons.purchaseAgain')
+      : t('buttons.addToCart');
+  };
+
   return (
     <div>
       <NavBar />
@@ -999,11 +1213,11 @@ const UserCart: React.FC = () => {
               }}
             >
               <div className="cart-badge-container">
-                <FaShoppingCart aria-label="Shopping Cart" />
+                <FaShoppingCart aria-label={t('cart.shoppingCart')} />
                 {cartItemCount > 0 && (
                   <span
                     className="cart-badge"
-                    aria-label={`Cart has ${cartItemCount} items`}
+                    aria-label={t('cart.itemCount', { count: cartItemCount })}
                   >
                     {cartItemCount}
                   </span>
@@ -1014,7 +1228,7 @@ const UserCart: React.FC = () => {
                 onClick={() => navigate('/products')}
                 style={{ marginLeft: 'auto' }}
               >
-                Continue Shopping
+                {t('buttons.continueShopping')}
               </button>
             </div>
 
@@ -1039,12 +1253,12 @@ const UserCart: React.FC = () => {
                   <span
                     className="empty-cart-icon"
                     role="img"
-                    aria-label="empty-cart"
+                    aria-label={t('cart.emptyLabel')}
                   >
                     🛒
                   </span>
                   <div className="empty-cart-message">
-                    Looks like your cart is empty! Why not add something?
+                    {t('cart.emptyMessage')}
                   </div>
                 </div>
               )}
@@ -1056,7 +1270,7 @@ const UserCart: React.FC = () => {
                   className="clear-cart-btn cart-button cart-button--danger"
                   onClick={clearCart}
                 >
-                  Clear Cart
+                  {t('buttons.clearCart')}
                 </button>
               )}
             </div>
@@ -1067,7 +1281,7 @@ const UserCart: React.FC = () => {
               <div className="voucher-code-section">
                 <input
                   type="text"
-                  placeholder="Enter voucher code"
+                  placeholder={t('cart.voucherPlaceholder')}
                   value={voucherCode}
                   onChange={e => {
                     setVoucherCode(e.target.value);
@@ -1079,10 +1293,10 @@ const UserCart: React.FC = () => {
                   onClick={applyVoucherCode}
                   className="apply-voucher-button cart-button cart-button--brand"
                 >
-                  Apply
+                  {t('buttons.apply')}
                 </button>
                 {voucherError && (
-                  <div className="voucher-error">{voucherError}</div>
+                  <div className="voucher-error">{t(voucherError)}</div>
                 )}
               </div>
 
@@ -1097,40 +1311,80 @@ const UserCart: React.FC = () => {
                       alignItems: 'center',
                     }}
                   >
-                    <span>Current promo: {promoPercent}%</span>
+                    <span>
+                      {t('cart.currentPromo', { percent: promoPercent })}
+                    </span>
                     <button
                       type="button"
                       className="cart-button cart-button--outline"
                       onClick={onClearPromo}
                     >
-                      Clear
+                      {t('buttons.clear')}
                     </button>
                   </div>
                 )}
               </div>
 
+              {cartItems.length > 0 && (
+                <div className="voucher-code-section" style={{ marginTop: 12 }}>
+                  <label htmlFor="shipping-method">{t('shipping.label')}</label>
+                  <select
+                    id="shipping-method"
+                    value={shippingMethod}
+                    onChange={onShippingMethodChange}
+                    className="shipping-method-select"
+                  >
+                    <option value="PICKUP">
+                      {t('shipping.pickup', { price: formatPrice(0) })}
+                    </option>
+                    <option value="STANDARD">
+                      {t('shipping.standard', { price: formatPrice(9.99) })}
+                    </option>
+                    <option value="EXPRESS">
+                      {t('shipping.express', { price: formatPrice(19.99) })}
+                    </option>
+                  </select>
+                </div>
+              )}
+
               <div className="CartSummary">
-                <h3>Cart Summary</h3>
+                <h3>{t('summary.title')}</h3>
                 <p className="summary-item">
-                  Subtotal: {formatPrice(subtotal)}
+                  {t('summary.itemsSubtotal')} {formatPrice(subtotal)}
+                </p>
+                <p className="summary-item">
+                  {promoPercent != null
+                    ? t('summary.discountWithPercent', {
+                        percent: promoPercent,
+                      })
+                    : t('summary.discount')}{' '}
+                  {formatPrice(effectiveDiscount)}
+                </p>
+                <p className="summary-item">
+                  {t('summary.shipping')} {formatPrice(effectiveShippingCost)}
+                </p>
+                <p className="summary-item">
+                  {t('summary.subtotal')} {formatPrice(taxableSubtotal)}
                 </p>
                 {resolvedTaxLines.map(line => (
                   <p key={`${line.name}-${line.rate}`} className="summary-item">
-                    {line.name} ({formatTaxRate(line.rate)}%):{' '}
+                    {t(
+                      `taxes.${taxLabelKey(line.name, billingInfo?.province)}`,
+                      {
+                        defaultValue: line.name,
+                      }
+                    )}{' '}
+                    ({formatTaxRate(line.rate)}%):{' '}
                     {formatPrice(line.amount ?? 0)}
                   </p>
                 ))}
                 {resolvedTaxLines.length > 1 && (
                   <p className="summary-item">
-                    Total taxes: {formatPrice(totalTax)}
+                    {t('summary.totalTaxes')} {formatPrice(totalTax)}
                   </p>
                 )}
-                <p className="summary-item">
-                  Discount{promoPercent != null ? ` (${promoPercent}%)` : ''}:{' '}
-                  {formatPrice(effectiveDiscount)}
-                </p>
                 <p className="total-price summary-item">
-                  Total: {formatPrice(total)}
+                  {t('summary.total')} {formatPrice(total)}
                 </p>
               </div>
 
@@ -1139,29 +1393,139 @@ const UserCart: React.FC = () => {
                 onClick={handleCheckoutConfirmation}
                 disabled={cartItems.length === 0}
               >
-                Checkout
+                {t('buttons.checkout')}
               </button>
 
               {checkoutMessage && (
                 <div className="checkout-message">{checkoutMessage}</div>
               )}
 
-              {lastInvoice && (
+              {orders.length > 0 && (
                 <button
+                  type="button"
                   className="view-receipt-btn cart-button cart-button--brand cart-button--block"
-                  onClick={() => setShowInvoiceModal(true)}
+                  onClick={() => {
+                    const latestOrder = orders.reduce((latest, order) =>
+                      new Date(order.orderDate).getTime() >
+                      new Date(latest.orderDate).getTime()
+                        ? order
+                        : latest
+                    );
+
+                    handleViewOrderReceipt(latestOrder);
+                  }}
                   style={{ marginTop: '1rem' }}
-                  aria-label="View your last receipt"
+                  aria-label={t('cart.receiptLabel')}
                 >
-                  View Receipt
+                  {t('buttons.viewReceipt')}
                 </button>
               )}
             </div>
           )}
         </div>
 
+        {/* Previous Orders */}
+        <div className="orders-section cart-panel cart-panel--padded">
+          <h2>{t('orders.title')}</h2>
+
+          {ordersLoading ? (
+            <p>{t('orders.loading')}</p>
+          ) : ordersError ? (
+            <p className="error">{ordersError}</p>
+          ) : orders.length === 0 ? (
+            <p>{t('orders.empty')}</p>
+          ) : (
+            <div className="orders-list">
+              {orders.map(order => (
+                <div key={order.orderId} className="order-card cart-card">
+                  <div className="order-header">
+                    <h3>{t('orders.orderNumber', { id: order.orderId })}</h3>
+
+                    <p>
+                      {t('orders.placedOn')}{' '}
+                      {new Date(order.orderDate).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <div className="order-products">
+                    {order.products.map(item => (
+                      <div key={item.productId} className="order-product">
+                        <div
+                          className="recent-purchase-image"
+                          onClick={() =>
+                            redirectToProductPageOnClick(item.productId)
+                          }
+                        >
+                          <ImageContainer
+                            productId={item.productId}
+                            imageId={item.imageId}
+                          />
+                        </div>
+
+                        <div className="order-product-details">
+                          <h4>{localizedName(item)}</h4>
+
+                          <p>
+                            {t('orders.quantity')} {item.quantityInCart}
+                          </p>
+
+                          <p>
+                            {t('orders.each', {
+                              price: formatPrice(item.productSalePrice),
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="order-footer">
+                    <button
+                      type="button"
+                      className="view-receipt-btn cart-button cart-button--brand cart-button--block"
+                      onClick={() => handleViewOrderReceipt(order)}
+                      style={{ marginTop: '1rem' }}
+                      aria-label={t('cart.receiptLabel')}
+                    >
+                      {t('buttons.viewReceipt')}
+                    </button>
+                    <span>
+                      {t('orders.subtotal')} {formatPrice(order.subtotal)}
+                    </span>
+                    <span>
+                      {order.shippingMethod
+                        ? t('orders.shippingWithMethod', {
+                            method: order.shippingMethod,
+                          })
+                        : t('orders.shipping')}{' '}
+                      {formatPrice(order.shippingCost ?? 0)}
+                    </span>
+                    <span>
+                      {t('orders.tvq')} {formatPrice(order.tvq)}
+                    </span>
+                    <span>
+                      {t('orders.tvc')} {formatPrice(order.tvc)}
+                    </span>
+
+                    {order.promoPercent != null && (
+                      <span>
+                        {t('orders.promo', { percent: order.promoPercent })}
+                      </span>
+                    )}
+
+                    <strong>
+                      {t('orders.total')} {formatPrice(order.total)}
+                    </strong>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Recent purchases*/}
         <div className="recent-purchases-section cart-panel cart-panel--padded">
-          <h2>Recent Purchases</h2>
+          <h2>{t('recent.title')}</h2>
           <div className="recent-purchases-list cart-scroll-strip">
             {recentPurchasesList.length > 0 ? (
               recentPurchasesList.map(item => (
@@ -1182,7 +1546,9 @@ const UserCart: React.FC = () => {
                       />
                     </div>
                   </div>
-                  <div className="recent-purchase-name">{item.productName}</div>
+                  <div className="recent-purchase-name">
+                    {localizedName(item)}
+                  </div>
                   <div className="recent-purchase-price">
                     ${item.productSalePrice.toFixed(2)}
                   </div>
@@ -1191,7 +1557,7 @@ const UserCart: React.FC = () => {
                       htmlFor={`recent-qty-${item.productId}`}
                       className="recent-purchase-qty-label"
                     >
-                      Qty:
+                      {t('recent.quantity')}
                     </label>
                     <input
                       id={`recent-qty-${item.productId}`}
@@ -1211,10 +1577,10 @@ const UserCart: React.FC = () => {
                     className="purchase-again-btn cart-button cart-button--brand"
                     onClick={() => handlePurchaseAgain(item)}
                   >
-                    Purchase Again
+                    {t('buttons.purchaseAgain')}
                   </button>
                   <div className="recent-purchase-total">
-                    Total: $
+                    {t('summary.total')} $
                     {(
                       item.productSalePrice *
                       (recentPurchaseQuantities[item.productId] || 1)
@@ -1223,14 +1589,14 @@ const UserCart: React.FC = () => {
                 </div>
               ))
             ) : (
-              <p>No recent purchases found.</p>
+              <p>{t('recent.empty')}</p>
             )}
           </div>
         </div>
 
         {/* Wishlist */}
         <div className="wishlist-section cart-panel cart-panel--padded">
-          {/* Header with Move All button */}
+          {/* Header with Add All button */}
           <div
             className="wishlist-header"
             style={{
@@ -1239,7 +1605,7 @@ const UserCart: React.FC = () => {
               alignItems: 'center',
             }}
           >
-            <h2 style={{ margin: 0 }}>Your Wishlist</h2>
+            <h2 style={{ margin: 0 }}>{t('wishlist.title')}</h2>
             {wishlistItems.length > 0 && (
               <button
                 className="cart-button cart-button--accent"
@@ -1249,13 +1615,13 @@ const UserCart: React.FC = () => {
                 aria-disabled={isStaff || movingAll || !hasMovableWishlistItems}
                 title={
                   isStaff
-                    ? 'Read-only: staff/admin cannot move wishlist items'
+                    ? t('wishlist.staffReadOnly')
                     : !hasMovableWishlistItems
-                      ? 'All wishlist items are out of stock'
-                      : 'Move all wishlist items to cart'
+                      ? t('wishlist.allOutOfStock')
+                      : t('wishlist.moveAllTitle')
                 }
               >
-                {movingAll ? 'Moving…' : 'Move All to Cart'}
+                {movingAll ? t('wishlist.moving') : t('buttons.moveAllToCart')}
               </button>
             )}
           </div>
@@ -1282,7 +1648,7 @@ const UserCart: React.FC = () => {
                       </div>
                     </div>
                     <div className="recent-purchase-name">
-                      {item.productName}
+                      {localizedName(item)}
                     </div>
                     <div className="recent-purchase-price">
                       {formatPrice(item.productSalePrice)}
@@ -1294,7 +1660,9 @@ const UserCart: React.FC = () => {
                         disabled={isStaff || isOutOfStock}
                         aria-disabled={isStaff || isOutOfStock}
                       >
-                        {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+                        {isOutOfStock
+                          ? t('buttons.outOfStock')
+                          : t('buttons.addToCart')}
                       </button>
                       <button
                         className="cart-button cart-button--danger cart-button--block cart-button--strike-disabled"
@@ -1302,23 +1670,23 @@ const UserCart: React.FC = () => {
                         disabled={isStaff}
                         aria-disabled={isStaff}
                       >
-                        Remove
+                        {t('buttons.remove')}
                       </button>
                     </div>
                   </div>
                 );
               })
             ) : (
-              <p>No products in the wishlist.</p>
+              <p>{t('wishlist.empty')}</p>
             )}
           </div>
         </div>
 
         <div className="recommendation-purchases-section cart-panel cart-panel--padded">
           <div className="recommendation-header">
-            <h2>Your Recommendations</h2>
+            <h2>{t('recommendations.title')}</h2>
             <div className="recommendation-subtitle recent-purchases-intro">
-              Based on your recent purchases
+              {t('recommendations.subtitle')}
             </div>
           </div>
           <div className={recommendationListClassName}>
@@ -1328,6 +1696,18 @@ const UserCart: React.FC = () => {
                   key={item.productId}
                   className="recommendation-purchase-card cart-card"
                 >
+                  <button
+                    className="wishlist-heart-btn"
+                    title="Add to Wishlist"
+                    onClick={() => toggleRecommendationWishlist(item.productId)}
+                  >
+                    {isInWishlist(item.productId) && (
+                      <FaHeart style={{ color: '#e11d48' }} />
+                    )}
+                    {!isInWishlist(item.productId) && (
+                      <FaRegHeart style={{ color: '#000' }} />
+                    )}
+                  </button>
                   <div className="recent-purchase-image-container">
                     <div
                       onClick={() =>
@@ -1342,17 +1722,17 @@ const UserCart: React.FC = () => {
                     </div>
                   </div>
                   <div className="recommendation-product-name recent-purchase-name">
-                    {item.productName}
+                    {localizedName(item)}
                   </div>
                   <div className="recommendation-product-price recent-purchase-price">
-                    ${formatPrice(item.productSalePrice)}
+                    {formatPrice(item.productSalePrice)}
                   </div>
                   <div className="recommendation-qty-row recent-purchase-qty-row">
                     <label
                       htmlFor={`recommendation-qty-${item.productId}`}
                       className="recommendation-qty-label recent-purchase-qty-label"
                     >
-                      Qty:
+                      {t('recent.quantity')}
                     </label>
                     <input
                       id={`recommendation-qty-${item.productId}`}
@@ -1374,10 +1754,10 @@ const UserCart: React.FC = () => {
                     className="purchase-again-btn cart-button cart-button--brand"
                     onClick={() => handlePurchaseRecommendation(item)}
                   >
-                    Purchase Again
+                    {displayAddToCartOrPurchaseAgain(item.productId)}
                   </button>
                   <div className="recommendation-total recent-purchase-total">
-                    Total: $
+                    {t('summary.total')} $
                     {(
                       item.productSalePrice *
                       (recommendationPurchaseQuantities[item.productId] || 1)
@@ -1388,16 +1768,15 @@ const UserCart: React.FC = () => {
             ) : (
               <div className="recommendation-empty-state">
                 <div className="recommendation-empty-message">
-                  No recommendations available yet.
+                  {t('recommendations.empty')}
                   <br />
-                  Add more products to your cart to get personalized
-                  suggestions!
+                  {t('recommendations.emptyHint')}
                 </div>
                 <button
                   className="cta-browse-products-btn cart-button cart-button--brand"
                   onClick={() => navigate('/products')}
                 >
-                  Browse Products
+                  {t('buttons.browseProducts')}
                 </button>
               </div>
             )}
@@ -1405,27 +1784,25 @@ const UserCart: React.FC = () => {
         </div>
 
         {showBillingForm && (
-          <div className="modal-backdrop">
-            <div className="modal-content">
-              <CartBillingForm
-                isOpen={true}
-                onClose={() => setShowBillingForm(false)}
-                onSubmit={async billing => {
-                  setBillingInfo(billing);
-                  await handleCheckout(billing);
-                  setShowBillingForm(false);
-                }}
-              />
-            </div>
-          </div>
+          <CartBillingForm
+            isOpen={true}
+            onClose={() => setShowBillingForm(false)}
+            onSubmit={async billing => {
+              setBillingInfo(billing);
+              await handleCheckout(billing);
+              setShowBillingForm(false);
+            }}
+          />
         )}
 
         {isCheckoutModalOpen && (
           <div className="checkout-modal">
-            <h3>Confirm Checkout</h3>
-            <p>Are you sure you want to checkout?</p>
-            <button onClick={() => handleCheckout()}>Yes</button>
-            <button onClick={() => setIsCheckoutModalOpen(false)}>No</button>
+            <h3>{t('checkoutModal.title')}</h3>
+            <p>{t('checkoutModal.message')}</p>
+            <button onClick={() => handleCheckout()}>{t('buttons.yes')}</button>
+            <button onClick={() => setIsCheckoutModalOpen(false)}>
+              {t('buttons.no')}
+            </button>
           </div>
         )}
         {showInvoiceModal && lastInvoice && (

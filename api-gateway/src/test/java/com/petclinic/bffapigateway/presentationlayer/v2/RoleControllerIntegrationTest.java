@@ -57,7 +57,7 @@ class RoleControllerIntegrationTest {
                 .getResponseBody();
       
         StepVerifier.create(result)
-                .expectNextMatches(role -> "OWNER".equals(role.getName()))
+                .expectNextMatches(role -> "CUST".equals(role.getName()))
                 .expectNextMatches(role -> "ADMIN".equals(role.getName()));
 
         StepVerifier
@@ -70,7 +70,7 @@ class RoleControllerIntegrationTest {
                 })
                 .expectNextMatches(role -> {
                     assertNotNull(role);
-                    assertEquals("OWNER", role.getName());
+                    assertEquals("CUST", role.getName());
                     assertEquals(2, role.getId());
                     return true;
                 })

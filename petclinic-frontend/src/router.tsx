@@ -4,10 +4,10 @@ import Login from '@/pages/User/Login';
 import SignUp from '@/pages/User/SignUp';
 import Home from '@/pages/Home/Home.tsx';
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
+import OrderHistoryPage from '@/features/customers/components/OrderHistoryPage.tsx';
+import OrderDetailsPage from '@/features/customers/components/OrderDetailsPage.tsx';
 import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
 import Products from '@/pages/Product/Products.tsx';
-import Inventories from '@/pages/Inventory/Inventories.tsx';
-import InventoryProducts from '@/features/inventories/InventoryProducts.tsx';
 import Vet from '@/pages/Vet/Vet.tsx';
 import VetDetails from '@/pages/Vet/VetDetails.tsx';
 import Visits from './pages/Visit/Visit';
@@ -32,7 +32,7 @@ import UpdateCustomerPage from '@/pages/Customer/UpdateCustomerPage.tsx';
 import VisitDetails from './features/visits/components/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 import VisitsCalendar from '@/pages/Visit/VisitsCalendar.tsx';
-import UpdateCustomerPetPage from '@/pages/Customer/UpdateCustomerPetPage.tsx';
+
 import AllUsers from '@/pages/Users/AllUsers.tsx';
 import ProductDetails from '@/features/products/components/ProductDetails';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
@@ -41,7 +41,6 @@ import ResetPassword from '@/pages/User/ResetPassword.tsx';
 import PromoPage from '@/pages/Promos/PromoListPage.tsx';
 import AddPromoPage from '@/pages/Promos/AddPromoPage.tsx';
 import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
-import LowStockProducts from '@/features/inventories/LowStockProducts.tsx';
 import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
 import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
@@ -62,15 +61,6 @@ const router = createBrowserRouter([
   },
   {
     children: [
-      {
-        path: AppRoutePaths.LowStockProducts,
-        element: (
-          <ProtectedRoute>
-            <LowStockProducts />
-          </ProtectedRoute>
-        ),
-      },
-
       {
         path: AppRoutePaths.GetVisitByVistId,
         element: (
@@ -96,22 +86,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: AppRoutePaths.Inventories,
-        element: (
-          <ProtectedRoute>
-            <Inventories />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.InventoryProducts,
-        element: (
-          <ProtectedRoute>
-            <InventoryProducts />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: AppRoutePaths.Vet,
         element: (
           <ProtectedRoute>
@@ -131,7 +105,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
-          <ProtectedRoute roles={['OWNER']}>
+          <ProtectedRoute roles={['CUST']}>
             <ProfileEdit />
           </ProtectedRoute>
         ),
@@ -247,7 +221,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerVisitsCalendar,
         element: (
-          <ProtectedRoute roles={['OWNER']}>
+          <ProtectedRoute roles={['CUST']}>
             <CustomerVisitsCalendar />
           </ProtectedRoute>
         ),
@@ -303,8 +277,24 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfile,
         element: (
-          <ProtectedRoute roles={['OWNER']}>
+          <ProtectedRoute roles={['CUST']}>
             <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerOrderHistory,
+        element: (
+          <ProtectedRoute roles={['CUST']}>
+            <OrderHistoryPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerOrderDetails,
+        element: (
+          <ProtectedRoute roles={['CUST']}>
+            <OrderDetailsPage />
           </ProtectedRoute>
         ),
       },
@@ -340,14 +330,7 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: AppRoutePaths.UpdatePet,
-        element: (
-          <ProtectedRoute roles={['ADMIN', 'VET', 'OWNER']}>
-            <UpdateCustomerPetPage />
-          </ProtectedRoute>
-        ),
-      },
+
       {
         path: AppRoutePaths.AddPet,
         element: (
@@ -389,7 +372,7 @@ const router = createBrowserRouter([
   {
     path: AppRoutePaths.OwnerBookAppointment,
     element: (
-      <ProtectedRoute roles={['OWNER']}>
+      <ProtectedRoute roles={['CUST']}>
         <OwnerBookAppointment />
       </ProtectedRoute>
     ),
