@@ -207,7 +207,9 @@ class InventoryControllerIntegrationTest {
 
     @BeforeEach
     public void dbSetup()  {
-
+        webTestClient = webTestClient.mutate()
+                .defaultHeader("X-Actor-Username", "test-user")
+                .build();
 
         Publisher<Inventory> inventoryPublisher = inventoryRepository.deleteAll()
                 .thenMany(inventoryRepository.save(inventory1))
@@ -766,8 +768,19 @@ class InventoryControllerIntegrationTest {
 
     @Test
     public void deleteProductInInventory_byProductId_ShouldSucceed() {
+        productRepository.save(Product.builder()
+                .inventoryId("inventoryId_3")
+                .productId("delete-test-product")
+                .productName("Audit deletion test supply")
+                .productDescription("Supply created for the deletion test")
+                .productPrice(10.0)
+                .productQuantity(10)
+                .productSalePrice(12.0)
+                .build()).block();
+
         webTestClient.delete()
-                .uri("/inventory/{inventoryId}/products/{productId}", "inventoryId_3", "123F567C9")
+                .uri("/inventory/{inventoryId}/products/{productId}",
+                        "inventoryId_3", "delete-test-product")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent();

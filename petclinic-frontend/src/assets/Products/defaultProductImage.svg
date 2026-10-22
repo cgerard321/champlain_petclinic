@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" role="img" aria-labelledby="title desc">
+  <title id="title">Default product image</title>
+  <desc id="desc">A neutral product placeholder with a paw print icon</desc>
+  <rect width="320" height="240" rx="16" fill="#eef1f4" />
+  <rect x="28" y="28" width="264" height="184" rx="12" fill="#dce2e8" />
+  <circle cx="160" cy="126" r="42" fill="#aeb8c2" />
+  <circle cx="117" cy="84" r="13" fill="#aeb8c2" />
+  <circle cx="146" cy="72" r="13" fill="#aeb8c2" />
+  <circle cx="176" cy="72" r="13" fill="#aeb8c2" />
+  <circle cx="203" cy="86" r="13" fill="#aeb8c2" />
+</svg>

@@ -1,0 +1,44 @@
+{
+  "items": {
+    "hours": {
+      "question": "Quelles sont vos heures d'ouverture ?",
+      "answer": "{{hours}}. Pour les cas urgents en dehors de ces heures, consultez notre page Urgences."
+    },
+    "walkins": {
+      "question": "Acceptez-vous les visites sans rendez-vous ?",
+      "answer": "Nous recommandons de prendre rendez-vous, mais nous essayons d'accueillir les visites sans rendez-vous lorsque c'est possible."
+    },
+    "booking": {
+      "question": "Comment prendre rendez-vous ?",
+      "answer": "Utilisez le bouton « Prendre rendez-vous » sur le site ou appelez la clinique pendant les heures d'ouverture."
+    },
+    "first-visit": {
+      "question": "Que dois-je apporter lors de ma première visite ?",
+      "answer": "Veuillez apporter le dossier médical, le carnet de vaccination, la liste des médicaments ainsi que la gâterie ou le jouet préféré de votre animal."
+    },
+    "vaccines": {
+      "question": "Offrez-vous la vaccination ?",
+      "answer": "Oui. Nous offrons des vaccins essentiels et selon le mode de vie, adaptés aux besoins de votre animal."
+    },
+    "dental": {
+      "question": "Offrez-vous des soins dentaires ?",
+      "answer": "Nous offrons des examens dentaires, le détartrage et le polissage, ainsi que des radiographies dentaires au besoin."
+    },
+    "emergency": {
+      "question": "Offrez-vous des soins d'urgence ?",
+      "answer": "Oui, pendant les heures d'ouverture. Pour les urgences en dehors de ces heures, consultez notre page Urgences pour connaître nos établissements partenaires."
+    },
+    "payment": {
+      "question": "Quels modes de paiement acceptez-vous ?",
+      "answer": "Visa, MasterCard, carte de débit et argent comptant. Nous pouvons vous aider avec les réclamations auprès de certains assureurs pour animaux."
+    },
+    "refills": {
+      "question": "Puis-je renouveler une ordonnance ?",
+      "answer": "Demandez un renouvellement depuis votre compte ou appelez-nous. Certains médicaments nécessitent un examen avant le renouvellement."
+    },
+    "microchip": {
+      "question": "Posez-vous des micropuces ?",
+      "answer": "Oui. La micropuce peut être posée lors d'un rendez-vous régulier ou pendant que votre animal est sous anesthésie."
+    }
+  }
+}

@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,6 +18,8 @@ public class ProductResponseDTO {
     private String imageId;
     private String productName;
     private String productDescription;
+    private String productNameFr;
+    private String productDescriptionFr;
     private Double productSalePrice;
     private Double averageRating;
     private Integer requestCount;
@@ -23,6 +27,7 @@ public class ProductResponseDTO {
     private Boolean isUnlisted;
     private String productTypeId;
     private String productType;
+    private LocalDate releaseDate;
     private ProductStatus productStatus;
     private DeliveryType deliveryType;
     private FileDetails image;
@@ -39,10 +44,11 @@ public class ProductResponseDTO {
             Boolean isUnlisted,
             String productTypeId,
             String productType,
+            LocalDate releaseDate,
             ProductStatus productStatus,
             DeliveryType deliveryType) {
-        this(productId, imageId, productName, productDescription,
+        this(productId, imageId, productName, productDescription, null, null,
                 productSalePrice, averageRating, requestCount, productQuantity,
-                isUnlisted, productTypeId, productType, productStatus, deliveryType, null);
+                isUnlisted, productTypeId, productType,releaseDate, productStatus, deliveryType, null);
     }
 }

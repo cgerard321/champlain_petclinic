@@ -1,0 +1,39 @@
+<section class="image-editor">
+  <h3>{{ label() }}</h3>
+
+  <div class="image-preview">
+    @if (preview(); as image) {
+      <img [src]="image" [alt]="previewAlt()" />
+    } @else {
+      <span i18n="@@image.noPhoto">Aucune photo sélectionnée</span>
+    }
+  </div>
+
+  <input
+    #fileInput
+    type="file"
+    accept="image/jpeg,image/png,image/webp"
+    [attr.aria-label]="chooseLabel()"
+    hidden
+    [disabled]="disabled()"
+    (change)="selectImage($event)"
+  />
+
+  <div class="image-actions">
+    <button type="button" [disabled]="disabled()" (click)="fileInput.click()">
+      {{ preview() ? changeLabel : addLabel }}
+    </button>
+
+    @if (preview()) {
+      <button type="button" class="remove-button" [disabled]="disabled()" (click)="removeImage()">
+        <ng-container i18n="@@image.actions.remove">Supprimer l'image</ng-container>
+      </button>
+    }
+  </div>
+
+  <p class="image-hint" i18n="@@image.hint">JPG, PNG ou WebP. Maximum {{ limitLabel() }}.</p>
+
+  @if (error()) {
+    <p class="image-error" role="alert">{{ error() }}</p>
+  }
+</section>

@@ -70,7 +70,13 @@ const AllUsers: React.FC = (): JSX.Element => {
                 <td>
                   <Link to={`/users/${user.userId}`}>{user.userId}</Link>
                 </td>
-                <td>{user.roles.map(role => role.name).join(', ')}</td>
+                <td>
+                  {user.roles
+                    .map(role =>
+                      role.name === 'CUST' ? 'Customer' : role.name
+                    )
+                    .join(', ')}
+                </td>
                 <td>{user.username}</td>
                 <td>{user.email}</td>
                 <td>{user.verified ? 'Yes' : 'No'}</td>

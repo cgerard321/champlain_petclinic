@@ -1,8 +1,8 @@
 export interface Bill {
   billId: string;
   customerId: string;
-  ownerFirstName: string;
-  ownerLastName: string;
+  customerFirstName: string;
+  customerLastName: string;
   visitType: string;
   vetId: string;
   vetFirstName: string;
