@@ -27,4 +27,5 @@ public class VisitRequestDTO {
     private String practitionerId;
     private Status status;
     private Boolean isEmergency;
+    private String followUpOfVisitId;
 }
