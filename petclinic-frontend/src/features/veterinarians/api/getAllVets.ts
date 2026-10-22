@@ -5,6 +5,8 @@ export async function getAllVets(): Promise<VetResponseModel[]> {
   const response = await axiosInstance.get('/vets', {
     responseType: 'text',
     useV2: true,
+    headers: { Accept: 'text/event-stream' },
+    handleLocally: true,
   });
   return response.data
     .split('data:')
