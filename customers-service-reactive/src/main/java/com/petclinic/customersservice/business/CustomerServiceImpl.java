@@ -109,6 +109,7 @@ public class CustomerServiceImpl implements CustomerService {
                             o.setId(customer.getId());
                             o.setCustomerId(customerId);
                             o.setIsActive(customer.getIsActive());
+                            o.setPhotoId(customer.getPhotoId());
                         })
                 )
                 .flatMap(customerRepo::save)
