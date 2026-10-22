@@ -20,6 +20,10 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+
 
 /**
  * Application Endpoint for Visit
@@ -34,7 +38,6 @@ public class VisitController {
     private final VisitService visitService;
     private final ReviewService reviewService;
     private final PrescriptionService prescriptionService;
-
     /**
      * Simple Get all Visits
      * Accessible through localhost:8080/visits
@@ -330,5 +333,14 @@ public class VisitController {
     public Mono<VisitResponseDTO> addVetNote(@PathVariable String visitId, @RequestBody VetNoteRequestDTO vetNoteRequestDTO){
         return visitService.addVetNote(visitId, vetNoteRequestDTO);
     }
+
+    @PostMapping("practitioner/{practitionerId}/weekly-email")
+    public Mono<String> sendWeeklyScheduleEmail(@PathVariable String practitionerId) {
+        LocalDate weekStart = LocalDate.now()
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        return visitService.sendSchedule(practitionerId, weekStart);
+    }
+
 
 }

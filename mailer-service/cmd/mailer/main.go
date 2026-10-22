@@ -18,10 +18,10 @@ import (
 )
 
 const (
-	MAX_RETRIES = 3
-	RETRY_DELAY = 5 * time.Second
+	MAX_RETRIES          = 3
+	RETRY_DELAY          = 5 * time.Second
 	EMAIL_QUEUE_CAPACITY = 100 //buffer size
-	NUM_WORKERS = 5 
+	NUM_WORKERS          = 5
 )
 
 // @title Mailer Service API
