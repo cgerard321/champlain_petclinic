@@ -1,8 +1,9 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
+import { AddPet } from '@features/cust/components/customer-pet-add/customer-pet-add';
 import { Pet, PetType } from '@features/cust/models/customer.model';
 import { CustomerService } from '@features/cust/services/customer-service';
 
@@ -19,6 +20,7 @@ interface CustomerPetDetails {
 export class PetDetails implements OnInit {
   private readonly data = inject<CustomerPetDetails>(MAT_DIALOG_DATA);
   private readonly customerService = inject(CustomerService);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly petTypes = signal<PetType[]>([]);
   protected readonly pets = signal<Pet[]>([]);
@@ -73,4 +75,17 @@ export class PetDetails implements OnInit {
     hamster: $localize`:@@pet.types.hamster:Hamster`,
     bird: $localize`:@@pet.types.bird:Oiseau`,
   };
+
+  protected openAddPet(): void {
+    // Close the current PetDetails dialog
+    // and open the AddPet dialog with the customer ID.
+    this.dialog.closeAll();
+
+    this.dialog.open(AddPet, {
+      width: '600px',
+      data: {
+        customerId: this.data.customerId,
+      },
+    });
+  }
 }
