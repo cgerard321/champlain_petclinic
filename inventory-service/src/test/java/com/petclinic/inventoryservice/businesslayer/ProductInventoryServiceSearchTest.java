@@ -27,7 +27,8 @@ class ProductInventoryServiceSearchTest {
     private final InventoryRepository inventoryRepository = mock(InventoryRepository.class);
     private final ProductInventoryServiceImpl service = new ProductInventoryServiceImpl(
             inventoryRepository, productRepository, mock(InventoryTypeRepository.class),
-            mock(InventoryValidator.class), mock(SupplyAuditRepository.class));
+            mock(InventoryValidator.class), mock(org.springframework.data.mongodb.core.ReactiveMongoTemplate.class),
+            mock(SupplyAuditRepository.class));
 
     @BeforeEach
     void setUp() {

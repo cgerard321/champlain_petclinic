@@ -2434,7 +2434,7 @@ class ProductInventoryServiceUnitTest {
                 any(FindAndModifyOptions.class),
                 eq(Product.class));
 
-        when(supplyAuditRepository.save(any()))
+        when(supplyAuditRepository.insert(any(SupplyAuditEntry.class)))
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
         StepVerifier.create(productInventoryService.restockLowStockProduct(
@@ -2447,7 +2447,34 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
 
         verify(productRepository, never()).save(any(Product.class));
-        verify(supplyAuditRepository).save(any());
+        verify(supplyAuditRepository).insert(argThat((SupplyAuditEntry entry) ->
+                entry.previousQuantity() == 10 && entry.newQuantity() == 15
+                        && entry.quantityChange() == 5 && entry.changedBy().equals("test-user")
+                        && entry.action() == com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditAction.QUANTITY_UPDATED));
+    }
+
+    @Test
+    void restockLowStockProduct_auditFailurePropagatesAfterAtomicMutation() {
+        Product updated = Product.builder().productId("12345").inventoryId("1")
+                .productName("Test Product").productQuantity(15).build();
+        doReturn(Mono.just(updated)).when(mongoTemplate).findAndModify(
+                any(Query.class), any(AggregationUpdate.class),
+                any(FindAndModifyOptions.class), eq(Product.class));
+        RuntimeException auditFailure = new RuntimeException("Audit unavailable");
+        when(supplyAuditRepository.insert(any(SupplyAuditEntry.class)))
+                .thenReturn(Mono.error(auditFailure));
+
+        // Main's stock mutations and audit insert are separate writes, not a Mongo transaction.
+        // Never return a successful response or repeat the addition when the audit write fails.
+        StepVerifier.create(productInventoryService.restockLowStockProduct(
+                        "1", "12345", 5, "test-user"))
+                .expectErrorMatches(error -> error == auditFailure).verify();
+        verify(mongoTemplate).findAndModify(any(Query.class), any(AggregationUpdate.class),
+                any(FindAndModifyOptions.class), eq(Product.class));
+        verify(supplyAuditRepository).insert(argThat((SupplyAuditEntry entry) ->
+                entry.previousQuantity() == 10 && entry.newQuantity() == 15
+                        && entry.changedBy().equals("test-user")));
+        verify(productRepository, never()).save(any(Product.class));
     }
 
     @Test

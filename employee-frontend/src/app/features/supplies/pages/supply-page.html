@@ -204,11 +204,7 @@
       </button>
       <mat-menu #supplyActionsMenu="matMenu">
         @if (canRestock(supply)) {
-          <button
-            mat-menu-item
-            (click)="openRestock(supply)"
-            i18n="@@supply.actions.restock"
-          >
+          <button mat-menu-item (click)="openRestock(supply)" i18n="@@supply.actions.restock">
             Réapprovisionner
           </button>
         }
@@ -292,20 +288,17 @@
       <button
         type="submit"
         class="edit-button"
-        [disabled]="restockPending() || !canManageSupplies()"
+        [disabled]="
+          restockPending() ||
+          !canManageSupplies() ||
+          uncertainRestocks().has(restockingSupply()?.productId ?? '')
+        "
       >
         {{ restockPending() ? 'Adding stock...' : 'Add stock' }}
       </button>
     </mat-dialog-actions>
   </form>
 </ng-template>
-
-<ng-template #deleteDialog let-supply>
-  <h2 mat-dialog-title>Delete supply</h2>
-
-  <mat-dialog-content>
-    Are you sure you want to delete {{ supply.productName }}?
-  </mat-dialog-content>
 
 <ng-template #expirationCell let-supply>
   @if (supply.expirationDate) {

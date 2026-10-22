@@ -58,7 +58,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Import(InventoryControllerTest.TestActorConfiguration.class)
 public class InventoryControllerTest {
     @org.junit.jupiter.params.ParameterizedTest
-    @org.junit.jupiter.params.provider.ValueSource(strings = {"ADMIN", "INVENTORY_MANAGER", "VET", "OWNER", "RECEPTIONIST"})
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"ADMIN", "INVENTORY_MANAGER", "VET", "CUST", "RECEPTIONIST"})
     void restockRoleFilter_enforcesTheActualControllerAnnotation(String role) throws Exception {
         com.petclinic.bffapigateway.utils.Utility utility = mock(com.petclinic.bffapigateway.utils.Utility.class);
         var exchange = org.springframework.mock.web.server.MockServerWebExchange.from(
@@ -67,7 +67,7 @@ public class InventoryControllerTest {
         var controller = new InventoryControllerV1(inventoryServiceClient);
         when(utility.getHandler(exchange)).thenReturn(new org.springframework.web.method.HandlerMethod(
                 controller, InventoryControllerV1.class.getMethod("restockLowStockProduct",
-                String.class, String.class, Integer.class)));
+                String.class, String.class, Integer.class, org.springframework.web.server.ServerWebExchange.class)));
         exchange.getAttributes().put("tokenValues", com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO
                 .builder().roles(java.util.List.of(role)).build());
         org.springframework.web.server.WebFilterChain chain = mock(org.springframework.web.server.WebFilterChain.class);
@@ -1118,7 +1118,7 @@ public class InventoryControllerTest {
 
         // Verify that the service client was never called
         verify(inventoryServiceClient, never())
-                .restockLowStockProduct(eq(inventoryId), eq(productId), eq(productQuantity));
+                .restockLowStockProduct(eq(inventoryId), eq(productId), eq(productQuantity), eq("test-user"));
     }
 
     @Test

@@ -9,6 +9,7 @@ import { AuthState } from '@core/services/auth-state';
 import { Status } from '@features/supplies/models/status';
 import { Supply } from '@features/supplies/models/supply';
 import { SupplyService } from '@features/supplies/services/supply-service';
+import { ModalForm } from '@shared/components/modal-form/modal-form';
 import { Roles } from '@shared/models/roles';
 
 import { SupplyPage } from './supply-page';
@@ -125,7 +126,7 @@ describe('SupplyPage', () => {
       },
     );
 
-    it.each([Roles.vet, Roles.owner, Roles.receptionist, ''])(
+    it.each([Roles.vet, Roles.customer, Roles.receptionist, ''])(
       'denies restock for role %s',
       (role) => {
         roles.set([role]);
@@ -138,16 +139,16 @@ describe('SupplyPage', () => {
     it('only renders Restock for eligible statuses and removes it when access is revoked', () => {
       const buttons = (): HTMLButtonElement[] =>
         Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
-      expect(buttons().filter((button) => button.textContent?.trim() === 'Restock')).toHaveLength(
-        1,
-      );
+      expect(
+        buttons().filter((button) => button.textContent?.trim() === 'R\u00e9approvisionner'),
+      ).toHaveLength(1);
       component['openRestock'](supplyOne);
       expect(openDialog).not.toHaveBeenCalled();
       roles.set([]);
       fixture.detectChanges();
-      expect(buttons().filter((button) => button.textContent?.trim() === 'Restock')).toHaveLength(
-        0,
-      );
+      expect(
+        buttons().filter((button) => button.textContent?.trim() === 'R\u00e9approvisionner'),
+      ).toHaveLength(0);
     });
 
     it.each([Status.RE_ORDER, Status.OUT_OF_STOCK])('allows status %s', (status) => {
@@ -221,18 +222,25 @@ describe('SupplyPage', () => {
       expect(closeDialog).toHaveBeenCalledOnce();
     });
 
-    it('keeps generic network errors in the modal and allows cancel without a request', () => {
-      component['openRestock'](eligible);
-      component['cancelRestock']();
-      expect(closeDialog).toHaveBeenCalledOnce();
-      expect(restockSupply).not.toHaveBeenCalled();
-      closeDialog.mockClear();
-      component['restockModel'].set({ quantity: 2 });
-      restockSupply.mockReturnValue(throwError(() => new Error('offline')));
-      component['submitRestock'](submitEvent());
-      expect(component['restockError']()).toBe('Unable to restock supply.');
-      expect(closeDialog).not.toHaveBeenCalled();
-    });
+    it.each([new Error('offline'), { code: 500, message: 'Audit unavailable' }])(
+      'blocks retry after an uncertain stock outcome %s and allows cancel',
+      (failure) => {
+        component['openRestock'](eligible);
+        component['cancelRestock']();
+        expect(closeDialog).toHaveBeenCalledOnce();
+        expect(restockSupply).not.toHaveBeenCalled();
+        closeDialog.mockClear();
+        component['restockModel'].set({ quantity: 2 });
+        restockSupply.mockReturnValue(throwError(() => failure));
+        component['submitRestock'](submitEvent());
+        expect(component['restockError']()).toContain('Stock may have changed');
+        component['submitRestock'](submitEvent());
+        expect(restockSupply).toHaveBeenCalledTimes(1);
+        expect(component['canRestock'](eligible)).toBe(false);
+        expect(component['canRestock']({ ...eligible, productId: 'other-supply' })).toBe(true);
+        expect(closeDialog).not.toHaveBeenCalled();
+      },
+    );
   });
 
   it('should combine filters dynamically and clear the controls without refetching', () => {
@@ -577,10 +585,18 @@ describe('SupplyPage', () => {
   it('should not delete a supply when the user cancels confirmation', () => {
     component['deleteSupply'](supplyOne);
 
-    expect(openDialog).toHaveBeenCalledWith(component['deleteDialogTemplate'](), {
-      data: supplyOne,
-      ariaLabel: 'Delete supply',
-    });
+    expect(openDialog).toHaveBeenCalledWith(
+      ModalForm,
+      expect.objectContaining({
+        data: expect.objectContaining({
+          title: "Supprimer l'article",
+          message: 'Voulez-vous vraiment supprimer Bandage \u00e9lastique ?',
+          fields: [],
+          destructive: true,
+        }),
+        ariaLabel: "Supprimer l'article",
+      }),
+    );
 
     dialogClosed.next(false);
     dialogClosed.complete();
@@ -710,7 +726,7 @@ describe('SupplyPage restock modal rendering', () => {
     fixture.detectChanges();
     const button = (
       Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[]
-    ).find((candidate) => candidate.textContent?.trim() === 'Restock');
+    ).find((candidate) => candidate.textContent?.trim() === 'R\u00e9approvisionner');
     button?.click();
     fixture.detectChanges();
     await fixture.whenStable();

@@ -46,6 +46,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 class InventoryControllerIntegrationTest {
     @Autowired
     ProductInventoryService productInventoryService;
+    @Autowired
+    com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditRepository supplyAuditRepository;
 
     private Product setRestockQuantity(Integer quantity) {
         Product product = productRepository.findProductByInventoryIdAndProductId("1", "123F567C9").block();
@@ -60,8 +62,10 @@ class InventoryControllerIntegrationTest {
     @CsvSource({"0,1,1,RE_ORDER", "1,5,6,RE_ORDER", "19,1,20,AVAILABLE", "0,2147483647,2147483647,AVAILABLE"})
     void restock_addsQuantityAndRecalculatesStatus(int initial, int amount, int total, Status status) {
         Product before = setRestockQuantity(initial);
+        String actor = "restock-test-" + UUID.randomUUID();
         webTestClient.put()
                 .uri("/inventory/1/products/123F567C9/restockProduct?productQuantity=" + amount)
+                .header("X-Actor-Username", actor)
                 .exchange().expectStatus().isOk().expectBody(ProductResponseDTO.class)
                 .value(response -> {
                     assertEquals(total, response.getProductQuantity());
@@ -74,6 +78,15 @@ class InventoryControllerIntegrationTest {
         assertEquals(status, saved.getStatus());
         assertEquals(before.getProductName(), saved.getProductName());
         assertEquals(before.getProductPrice(), saved.getProductPrice());
+        var audit = supplyAuditRepository
+                .findTop20ByInventoryIdAndSupplyIdOrderByChangedAtDesc("1", "123F567C9")
+                .filter(entry -> actor.equals(entry.changedBy())).single().block();
+        assertNotNull(audit);
+        assertEquals(initial, audit.previousQuantity());
+        assertEquals(total, audit.newQuantity());
+        assertEquals(amount, audit.quantityChange());
+        assertEquals(com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditAction.QUANTITY_UPDATED,
+                audit.action());
     }
 
     @ParameterizedTest
@@ -115,7 +128,7 @@ class InventoryControllerIntegrationTest {
         setRestockQuantity(0);
         // Real concurrent reactive Mongo operations; no mocked repository/save arithmetic.
         List<ProductResponseDTO> responses = Flux.range(0, 12)
-                .flatMap(index -> productInventoryService.restockLowStockProduct("1", "123F567C9", 1), 12)
+                .flatMap(index -> productInventoryService.restockLowStockProduct("1", "123F567C9", 1, "test-user"), 12)
                 .collectList().block();
         assertNotNull(responses);
         assertEquals(12, responses.size());
@@ -128,7 +141,7 @@ class InventoryControllerIntegrationTest {
     void restock_concurrentRequestsRecheckEligibilityAtMutationTime() {
         setRestockQuantity(19);
         List<Signal<ProductResponseDTO>> results = Flux.range(0, 8)
-                .flatMap(index -> productInventoryService.restockLowStockProduct("1", "123F567C9", 1)
+                .flatMap(index -> productInventoryService.restockLowStockProduct("1", "123F567C9", 1, "test-user")
                         .materialize(), 8).collectList().block();
         assertNotNull(results);
         assertEquals(1, results.stream().filter(Signal::isOnNext).count());

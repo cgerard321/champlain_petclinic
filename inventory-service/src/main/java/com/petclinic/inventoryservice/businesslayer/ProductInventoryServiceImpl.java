@@ -847,6 +847,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                                         < EntityDTOUtil.REORDER_THRESHOLD
                                                 ? "The restock quantity would exceed the maximum stock quantity."
                                                 : "Only RE ORDER or OUT OF STOCK supplies can be restocked. Refresh and try again.")))))
+                // Main records audit history after the stock write without a transaction.
+                // Propagate audit failures; the stock addition has already been applied.
                 .flatMap(updated ->
                         recordSupplyChange(
                                 inventoryId,
@@ -857,7 +859,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                 SupplyAuditAction.QUANTITY_UPDATED,
                                 changedBy)
                                 .thenReturn(EntityDTOUtil.toProductResponseDTO(updated)));
-    }
     }
 
     @Override

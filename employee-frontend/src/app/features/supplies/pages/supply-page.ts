@@ -9,7 +9,7 @@ import {
   TemplateRef,
   viewChild,
 } from '@angular/core';
-import { FormField, form, max, min, required, submit } from '@angular/forms/signals';
+import { FormField, form, max, min, required } from '@angular/forms/signals';
 import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -19,7 +19,6 @@ import { firstValueFrom } from 'rxjs';
 
 import { isApiError } from '@core/models/api-error';
 import { AuthState } from '@core/services/auth-state';
-import { SupplyImageEditor } from '@features/supplies/components/supply-image-editor/supply-image-editor';
 import { Status } from '@features/supplies/models/status';
 import { Supply, SupplyRequest } from '@features/supplies/models/supply';
 import {
@@ -50,7 +49,15 @@ interface SupplyFormValue {
 }
 
 @Component({
-  imports: [CurrencyPipe, MatIconModule, MatMenuModule, Table, MatTooltipModule],
+  imports: [
+    CurrencyPipe,
+    FormField,
+    MatDialogModule,
+    MatIconModule,
+    MatMenuModule,
+    Table,
+    MatTooltipModule,
+  ],
   selector: 'app-supply',
   styleUrl: './supply-page.css',
   templateUrl: './supply-page.html',
@@ -60,13 +67,13 @@ export class SupplyPage {
   private readonly supplyService = inject(SupplyService);
   private readonly auth = inject(AuthState);
   private readonly dialog = inject(MatDialog);
-  private readonly deleteDialogTemplate = viewChild.required<TemplateRef<unknown>>('deleteDialog');
   private readonly restockDialogTemplate =
     viewChild.required<TemplateRef<unknown>>('restockDialog');
   private restockDialogRef: MatDialogRef<unknown> | null = null;
   protected readonly restockingSupply = signal<Supply | null>(null);
   protected readonly restockPending = signal(false);
   protected readonly restockError = signal('');
+  protected readonly uncertainRestocks = signal<ReadonlySet<string>>(new Set());
   protected readonly restockModel = signal<{ quantity: number | null }>({ quantity: null });
   protected readonly restockForm = form(this.restockModel, (path) => {
     required(path.quantity, { message: 'Quantity is required.' });
@@ -77,6 +84,7 @@ export class SupplyPage {
   protected canRestock(supply: Supply): boolean {
     return (
       this.canManageSupplies() &&
+      !this.uncertainRestocks().has(supply.productId) &&
       (supply.status === Status.RE_ORDER || supply.status === Status.OUT_OF_STOCK)
     );
   }
@@ -105,6 +113,7 @@ export class SupplyPage {
   protected submitRestock(event: Event): void {
     event.preventDefault();
     if (this.restockPending()) return;
+    if (this.uncertainRestocks().has(this.restockingSupply()?.productId ?? '')) return;
 
     const supply = this.restockingSupply();
     const inventoryId = this.inventoryId;
@@ -140,7 +149,17 @@ export class SupplyPage {
       error: (error: unknown) => {
         this.restockPending.set(false);
         if (dialogRef) dialogRef.disableClose = false;
-        this.restockError.set(isApiError(error) ? error.message : 'Unable to restock supply.');
+        const code = isApiError(error) ? Number(error.code) : 0;
+        if (!code || code >= 500) {
+          // Stock may have changed before an audit write or the response failed. A second
+          // additive request could duplicate it; require reconciliation by reloading the page.
+          this.uncertainRestocks.update((ids) => new Set([...ids, supply.productId]));
+          this.restockError.set(
+            'Unable to confirm restock. Stock may have changed. Reload the page to check quantities before trying again.',
+          );
+        } else {
+          this.restockError.set(isApiError(error) ? error.message : 'Unable to restock supply.');
+        }
       },
     });
   }
