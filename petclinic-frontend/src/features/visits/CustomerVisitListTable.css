@@ -35,3 +35,14 @@
 .cvlt-modal-actions .btn {
   min-width: 80px;
 }
+
+.follow-up-label {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background-color: #e3f2fd;
+  color: #1565c0;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
