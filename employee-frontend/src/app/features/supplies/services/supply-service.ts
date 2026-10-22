@@ -64,6 +64,14 @@ export class SupplyService {
     return this.http.delete<void>(`/api/gateway/inventories/${inventoryId}/products/${productId}`);
   }
 
+  restockSupply(inventoryId: string, productId: string, quantity: number): Observable<Supply> {
+    return this.http.put<Supply>(
+      `/api/gateway/inventories/${inventoryId}/products/${productId}/restockProduct`,
+      null,
+      { params: { productQuantity: quantity } },
+    );
+  }
+
   downloadSupplyPdf(inventoryId: string): Observable<Blob> {
     return this.http.get(`/api/gateway/inventories/${inventoryId}/products/download`, {
       responseType: 'blob',

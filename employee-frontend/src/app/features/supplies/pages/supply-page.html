@@ -239,9 +239,53 @@
 
 <ng-template #actionsCell let-supply>
   <div class="action-buttons">
+    @if (canRestock(supply)) {
+      <button type="button" class="edit-button" (click)="openRestock(supply)">Restock</button>
+    }
     <button type="button" class="edit-button" (click)="editSupply(supply)">Edit</button>
     <button type="button" class="delete-button" (click)="deleteSupply(supply)">Delete</button>
   </div>
+</ng-template>
+<ng-template #restockDialog>
+  <h2 mat-dialog-title>Restock supply</h2>
+  <form (submit)="submitRestock($event)">
+    <mat-dialog-content>
+      @if (restockingSupply(); as supply) {
+        <p>{{ supply.productName }} — Current quantity: {{ supply.productQuantity }}</p>
+      }
+      <label for="restockQuantity">Quantity to add</label>
+      <input
+        id="restockQuantity"
+        type="number"
+        step="1"
+        [formField]="restockForm.quantity"
+        [readOnly]="restockPending()"
+      />
+      @if (restockForm.quantity().touched() && restockForm.quantity().invalid()) {
+        <p class="field-error">{{ restockForm.quantity().errors()[0]?.message }}</p>
+      }
+      @if (restockError()) {
+        <p class="field-error" role="alert">{{ restockError() }}</p>
+      }
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button
+        type="button"
+        class="dialog-cancel-button"
+        [disabled]="restockPending()"
+        (click)="cancelRestock()"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="edit-button"
+        [disabled]="restockPending() || !canManageSupplies()"
+      >
+        {{ restockPending() ? 'Adding stock...' : 'Add stock' }}
+      </button>
+    </mat-dialog-actions>
+  </form>
 </ng-template>
 <ng-template #deleteDialog let-supply>
   <h2 mat-dialog-title>Delete supply</h2>

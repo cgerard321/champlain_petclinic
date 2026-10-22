@@ -22,6 +22,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.aggregation.AggregationUpdate;
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
+import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import javax.security.auth.callback.TextInputCallback;
 import java.io.ByteArrayOutputStream;
@@ -44,6 +51,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     private final ProductRepository productRepository;
     private final InventoryTypeRepository inventoryTypeRepository;
     private final InventoryValidator validator;
+    private final ReactiveMongoTemplate mongoTemplate;
 
 
     @Override
@@ -739,19 +747,34 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     @Override
     public Mono<ProductResponseDTO> restockLowStockProduct(String inventoryId, String productId, Integer productQuantity) {
-        return productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Product with id: " + productId + "not found in inventory " + inventoryId)))
-                .flatMap(product -> {
-                    if (productQuantity <= 0) {
-                        return Mono.error(new InvalidInputException("The restock quantity must be greater than 0."));
-                    }
+        if (productQuantity == null || productQuantity <= 0) {
+            return Mono.error(new InvalidInputException("The restock quantity must be greater than 0."));
+        }
 
-                    product.setProductQuantity(product.getProductQuantity() + productQuantity);
-                    product.setLastUpdatedAt(LocalDateTime.now());
+        // Match eligibility and overflow protection against the stock at mutation time.
+        // Separate pipeline stages calculate status from the NEW quantity atomically.
+        Query eligible = Query.query(Criteria.where("inventoryId").is(inventoryId)
+                .and("productId").is(productId)
+                .and("productQuantity").gte(0).lt(EntityDTOUtil.REORDER_THRESHOLD)
+                .lte(Integer.MAX_VALUE - productQuantity));
+        AggregationUpdate update = AggregationUpdate.update()
+                .set("productQuantity").toValue(ArithmeticOperators.valueOf("productQuantity").add(productQuantity))
+                .set("status").toValue(ConditionalOperators.when(
+                        Criteria.where("productQuantity").lt(EntityDTOUtil.REORDER_THRESHOLD))
+                        .then(Status.RE_ORDER.name()).otherwise(Status.AVAILABLE.name()))
+                .set("lastUpdatedAt").toValue(LocalDateTime.now());
 
-                    return productRepository.save(product)
-                            .map(EntityDTOUtil::toProductResponseDTO);
-                });
+        return mongoTemplate.findAndModify(eligible, update,
+                        FindAndModifyOptions.options().returnNew(true), Product.class)
+                .switchIfEmpty(Mono.defer(() -> productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
+                        .switchIfEmpty(Mono.error(new NotFoundException(
+                                "Product with id: " + productId + " not found in inventory " + inventoryId)))
+                        .flatMap(product -> Mono.error(new InvalidInputException(
+                                product.getProductQuantity() != null && product.getProductQuantity() >= 0
+                                        && product.getProductQuantity() < EntityDTOUtil.REORDER_THRESHOLD
+                                        ? "The restock quantity would exceed the maximum stock quantity."
+                                        : "Only RE ORDER or OUT OF STOCK supplies can be restocked. Refresh and try again.")))))
+                .map(EntityDTOUtil::toProductResponseDTO);
     }
 
     @Override

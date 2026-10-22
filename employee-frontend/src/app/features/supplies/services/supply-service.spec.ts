@@ -51,6 +51,34 @@ describe('SupplyService', () => {
     http.verify();
   });
 
+  describe('restockSupply', () => {
+    it('sends an additive quantity through the existing endpoint and returns the server row', () => {
+      const updated = { ...supplyOne, productQuantity: 23, status: Status.AVAILABLE };
+      service
+        .restockSupply(inventoryId, productId, 3)
+        .subscribe((response) => expect(response).toEqual(updated));
+      const request = http.expectOne(
+        `/api/gateway/inventories/${inventoryId}/products/${productId}/restockProduct?productQuantity=3`,
+      );
+      expect(request.request.method).toBe('PUT');
+      expect(request.request.body).toBeNull();
+      request.flush(updated);
+    });
+
+    it('propagates restock failures to the modal', () => {
+      let failure: unknown;
+      service
+        .restockSupply(inventoryId, productId, 3)
+        .subscribe({ error: (error) => (failure = error) });
+      http
+        .expectOne(
+          `/api/gateway/inventories/${inventoryId}/products/${productId}/restockProduct?productQuantity=3`,
+        )
+        .flush({ message: 'No longer eligible' }, { status: 400, statusText: 'Bad Request' });
+      expect(failure).toBeInstanceOf(HttpErrorResponse);
+    });
+  });
+
   describe('getSupplies', () => {
     it('should collect streamed supplies once the SSE response completes', () => {
       let result: Supply[] | undefined;

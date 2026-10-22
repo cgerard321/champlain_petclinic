@@ -240,7 +240,8 @@ public Flux<InventoryResponseDTO> searchInventories(
     @PutMapping("/{inventoryId}/products/{productId}/restockProduct")
     public Mono<ResponseEntity<ProductResponseDTO>> restockLowStockProduct(@PathVariable String inventoryId,@PathVariable String productId, @RequestParam Integer productQuantity){
         if (productQuantity == null || productQuantity <= 0) {
-            return Mono.just(ResponseEntity.badRequest().body(null));
+            return Mono.error(new com.petclinic.inventoryservice.utils.exceptions.InvalidInputException(
+                    "The restock quantity must be greater than 0."));
         }
         return productInventoryService.restockLowStockProduct(inventoryId, productId, productQuantity)
                 .map(updatedProduct -> ResponseEntity.ok().body(updatedProduct))

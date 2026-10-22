@@ -339,6 +339,24 @@ class InventoryServiceClientIntegrationTest {
                 .verify();
     }
 
+    @Test
+    void restockLowStockProduct_preservesEligibilityErrorInsteadOfReportingNotFound() {
+        enqueueError(400, "Only RE ORDER or OUT OF STOCK supplies can be restocked.");
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", 5))
+                .expectErrorMatches(error -> error instanceof InvalidInputsInventoryException
+                        && error.getMessage().contains("Only RE ORDER"))
+                .verify();
+    }
+
+    @Test
+    void restockLowStockProduct_preservesOverflowErrorInsteadOfReportingNotFound() {
+        enqueueError(400, "The restock quantity would exceed the maximum stock quantity.");
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", Integer.MAX_VALUE))
+                .expectErrorMatches(error -> error instanceof InvalidInputsInventoryException
+                        && error.getMessage().contains("maximum stock"))
+                .verify();
+    }
+
 
 
 
