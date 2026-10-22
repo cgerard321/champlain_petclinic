@@ -365,7 +365,7 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.CUST})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.CUST, Roles.VET})
     @PatchMapping(value = "/{visitId}/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> cancelVisit(@PathVariable String visitId, @RequestBody CancellationRequestDTO cancellationRequestDTO) {
 
