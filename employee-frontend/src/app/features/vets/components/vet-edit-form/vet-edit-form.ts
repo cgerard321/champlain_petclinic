@@ -186,9 +186,16 @@ export class VetEditForm {
     const rest = hours.filter((item) => item !== hour);
     const neighbour = rest[index] ?? rest[index - 1];
     this.schedule.update((current) => ({ ...current, [day]: rest }));
-    this.announcement.set(
+    const messages = [
       $localize`:@@vets.availability.removed_hour:${this.labels[day]}:day: ${hourLabel(hour)}:hour: retiré.`,
-    );
+    ];
+    if (!rest.length) {
+      this.days.update((current) => current.filter((item) => item !== day));
+      messages.push(
+        $localize`:@@vets.availability.removed_day:Journée ${this.labels[day]}:day: retirée.`,
+      );
+    }
+    this.announcement.set(messages.join(' '));
     this.restoreFocus(neighbour ? `#remove-hour-${day}-${neighbour}` : `#remove-day-${day}`);
   }
 
@@ -252,6 +259,7 @@ export class VetEditForm {
     const vet = this.vet();
     const days = this.days();
     const schedule = this.schedule();
+    const untouched = !this.removed().length;
     const workHours: Record<string, readonly string[]> = {};
     for (const day of DAYS) {
       if (schedule[day].length) workHours[day] = schedule[day];
@@ -260,8 +268,10 @@ export class VetEditForm {
       ...this.form.getRawValue(),
       vetId: vet.vetId,
       vetBillId: vet.vetBillId,
-      workday: DAYS.filter((day) => days.includes(day) || schedule[day].length > 0),
-      workHoursJson: JSON.stringify(workHours),
+      workday: untouched
+        ? (vet.workday ?? [])
+        : DAYS.filter((day) => days.includes(day) || schedule[day].length > 0),
+      workHoursJson: untouched ? vet.workHoursJson : JSON.stringify(workHours),
       active: vet.active,
       specialties: vet.specialties ?? [],
       photoDefault: false,
