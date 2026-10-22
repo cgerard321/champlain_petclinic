@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.CancellationRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.RescheduleRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VetNoteRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
@@ -13,6 +14,7 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingPrescriptionNotFoundException;
+import com.petclinic.bffapigateway.exceptions.ForbiddenAccessException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -380,6 +382,35 @@ public class VisitsControllerV1 {
                 .addVetNote(visitId, vetNoteRequestDTO)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
+    @PatchMapping(value = "/{visitId}/confirm", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> confirmFollowUpVisit(@PathVariable String visitId, ServerWebExchange exchange) {
+        TokenResponseDTO user = exchange.getAttribute("tokenValues");
+        return findVisitOfCustomer(visitId, user)
+                .flatMap(visit -> visitsServiceClient.confirmFollowUpVisit(visitId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
+    @PatchMapping(value = "/{visitId}/reschedule", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> rescheduleFollowUpVisit(@PathVariable String visitId, @RequestBody RescheduleRequestDTO rescheduleRequestDTO, ServerWebExchange exchange) {
+        TokenResponseDTO user = exchange.getAttribute("tokenValues");
+        return findVisitOfCustomer(visitId, user)
+                .flatMap(visit -> visitsServiceClient.rescheduleFollowUpVisit(visitId, rescheduleRequestDTO))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    // Customers can only change visits for their own pets
+    private Mono<VisitResponseDTO> findVisitOfCustomer(String visitId, TokenResponseDTO user) {
+        return visitsServiceClient.getVisitByVisitId(visitId, false)
+                .flatMap(visit -> customersServiceClient.getPetByPetId(visit.getPetId(), false)
+                        .filter(pet -> user != null && user.getUserId().equals(pet.getCustomerId()))
+                        .switchIfEmpty(Mono.error(new ForbiddenAccessException("You can only change visits for your own pets")))
+                        .thenReturn(visit));
     }
 
 
