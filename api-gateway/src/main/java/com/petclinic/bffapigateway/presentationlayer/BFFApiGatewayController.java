@@ -88,7 +88,7 @@ public class BFFApiGatewayController {
     }
 
     //not for me to mess with
-    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN})
+    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
     @GetMapping(value = "bills/customer/{customerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByCustomerId(final @PathVariable String customerId)
     {
