@@ -1,0 +1,69 @@
+<!--@if (image(); as currentImage) {
+      <img
+        class="pet-image"
+        [src]="'data:' + currentImage.fileType + ';base64,' + currentImage.fileData"
+        [alt]="currentPet.petName"
+      />-->
+
+<header class="dialog-header">
+  <div>
+    <h2 mat-dialog-title class="dialog-title" i18n="@@pet.petDetailsTitle">Détails de l'animal</h2>
+    <p class="dialog-subtitle" i18n="@@pet.petDetailsSubtitle">
+      Animaux enregistrés et leurs informations
+    </p>
+  </div>
+  <button
+    class="dialog-close-button"
+    mat-icon-button
+    mat-dialog-close
+    type="button"
+    aria-label="Close Pet Details dialog"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</header>
+
+<mat-dialog-content class="details-content">
+  @if (isLoading()) {
+    <div class="state" role="status">
+      <mat-progress-spinner diameter="40" mode="indeterminate" />
+      <span i18n="@@pet.loadingPets">Chargement des animaux...</span>
+    </div>
+  } @else if (errorMessage()) {
+    <p class="error-message" role="alert">{{ errorMessage() }}</p>
+  } @else if (pets().length === 0) {
+    <div class="state" role="status">
+      <mat-icon aria-hidden="true">pets</mat-icon>
+      <p i18n="@@pet.noPetsFound">Aucun animal enregistré pour ce client.</p>
+    </div>
+  } @else {
+    @for (currentPet of pets(); track currentPet.petId) {
+      <article class="pet-card">
+        <div class="pet-heading">
+          <span class="pet-avatar" aria-hidden="true"><mat-icon>pets</mat-icon></span>
+          <h3>{{ currentPet.name }}</h3>
+        </div>
+        <dl>
+          <div>
+            <dt i18n="@@pet.petDetails.species">Espèce</dt>
+            <dd>{{ getPetTypeName(currentPet.petTypeId) }}</dd>
+          </div>
+          <div>
+            <dt i18n="@@pet.petDetails.age">Âge</dt>
+            <dd>
+              {{ calculateAge(currentPet.birthDate) }}
+              {{ calculateAge(currentPet.birthDate) === 1 ? year : years }}
+            </dd>
+          </div>
+          <div>
+            <dt i18n="@@pet.petDetails.weight">Poids</dt>
+            <dd>{{ currentPet.weight }}</dd>
+          </div>
+        </dl>
+      </article>
+    }
+  }
+  <button type="button" class="primary-button" (click)="openAddPet()" i18n="@@pet.button.addAnimal">
+    Ajouter un animal
+  </button>
+</mat-dialog-content>

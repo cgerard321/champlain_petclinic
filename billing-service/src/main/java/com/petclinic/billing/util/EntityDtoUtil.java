@@ -21,8 +21,8 @@ public class EntityDtoUtil {
         //BeanUtils.copyProperties(bill,billResponseDTO);
         billResponseDTO.setBillId(bill.getBillId());
         billResponseDTO.setCustomerId(bill.getCustomerId());
-        billResponseDTO.setOwnerFirstName(bill.getOwnerFirstName());
-        billResponseDTO.setOwnerLastName(bill.getOwnerLastName());
+        billResponseDTO.setCustomerFirstName(bill.getCustomerFirstName());
+        billResponseDTO.setCustomerLastName(bill.getCustomerLastName());
         billResponseDTO.setVisitType(bill.getVisitType());
         billResponseDTO.setVetId(bill.getVetId());
         billResponseDTO.setVetFirstName(bill.getVetFirstName());
@@ -92,7 +92,7 @@ public class EntityDtoUtil {
     }
 
     private static long timeRemaining(Bill bill){
-        if (bill.getDueDate().isBefore(LocalDate.now())) {
+        if (bill.getDueDate() == null || bill.getDueDate().isBefore(LocalDate.now())) {
             return 0L;
         }
 

@@ -1,22 +1,30 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatCardModule } from '@angular/material/card';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
+import { AddCustomer } from '@features/cust/components/customer-add/customer-add';
+import { PetDetails } from '@features/cust/components/customer-pet-details/customer-pet-details';
 import { Customer } from '@features/cust/models/customer.model';
 import { CustomerService } from '@features/cust/services/customer-service';
 
 @Component({
-  imports: [MatProgressSpinnerModule],
+  imports: [MatProgressSpinnerModule, MatCardModule, MatDialogModule],
   selector: 'app-cust',
   styleUrl: './cust.css',
   templateUrl: './cust.html',
 })
 export class Cust implements OnInit {
   private readonly customerService = inject(CustomerService);
+  private readonly dialog = inject(MatDialog);
   private readonly untilDestroyed = takeUntilDestroyed<Customer>();
+  protected readonly petDetails = signal<PetDetails[]>([]);
   protected readonly customers = signal<Customer[]>([]);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly notAvailable = $localize`:@@cust.notAvailable:Non disponible`;
+  protected readonly searchPlaceholder = $localize`:@@cust.searchPlaceholder:Rechercher un client par nom, prénom, ID, téléphone, adresse ou ville`;
 
   ngOnInit(): void {
     this.customerService
@@ -30,5 +38,44 @@ export class Cust implements OnInit {
         },
         complete: () => this.isLoading.set(false),
       });
+  }
+
+  protected checkPetDetails(customerId: string): void {
+    this.dialog.open(PetDetails, {
+      data: {
+        customerId,
+      },
+      autoFocus: 'first-tabbable',
+      width: '850px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+    });
+  }
+
+  protected readonly searchText = signal('');
+
+  protected readonly filteredCustomers = computed(() => {
+    const query = this.searchText().trim().toLowerCase();
+
+    return this.customers().filter((customer) =>
+      [
+        `${customer.firstName} ${customer.lastName}`,
+        customer.customerId,
+        customer.telephone,
+        customer.address,
+        customer.city,
+      ].some((value) =>
+        String(value ?? '')
+          .toLowerCase()
+          .includes(query),
+      ),
+    );
+  });
+
+  protected addCustomerPopUp(): void {
+    this.dialog.open(AddCustomer, {
+      width: '650px',
+      maxWidth: '90vw',
+    });
   }
 }

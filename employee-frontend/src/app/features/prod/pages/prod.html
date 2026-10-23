@@ -11,6 +11,49 @@
     }
   </div>
 
+  @if (isAdmin()) {
+    <mat-card class="review-settings-card">
+      <mat-card-header>
+        <mat-card-title>Review Settings</mat-card-title>
+        <mat-card-subtitle> Set how long customers can edit their reviews. </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <mat-form-field appearance="outline">
+          <mat-label>Review edit period</mat-label>
+          <input
+            matInput
+            type="number"
+            min="0"
+            step="1"
+            [ngModel]="reviewEditPeriodHours()"
+            (ngModelChange)="setReviewEditPeriodHours($event)"
+          />
+          <span matTextSuffix>hours</span>
+        </mat-form-field>
+        @if (settingsMessage()) {
+          <p class="settings-success">{{ settingsMessage() }}</p>
+        }
+
+        @if (settingsError()) {
+          <p class="settings-error">{{ settingsError() }}</p>
+        }
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button
+          mat-flat-button
+          color="primary"
+          type="button"
+          [disabled]="isSavingSettings()"
+          (click)="saveReviewSettings()"
+        >
+          Save Review Settings
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  }
+
   <mat-form-field class="product-search" appearance="outline">
     <mat-label>Search products by name</mat-label>
     <input
@@ -20,6 +63,12 @@
       (input)="searchProducts($any($event.target).value)"
     />
   </mat-form-field>
+
+  @if (deleteErrorMessage()) {
+    <div class="delete-error-message" role="alert">
+      {{ deleteErrorMessage() }}
+    </div>
+  }
 
   @if (isLoading()) {
     <div class="state-container" role="status">
@@ -69,7 +118,7 @@
               </div>
             </dl>
           </mat-card-content>
-          <mat-card-actions align="end">
+          <mat-card-actions class="product-card-actions" align="end">
             <button
               mat-stroked-button
               type="button"
@@ -85,6 +134,15 @@
                 (click)="openProductUpdate(product)"
               >
                 Update
+              </button>
+              <button
+                mat-stroked-button
+                class="delete-button"
+                type="button"
+                [disabled]="deletingProductId() === product.productId"
+                (click)="openProductDelete(product)"
+              >
+                Delete
               </button>
             }
           </mat-card-actions>

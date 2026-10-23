@@ -508,41 +508,75 @@ public class CartControllerV1UnitTest {
     }
 
     // Tests for checkoutCart endpoint
+
     @Test
     @DisplayName("POST /api/gateway/carts/{cartId}/checkout - Should checkout cart successfully")
     void checkoutCart_withValidId_shouldCheckoutCart() {
         // Arrange
         String cartId = "cart-123";
+        BillingRequestDTO billing = BillingRequestDTO.builder()
+                .customerName("Test Customer")
+                .email("customer@example.com")
+                .address("123 Test Street")
+                .city("Montreal")
+                .province("Quebec")
+                .postalCode("H1A 1A1")
+                .build();
+
         CartResponseDTO checkedOutCart = buildCartResponseDTO();
-        when(cartServiceClient.checkoutCart(cartId))
+
+        when(cartServiceClient.checkoutCart(eq(cartId), any(BillingRequestDTO.class)))
                 .thenReturn(Mono.just(checkedOutCart));
 
         // Act & Assert
         webTestClient.post()
                 .uri(baseCartURL + "/" + cartId + "/checkout")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .bodyValue(billing)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(CartResponseDTO.class)
                 .isEqualTo(checkedOutCart);
 
-        verify(cartServiceClient, times(1)).checkoutCart(cartId);
+        ArgumentCaptor<BillingRequestDTO> billingCaptor =
+                ArgumentCaptor.forClass(BillingRequestDTO.class);
+        verify(cartServiceClient).checkoutCart(eq(cartId), billingCaptor.capture());
+        BillingRequestDTO capturedBilling = billingCaptor.getValue();
+        assertEquals("Test Customer", capturedBilling.getCustomerName());
+        assertEquals("customer@example.com", capturedBilling.getEmail());
+        assertEquals("123 Test Street", capturedBilling.getAddress());
+        assertEquals("Montreal", capturedBilling.getCity());
+        assertEquals("Quebec", capturedBilling.getProvince());
+        assertEquals("H1A 1A1", capturedBilling.getPostalCode());
     }
+
+
 
     @Test
     @DisplayName("POST /api/gateway/carts/{cartId}/checkout - Should return 404 when cart not found")
     void checkoutCart_withNonExistingId_shouldReturnNotFound() {
         // Arrange
         String cartId = "non-existent-cart";
-        when(cartServiceClient.checkoutCart(cartId))
+        BillingRequestDTO billing = BillingRequestDTO.builder()
+                .customerName("Test Customer")
+                .email("customer@example.com")
+                .address("123 Test Street")
+                .city("Montreal")
+                .province("Quebec")
+                .postalCode("H1A 1A1")
+                .build();
+        when(cartServiceClient.checkoutCart(eq(cartId), any(BillingRequestDTO.class)))
                 .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.post()
                 .uri(baseCartURL + "/" + cartId + "/checkout")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .bodyValue(billing)
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(cartServiceClient, times(1)).checkoutCart(cartId);
+        verify(cartServiceClient).checkoutCart(eq(cartId), any(BillingRequestDTO.class));
     }
 
     // Tests for wishlist operations
@@ -809,6 +843,47 @@ public class CartControllerV1UnitTest {
                 .expectBody().isEmpty();
 
         verify(cartServiceClient).clearPromo(cartId);
+    }
+
+    @Test
+    @DisplayName("PUT /api/gateway/carts/{cartId}/shipping - Should update shipping method")
+    void updateShippingMethod_shouldReturnUpdatedCart() {
+        String cartId = "cart-123";
+        CartResponseDTO response = buildCartResponseDTO();
+        response.setShippingMethod("EXPRESS");
+        response.setShippingCost(19.99);
+
+        when(cartServiceClient.updateShippingMethod(eq(cartId), eq("EXPRESS"))).thenReturn(Mono.just(response));
+
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/shipping")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new CartShippingRequestDTO("EXPRESS"))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CartResponseDTO.class)
+                .isEqualTo(response);
+
+        verify(cartServiceClient).updateShippingMethod(eq(cartId), eq("EXPRESS"));
+    }
+
+    @Test
+    @DisplayName("PUT /api/gateway/carts/{cartId}/shipping - Should return 422 for invalid method")
+    void updateShippingMethod_withInvalidInput_shouldReturnUnprocessableEntity() {
+        String cartId = "cart-123";
+        when(cartServiceClient.updateShippingMethod(eq(cartId), eq("OVERNIGHT")))
+                .thenReturn(Mono.error(new InvalidInputException("Invalid shipping method. Allowed values are PICKUP, STANDARD, EXPRESS")));
+
+        webTestClient.put()
+                .uri(baseCartURL + "/" + cartId + "/shipping")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new CartShippingRequestDTO("OVERNIGHT"))
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectBody(CartResponseDTO.class)
+                .value(body -> assertEquals("Invalid shipping method. Allowed values are PICKUP, STANDARD, EXPRESS", body.getMessage()));
+
+        verify(cartServiceClient).updateShippingMethod(eq(cartId), eq("OVERNIGHT"));
     }
 
     @Test

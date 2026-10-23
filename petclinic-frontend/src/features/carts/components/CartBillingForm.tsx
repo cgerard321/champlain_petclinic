@@ -1,8 +1,12 @@
-import { useState, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useUser } from '@/context/UserContext';
+import { getCustomer } from '@/features/customers/api/getCustomer';
+import { getUserDetails } from '@/features/customers/api/getUserDetails';
 import './cart-shared.css';
 import './CartBillingForm.css';
 export interface BillingInfo {
-  fullName: string;
+  customerName: string;
   email: string;
   phoneNumber: string;
   address: string;
@@ -19,20 +23,34 @@ export interface CartBillingFormProps {
   onSubmit: (billing: BillingInfo) => void;
 }
 const provinces = [
-  'AB',
-  'BC',
-  'MB',
-  'NB',
-  'NL',
-  'NS',
-  'ON',
-  'PE',
-  'QC',
-  'SK',
-  'NT',
-  'NU',
-  'YT',
+  { code: 'AB', name: 'Alberta' },
+  { code: 'BC', name: 'British Columbia' },
+  { code: 'MB', name: 'Manitoba' },
+  { code: 'NB', name: 'New Brunswick' },
+  { code: 'NL', name: 'Newfoundland and Labrador' },
+  { code: 'NS', name: 'Nova Scotia' },
+  { code: 'ON', name: 'Ontario' },
+  { code: 'PE', name: 'Prince Edward Island' },
+  { code: 'QC', name: 'Quebec' },
+  { code: 'SK', name: 'Saskatchewan' },
+  { code: 'NT', name: 'Northwest Territories' },
+  { code: 'NU', name: 'Nunavut' },
+  { code: 'YT', name: 'Yukon' },
 ];
+
+const getProvinceCode = (province?: string): string => {
+  const normalized = province?.trim().toLowerCase();
+
+  if (!normalized) return '';
+
+  return (
+    provinces.find(
+      option =>
+        option.code.toLowerCase() === normalized ||
+        option.name.toLowerCase() === normalized
+    )?.code ?? ''
+  );
+};
 
 const CartBillingForm: React.FC<CartBillingFormProps> = ({
   // eslint-disable-next-line react/prop-types
@@ -42,8 +60,10 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
   // eslint-disable-next-line react/prop-types
   onSubmit,
 }) => {
+  const { user } = useUser();
+  const { t } = useTranslation('carts');
   const [billing, setBilling] = useState<BillingInfo>({
-    fullName: '',
+    customerName: '',
     email: '',
     phoneNumber: '',
     address: '',
@@ -59,6 +79,49 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (!user.userId) return;
+
+    let ignoreResponse = false;
+
+    const loadCustomerInformation = async (): Promise<void> => {
+      try {
+        const [customerResponse, userResponse] = await Promise.all([
+          getCustomer(user.userId),
+          getUserDetails(user.userId),
+        ]);
+
+        if (ignoreResponse) return;
+
+        const customer = customerResponse.data;
+        const userDetails = userResponse.data;
+        const customerName = [customer.firstName, customer.lastName]
+          .filter(Boolean)
+          .join(' ');
+
+        setBilling(previous => ({
+          ...previous,
+          customerName: previous.customerName || customerName,
+          email: previous.email || userDetails.email || '',
+          phoneNumber: previous.phoneNumber || customer.telephone || '',
+          address: previous.address || customer.address || '',
+          city: previous.city || customer.city || '',
+          province: previous.province || getProvinceCode(customer.province),
+        }));
+      } catch (error) {
+        console.error('Could not pre-fill checkout information:', error);
+      }
+    };
+
+    void loadCustomerInformation();
+
+    return () => {
+      ignoreResponse = true;
+    };
+  }, [isOpen, user.userId]);
 
   if (!isOpen) return null;
 
@@ -80,17 +143,17 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
 
     const rawCardNumber = billing.cardNumber.replace(/\s+/g, '');
     if (!/^\d{16}$/.test(rawCardNumber)) {
-      setError('Credit card number must be 16 digits.');
+      setError(t('billing.cardInvalid'));
       setLoading(false);
       return;
     }
     if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(billing.expiry)) {
-      setError('Expiration must be in MM/YY format.');
+      setError(t('billing.expiryInvalid'));
       setLoading(false);
       return;
     }
     if (!/^\d{3,4}$/.test(billing.cvv)) {
-      setError('CVV must be 3 or 4 digits.');
+      setError(t('billing.cvvInvalid'));
       setLoading(false);
       return;
     }
@@ -101,10 +164,10 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
 
   const handleConfirm = (): void => {
     setShowConfirm(false);
-    setSuccess('Checkout successful! (mocked, no backend yet)');
+    setSuccess(t('billing.success'));
     onSubmit(billing);
     setBilling({
-      fullName: '',
+      customerName: '',
       email: '',
       phoneNumber: '',
       address: '',
@@ -128,11 +191,11 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
         <button
           className="cart-billing-modal-close"
           onClick={onClose}
-          aria-label="Close billing form"
+          aria-label={t('billing.close')}
         >
           ✕
         </button>
-        <h2>Billing Information</h2>
+        <h2>{t('billing.title')}</h2>
 
         {error && <div className="error">{error}</div>}
         {success && <div className="success">{success}</div>}
@@ -141,24 +204,33 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
           <div className="main-fields">
             <input
               type="text"
-              name="fullName"
-              placeholder="Full Name"
-              value={billing.fullName}
+              name="customerName"
+              placeholder={t('billing.customerName')}
+              value={billing.customerName}
               onChange={handleChange}
               required
             />
             <input
               type="email"
               name="email"
-              placeholder="Email"
+              placeholder={t('billing.email')}
               value={billing.email}
               onChange={handleChange}
               required
             />
             <input
+              type="tel"
+              name="phoneNumber"
+              placeholder={t('billing.telephone')}
+              value={billing.phoneNumber}
+              onChange={handleChange}
+              autoComplete="tel"
+              required
+            />
+            <input
               type="text"
               name="address"
-              placeholder="Address"
+              placeholder={t('billing.address')}
               value={billing.address}
               onChange={handleChange}
               required
@@ -166,7 +238,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
             <input
               type="text"
               name="city"
-              placeholder="City"
+              placeholder={t('billing.city')}
               value={billing.city}
               onChange={handleChange}
               required
@@ -177,17 +249,19 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
               onChange={handleSelectChange}
               required
             >
-              <option value="">Select Province</option>
-              {provinces.map(prov => (
-                <option key={prov} value={prov}>
-                  {prov}
+              <option value="">{t('billing.selectProvince')}</option>
+              {provinces.map(province => (
+                <option key={province.code} value={province.code}>
+                  {t(`billing.provinces.${province.code}`, {
+                    defaultValue: province.name,
+                  })}
                 </option>
               ))}
             </select>
             <input
               type="text"
               name="postalCode"
-              placeholder="Postal Code"
+              placeholder={t('billing.postalCode')}
               value={billing.postalCode}
               onChange={handleChange}
               required
@@ -195,7 +269,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
             <input
               type="text"
               name="cardNumber"
-              placeholder="Card Number"
+              placeholder={t('billing.cardNumber')}
               value={billing.cardNumber}
               onChange={handleChange}
               required
@@ -205,7 +279,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
                 <input
                   type="text"
                   name="expiry"
-                  placeholder="MM/YY"
+                  placeholder={t('billing.expiryPlaceholder')}
                   value={billing.expiry}
                   onChange={handleChange}
                   required
@@ -229,7 +303,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
             className="cart-button cart-button--brand cart-button--block cart-button--tall cart-button--disabled-muted"
             disabled={loading}
           >
-            {loading ? 'Processing...' : 'Submit Payment'}
+            {loading ? t('billing.processing') : t('billing.submit')}
           </button>
         </form>
       </div>
@@ -237,20 +311,20 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
       {showConfirm && (
         <div className="confirm-modal-backdrop">
           <div className="confirm-modal-content cart-panel cart-panel--padded">
-            <h2>Confirm Checkout</h2>
-            <p>Are you sure you want to checkout?</p>
+            <h2>{t('checkoutModal.title')}</h2>
+            <p>{t('checkoutModal.message')}</p>
             <div className="confirm-modal-buttons">
               <button
                 className="cart-button cart-button--brand cart-button--tall"
                 onClick={handleConfirm}
               >
-                Yes
+                {t('buttons.yes')}
               </button>
               <button
                 className="cart-button cart-button--danger cart-button--tall"
                 onClick={handleCancel}
               >
-                No
+                {t('buttons.no')}
               </button>
             </div>
           </div>

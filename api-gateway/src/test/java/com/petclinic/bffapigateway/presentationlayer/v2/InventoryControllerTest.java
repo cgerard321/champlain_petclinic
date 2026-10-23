@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.InventoryServiceClient;
+import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
 import com.petclinic.bffapigateway.presentationlayer.v1.InventoryControllerV1;
@@ -12,9 +13,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -23,6 +27,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.WebFilter;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -49,7 +54,22 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 })
 @WebFluxTest(controllers = InventoryControllerV1.class)
 @AutoConfigureWebTestClient
+@Import(InventoryControllerTest.TestActorConfiguration.class)
 public class InventoryControllerTest {
+    @TestConfiguration
+    static class TestActorConfiguration {
+        @Bean
+        WebFilter testAuthenticatedUser() {
+            return (exchange, chain) -> {
+                exchange.getAttributes().put("tokenValues", TokenResponseDTO.builder()
+                        .username("test-user")
+                        .roles(List.of("ADMIN"))
+                        .build());
+                return chain.filter(exchange);
+            };
+        }
+    }
+
     @Autowired
     private WebTestClient client;
     @MockBean
@@ -616,7 +636,8 @@ public class InventoryControllerTest {
                 .productPrice(149.99)
                 .build();
 
-        when(inventoryServiceClient.updateProductInInventory(productRequestDTO, inventoryId, productId))
+        when(inventoryServiceClient.updateProductInInventory(
+                productRequestDTO, inventoryId, productId, "test-user"))
                 .thenReturn(Mono.just(updatedProductResponseDTO));
 
         // Act
@@ -631,7 +652,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .updateProductInInventory(productRequestDTO, inventoryId, productId);
+                .updateProductInInventory(productRequestDTO, inventoryId, productId, "test-user");
     }
 
     @Test
@@ -645,7 +666,8 @@ public class InventoryControllerTest {
                 .productPrice(-10.0)
                 .build();
 
-        when(inventoryServiceClient.updateProductInInventory(invalidProductRequestDTO, inventoryId, productId))
+        when(inventoryServiceClient.updateProductInInventory(
+                invalidProductRequestDTO, inventoryId, productId, "test-user"))
                 .thenReturn(Mono.empty());
 
         // Act
@@ -658,7 +680,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .updateProductInInventory(invalidProductRequestDTO, inventoryId, productId);
+                .updateProductInInventory(invalidProductRequestDTO, inventoryId, productId, "test-user");
     }
 
     @Test
@@ -723,7 +745,8 @@ public class InventoryControllerTest {
 
         String inventoryId = "1"; // Define the inventoryId
 
-        when(inventoryServiceClient.addSupplyToInventory(invalidProductRequestDTO, inventoryId))
+        when(inventoryServiceClient.addSupplyToInventory(
+                invalidProductRequestDTO, inventoryId, "test-user"))
                 .thenReturn(Mono.empty());
 
         // Act
@@ -736,7 +759,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .addSupplyToInventory(invalidProductRequestDTO, inventoryId);
+                .addSupplyToInventory(invalidProductRequestDTO, inventoryId, "test-user");
     }
 
     @Test
@@ -757,7 +780,8 @@ public class InventoryControllerTest {
                 .productPrice(99.99)
                 .build();
 
-        when(inventoryServiceClient.addSupplyToInventory(productRequestDTO, inventoryId))
+        when(inventoryServiceClient.addSupplyToInventory(
+                productRequestDTO, inventoryId, "test-user"))
                 .thenReturn(Mono.just(createdProductResponseDTO));
 
         // Act
@@ -772,7 +796,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .addSupplyToInventory(productRequestDTO, inventoryId);
+                .addSupplyToInventory(productRequestDTO, inventoryId, "test-user");
     }
 
 
@@ -794,7 +818,7 @@ public class InventoryControllerTest {
                 .productPrice(99.99)
                 .build();
 
-        when(inventoryServiceClient.consumeProduct(inventoryId, productId))
+        when(inventoryServiceClient.consumeProduct(inventoryId, productId, "test-user"))
                 .thenReturn(Mono.just(updatedProductResponseDTO));
 
         // Act
@@ -809,7 +833,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .consumeProduct(inventoryId, productId);
+                .consumeProduct(inventoryId, productId, "test-user");
     }
 
     @Test
@@ -817,7 +841,7 @@ public class InventoryControllerTest {
         // Arrange
         String inventoryId = "1";
         String invalidProductId = "999";
-        when(inventoryServiceClient.consumeProduct(inventoryId, invalidProductId))
+        when(inventoryServiceClient.consumeProduct(inventoryId, invalidProductId, "test-user"))
                 .thenReturn(Mono.empty());
 
         // Act
@@ -829,7 +853,7 @@ public class InventoryControllerTest {
 
         // Assert
         verify(inventoryServiceClient, times(1))
-                .consumeProduct(inventoryId, invalidProductId);
+                .consumeProduct(inventoryId, invalidProductId, "test-user");
     }
 
     @Test
@@ -979,7 +1003,8 @@ public class InventoryControllerTest {
                 .productQuantity(productQuantity)
                 .build();
 
-        when(inventoryServiceClient.restockLowStockProduct(inventoryId, productId, productQuantity))
+        when(inventoryServiceClient.restockLowStockProduct(
+                inventoryId, productId, productQuantity, "test-user"))
                 .thenReturn(Mono.just(restockedProduct));
 
         // Act and Assert
@@ -992,7 +1017,7 @@ public class InventoryControllerTest {
 
         // Verify that the service client was called
         verify(inventoryServiceClient, times(1))
-                .restockLowStockProduct(inventoryId, productId, productQuantity);
+                .restockLowStockProduct(inventoryId, productId, productQuantity, "test-user");
     }
 
 
@@ -1011,7 +1036,7 @@ public class InventoryControllerTest {
 
         // Verify that the service client was not called
         verify(inventoryServiceClient, never())
-                .restockLowStockProduct(inventoryId, productId, invalidQuantity);
+                .restockLowStockProduct(inventoryId, productId, invalidQuantity, "test-user");
     }
 
     @Test
@@ -1029,7 +1054,8 @@ public class InventoryControllerTest {
 
         // Verify that the service client was never called
         verify(inventoryServiceClient, never())
-                .restockLowStockProduct(eq(inventoryId), eq(productId), eq(productQuantity));
+                .restockLowStockProduct(
+                        eq(inventoryId), eq(productId), eq(productQuantity), eq("test-user"));
     }
 
     @Test
@@ -1047,7 +1073,8 @@ public class InventoryControllerTest {
 
         // Verify that the service client was never called
         verify(inventoryServiceClient, never())
-                .restockLowStockProduct(eq(inventoryId), eq(productId), eq(productQuantity));
+                .restockLowStockProduct(
+                        eq(inventoryId), eq(productId), eq(productQuantity), eq("test-user"));
     }
 
     @Test
@@ -1151,7 +1178,7 @@ public class InventoryControllerTest {
     @Test
     void testUpdateProductInInventory() {
         // Create a sample ProductRequestDTO
-        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99, null);
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", null, "Sample Description", 10.0, 100, 15.99, null, null, null, null);
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
@@ -1164,7 +1191,8 @@ public class InventoryControllerTest {
                 .build();
 
         // Mock the behavior of the inventoryServiceClient
-        when(inventoryServiceClient.updateProductInInventory(any(), anyString(), anyString()))
+        when(inventoryServiceClient.updateProductInInventory(
+                any(), anyString(), anyString(), eq("test-user")))
                 .thenReturn(Mono.just(expectedResponse));
 
         // Perform the PUT request
@@ -1186,14 +1214,15 @@ public class InventoryControllerTest {
 
         // Verify that the inventoryServiceClient method was called
         verify(inventoryServiceClient, times(1))
-                .updateProductInInventory(eq(requestDTO), eq("sampleInventoryId"), eq("sampleProductId"));
+                .updateProductInInventory(
+                        eq(requestDTO), eq("sampleInventoryId"), eq("sampleProductId"), eq("test-user"));
     }
 
     @Test
     @DisplayName("Given valid inventoryId and valid productRequest Post and return productResponse")
     void testAddProductToInventory_ShouldSucceed() {
         // Create a sample ProductRequestDTO
-        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99, null);
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", null, "Sample Description", 10.0, 100, 15.99, null, null, null, null);
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
@@ -1207,7 +1236,7 @@ public class InventoryControllerTest {
                 .build();
 
         // Mock the behavior of the inventoryServiceClient
-        when(inventoryServiceClient.addSupplyToInventory(any(), anyString()))
+        when(inventoryServiceClient.addSupplyToInventory(any(), anyString(), eq("test-user")))
                 .thenReturn(Mono.just(expectedResponse));
 
         // Perform the POST request
@@ -1229,18 +1258,18 @@ public class InventoryControllerTest {
 
         // Verify that the inventoryServiceClient method was called
         verify(inventoryServiceClient, times(1))
-                .addSupplyToInventory(eq(requestDTO), eq("sampleInventoryId"));
+                .addSupplyToInventory(eq(requestDTO), eq("sampleInventoryId"), eq("test-user"));
     }
 
     @Test
     @DisplayName("Given invalid inventoryId and valid productRequest Post and return NotFoundException")
     void testAddProductToInventory_InvalidInventoryId_ShouldReturnNotFoundException() {
         // Create a sample ProductRequestDTO
-        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100,15.99, null);
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", null, "Sample Description", 10.0, 100, 15.99, null, null, null, null);
 
 
         // Mock the behavior of the inventoryServiceClient
-        when(inventoryServiceClient.addSupplyToInventory(any(), anyString()))
+        when(inventoryServiceClient.addSupplyToInventory(any(), anyString(), eq("test-user")))
                 .thenReturn(Mono.error(new NotFoundException("Inventory not found")));
 
         // Perform the POST request
@@ -1254,7 +1283,7 @@ public class InventoryControllerTest {
 
         // Verify that the inventoryServiceClient method was called
         verify(inventoryServiceClient, times(1))
-                .addSupplyToInventory(eq(requestDTO), eq("invalidInventoryId"));
+                .addSupplyToInventory(eq(requestDTO), eq("invalidInventoryId"), eq("test-user"));
     }
 
 
@@ -1439,7 +1468,8 @@ public class InventoryControllerTest {
     @Test
     public void deleteProductById_insideInventory(){
         ProductResponseDTO productResponseDTO = buildProductDTO();
-        when(inventoryServiceClient.deleteProductInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId()))
+        when(inventoryServiceClient.deleteProductInInventory(
+                productResponseDTO.getInventoryId(), productResponseDTO.getProductId(), "test-user"))
                 .thenReturn((Mono.empty()));
 
         client.delete()
@@ -1449,7 +1479,8 @@ public class InventoryControllerTest {
                 .expectStatus().isNoContent();
 
         Mockito.verify(inventoryServiceClient, times(1))
-                .deleteProductInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId());
+                .deleteProductInInventory(
+                        productResponseDTO.getInventoryId(), productResponseDTO.getProductId(), "test-user");
 
     }
 
@@ -1743,5 +1774,34 @@ public class InventoryControllerTest {
 
         verify(inventoryServiceClient, times(1))
                 .searchInventory(eq(page), eq(size), eq(null), eq(null), eq(null), eq(null), eq(null));
+    }
+
+    @Test
+    void getSupplyHistory_shouldReturnAuditEntriesForSupply() {
+        String inventoryId = "inventory-1";
+        String productId = "product-1";
+        Map<String, Object> entry = Map.of(
+                "id", "audit-1",
+                "inventoryId", inventoryId,
+                "supplyId", productId,
+                "supplyName", "Bandages",
+                "previousQuantity", 8,
+                "newQuantity", 10,
+                "quantityChange", 2,
+                "action", "QUANTITY_UPDATED",
+                "changedAt", "2026-10-14T20:38:52.412Z",
+                "changedBy", "test-user");
+        when(inventoryServiceClient.getSupplyHistory(inventoryId, productId)).thenReturn(Flux.just(entry));
+
+        client.get()
+                .uri(baseInventoryURL + "/{inventoryId}/products/{productId}/history", inventoryId, productId)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo("audit-1")
+                .jsonPath("$[0].changedAt").isEqualTo("2026-10-14T20:38:52.412Z");
+
+        verify(inventoryServiceClient).getSupplyHistory(inventoryId, productId);
     }
 }

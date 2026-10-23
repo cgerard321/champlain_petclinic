@@ -28,6 +28,8 @@ interface ProductUpdateData {
 interface ProductFormModel {
   productName: string;
   productDescription: string;
+  productNameFr: string;
+  productDescriptionFr: string;
   productSalePrice: number;
   productQuantity: number;
   isUnlisted: boolean;
@@ -58,7 +60,7 @@ export class ProductUpdateDialog implements OnInit {
   private readonly imageService = inject(ImageService);
 
   protected readonly productTypes = signal<ProductType[]>([]);
-  protected readonly deliveryTypes = signal<DeliveryType[]>([]);
+  protected readonly deliveryTypes = signal<DeliveryType[]>(Object.values(DeliveryType));
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly selectedFile = signal<File | null>(null);
@@ -68,6 +70,8 @@ export class ProductUpdateDialog implements OnInit {
   protected readonly model = signal<ProductFormModel>({
     productName: this.data.product.productName,
     productDescription: this.data.product.productDescription,
+    productNameFr: this.data.product.productNameFr ?? '',
+    productDescriptionFr: this.data.product.productDescriptionFr ?? '',
     productSalePrice: this.data.product.productSalePrice,
     productQuantity: this.data.product.productQuantity,
     isUnlisted: this.data.product.isUnlisted,

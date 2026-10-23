@@ -1,0 +1,41 @@
+.bill-update-form {
+  width: 100%;
+}
+
+.bill-update-content {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding-top: 12px;
+}
+
+.bill-update-summary {
+  padding: 16px;
+  border: 1px solid #e0eae0;
+  border-radius: 10px;
+  background: #f7faf7;
+}
+
+.bill-update-summary p {
+  margin: 6px 0;
+  color: #1b382b;
+  overflow-wrap: anywhere;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.bill-update-error {
+  color: #b42318;
+  font-weight: 500;
+}
+
+:host-context(.dark-mode) {
+  .bill-update-summary,
+  .bill-update-summary p {
+    background: var(--mat-sys-surface);
+    border: none;
+    color: #8dbb8f;
+  }
+}

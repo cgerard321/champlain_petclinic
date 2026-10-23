@@ -47,6 +47,12 @@ export class ProductService {
     return this.http.put<Product>(`/api/gateway/products/${productId}`, request);
   }
 
+  deleteProduct(productId: string, cascadeBundles: boolean): Observable<Product> {
+    return this.http.delete<Product>(`/api/gateway/products/${productId}`, {
+      params: new HttpParams().set('cascadeBundles', String(cascadeBundles)),
+    });
+  }
+
   updateProductImage(productId: string, image: FileDetails): Observable<Product> {
     return this.http.patch<Product>(`/api/gateway/products/${productId}/image`, image);
   }

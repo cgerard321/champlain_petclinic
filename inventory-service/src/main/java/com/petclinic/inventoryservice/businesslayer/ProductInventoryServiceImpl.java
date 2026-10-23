@@ -1,9 +1,7 @@
 package com.petclinic.inventoryservice.businesslayer;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.PdfWriter;
+
+import com.lowagie.text.DocumentException;
 import com.mongodb.internal.connection.tlschannel.NeedsWriteException;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryNameRepository;
@@ -15,7 +13,11 @@ import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.InventoryValidator;
+import com.petclinic.inventoryservice.utils.SupplyReportPdfGenerator;
 import com.petclinic.inventoryservice.utils.exceptions.*;
+import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditAction;
+import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditEntry;
+import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -24,7 +26,7 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.data.domain.Pageable;
 
 import javax.security.auth.callback.TextInputCallback;
-import java.io.ByteArrayOutputStream;
+import java.time.Instant;
 import java.util.Comparator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     private final ProductRepository productRepository;
     private final InventoryTypeRepository inventoryTypeRepository;
     private final InventoryValidator validator;
-
+    private final SupplyAuditRepository supplyAuditRepository;
 
     @Override
     public Mono<InventoryResponseDTO> addInventory(Mono<InventoryRequestDTO> inventoryRequestDTO) {
@@ -88,62 +90,97 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
     @Override
-    public Mono<ProductResponseDTO> updateProductInInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId, String productId) {
-
+    public Mono<ProductResponseDTO> updateProductInInventory(
+            Mono<ProductRequestDTO> productRequestDTOMono,
+            String inventoryId,
+            String productId,
+            String changedBy
+    ) {
         return productRequestDTOMono
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap(requestDTO ->
                         inventoryRepository.findInventoryByInventoryId(inventoryId)
-                                .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
+                                .switchIfEmpty(Mono.error(
+                                        new NotFoundException("Inventory not found with id: " + inventoryId)))
                                 .flatMap(inventory ->
                                         productRepository.findProductByProductId(productId)
-                                                .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + productId)))
+                                                .switchIfEmpty(Mono.error(
+                                                        new NotFoundException("Product not found with id: " + productId)))
                                                 .flatMap(existingProduct -> {
-                                            existingProduct.setProductName(requestDTO.getProductName());
-                                            existingProduct.setProductDescription(requestDTO.getProductDescription());
-                                            existingProduct.setProductPrice(requestDTO.getProductPrice());
-                                            existingProduct.setProductQuantity(requestDTO.getProductQuantity());
-                                            existingProduct.setProductSalePrice(requestDTO.getProductSalePrice());
-                                            existingProduct.setLastUpdatedAt(LocalDateTime.now());
+                                                    int previousQuantity = existingProduct.getProductQuantity();
 
-                                            // Set Status based on the product quantity
-//                                            if (existingProduct.getProductQuantity() == 0) {
-//                                                existingProduct.setStatus(Status.OUT_OF_STOCK);
-//                                            } else if (existingProduct.getProductQuantity() < 20) {
-//                                                existingProduct.setStatus(Status.RE_ORDER);
-//                                            } else {
-//                                                existingProduct.setStatus(Status.AVAILABLE);
-//                                            }
+                                                    validatePhoto(requestDTO);
 
-                                            return validator.validateProductForUpdate(existingProduct, inventoryId, productId)
-                                                    .flatMap(productRepository::save)
-                                                    .map(EntityDTOUtil::toProductResponseDTO);
-                                        })
-                            )
-                        )
-                .switchIfEmpty(Mono.error(new InvalidInputException("Unable to update product in the repository, an error occurred.")));
+                                                    if (requestDTO.getPhotoData() != null) {
+                                                        boolean removePhoto = requestDTO.getPhotoData().length == 0;
+                                                        existingProduct.setPhotoData(
+                                                                removePhoto ? null : requestDTO.getPhotoData());
+                                                        existingProduct.setPhotoType(
+                                                                removePhoto ? null : requestDTO.getPhotoType());
+                                                    }
+
+                                                    existingProduct.setProductName(requestDTO.getProductName());
+                                                    existingProduct.setProductDescription(requestDTO.getProductDescription());
+                                                    existingProduct.setProductPrice(requestDTO.getProductPrice());
+                                                    existingProduct.setProductQuantity(requestDTO.getProductQuantity());
+                                                    existingProduct.setProductSalePrice(requestDTO.getProductSalePrice());
+                                                    existingProduct.setLastUpdatedAt(LocalDateTime.now());
+                                                    if (requestDTO.getSupplierName() != null) {
+                                                        existingProduct.setSupplierName(
+                                                                normalizeSupplierName(requestDTO.getSupplierName()));
+                                                    }
+                                                    existingProduct.setExpirationDate(requestDTO.getExpirationDate());
+
+                                                    return validator
+                                                            .validateProductForUpdate(existingProduct, inventoryId, productId)
+                                                            .flatMap(productRepository::save)
+                                                            .flatMap(saved -> {
+                                                                if (previousQuantity == saved.getProductQuantity()) {
+                                                                    return Mono.just(
+                                                                            EntityDTOUtil.toProductResponseDTO(saved));
+                                                                }
+
+                                                                return recordSupplyChange(
+                                                                                inventoryId,
+                                                                                saved.getProductId(),
+                                                                                saved.getProductName(),
+                                                                                previousQuantity,
+                                                                                saved.getProductQuantity(),
+                                                                                SupplyAuditAction.QUANTITY_UPDATED,
+                                                                                changedBy)
+                                                                        .thenReturn(
+                                                                                EntityDTOUtil.toProductResponseDTO(saved));
+                                                            });
+                                                })
+                                )
+                )
+                .switchIfEmpty(Mono.error(new InvalidInputException(
+                        "Unable to update product in the repository, an error occurred.")));
     }
 
 
     @Override
-    public Mono<Void> deleteProductInInventory(String inventoryId, String productId) {
-        return inventoryRepository.existsByInventoryId(inventoryId)
-                .flatMap(invExist -> {
-                    if (!invExist) {
-                        return Mono.error(new NotFoundException("Inventory not found, make sure it exists, inventoryId: " + inventoryId));
-                    } else {
-                        return productRepository.existsByProductId(productId)
-                                .flatMap(prodExist -> {
-                                    if (!prodExist) {
-                                        return Mono.error(new NotFoundException("Product not found, make sure it exists, productId: " + productId));
-                                    } else {
-                                        return productRepository.deleteByProductId(productId);
-                                    }
-                                });
-                    }
-                });
-
-
+    public Mono<Void> deleteProductInInventory(
+            String inventoryId,
+            String productId,
+            String changedBy
+    ) {
+        return inventoryRepository.findInventoryByInventoryId(inventoryId)
+                .switchIfEmpty(Mono.error(new NotFoundException(
+                        "Inventory not found, make sure it exists, inventoryId: " + inventoryId)))
+                .then(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
+                        .switchIfEmpty(Mono.error(new NotFoundException(
+                                "Product not found, make sure it exists, productId: " + productId)))
+                        .flatMap(product ->
+                                productRepository.delete(product)
+                                        .then(recordSupplyChange(
+                                                inventoryId,
+                                                product.getProductId(),
+                                                product.getProductName(),
+                                                product.getProductQuantity(),
+                                                0,
+                                                SupplyAuditAction.DELETED,
+                                                changedBy))));
     }
 
     @Override
@@ -595,50 +632,106 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
 
     @Override
-    public Mono<ProductResponseDTO> addSupplyToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId) {
+    public Mono<ProductResponseDTO> addSupplyToInventory(
+            Mono<ProductRequestDTO> productRequestDTOMono,
+            String inventoryId,
+            String changedBy
+    ) {
         return productRequestDTOMono
                 .publishOn(Schedulers.boundedElastic())
-                .flatMap(requestDTO -> inventoryRepository.findInventoryByInventoryId(inventoryId)
-                        .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
-                        .flatMap(inventory -> {
-                            if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null || requestDTO.getProductSalePrice() == null) {
-                                return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
-                            }
-                            if (requestDTO.getProductPrice() <= 0 || requestDTO.getProductQuantity() <= 0 || requestDTO.getProductSalePrice() <= 0) {
-                                return Mono.error(new InvalidInputException("Product price quantity and sale price must be greater than 0."));
-                            }
-                            return productRepository.existsByInventoryIdAndProductNameIgnoreCase(inventoryId,requestDTO.getProductName())
-                                    .flatMap(exists -> {
-                                        if (exists) {
-                                            return Mono.error(new UnprocessableEntityException("A product with the name '" + requestDTO.getProductName() + "' already exists in this inventory."));
+                .flatMap(requestDTO ->
+                        inventoryRepository.findInventoryByInventoryId(inventoryId)
+                                .switchIfEmpty(Mono.error(
+                                        new NotFoundException("Inventory not found with id: " + inventoryId)))
+                                .flatMap(inventory -> {
+                                    if (requestDTO.getProductName() == null
+                                            || requestDTO.getProductPrice() == null
+                                            || requestDTO.getProductQuantity() == null
+                                            || requestDTO.getProductSalePrice() == null) {
+                                        return Mono.error(new InvalidInputException(
+                                                "Product must have an inventory id, product name, product price, and product quantity."));
                                     }
 
-                                Product product = EntityDTOUtil.toProductEntity(requestDTO);
-                                product.setInventoryId(inventoryId);
-                                product.setProductId(EntityDTOUtil.generateUUID());
-                                product.setLastUpdatedAt(LocalDateTime.now());
-                                return productRepository.save(product)
-                                        .map(EntityDTOUtil::toProductResponseDTO);
-                            });
-                        }))
-                .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save supply to the inventory, an error occurred.")));
+                                    if (requestDTO.getProductPrice() <= 0
+                                            || requestDTO.getProductQuantity() <= 0
+                                            || requestDTO.getProductSalePrice() <= 0) {
+                                        return Mono.error(new InvalidInputException(
+                                                "Product price, quantity and sale price must be greater than 0."));
+                                    }
 
+                                    return productRepository
+                                            .existsByInventoryIdAndProductNameIgnoreCase(
+                                                    inventoryId, requestDTO.getProductName())
+                                            .flatMap(exists -> {
+                                                if (exists) {
+                                                    return Mono.error(new UnprocessableEntityException(
+                                                            "A product with the name '" + requestDTO.getProductName()
+                                                                    + "' already exists in this inventory."));
+                                                }
+
+                                                validatePhoto(requestDTO);
+
+                                                Product product = EntityDTOUtil.toProductEntity(requestDTO);
+                                                product.setSupplierName(normalizeSupplierName(requestDTO.getSupplierName()));
+                                                if (product.getPhotoData() != null && product.getPhotoData().length == 0) {
+                                                    product.setPhotoData(null);
+                                                    product.setPhotoType(null);
+                                                }
+
+                                                product.setInventoryId(inventoryId);
+                                                product.setProductId(EntityDTOUtil.generateUUID());
+                                                product.setLastUpdatedAt(LocalDateTime.now());
+                                                product.setExpirationDate(requestDTO.getExpirationDate());
+
+                                                return productRepository.save(product)
+                                                        .flatMap(saved ->
+                                                                recordSupplyChange(
+                                                                        inventoryId,
+                                                                        saved.getProductId(),
+                                                                        saved.getProductName(),
+                                                                        0,
+                                                                        saved.getProductQuantity(),
+                                                                        SupplyAuditAction.CREATED,
+                                                                        changedBy)
+                                                                        .thenReturn(
+                                                                                EntityDTOUtil.toProductResponseDTO(saved)));
+                                            });
+                                }))
+                .switchIfEmpty(Mono.error(new InvalidInputException(
+                        "Unable to save supply to the inventory, an error occurred.")));
     }
 
     @Override
-    public Mono<ProductResponseDTO> consumeProduct(String inventoryId, String productId) {
+    public Mono<ProductResponseDTO> consumeProduct(
+            String inventoryId,
+            String productId,
+            String changedBy
+    ) {
         return productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
+                .switchIfEmpty(Mono.error(new NotFoundException(
+                        "Product not found with id: " + productId)))
                 .flatMap(product -> {
-                    if (product.getProductQuantity() - 1 < 0) {
+                    int previousQuantity = product.getProductQuantity();
+
+                    if (previousQuantity <= 0) {
                         return Mono.error(new InvalidInputException("Not enough stock to consume."));
-                    } else {
-                        product.setProductQuantity(product.getProductQuantity() - 1);
-                        product.setLastUpdatedAt(LocalDateTime.now());
-                        return productRepository.save(product)
-                                .map(EntityDTOUtil::toProductResponseDTO);
                     }
-                })
-                .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + productId)));
+
+                    product.setProductQuantity(previousQuantity - 1);
+                    product.setLastUpdatedAt(LocalDateTime.now());
+
+                    return productRepository.save(product)
+                            .flatMap(saved ->
+                                    recordSupplyChange(
+                                            inventoryId,
+                                            saved.getProductId(),
+                                            saved.getProductName(),
+                                            previousQuantity,
+                                            saved.getProductQuantity(),
+                                            SupplyAuditAction.CONSUMED,
+                                            changedBy)
+                                            .thenReturn(EntityDTOUtil.toProductResponseDTO(saved)));
+                });
     }
 
     @Override
@@ -663,30 +756,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         return Mono.error(new NotFoundException("No products found for inventory ID: " + inventoryId));
                     }
                     try {
-                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                        Document document = new Document();
-                        PdfWriter.getInstance(document, byteArrayOutputStream);
-
-                        document.open();
-                        document.add(new Paragraph("Supplies Report for Inventory ID: " + inventoryId));
-                        document.add(new Paragraph(" ")); // Blank line
-
-                        for (Product supply : supplies) {
-                            Double cost = supply.getProductPrice();
-                            Double sell = supply.getProductSalePrice();
-                            Double profit = sell - cost;
-                            document.add(new Paragraph("Product Name: " + supply.getProductName()));
-                            document.add(new Paragraph("Quantity: " + supply.getProductQuantity()));
-                            document.add(new Paragraph("Description: " + supply.getProductDescription()));
-                            document.add(new Paragraph("Regular Price: $" + supply.getProductPrice()));
-                            document.add(new Paragraph("Sale Price: $" + supply.getProductSalePrice()));
-                            document.add(new Paragraph("Profit Margin: $" + profit));
-                            document.add(new Paragraph(" "));
-                        }
-
-                        document.close();
-
-                        return Mono.just(byteArrayOutputStream.toByteArray());
+                        return Mono.just(SupplyReportPdfGenerator.generate(inventoryId, supplies));
                     } catch (DocumentException e) {
                         return Mono.error(new UnprocessableEntityException("Error generating PDF"));
                     }
@@ -725,20 +795,68 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
     @Override
-    public Mono<ProductResponseDTO> restockLowStockProduct(String inventoryId, String productId, Integer productQuantity) {
-        return productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Product with id: " + productId + "not found in inventory " + inventoryId)))
-                .flatMap(product -> {
-                    if (productQuantity <= 0) {
-                        return Mono.error(new InvalidInputException("The restock quantity must be greater than 0."));
-                    }
+    public Mono<ProductResponseDTO> restockLowStockProduct(
+            String inventoryId,
+            String productId,
+            Integer productQuantity,
+            String changedBy
+    ) {
+        if (productQuantity == null || productQuantity <= 0) {
+            return Mono.error(new InvalidInputException(
+                    "The restock quantity must be greater than 0."));
+        }
 
-                    product.setProductQuantity(product.getProductQuantity() + productQuantity);
+        return productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
+                .switchIfEmpty(Mono.error(new NotFoundException(
+                        "Product with id: " + productId + " not found in inventory " + inventoryId)))
+                .flatMap(product -> {
+                    int previousQuantity = product.getProductQuantity();
+                    product.setProductQuantity(previousQuantity + productQuantity);
                     product.setLastUpdatedAt(LocalDateTime.now());
 
                     return productRepository.save(product)
-                            .map(EntityDTOUtil::toProductResponseDTO);
+                            .flatMap(saved ->
+                                    recordSupplyChange(
+                                            inventoryId,
+                                            saved.getProductId(),
+                                            saved.getProductName(),
+                                            previousQuantity,
+                                            saved.getProductQuantity(),
+                                            SupplyAuditAction.QUANTITY_UPDATED,
+                                            changedBy)
+                                            .thenReturn(EntityDTOUtil.toProductResponseDTO(saved)));
                 });
+    }
+
+    @Override
+    public Flux<SupplyAuditEntry> getSupplyHistory(String inventoryId, String productId) {
+        return supplyAuditRepository
+                .findTop20ByInventoryIdAndSupplyIdOrderByChangedAtDesc(inventoryId, productId);
+    }
+
+    private Mono<Void> recordSupplyChange(
+            String inventoryId,
+            String supplyId,
+            String supplyName,
+            int previousQuantity,
+            int newQuantity,
+            SupplyAuditAction action,
+            String changedBy
+    ) {
+        SupplyAuditEntry entry = new SupplyAuditEntry(
+                UUID.randomUUID().toString(),
+                inventoryId,
+                supplyId,
+                supplyName,
+                previousQuantity,
+                newQuantity,
+                newQuantity - previousQuantity,
+                action,
+                Instant.now(),
+                changedBy
+        );
+
+        return supplyAuditRepository.insert(entry).then();
     }
 
     @Override
@@ -755,7 +873,54 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 });
     }
 
+    private String normalizeSupplierName(String supplierName) {
+        if (supplierName == null) {
+            return null; // Allow older clients to create supplies without this new field.
+        }
+
+        String normalized = supplierName.strip();
+        if (normalized.isEmpty()) {
+            throw new InvalidInputException("Supplier name cannot be empty.");
+        }
+        return normalized;
+    }
+
+
+    private void validatePhoto(ProductRequestDTO requestDTO) {
+        byte[] data = requestDTO.getPhotoData();
+        String type = requestDTO.getPhotoType();
+
+        // No photo supplied, or an empty array requesting removal.
+        if (data == null || data.length == 0) {
+            if (type != null && !type.isBlank()) {
+                throw new InvalidInputException("Photo data is missing.");
+            }
+            return;
+        }
+
+        if (data.length > 2 * 1024 * 1024) {
+            throw new InvalidInputException("Photo must be 2 MB or smaller.");
+        }
+
+        boolean jpg = data.length >= 3
+                && data[0] == (byte) 0xFF
+                && data[1] == (byte) 0xD8
+                && data[2] == (byte) 0xFF;
+
+        boolean png = data.length >= 8
+                && data[0] == (byte) 0x89
+                && data[1] == 0x50
+                && data[2] == 0x4E
+                && data[3] == 0x47
+                && data[4] == 0x0D
+                && data[5] == 0x0A
+                && data[6] == 0x1A
+                && data[7] == 0x0A;
+
+        if (!("image/jpeg".equals(type) && jpg)
+                && !("image/png".equals(type) && png)) {
+            throw new InvalidInputException("Only JPG and PNG photos are supported.");
+        }
+    }
+
 }
-
-
-

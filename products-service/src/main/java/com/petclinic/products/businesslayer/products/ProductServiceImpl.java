@@ -5,6 +5,7 @@ import com.petclinic.products.datalayer.images.ImageRepository;
 import com.petclinic.products.datalayer.products.*;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
+import com.petclinic.products.datalayer.ratings.ReviewLikeRepository;
 import com.petclinic.products.domainclientlayer.FileRequestDTO;
 import com.petclinic.products.domainclientlayer.FileResponseDTO;
 import com.petclinic.products.domainclientlayer.FilesServiceClient;
@@ -30,6 +31,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
     private final RatingRepository ratingRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
     private final ProductBundleRepository productBundleRepository;
     private final ProductBundleService productBundleService;
     private final ProductTypeRepository productTypeRepository;
@@ -40,6 +42,7 @@ public class ProductServiceImpl implements ProductService {
     private String defaultImageIds = "";
 
     public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository,
+                              ReviewLikeRepository reviewLikeRepository,
                               ProductBundleRepository productBundleRepository,
                               ProductBundleService productBundleService,
                               ProductTypeRepository productTypeRepository,
@@ -47,6 +50,7 @@ public class ProductServiceImpl implements ProductService {
                               FilesServiceClient filesServiceClient) {
         this.productRepository = productRepository;
         this.ratingRepository = ratingRepository;
+        this.reviewLikeRepository = reviewLikeRepository;
         this.productBundleRepository = productBundleRepository;
         this.productBundleService = productBundleService;
         this.productTypeRepository = productTypeRepository;
@@ -283,6 +287,15 @@ public class ProductServiceImpl implements ProductService {
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(found -> productRequestModel
                         .map(EntityModelUtil::toProductEntity)
+                        // Older clients omit translations. Preserve them; an explicit empty string clears them.
+                        .doOnNext(entity -> {
+                            if (entity.getProductNameFr() == null) {
+                                entity.setProductNameFr(found.getProductNameFr());
+                            }
+                            if (entity.getProductDescriptionFr() == null) {
+                                entity.setProductDescriptionFr(found.getProductDescriptionFr());
+                            }
+                        })
                         .doOnNext(entity -> entity.setId(found.getId()))
                         .doOnNext(entity -> entity.setImageId(found.getImageId()))
                         .doOnNext(entity -> entity.setProductId(found.getProductId())))
@@ -325,6 +338,7 @@ public class ProductServiceImpl implements ProductService {
                                             : productBundleService.deleteAllProductBundlesByProductId(found.getProductId()).then();
 
                                     return deleteBundles
+                                            .then(reviewLikeRepository.deleteByProductId(found.getProductId()))
                                             .then(ratingRepository.deleteRatingsByProductId(
                                                     found.getProductId()).then())
                                             // Clean up the owned image before deleting the product.
@@ -381,7 +395,7 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findProductByProductId(productId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(product -> {
-                    product.setRequestCount(product.getProductQuantity() - 1);
+                    product.setProductQuantity(product.getProductQuantity() - 1);
                     return productRepository.save(product).then();
                 });
     }
