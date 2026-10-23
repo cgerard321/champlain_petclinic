@@ -340,9 +340,9 @@ public class CartControllerV1 {
         @PathVariable String cartId,
         @RequestBody(required = false) ApplyPromoRequestDTO promoRequest) {
 
-    Double promoPercent = promoRequest != null ? promoRequest.getPromoPercent() : null;
+    String promoCode = promoRequest != null ? promoRequest.getPromoCode() : null;
 
-    return cartServiceClient.applyPromoToCart(cartId, promoPercent)
+    return cartServiceClient.applyPromoCodeToCart(cartId, promoCode)
         .map(ResponseEntity::ok)
         .onErrorResume(e -> mapCartErrorWithMessage(
             e,

@@ -145,7 +145,8 @@
     "addToWishlist": "Add to wishlist",
     "addToCartLabel": "Add {{name}} to cart",
     "removeFromWishlistLabel": "Remove {{name}} from wishlist",
-    "lowStockOne": "Only 1 item left in stock."
+    "lowStockOne": "Only 1 item left in stock.",
+    "promoDiscount": "Promo discount: -{{amount}}"
   },
   "billing": {
     "close": "Close billing form",

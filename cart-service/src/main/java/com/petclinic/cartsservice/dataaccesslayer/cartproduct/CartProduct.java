@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartProduct {
+    private String productType;
+    private double discountAmount;
     private String productId;
     private String imageId;
     private String productName;

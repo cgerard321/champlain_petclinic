@@ -2,6 +2,8 @@ package com.petclinic.cartsservice.businesslayer;
 
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
+import com.petclinic.cartsservice.dataaccesslayer.PromoRepository;
+import com.petclinic.cartsservice.utils.PromoEligibility;
 import com.petclinic.cartsservice.dataaccesslayer.ShippingMethod;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
@@ -29,12 +31,15 @@ public class CartServiceImpl implements CartService {
     private final ProductClient productClient;
     private final CustomerClient customerClient;
     private final OrderServiceImpl orderService;
+    private final PromoRepository promoRepository;
 
-    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient, CustomerClient customerClient , OrderServiceImpl orderService) {
+    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient, CustomerClient customerClient,
+                           OrderServiceImpl orderService, PromoRepository promoRepository) {
         this.cartRepository = cartRepository;
         this.productClient = productClient;
         this.customerClient = customerClient;
         this.orderService = orderService;
+        this.promoRepository = promoRepository;
     }
     private static final int DEFAULT_PAGE_SIZE = 50;
     private static final int MAX_PAGE_SIZE = 200;
@@ -266,6 +271,7 @@ public class CartServiceImpl implements CartService {
         private CartProduct toCartProduct(ProductResponseModel product) {
         return CartProduct.builder()
                 .productId(product.getProductId())
+                .productType(product.getProductType())
                 .imageId(product.getImageId())
                 .productName(product.getProductName())
                 .productDescription(product.getProductDescription())
@@ -358,9 +364,11 @@ public class CartServiceImpl implements CartService {
                                     }
                                     existingProduct.setQuantityInCart(newQuantity);
                                     existingProduct.setProductQuantity(availableStock);
+                                    existingProduct.setProductType(product.getProductType());
                                 } else {
                                     CartProduct cartProduct = CartProduct.builder()
                                             .productId(product.getProductId())
+                                            .productType(product.getProductType())
                                             .imageId(product.getImageId())
                                             .productName(product.getProductName())
                                             .productDescription(product.getProductDescription())
@@ -405,6 +413,7 @@ public class CartServiceImpl implements CartService {
                                 CartProduct existingProduct = existingProductOpt.get();
                                 existingProduct.setQuantityInCart(quantity);
                                 existingProduct.setProductQuantity(availableStock);
+                                existingProduct.setProductType(product.getProductType());
                             } else {
                                 return Mono.error(new NotFoundException("Product not found in cart: " + productId));
                             }
@@ -470,6 +479,7 @@ public class CartServiceImpl implements CartService {
                     if (existingProductOpt.isEmpty()) {
                         CartProduct cartProduct = CartProduct.builder()
                             .productId(product.getProductId())
+                            .productType(product.getProductType())
                             .productName(product.getProductName())
                             .imageId(product.getImageId())
                             .productDescription(product.getProductDescription())
@@ -628,9 +638,11 @@ public class CartServiceImpl implements CartService {
                 int currentQty = safeQuantity(cartLine.getQuantityInCart());
                 cartLine.setQuantityInCart(currentQty + allocated);
                 cartLine.setProductQuantity(availability.getAvailableStock());
+                cartLine.setProductType(availability.productType);
             } else {
                 CartProduct newLine = CartProduct.builder()
                         .productId(item.getProductId())
+                        .productType(availability.productType)
                         .imageId(item.getImageId())
                         .productName(item.getProductName())
                         .productDescription(item.getProductDescription())
@@ -690,6 +702,7 @@ public class CartServiceImpl implements CartService {
     private static final class WishlistProductAvailability {
         private final String productId;
         private final String productName;
+        private String productType;
         private final int availableStock;
         private final boolean missing;
         private int existingInCart;
@@ -704,7 +717,9 @@ public class CartServiceImpl implements CartService {
 
         static WishlistProductAvailability fromProduct(String productId, ProductResponseModel product, int availableStock) {
             String resolvedName = product != null ? product.getProductName() : null;
-            return new WishlistProductAvailability(productId, resolvedName, availableStock, false);
+            WishlistProductAvailability availability = new WishlistProductAvailability(productId, resolvedName, availableStock, false);
+            availability.productType = product == null ? null : product.getProductType();
+            return availability;
         }
 
         static WishlistProductAvailability missing(String productId) {
@@ -804,6 +819,7 @@ public class CartServiceImpl implements CartService {
             } else {
                 CartProduct copy = CartProduct.builder()
                         .productId(selected.getProductId())
+                        .productType(selected.getProductType())
                         .imageId(selected.getImageId())
                         .productName(selected.getProductName())
                         .productDescription(selected.getProductDescription())
@@ -855,20 +871,47 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Mono<CartResponseModel> applyPromoToCart(String cartId, Double promoPercent) {
+    public Mono<CartResponseModel> clearPromoFromCart(String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> {
-                    if (promoPercent == null || promoPercent <= 0) {
-                        cart.setPromoPercent(null);
-                        return cartRepository.save(cart);
-                    }
-                    if (promoPercent > 100) {
-                        return Mono.error(new InvalidInputException("promoPercent must be 1..100"));
-                    }
-                    cart.setPromoPercent(promoPercent);
+                    cart.setPromoPercent(null);
+                    cart.setAppliedPromo(null);
                     return cartRepository.save(cart);
                 })
+                .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts()));
+    }
+
+    @Override
+    public Mono<CartResponseModel> applyPromoCodeToCart(String cartId, String code) {
+        if (code == null || code.isBlank()) {
+            return Mono.error(new InvalidInputException("Promo code must be provided"));
+        }
+        return promoRepository.findPromoCodeByCode(code.trim())
+                .filter(p -> p.isActive() && EntityModelUtil.isPromoActive(p.getExpirationDate())
+                        && Double.isFinite(p.getDiscount()) && p.getDiscount() > 0 && p.getDiscount() <= 100)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Promo code is invalid, inactive or expired")))
+                .flatMap(promo -> cartRepository.findCartByCartId(cartId)
+                        .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                        .flatMap(cart -> {
+                            List<CartProduct> products = cart.getProducts() == null ? List.of() : cart.getProducts();
+                            // Existing carts may predate product type snapshots.
+                            return Flux.fromIterable(products)
+                                    .concatMap(p -> "PRODUCT_TYPE".equals(promo.getScope())
+                                            ? productClient.getProductByProductId(p.getProductId()).map(current -> {
+                                                p.setProductType(current.getProductType());
+                                                return p;
+                                            }) : Mono.just(p))
+                                    .collectList()
+                                    .flatMap(items -> {
+                                        if (items.stream().noneMatch(p -> PromoEligibility.isEligible(promo, p))) {
+                                            return Mono.error(new InvalidInputException("Promo code does not apply to any items in this cart"));
+                                        }
+                                        cart.setAppliedPromo(promo);
+                                        cart.setPromoPercent(promo.getDiscount());
+                                        return cartRepository.save(cart);
+                                    });
+                        }))
                 .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts()));
     }
 

@@ -50,6 +50,7 @@ import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import { getCustomerOrders } from '../api/getCustomerOrders';
 import type { OrderModel } from '../models/OrderModel';
 interface ProductAPIResponse {
+  discountAmount?: number;
   productId: string;
   imageId?: string;
   productName: string;
@@ -139,6 +140,7 @@ const UserCart: React.FC = () => {
 
   const toProductModel = useCallback(
     (product: ProductAPIResponse): ProductModel => ({
+      discountAmount: product.discountAmount ?? 0,
       productId: String(product.productId ?? ''),
       imageId: product.imageId ?? '',
       productName: product.productName,
@@ -430,8 +432,10 @@ const UserCart: React.FC = () => {
     0
   );
 
-  const promoDiscount =
-    promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
+  const promoDiscount = cartItems.reduce(
+    (sum, item) => sum + (item.discountAmount ?? 0),
+    0
+  );
   const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
   const effectiveShippingCost = cartItems.length > 0 ? shippingCost : 0;
   const taxableSubtotal = roundToCents(
@@ -548,27 +552,18 @@ const UserCart: React.FC = () => {
     }
 
     try {
-      const { data } = await axiosInstance.get(
-        `/carts/promos/validate/${encodeURIComponent(voucherCode.trim())}`,
-        { useV2: false, handleLocally: true }
-      );
-
-      const percent: number = Number(data?.discount);
-      if (Number.isNaN(percent) || percent < 0 || percent > 100) {
-        setVoucherError('errors.invalidDiscount');
-        return;
-      }
-
-      const updated = await applyPromo(existingCartId, percent);
+      const updated = await applyPromo(existingCartId, voucherCode.trim());
 
       setVoucherError(null);
       const appliedMessage = t('toasts.promoApplied', {
-        percent: updated?.promoPercent ?? percent,
+        percent: updated?.promoPercent ?? 0,
       });
       syncCartState(updated, appliedMessage);
     } catch (err) {
       console.error('Error validating promo code:', err);
-      setVoucherError('errors.promoInvalid');
+      const message = apiErrorMessage(err, t('errors.promoInvalid'));
+      setVoucherError(message);
+      showToast(message, 'error');
     }
   };
 
@@ -660,6 +655,9 @@ const UserCart: React.FC = () => {
     try {
       await clearPromo(existingCartId);
       setPromoPercent(null);
+      setCartItems(items =>
+        items.map(item => ({ ...item, discountAmount: 0 }))
+      );
       showToast(t('toasts.promoRemoved'), 'success');
     } catch (err: unknown) {
       showToast(apiErrorMessage(err, t('errors.removePromoFailed')), 'error');
