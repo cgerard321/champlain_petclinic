@@ -205,25 +205,36 @@
       </mat-menu>
     }
     @if (canConsumeSupplies()) {
-      <button
-        type="button"
-        class="consume-button"
-        (click)="consumeSupply(supply)"
-        [disabled]="
-          supply.productQuantity <= 0 ||
-          expirationState(supply) === 'expired' ||
-          consumingSupplyId() === supply.productId
-        "
-        [attr.aria-label]="
+      <span
+        [matTooltip]="
           supply.productQuantity <= 0
             ? cannotConsumeStockLabel
             : expirationState(supply) === 'expired'
               ? cannotConsumeExpiredLabel
-              : consumeLabel
+              : ''
         "
+        [matTooltipDisabled]="supply.productQuantity > 0 && expirationState(supply) !== 'expired'"
       >
-        {{ consumingSupplyId() === supply.productId ? consumingLabel : consumeButtonLabel }}
-      </button>
+        <button
+          type="button"
+          class="consume-button"
+          (click)="consumeSupply(supply)"
+          [disabled]="
+            supply.productQuantity <= 0 ||
+            expirationState(supply) === 'expired' ||
+            consumingSupplyId() === supply.productId
+          "
+          [attr.aria-label]="
+            supply.productQuantity <= 0
+              ? cannotConsumeStockLabel
+              : expirationState(supply) === 'expired'
+                ? cannotConsumeExpiredLabel
+                : consumeLabel
+          "
+        >
+          {{ consumingSupplyId() === supply.productId ? consumingLabel : consumeButtonLabel }}
+        </button>
+      </span>
     }
   </div>
 </ng-template>

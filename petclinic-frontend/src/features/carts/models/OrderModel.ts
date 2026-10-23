@@ -15,7 +15,11 @@ export interface OrderModel {
   orderId: string;
   customerId: string;
   customerName: string;
-  customerAddress: string;
+  address: string;
+  city: string;
+  province?: string;
+  postalCode: string;
+  email: string;
   orderDate: string;
   products: OrderItemModel[];
   subtotal: number;
