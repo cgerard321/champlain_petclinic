@@ -119,8 +119,7 @@
 .history-button,
 .delete-button,
 .consume-button,
-.download-pdf-button,
-.clear-filters-button {
+.download-pdf-button {
   border: 0;
   border-radius: 999px;
   font: inherit;
@@ -142,10 +141,6 @@
   padding: 7px 8px;
   font-size: 0.75rem;
   white-space: nowrap;
-}
-
-.edit-button,
-.history-button {
   background: var(--forest-700);
   color: #fff;
 }
@@ -160,7 +155,6 @@
 .delete-button {
   background: #b71c1c;
   border: 1px solid #8e0000;
-  color: #fff;
 }
 
 .delete-button:hover {
@@ -332,8 +326,7 @@
   color: var(--forest-700);
 }
 
-.filter-field input,
-.filter-field select {
+.filter-field :is(input, select) {
   width: 100%;
   min-height: 46px;
   box-sizing: border-box;
@@ -357,8 +350,7 @@
   border-color: rgb(36 75 63 / 42%);
 }
 
-.filter-field input:focus-visible,
-.filter-field select:focus-visible {
+.filter-field :is(input, select):focus-visible {
   border-color: var(--forest-700);
   box-shadow: 0 0 0 3px rgb(36 75 63 / 14%);
 }
@@ -477,8 +469,7 @@
     color: #111;
   }
 
-  .filter-field input,
-  .filter-field select {
+  .filter-field :is(input, select) {
     border-color: var(--sage-400);
   }
 
@@ -486,6 +477,7 @@
     color: #7f958a;
   }
 }
+
 .restock-submit-button {
   background: #198754;
   color: white;
