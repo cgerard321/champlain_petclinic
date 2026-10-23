@@ -799,9 +799,12 @@
 }
 
 .report-order-product-option {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0;
   padding: 8px;
   border-radius: 4px;
   cursor: pointer;
@@ -811,8 +814,11 @@
   background: #f8fafc;
 }
 
-.report-order-product-option input {
-  margin-top: 3px;
+.report-order-product-option input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
   accent-color: var(--cart-brand, #2563eb);
 }
 

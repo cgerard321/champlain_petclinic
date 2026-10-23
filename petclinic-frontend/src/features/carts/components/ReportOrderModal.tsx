@@ -7,6 +7,7 @@ import {
   type OrderReportSummary,
 } from '../api/orderReports';
 import type { OrderModel } from '../models/OrderModel';
+import { useProductText } from '../utils/useProductText';
 
 interface ReportOrderModalProps {
   customerId: string;
@@ -36,6 +37,7 @@ export default function ReportOrderModal({
   onSubmitted,
 }: ReportOrderModalProps): JSX.Element {
   const { t } = useTranslation('carts');
+  const { localizedName } = useProductText(order.products);
   const [reason, setReason] = useState<OrderReportReason | ''>('');
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [description, setDescription] = useState('');
@@ -111,7 +113,7 @@ export default function ReportOrderModal({
           </div>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <fieldset disabled={submitting} className="report-order-fieldset">
             <label htmlFor="report-order-reason">{t('reports.reason')}</label>
 
@@ -147,7 +149,7 @@ export default function ReportOrderModal({
                   />
 
                   <span>
-                    <strong>{product.productName}</strong>
+                    <strong>{localizedName(product)}</strong>
                     <small>
                       {t('reports.orderedQuantity', {
                         quantity: product.quantityInCart,
