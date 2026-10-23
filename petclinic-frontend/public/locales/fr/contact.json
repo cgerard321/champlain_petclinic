@@ -1,0 +1,52 @@
+{
+  "intro": {
+    "title": "Contactez-nous",
+    "subtitle": "Nous vous répondrons dès que possible."
+  },
+  "details": {
+    "title": "Détails de la clinique",
+    "hoursTitle": "Heures d'ouverture",
+    "directions": "Obtenir l'itinéraire →"
+  },
+  "form": {
+    "title": "Envoyer un message",
+    "name": {
+      "label": "Nom",
+      "placeholder": "Marie Tremblay",
+      "error": "Veuillez entrer votre nom."
+    },
+    "email": {
+      "label": "Courriel",
+      "placeholder": "marie@exemple.com",
+      "error": "Veuillez entrer un courriel valide."
+    },
+    "phone": {
+      "label": "Téléphone (facultatif)",
+      "placeholder": "(555) 555-5555"
+    },
+    "subject": {
+      "label": "Sujet",
+      "placeholder": "Comment pouvons-nous vous aider ?"
+    },
+    "message": {
+      "label": "Message",
+      "placeholder": "Écrivez votre message…",
+      "error": "Veuillez entrer un message."
+    },
+    "send": "Envoyer le message",
+    "sending": "Envoi en cours…",
+    "clear": "Effacer"
+  },
+  "status": {
+    "success": "Merci ! Votre message a été envoyé.",
+    "error": "Une erreur est survenue. Veuillez réessayer."
+  },
+  "hours": {
+    "day": {
+      "weekdays": "Lun - Ven",
+      "saturday": "Sam",
+      "sunday": "Dim"
+    },
+    "closed": "Fermé"
+  }
+}
