@@ -84,7 +84,7 @@ const CancellationModal: React.FC<CancellationModalProps> = ({
               setErrorMessage('');
             }}
           />
-          Pet owner is no longer available
+          No longer available
         </label>
 
         <label className="cancellation-option">
@@ -97,7 +97,7 @@ const CancellationModal: React.FC<CancellationModalProps> = ({
               setErrorMessage('');
             }}
           />
-          Pet owner needs to reschedule
+          Booked by mistake
         </label>
 
         <label className="cancellation-option">

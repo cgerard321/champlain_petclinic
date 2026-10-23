@@ -175,8 +175,8 @@ public class CartController {
     //admin restriction at check out
     @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PostMapping("/{cartId}/checkout")
-    public Mono<ResponseEntity<CartResponseDTO>> checkoutCart(@PathVariable String cartId) {
-        return cartServiceClient.checkoutCart(cartId)
+    public Mono<ResponseEntity<CartResponseDTO>> checkoutCart(@PathVariable String cartId, @RequestBody BillingRequestDTO billing) {
+        return cartServiceClient.checkoutCart(cartId, billing)
                 .map(cart -> new ResponseEntity<>(cart, HttpStatus.OK))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }

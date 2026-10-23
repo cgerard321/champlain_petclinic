@@ -281,8 +281,8 @@ public class CartControllerV1 {
     
     @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PostMapping("/{cartId}/checkout")
-    public Mono<ResponseEntity<CartResponseDTO>> checkoutCart(@PathVariable String cartId) {
-        return mapToOkOrNotFound(cartServiceClient.checkoutCart(cartId));
+    public Mono<ResponseEntity<CartResponseDTO>> checkoutCart(@PathVariable String cartId, @RequestBody BillingRequestDTO billing) {
+        return mapToOkOrNotFound(cartServiceClient.checkoutCart(cartId, billing));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.CUST})

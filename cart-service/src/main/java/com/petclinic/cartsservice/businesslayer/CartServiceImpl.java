@@ -9,6 +9,7 @@ import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
+import com.petclinic.cartsservice.presentationlayer.BillingRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistTransferDirection;
@@ -209,7 +210,7 @@ public class CartServiceImpl implements CartService {
 
 
     @Override
-    public Mono<CartResponseModel> checkoutCart(final String cartId) {
+    public Mono<CartResponseModel> checkoutCart(final String cartId, BillingRequestModel billing) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> {
@@ -217,13 +218,10 @@ public class CartServiceImpl implements CartService {
                         return Mono.error(new InvalidInputException("Cart is empty"));
                     }
                     Cart orderCart = EntityModelUtil.storeCartOrder(cart);
-
                     String invoiceId = UUID.randomUUID().toString();
                     orderCart.setInvoiceId(invoiceId);
-
                     List<CartProduct> purchasedProducts = orderCart.getProducts();
                     double total = orderCart.getTotal();
-
                     return generateRecommendations(purchasedProducts)
                             .flatMap(recommendations -> {
                                 cart.setRecentPurchases(
@@ -231,15 +229,13 @@ public class CartServiceImpl implements CartService {
                                                 cart.getRecentPurchases(),
                                                 purchasedProducts)
                                 );
-
                                 cart.setRecommendationPurchase(recommendations);
                                 cart.setProducts(Collections.emptyList());
                                 cart.setShippingMethod(ShippingMethod.PICKUP);
                                 cart.setShippingCost(ShippingMethod.PICKUP.getCost());
-
                                 return cartRepository.save(cart);
                             })
-                            .flatMap(savedCart -> orderService.createOrder(orderCart))
+                            .flatMap(savedCart -> orderService.createOrder(orderCart,billing))
                             .map(savedOrder -> {
                                 CartResponseModel response =
                                         new CartResponseModel(invoiceId, cartId, purchasedProducts, total);

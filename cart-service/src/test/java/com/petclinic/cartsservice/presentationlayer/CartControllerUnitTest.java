@@ -345,8 +345,9 @@ class CartControllerUnitTest {
         verify(cartService, times(1)).addProductToCart(anyString(), any(CartItemRequestModel.class));
     }
 
+
     @Test
-    void whenCheckoutCart_thenReturnCartResponseModel(){
+    void whenCheckoutCart_thenReturnCartResponseModel() {
         // Arrange
         Cart cart = Cart.builder()
                 .cartId(VALID_CART_ID)
@@ -354,18 +355,29 @@ class CartControllerUnitTest {
                 .customerId("1")
                 .build();
 
+        BillingRequestModel billing = new BillingRequestModel();
+        billing.setCity("Montreal");
+        billing.setProvince("Quebec");
+        billing.setPostalCode("H1A 1A1");
+        billing.setEmail("customer@example.com");
+
         CartResponseModel cartResponseModel = CartResponseModel.builder()
                 .cartId(cart.getCartId())
                 .customerId("1")
                 .products(new ArrayList<>())
                 .build();
-        when(cartService.checkoutCart(cart.getCartId()))
+        when(cartService.checkoutCart(
+                eq(cart.getCartId()),
+                any(BillingRequestModel.class)))
                 .thenReturn(Mono.just(cartResponseModel));
 
+        // Act & Assert
         webTestClient
                 .post()
                 .uri("/api/v1/carts/" + cart.getCartId() + "/checkout")
+                .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(billing)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -376,8 +388,18 @@ class CartControllerUnitTest {
                     assertEquals(0, response.getProducts().size());
                 });
 
-        verify(cartService, times(1)).checkoutCart(cartResponseModel.getCartId());
+        ArgumentCaptor<BillingRequestModel> billingCaptor =
+                ArgumentCaptor.forClass(BillingRequestModel.class);
+        verify(cartService).checkoutCart(
+                eq(cart.getCartId()),
+                billingCaptor.capture());
+        BillingRequestModel capturedBilling = billingCaptor.getValue();
+        assertEquals("Montreal", capturedBilling.getCity());
+        assertEquals("Quebec", capturedBilling.getProvince());
+        assertEquals("H1A 1A1", capturedBilling.getPostalCode());
+        assertEquals("customer@example.com", capturedBilling.getEmail());
     }
+
 
     @Test
     void whenAddProductToCart_OutOfStock_ThrowsBadRequest() {
