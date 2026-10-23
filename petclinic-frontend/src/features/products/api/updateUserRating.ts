@@ -1,38 +1,47 @@
-import { RatingModel } from '@/features/products/models/ProductModels/RatingModel';
+import {
+  RatingCategories,
+  RatingModel,
+} from '@/features/products/models/ProductModels/RatingModel';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getUserRating } from './getUserRating';
 
 export async function updateUserRating(
   productId: string,
   newRating: number,
-  newReview: string | null
+  newReview: string | null,
+  categoryRatings: RatingCategories
 ): Promise<RatingModel> {
   try {
     const doesUserRatingExist = await getUserRating(productId);
+
+    const payload = {
+      rating: newRating,
+      review: newReview,
+      ...categoryRatings,
+    };
+
     let response;
-    if (doesUserRatingExist.rating == 0) {
+    if (doesUserRatingExist.rating === 0) {
       response = await axiosInstance.post<RatingModel>(
         '/ratings/' + productId,
-        { rating: newRating, review: newReview },
+        payload,
         {
           responseType: 'json',
           useV2: false,
         }
       );
-
-      return response.data;
     } else {
       response = await axiosInstance.put<RatingModel>(
         '/ratings/' + productId,
-        { rating: newRating, review: newReview },
+        payload,
         {
           responseType: 'json',
           useV2: false,
         }
       );
-
-      return response.data;
     }
+
+    return response.data;
   } catch (error) {
     console.error('Error updating user rating:', error);
     throw error;

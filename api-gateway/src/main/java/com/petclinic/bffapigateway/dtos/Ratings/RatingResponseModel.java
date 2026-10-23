@@ -17,4 +17,8 @@ public class RatingResponseModel {
     String reviewerPhoto;
     long likeCount;
     boolean likedByCurrentUser;
+    Byte qualityRating;
+    Byte valueRating;
+    Byte petSatisfactionRating;
+    Byte ingredientsRating;
 }

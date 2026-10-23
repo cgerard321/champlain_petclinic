@@ -3,7 +3,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 import StarRating from './StarRating';
 import ReviewBox from './ReviewBox';
-import { RatingModel } from '../models/ProductModels/RatingModel';
+import {
+  RatingCategories,
+  RatingModel,
+} from '../models/ProductModels/RatingModel';
 
 import './WriteReviewModal.css';
 
@@ -11,7 +14,11 @@ interface WriteReviewModalProps {
   show: boolean;
   onClose: () => void;
   currentUserRating: RatingModel;
-  updateRating: (rating: number, review: string | null) => void;
+  updateRating: (
+    rating: number,
+    review: string | null,
+    categoryRatings: RatingCategories
+  ) => Promise<void>;
 }
 
 const WriteReviewModal = ({
@@ -28,13 +35,35 @@ const WriteReviewModal = ({
   const [localRating, setLocalRating] = useState<number>(
     currentUserRating.rating
   );
+  const [categoryRatings, setCategoryRatings] = useState<RatingCategories>({
+    qualityRating: currentUserRating.qualityRating ?? 0,
+    valueRating: currentUserRating.valueRating ?? 0,
+    petSatisfactionRating: currentUserRating.petSatisfactionRating ?? 0,
+    ingredientsRating: currentUserRating.ingredientsRating ?? 0,
+  });
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
     setReviewText(currentUserRating.review);
     setLocalRating(currentUserRating.rating);
     setError('');
+    setCategoryRatings({
+      qualityRating: currentUserRating.qualityRating ?? 0,
+      valueRating: currentUserRating.valueRating ?? 0,
+      petSatisfactionRating: currentUserRating.petSatisfactionRating ?? 0,
+      ingredientsRating: currentUserRating.ingredientsRating ?? 0,
+    });
   }, [currentUserRating, show]);
+
+  const updateCategoryRating = (
+    category: keyof RatingCategories,
+    rating: number
+  ): void => {
+    setCategoryRatings(current => ({
+      ...current,
+      [category]: rating,
+    }));
+  };
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleSubmit = async () => {
@@ -50,9 +79,13 @@ const WriteReviewModal = ({
       setError('reviewTooLong');
       return;
     }
+    if (Object.values(categoryRatings).some(rating => rating === 0)) {
+      setError('categoryRatingsRequired');
+      return;
+    }
 
     try {
-      await updateRating(localRating, reviewText);
+      await updateRating(localRating, reviewText, categoryRatings);
       setError('');
       onClose();
     } catch (err) {
@@ -92,6 +125,49 @@ const WriteReviewModal = ({
             currentRating={localRating}
             viewOnly={false}
             updateRating={newRating => setLocalRating(newRating)}
+          />
+        </div>
+
+        {/* Rating Categories Section */}
+        <div className="wrm-section">
+          <label className="wrm-label">{t('qualityOfProduct')} *</label>
+          <StarRating
+            currentRating={categoryRatings.qualityRating}
+            viewOnly={false}
+            updateRating={rating =>
+              updateCategoryRating('qualityRating', rating)
+            }
+          />
+        </div>
+
+        <div className="wrm-section">
+          <label className="wrm-label">{t('valueOfProduct')} *</label>
+          <StarRating
+            currentRating={categoryRatings.valueRating}
+            viewOnly={false}
+            updateRating={rating => updateCategoryRating('valueRating', rating)}
+          />
+        </div>
+
+        <div className="wrm-section">
+          <label className="wrm-label">{t('petSatisfaction')} *</label>
+          <StarRating
+            currentRating={categoryRatings.petSatisfactionRating}
+            viewOnly={false}
+            updateRating={rating =>
+              updateCategoryRating('petSatisfactionRating', rating)
+            }
+          />
+        </div>
+
+        <div className="wrm-section">
+          <label className="wrm-label">{t('ingredients')} *</label>
+          <StarRating
+            currentRating={categoryRatings.ingredientsRating}
+            viewOnly={false}
+            updateRating={rating =>
+              updateCategoryRating('ingredientsRating', rating)
+            }
           />
         </div>
 
