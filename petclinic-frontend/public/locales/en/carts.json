@@ -196,6 +196,39 @@
     "quantity": "Quantity:",
     "download": "Download Invoice"
   },
+  "reports": {
+    "openButton": "Report an Issue",
+    "title": "Report an Order Issue",
+    "orderNumber": "Order #{{id}}",
+    "reason": "Reason",
+    "selectReason": "Select a reason",
+    "affectedProducts": "Affected products",
+    "orderedQuantity": "Ordered quantity: {{quantity}}",
+    "description": "Description",
+    "submit": "Submit Report",
+    "submitting": "Submitting...",
+    "success": "Your report has been submitted. Our team is reviewing it.",
+    "banner": "Issue Reported - Status: {{status}} - Reference: {{reportId}}",
+    "reasons": {
+      "DAMAGED_ITEM": "Damaged Item",
+      "MISSING_ITEM": "Missing Item",
+      "WRONG_ITEM": "Wrong Item",
+      "PACKAGE_NOT_RECEIVED": "Package Not Received",
+      "OTHER": "Other"
+    },
+    "status": {
+      "NEW": "New",
+      "IN_REVIEW": "In Review",
+      "RESOLVED": "Resolved",
+      "REJECTED": "Rejected"
+    },
+    "errors": {
+      "reasonRequired": "Select a reason.",
+      "productRequired": "Select at least one affected product.",
+      "descriptionLength": "Description must contain between 15 and 500 characters.",
+      "submitFailed": "Could not submit the report."
+    }
+  },
   "taxes": {
     "GST": "GST",
     "PST": "PST",

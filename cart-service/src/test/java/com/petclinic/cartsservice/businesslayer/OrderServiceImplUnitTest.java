@@ -6,6 +6,7 @@ import com.petclinic.cartsservice.dataaccesslayer.Order;
 import com.petclinic.cartsservice.dataaccesslayer.OrderRepository;
 import com.petclinic.cartsservice.dataaccesslayer.ShippingMethod;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportRepository;
 import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
@@ -47,6 +48,9 @@ class OrderServiceUnitTest {
 
     @Mock
     private CustomerClient customerClient;
+
+    @Mock
+    private OrderReportRepository orderReportRepository;
 
     private Cart cart;
     private Order order;
