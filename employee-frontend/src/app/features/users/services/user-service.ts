@@ -1,0 +1,103 @@
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import { Observable, switchMap, throwError } from 'rxjs';
+
+import {
+  User,
+  UserChanges,
+  UserCreateRequest,
+  UserUpdateRequest,
+  userRoleName,
+} from '@features/users/models/user.model';
+
+@Injectable({ providedIn: 'root' })
+export class UserService {
+  private readonly http = inject(HttpClient);
+
+  // The v2 endpoints return plain JSON, and v1 has no way to edit an email.
+  private readonly baseUrl = '/api/v2/gateway/users';
+
+  // Creating users uses the v1 gateway endpoints, one per role.
+  private readonly createUrls: Record<string, string> = {
+    INVENTORY_MANAGER: '/api/gateway/users/inventoryManager',
+    RECEPTIONIST: '/api/gateway/users/receptionist',
+    VET: '/api/gateway/users/vets',
+    CUST: '/api/gateway/users',
+  };
+
+  // A new vet is available from Monday to Friday. An administrator can change this
+  // later on the vets page.
+  private readonly defaultVetWorkdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(this.baseUrl);
+  }
+
+  // The backend saves username/email with PUT and the role with a separate PATCH.
+  updateUser(user: User, changes: UserChanges): Observable<unknown> {
+    const request: UserUpdateRequest = {
+      userId: user.userId,
+      username: changes.username,
+      email: changes.email,
+      roles: user.roles,
+    };
+    const update$ = this.http.put<UserUpdateRequest>(`${this.baseUrl}/${user.userId}`, request);
+
+    if (changes.role === userRoleName(user)) {
+      return update$;
+    }
+
+    return update$.pipe(
+      switchMap(() => this.http.patch(`${this.baseUrl}/${user.userId}`, { roles: [changes.role] })),
+    );
+  }
+
+  createUser(request: UserCreateRequest): Observable<unknown> {
+    const url = this.createUrls[request.role];
+
+    if (!url) {
+      return throwError(() => ({
+        code: 'NOT_SUPPORTED',
+        message: 'Creating this type of user is not available.',
+      }));
+    }
+
+    const account = {
+      username: request.username,
+      email: request.email,
+      password: request.password,
+    };
+
+    if (request.role === 'VET') {
+      return this.http.post(url, {
+        ...account,
+        vet: {
+          firstName: request.firstName,
+          lastName: request.lastName,
+          phoneNumber: request.phoneNumber,
+          resume: request.resume,
+          specialties: [],
+          workday: this.defaultVetWorkdays,
+          active: true,
+          photoDefault: true,
+        },
+      });
+    }
+
+    if (request.role === 'CUST') {
+      return this.http.post(url, {
+        ...account,
+        owner: {
+          firstName: request.firstName,
+          lastName: request.lastName,
+          address: request.address,
+          city: request.city,
+          province: request.province,
+          telephone: request.telephone,
+        },
+      });
+    }
+
+    return this.http.post(url, account);
+  }
+}

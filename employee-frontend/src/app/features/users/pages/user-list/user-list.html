@@ -1,0 +1,45 @@
+<section class="user-page">
+  <div class="page-header">
+    <div>
+      <h1>Users</h1>
+      <p class="page-description">
+        View and manage user accounts for inventory managers, vets, receptionists and owners.
+      </p>
+    </div>
+
+    <button type="button" class="add-user-button" (click)="openAddDialog()">Add user</button>
+  </div>
+
+  @if (successMessage()) {
+    <p class="success-message" role="status">{{ successMessage() }}</p>
+  }
+
+  @if (saveError()) {
+    <p class="field-error" role="alert">{{ saveError() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="state-message">Loading users…</p>
+  } @else if (error()) {
+    <p class="state-message error-message" role="alert">Unable to load the users.</p>
+  } @else if (users().length === 0) {
+    <p class="state-message">No users found.</p>
+  } @else {
+    <app-table [label]="tableLabel" [rows]="users()" [columns]="columns()" [rowId]="userRowId" />
+  }
+</section>
+
+<ng-template #actionsCell let-user>
+  <div class="action-buttons">
+    @if (canEdit(user)) {
+      <button
+        type="button"
+        class="edit-button"
+        [attr.aria-label]="'Edit ' + user.username"
+        (click)="openEditDialog(user)"
+      >
+        Edit
+      </button>
+    }
+  </div>
+</ng-template>
