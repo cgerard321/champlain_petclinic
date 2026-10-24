@@ -27,6 +27,11 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.aggregation.AggregationUpdate;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
@@ -50,6 +55,8 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class ProductInventoryServiceUnitTest {
+    @SpyBean
+    ReactiveMongoTemplate mongoTemplate;
     @Autowired
     ProductInventoryService productInventoryService;
     @MockBean
@@ -2414,113 +2421,104 @@ class ProductInventoryServiceUnitTest {
 
     @Test
     void restockLowStockProduct_WithValidInputs_ShouldSucceed() {
-        // Arrange
-        String inventoryId = "1";
-        String productId = "12345";
-        int restockQuantity = 5;
-
-        Product product = Product.builder()
-                .id(UUID.randomUUID().toString())
-                .productId(productId)
-                .inventoryId(inventoryId)
+        Product updated = Product.builder()
+                .productId("12345")
+                .inventoryId("1")
                 .productName("Test Product")
-                .productDescription("Test Description")
-                .productPrice(50.00)
-                .productQuantity(10)
-                .productSalePrice(20.00)
+                .productQuantity(15)
                 .build();
 
-        Product updatedProduct = Product.builder()
-                .id(product.getId())
-                .productId(productId)
-                .inventoryId(inventoryId)
-                .productName("Test Product")
-                .productDescription("Test Description")
-                .productPrice(50.00)
-                .productQuantity(15) // Updated quantity after restock
-                .productSalePrice(20.00)
-                .build();
+        doReturn(Mono.just(updated)).when(mongoTemplate).findAndModify(
+                any(Query.class),
+                any(AggregationUpdate.class),
+                any(FindAndModifyOptions.class),
+                eq(Product.class));
 
-        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
-                .thenReturn(Mono.just(product));
-        when(productRepository.save(any(Product.class)))
-                .thenReturn(Mono.just(updatedProduct));
+        when(supplyAuditRepository.insert(any(SupplyAuditEntry.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
 
-        // Act
-        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(
-                inventoryId, productId, restockQuantity, "test-user");
-
-        // Assert
-        StepVerifier.create(result)
-                .expectNextMatches(responseDTO -> {
-                    assertNotNull(responseDTO);
-                    assertEquals(productId, responseDTO.getProductId());
-                    assertEquals(15, responseDTO.getProductQuantity()); // Check the updated quantity
-                    return true;
+        StepVerifier.create(productInventoryService.restockLowStockProduct(
+                        "1", "12345", 5, "test-user"))
+                .assertNext(response -> {
+                    assertEquals("12345", response.getProductId());
+                    assertEquals(15, response.getProductQuantity());
+                    assertEquals(Status.RE_ORDER, response.getStatus());
                 })
                 .verifyComplete();
 
-        verify(productRepository).findProductByInventoryIdAndProductId(inventoryId, productId);
-        verify(productRepository).save(any(Product.class));
+        verify(productRepository, never()).save(any(Product.class));
+        verify(supplyAuditRepository).insert(argThat((SupplyAuditEntry entry) ->
+                entry.previousQuantity() == 10 && entry.newQuantity() == 15
+                        && entry.quantityChange() == 5 && entry.changedBy().equals("test-user")
+                        && entry.action() == com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditAction.QUANTITY_UPDATED));
+    }
+
+    @Test
+    void restockLowStockProduct_auditFailurePropagatesAfterAtomicMutation() {
+        Product updated = Product.builder().productId("12345").inventoryId("1")
+                .productName("Test Product").productQuantity(15).build();
+        doReturn(Mono.just(updated)).when(mongoTemplate).findAndModify(
+                any(Query.class), any(AggregationUpdate.class),
+                any(FindAndModifyOptions.class), eq(Product.class));
+        RuntimeException auditFailure = new RuntimeException("Audit unavailable");
+        when(supplyAuditRepository.insert(any(SupplyAuditEntry.class)))
+                .thenReturn(Mono.error(auditFailure));
+
+        // Main's stock mutations and audit insert are separate writes, not a Mongo transaction.
+        // Never return a successful response or repeat the addition when the audit write fails.
+        StepVerifier.create(productInventoryService.restockLowStockProduct(
+                        "1", "12345", 5, "test-user"))
+                .expectErrorMatches(error -> error == auditFailure).verify();
+        verify(mongoTemplate).findAndModify(any(Query.class), any(AggregationUpdate.class),
+                any(FindAndModifyOptions.class), eq(Product.class));
+        verify(supplyAuditRepository).insert(argThat((SupplyAuditEntry entry) ->
+                entry.previousQuantity() == 10 && entry.newQuantity() == 15
+                        && entry.changedBy().equals("test-user")));
+        verify(productRepository, never()).save(any(Product.class));
     }
 
     @Test
     void restockLowStockProduct_WithNonExistentProduct_ShouldThrowNotFoundException() {
-        // Arrange
-        String inventoryId = "1";
-        String productId = "nonExistentProduct";
-        int restockQuantity = 5;
+        doReturn(Mono.empty()).when(mongoTemplate).findAndModify(
+                any(Query.class),
+                any(AggregationUpdate.class),
+                any(FindAndModifyOptions.class),
+                eq(Product.class));
 
-        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
+        when(productRepository.findProductByInventoryIdAndProductId("1", "missing"))
                 .thenReturn(Mono.empty());
 
-        // Act
-        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(
-                inventoryId, productId, restockQuantity, "test-user");
-
-        // Assert
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof NotFoundException &&
-                        throwable.getMessage().equals("Product with id: " + productId + " not found in inventory " + inventoryId))
+        StepVerifier.create(productInventoryService.restockLowStockProduct(
+                        "1", "missing", 5, "test-user"))
+                .expectErrorMatches(error ->
+                        error instanceof NotFoundException
+                                && error.getMessage().equals(
+                                        "Product with id: missing not found in inventory 1"))
                 .verify();
 
-        verify(productRepository).findProductByInventoryIdAndProductId(inventoryId, productId);
+        verify(productRepository).findProductByInventoryIdAndProductId("1", "missing");
+        verifyNoInteractions(supplyAuditRepository);
         verify(productRepository, never()).save(any(Product.class));
     }
 
     @Test
     void restockLowStockProduct_WithInvalidQuantity_ShouldThrowInvalidInputException() {
-        // Arrange
-        String inventoryId = "1";
-        String productId = "12345";
-        int restockQuantity = -5; // Invalid quantity
+        for (Integer amount : Arrays.asList(null, 0, -5)) {
+            StepVerifier.create(productInventoryService.restockLowStockProduct(
+                            "1", "12345", amount, "test-user"))
+                    .expectErrorMatches(error ->
+                            error instanceof InvalidInputException
+                                    && error.getMessage().equals(
+                                            "The restock quantity must be greater than 0."))
+                    .verify();
+        }
 
-        Product product = Product.builder()
-                .id(UUID.randomUUID().toString())
-                .productId(productId)
-                .inventoryId(inventoryId)
-                .productName("Test Product")
-                .productDescription("Test Description")
-                .productPrice(50.00)
-                .productQuantity(10)
-                .productSalePrice(20.00)
-                .build();
-
-        when(productRepository.findProductByInventoryIdAndProductId(inventoryId, productId))
-                .thenReturn(Mono.just(product));
-
-        // Act
-        Mono<ProductResponseDTO> result = productInventoryService.restockLowStockProduct(
-                inventoryId, productId, restockQuantity, "test-user");
-
-        // Assert
-        StepVerifier.create(result)
-                .expectErrorMatches(throwable -> throwable instanceof InvalidInputException &&
-                        throwable.getMessage().equals("The restock quantity must be greater than 0."))
-                .verify();
-
-        verify(productRepository, never()).findProductByInventoryIdAndProductId(inventoryId, productId);
-        verify(productRepository, never()).save(any(Product.class));
+        verifyNoInteractions(productRepository, supplyAuditRepository);
+        verify(mongoTemplate, never()).findAndModify(
+                any(Query.class),
+                any(AggregationUpdate.class),
+                any(FindAndModifyOptions.class),
+                eq(Product.class));
     }
 
     @Test

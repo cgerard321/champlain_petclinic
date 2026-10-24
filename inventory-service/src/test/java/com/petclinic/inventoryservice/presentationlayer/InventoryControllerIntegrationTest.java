@@ -20,6 +20,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Signal;
+import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
+import com.petclinic.inventoryservice.datalayer.Product.Status;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
@@ -38,6 +44,113 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port:0"})
 @AutoConfigureWebTestClient
 class InventoryControllerIntegrationTest {
+    @Autowired
+    ProductInventoryService productInventoryService;
+    @Autowired
+    com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditRepository supplyAuditRepository;
+
+    private Product setRestockQuantity(Integer quantity) {
+        Product product = productRepository.findProductByInventoryIdAndProductId("1", "123F567C9").block();
+        assertNotNull(product);
+        product.setProductQuantity(quantity);
+        // Deliberately stale: eligibility must use quantity, not the stored status.
+        product.setStatus(Status.AVAILABLE);
+        return productRepository.save(product).block();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"0,1,1,RE_ORDER", "1,5,6,RE_ORDER", "19,1,20,AVAILABLE", "0,2147483647,2147483647,AVAILABLE"})
+    void restock_addsQuantityAndRecalculatesStatus(int initial, int amount, int total, Status status) {
+        Product before = setRestockQuantity(initial);
+        String actor = "restock-test-" + UUID.randomUUID();
+        webTestClient.put()
+                .uri("/inventory/1/products/123F567C9/restockProduct?productQuantity=" + amount)
+                .header("X-Actor-Username", actor)
+                .exchange().expectStatus().isOk().expectBody(ProductResponseDTO.class)
+                .value(response -> {
+                    assertEquals(total, response.getProductQuantity());
+                    assertEquals(status, response.getStatus());
+                    assertNotNull(response.getLastUpdatedAt());
+                });
+        Product saved = productRepository.findProductByInventoryIdAndProductId("1", "123F567C9").block();
+        assertNotNull(saved);
+        assertEquals(total, saved.getProductQuantity());
+        assertEquals(status, saved.getStatus());
+        assertEquals(before.getProductName(), saved.getProductName());
+        assertEquals(before.getProductPrice(), saved.getProductPrice());
+        var audit = supplyAuditRepository
+                .findTop20ByInventoryIdAndSupplyIdOrderByChangedAtDesc("1", "123F567C9")
+                .filter(entry -> actor.equals(entry.changedBy())).single().block();
+        assertNotNull(audit);
+        assertEquals(initial, audit.previousQuantity());
+        assertEquals(total, audit.newQuantity());
+        assertEquals(amount, audit.quantityChange());
+        assertEquals(com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditAction.QUANTITY_UPDATED,
+                audit.action());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {20, 100, -1})
+    void restock_rejectsIneligibleCurrentQuantity(int quantity) {
+        setRestockQuantity(quantity);
+        webTestClient.put().uri("/inventory/1/products/123F567C9/restockProduct?productQuantity=1")
+                .exchange().expectStatus().isBadRequest().expectBody()
+                .jsonPath("$.message").value(message -> assertTrue(message.toString().contains("Only RE ORDER")));
+        assertEquals(quantity, productRepository.findProductByInventoryIdAndProductId("1", "123F567C9")
+                .block().getProductQuantity());
+    }
+
+    @Test
+    void restock_rejectsOverflowWithoutChangingStock() {
+        setRestockQuantity(1);
+        webTestClient.put().uri("/inventory/1/products/123F567C9/restockProduct?productQuantity=2147483647")
+                .exchange().expectStatus().isBadRequest().expectBody()
+                .jsonPath("$.message").value(message -> assertTrue(message.toString().contains("maximum stock")));
+        assertEquals(1, productRepository.findProductByInventoryIdAndProductId("1", "123F567C9")
+                .block().getProductQuantity());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"1.5", "2147483648", "NaN", ""})
+    void restock_rejectsNonIntegerHttpInput(String amount) {
+        webTestClient.put().uri("/inventory/1/products/123F567C9/restockProduct?productQuantity=" + amount)
+                .exchange().expectStatus().isBadRequest();
+    }
+
+    @Test
+    void restock_requiresProductInTheSpecifiedInventory() {
+        webTestClient.put().uri("/inventory/wrong/products/123F567C9/restockProduct?productQuantity=1")
+                .exchange().expectStatus().isNotFound();
+    }
+
+    @Test
+    void restock_concurrentAcceptedAdditionsAreNeverLost() {
+        setRestockQuantity(0);
+        // Real concurrent reactive Mongo operations; no mocked repository/save arithmetic.
+        List<ProductResponseDTO> responses = Flux.range(0, 12)
+                .flatMap(index -> productInventoryService.restockLowStockProduct("1", "123F567C9", 1, "test-user"), 12)
+                .collectList().block();
+        assertNotNull(responses);
+        assertEquals(12, responses.size());
+        assertEquals(12, responses.stream().map(ProductResponseDTO::getProductQuantity).distinct().count());
+        assertEquals(12, productRepository.findProductByInventoryIdAndProductId("1", "123F567C9")
+                .block().getProductQuantity());
+    }
+
+    @Test
+    void restock_concurrentRequestsRecheckEligibilityAtMutationTime() {
+        setRestockQuantity(19);
+        List<Signal<ProductResponseDTO>> results = Flux.range(0, 8)
+                .flatMap(index -> productInventoryService.restockLowStockProduct("1", "123F567C9", 1, "test-user")
+                        .materialize(), 8).collectList().block();
+        assertNotNull(results);
+        assertEquals(1, results.stream().filter(Signal::isOnNext).count());
+        assertEquals(7, results.stream().filter(Signal::isOnError).count());
+        results.stream().filter(Signal::isOnError)
+                .forEach(result -> assertTrue(result.getThrowable() instanceof InvalidInputException));
+        assertEquals(20, productRepository.findProductByInventoryIdAndProductId("1", "123F567C9")
+                .block().getProductQuantity());
+    }
     @Autowired
     WebTestClient webTestClient;
     @Autowired

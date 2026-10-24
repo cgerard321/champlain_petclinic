@@ -9,14 +9,17 @@ import {
   TemplateRef,
   viewChild,
 } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { FormField, form, max, min, required } from '@angular/forms/signals';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
+import { isApiError } from '@core/models/api-error';
 import { AuthState } from '@core/services/auth-state';
+import { Status } from '@features/supplies/models/status';
 import { Supply, SupplyRequest } from '@features/supplies/models/supply';
 import {
   SupplyHistoryDialog,
@@ -46,7 +49,15 @@ interface SupplyFormValue {
 }
 
 @Component({
-  imports: [CurrencyPipe, MatIconModule, MatMenuModule, Table, MatTooltipModule],
+  imports: [
+    CurrencyPipe,
+    FormField,
+    MatDialogModule,
+    MatIconModule,
+    MatMenuModule,
+    Table,
+    MatTooltipModule,
+  ],
   selector: 'app-supply',
   styleUrl: './supply-page.css',
   templateUrl: './supply-page.html',
@@ -56,6 +67,102 @@ export class SupplyPage {
   private readonly supplyService = inject(SupplyService);
   private readonly auth = inject(AuthState);
   private readonly dialog = inject(MatDialog);
+  private readonly restockDialogTemplate =
+    viewChild.required<TemplateRef<unknown>>('restockDialog');
+  private restockDialogRef: MatDialogRef<unknown> | null = null;
+  protected readonly restockingSupply = signal<Supply | null>(null);
+  protected readonly restockPending = signal(false);
+  protected readonly restockError = signal('');
+  protected readonly uncertainRestocks = signal<ReadonlySet<string>>(new Set());
+  protected readonly restockModel = signal<{ quantity: number | null }>({ quantity: null });
+  protected readonly restockForm = form(this.restockModel, (path) => {
+    required(path.quantity, { message: 'Quantity is required.' });
+    min(path.quantity, 1, { message: 'Enter an integer greater than 0.' });
+    max(path.quantity, 2147483647, { message: 'Quantity must not exceed 2147483647.' });
+  });
+
+  protected canRestock(supply: Supply): boolean {
+    return (
+      this.canManageSupplies() &&
+      !this.uncertainRestocks().has(supply.productId) &&
+      (supply.status === Status.RE_ORDER || supply.status === Status.OUT_OF_STOCK)
+    );
+  }
+
+  protected openRestock(supply: Supply): void {
+    if (!this.inventoryId || !this.canRestock(supply) || this.restockDialogRef) return;
+
+    this.restockingSupply.set(supply);
+    this.restockForm().reset({ quantity: null });
+    this.restockError.set('');
+    const dialogRef = this.dialog.open(this.restockDialogTemplate(), {
+      ariaLabel: `Restock ${supply.productName}`,
+    });
+    this.restockDialogRef = dialogRef;
+    dialogRef.afterClosed().subscribe(() => {
+      this.restockDialogRef = null;
+      this.restockingSupply.set(null);
+      this.restockPending.set(false);
+    });
+  }
+
+  protected cancelRestock(): void {
+    if (!this.restockPending()) this.restockDialogRef?.close();
+  }
+
+  protected submitRestock(event: Event): void {
+    event.preventDefault();
+    if (this.restockPending()) return;
+    if (this.uncertainRestocks().has(this.restockingSupply()?.productId ?? '')) return;
+
+    const supply = this.restockingSupply();
+    const inventoryId = this.inventoryId;
+    if (!supply || !inventoryId || !this.canRestock(supply)) {
+      this.restockError.set('You no longer have permission to restock this supply.');
+      return;
+    }
+
+    const quantity = this.restockModel().quantity;
+    if (
+      quantity === null ||
+      !Number.isInteger(quantity) ||
+      quantity <= 0 ||
+      quantity > 2147483647
+    ) {
+      this.restockError.set('Enter an integer between 1 and 2147483647.');
+      return;
+    }
+
+    this.restockPending.set(true);
+    this.restockError.set('');
+    const dialogRef = this.restockDialogRef;
+    if (dialogRef) dialogRef.disableClose = true;
+    this.supplyService.restockSupply(inventoryId, supply.productId, quantity).subscribe({
+      next: (updated) => {
+        // Use the authoritative response. No refresh can turn a successful addition into an error.
+        this.supplies.update((supplies) =>
+          supplies.map((row) => (row.productId === updated.productId ? updated : row)),
+        );
+        // Keep submission blocked through the dialog's closing animation.
+        dialogRef?.close();
+      },
+      error: (error: unknown) => {
+        this.restockPending.set(false);
+        if (dialogRef) dialogRef.disableClose = false;
+        const code = isApiError(error) ? Number(error.code) : 0;
+        if (!code || code >= 500) {
+          // Stock may have changed before an audit write or the response failed. A second
+          // additive request could duplicate it; require reconciliation by reloading the page.
+          this.uncertainRestocks.update((ids) => new Set([...ids, supply.productId]));
+          this.restockError.set(
+            'Unable to confirm restock. Stock may have changed. Reload the page to check quantities before trying again.',
+          );
+        } else {
+          this.restockError.set(isApiError(error) ? error.message : 'Unable to restock supply.');
+        }
+      },
+    });
+  }
   private readonly locale = inject(LOCALE_ID);
 
   // Translate the seeded records for display while keeping their stored API values unchanged.
