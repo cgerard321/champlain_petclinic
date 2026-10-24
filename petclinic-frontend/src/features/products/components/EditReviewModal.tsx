@@ -78,10 +78,6 @@ const EditReviewModal = ({
       setError('reviewTooLong');
       return;
     }
-    if (Object.values(categoryRatings).some(rating => rating === 0)) {
-      setError('categoryRatingsRequired');
-      return;
-    }
 
     try {
       await updateRating(localRating, reviewText, categoryRatings);
@@ -145,7 +141,7 @@ const EditReviewModal = ({
 
         {/* Rating Categories Section */}
         <div className="erm-section">
-          <label className="erm-label">{t('qualityOfProduct')} *</label>
+          <label className="erm-label">{t('qualityOfProduct')}</label>
           <StarRating
             currentRating={categoryRatings.qualityRating}
             viewOnly={false}
@@ -156,7 +152,7 @@ const EditReviewModal = ({
         </div>
 
         <div className="erm-section">
-          <label className="erm-label">{t('valueOfProduct')} *</label>
+          <label className="erm-label">{t('valueOfProduct')}</label>
           <StarRating
             currentRating={categoryRatings.valueRating}
             viewOnly={false}
@@ -165,7 +161,7 @@ const EditReviewModal = ({
         </div>
 
         <div className="erm-section">
-          <label className="erm-label">{t('petSatisfaction')} *</label>
+          <label className="erm-label">{t('petSatisfaction')}</label>
           <StarRating
             currentRating={categoryRatings.petSatisfactionRating}
             viewOnly={false}
@@ -176,7 +172,7 @@ const EditReviewModal = ({
         </div>
 
         <div className="erm-section">
-          <label className="erm-label">{t('ingredients')} *</label>
+          <label className="erm-label">{t('ingredients')}</label>
           <StarRating
             currentRating={categoryRatings.ingredientsRating}
             viewOnly={false}

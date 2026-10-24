@@ -330,7 +330,15 @@ class RatingServiceUnitTest {
     }
 
     @Test
-    void whenAddRatingWithMissingCategoryRating_thenReturnInvalidInput() {
+    void whenAddRatingWithMissingCategoryRating_thenReturnRating() {
+        Product prod = Product.builder()
+                .productId(productId)
+                .productName("Sample Name")
+                .productDescription("Sample Description")
+                .productSalePrice(100.0)
+                .averageRating(0.0)
+                .build();
+
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
                 .review("Great product")
@@ -340,16 +348,23 @@ class RatingServiceUnitTest {
                 .ingredientsRating((byte) 4)
                 .build();
 
+        when(productRepository.findProductByProductId(productId))
+                .thenReturn(Mono.just(prod));
+        when(ratingRepository.findRatingByCustomerIdAndProductId(rating1.getCustomerId(), productId))
+                .thenReturn(Mono.empty());
+        when(ratingRepository.save(any(Rating.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
         StepVerifier.create(ratingService.addRatingForProduct(
                         productId,
                         rating1.getCustomerId(),
                         Mono.just(requestModel)))
-                .expectErrorMatches(error ->
-                        error instanceof InvalidInputException &&
-                                error.getMessage().equals("All category ratings must be provided"))
-                .verify();
-
-        verifyNoInteractions(productRepository);
+                .expectNextMatches(response ->
+                        response.getQualityRating() == null
+                                && response.getValueRating() == 4
+                                && response.getPetSatisfactionRating() == 5
+                                && response.getIngredientsRating() == 4)
+                .verifyComplete();
     }
 
     @Test
@@ -534,7 +549,15 @@ class RatingServiceUnitTest {
     }
 
     @Test
-    void whenUpdateRatingWithMissingCategoryRating_thenReturnInvalidInput() {
+    void whenUpdateRatingWithMissingCategoryRating_thenReturnRating() {
+        Product prod = Product.builder()
+                .productId(productId)
+                .productName("Sample Name")
+                .productDescription("Sample Description")
+                .productSalePrice(100.0)
+                .averageRating(0.0)
+                .build();
+
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating((byte) 4)
                 .review("Updated review")
@@ -544,16 +567,25 @@ class RatingServiceUnitTest {
                 .ingredientsRating((byte) 4)
                 .build();
 
+        when(productRepository.findProductByProductId(productId))
+                .thenReturn(Mono.just(prod));
+        when(ratingRepository.findRatingByCustomerIdAndProductId(rating1.getCustomerId(), productId))
+                .thenReturn(Mono.just(rating1));
+        when(reviewSettingsRepository.findById(1L))
+                .thenReturn(Mono.just(new ReviewSettings(1L, 48)));
+        when(ratingRepository.save(any(Rating.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
         StepVerifier.create(ratingService.updateRatingForProduct(
                         productId,
                         rating1.getCustomerId(),
                         Mono.just(requestModel)))
-                .expectErrorMatches(error ->
-                        error instanceof InvalidInputException &&
-                                error.getMessage().equals("All category ratings must be provided"))
-                .verify();
-
-        verifyNoInteractions(productRepository);
+                .expectNextMatches(response ->
+                        response.getQualityRating() == 4
+                                && response.getValueRating() == null
+                                && response.getPetSatisfactionRating() == 5
+                                && response.getIngredientsRating() == 4)
+                .verifyComplete();
     }
 
     @Test

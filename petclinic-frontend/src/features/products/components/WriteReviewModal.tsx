@@ -79,10 +79,6 @@ const WriteReviewModal = ({
       setError('reviewTooLong');
       return;
     }
-    if (Object.values(categoryRatings).some(rating => rating === 0)) {
-      setError('categoryRatingsRequired');
-      return;
-    }
 
     try {
       await updateRating(localRating, reviewText, categoryRatings);
@@ -130,7 +126,7 @@ const WriteReviewModal = ({
 
         {/* Rating Categories Section */}
         <div className="wrm-section">
-          <label className="wrm-label">{t('qualityOfProduct')} *</label>
+          <label className="wrm-label">{t('qualityOfProduct')}</label>
           <StarRating
             currentRating={categoryRatings.qualityRating}
             viewOnly={false}
@@ -141,7 +137,7 @@ const WriteReviewModal = ({
         </div>
 
         <div className="wrm-section">
-          <label className="wrm-label">{t('valueOfProduct')} *</label>
+          <label className="wrm-label">{t('valueOfProduct')}</label>
           <StarRating
             currentRating={categoryRatings.valueRating}
             viewOnly={false}
@@ -150,7 +146,7 @@ const WriteReviewModal = ({
         </div>
 
         <div className="wrm-section">
-          <label className="wrm-label">{t('petSatisfaction')} *</label>
+          <label className="wrm-label">{t('petSatisfaction')}</label>
           <StarRating
             currentRating={categoryRatings.petSatisfactionRating}
             viewOnly={false}
@@ -161,7 +157,7 @@ const WriteReviewModal = ({
         </div>
 
         <div className="wrm-section">
-          <label className="wrm-label">{t('ingredients')} *</label>
+          <label className="wrm-label">{t('ingredients')}</label>
           <StarRating
             currentRating={categoryRatings.ingredientsRating}
             viewOnly={false}

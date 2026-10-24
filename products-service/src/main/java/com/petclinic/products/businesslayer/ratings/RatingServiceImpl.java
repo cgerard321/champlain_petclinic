@@ -83,22 +83,18 @@ public class RatingServiceImpl implements RatingService {
                 .filter(req -> req.getRating() > 0 && req.getRating() <= 5)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be between 1 and 5")))
                 .filter(req ->
-                        req.getQualityRating() != null
-                                && req.getValueRating() != null
-                                && req.getPetSatisfactionRating() != null
-                                && req.getIngredientsRating() != null
-                )
-                .switchIfEmpty(Mono.error(new InvalidInputException(
-                        "All category ratings must be provided")))
-                .filter(req ->
-                        req.getQualityRating() >= 1
-                                && req.getQualityRating() <= 5
-                                && req.getValueRating() >= 1
-                                && req.getValueRating() <= 5
-                                && req.getPetSatisfactionRating() >= 1
-                                && req.getPetSatisfactionRating() <= 5
-                                && req.getIngredientsRating() >= 1
-                                && req.getIngredientsRating() <= 5
+                        (req.getQualityRating() == null
+                                || req.getQualityRating() >= 1
+                                && req.getQualityRating() <= 5)
+                                && (req.getValueRating() == null
+                                || req.getValueRating() >= 1
+                                && req.getValueRating() <= 5)
+                                && (req.getPetSatisfactionRating() == null
+                                || req.getPetSatisfactionRating() >= 1
+                                && req.getPetSatisfactionRating() <= 5)
+                                && (req.getIngredientsRating() == null
+                                || req.getIngredientsRating() >= 1
+                                && req.getIngredientsRating() <= 5)
                 )
                 .switchIfEmpty(Mono.error(new InvalidInputException(
                         "Category ratings must be between 1 and 5")))
@@ -129,22 +125,18 @@ public class RatingServiceImpl implements RatingService {
                 .filter(req -> req.getRating() > 0 && req.getRating() <= 5)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be between 1 and 5")))
                 .filter(req ->
-                        req.getQualityRating() != null
-                                && req.getValueRating() != null
-                                && req.getPetSatisfactionRating() != null
-                                && req.getIngredientsRating() != null
-                )
-                .switchIfEmpty(Mono.error(new InvalidInputException(
-                        "All category ratings must be provided")))
-                .filter(req ->
-                        req.getQualityRating() >= 1
-                                && req.getQualityRating() <= 5
-                                && req.getValueRating() >= 1
-                                && req.getValueRating() <= 5
-                                && req.getPetSatisfactionRating() >= 1
-                                && req.getPetSatisfactionRating() <= 5
-                                && req.getIngredientsRating() >= 1
-                                && req.getIngredientsRating() <= 5
+                        (req.getQualityRating() == null
+                                || req.getQualityRating() >= 1
+                                && req.getQualityRating() <= 5)
+                                && (req.getValueRating() == null
+                                || req.getValueRating() >= 1
+                                && req.getValueRating() <= 5)
+                                && (req.getPetSatisfactionRating() == null
+                                || req.getPetSatisfactionRating() >= 1
+                                && req.getPetSatisfactionRating() <= 5)
+                                && (req.getIngredientsRating() == null
+                                || req.getIngredientsRating() >= 1
+                                && req.getIngredientsRating() <= 5)
                 )
                 .switchIfEmpty(Mono.error(new InvalidInputException(
                         "Category ratings must be between 1 and 5")))

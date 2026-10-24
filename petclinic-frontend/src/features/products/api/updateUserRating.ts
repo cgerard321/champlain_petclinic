@@ -17,7 +17,10 @@ export async function updateUserRating(
     const payload = {
       rating: newRating,
       review: newReview,
-      ...categoryRatings,
+      qualityRating: categoryRatings.qualityRating || null,
+      valueRating: categoryRatings.valueRating || null,
+      petSatisfactionRating: categoryRatings.petSatisfactionRating || null,
+      ingredientsRating: categoryRatings.ingredientsRating || null,
     };
 
     let response;
