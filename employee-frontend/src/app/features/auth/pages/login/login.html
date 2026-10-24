@@ -1,66 +1,88 @@
 <div class="login-page">
-  <mat-card class="login-card">
-    <mat-card-header>
-      <mat-card-title i18n="@@login.title">Connexion</mat-card-title>
-      <mat-card-subtitle>This will need to change, only a dummy</mat-card-subtitle>
-    </mat-card-header>
+  <section class="hero" aria-hidden="true">
+    <div class="hero-slide"></div>
+    <div class="hero-slide"></div>
+    <div class="hero-slide"></div>
+    <div class="hero-slide"></div>
+  </section>
 
-    <mat-card-content>
-      <form class="login-form" (submit)="submit($event)">
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label i18n="@@login.username">Nom d'utilisateur ou courriel</mat-label>
+  <section class="panel">
+    <button type="button" class="link-button lang-link" (click)="switchLanguage()">
+      {{ isEnglish ? 'Français' : 'English' }}
+    </button>
+
+    <div class="panel-body">
+      <div class="clinic">
+        <mat-icon class="clinic-icon" aria-hidden="true">pets</mat-icon>
+        <span class="clinic-name">Champlain<br />Pet Clinic</span>
+      </div>
+
+      <h1 class="greeting" i18n="@@login.title">Bienvenue</h1>
+
+      <form class="form" (submit)="submit($event)" novalidate>
+        <div class="field">
           <input
-            matInput
+            id="login-username"
+            class="input"
             type="text"
             [formField]="loginForm.emailOrUsername"
             autocomplete="username"
+            i18n-placeholder="@@login.usernamePlaceholder"
+            placeholder="Entrez votre nom d'utilisateur ou courriel"
           />
           @if (loginForm.emailOrUsername().touched() && loginForm.emailOrUsername().invalid()) {
-            <mat-error>{{ loginForm.emailOrUsername().errors()[0]?.message }}</mat-error>
+            <p class="field-error">{{ loginForm.emailOrUsername().errors()[0]?.message }}</p>
           }
-        </mat-form-field>
+        </div>
 
-        <mat-form-field appearance="outline" class="full-width password-field">
-          <mat-label i18n="@@login.password">Mot de passe</mat-label>
-          <input
-            matInput
-            [formField]="loginForm.password"
-            autocomplete="current-password"
-            [type]="hidePassword() ? 'password' : 'text'"
-          />
-          <button
-            mat-icon-button
-            matSuffix
-            type="button"
-            [attr.aria-pressed]="!hidePassword()"
-            aria-label="Toggle password visibility"
-            (click)="togglePasswordVisibility()"
-          >
-            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
-          </button>
+        <div class="field">
+          <div class="password-wrapper">
+            <input
+              id="login-password"
+              class="input"
+              [formField]="loginForm.password"
+              autocomplete="current-password"
+              [type]="hidePassword() ? 'password' : 'text'"
+              i18n-placeholder="@@login.passwordPlaceholder"
+              placeholder="Entrez votre mot de passe"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              [attr.aria-pressed]="!hidePassword()"
+              aria-label="Toggle password visibility"
+              (click)="togglePasswordVisibility()"
+            >
+              <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+          </div>
           @if (loginForm.password().touched() && loginForm.password().invalid()) {
-            <mat-error>{{ loginForm.password().errors()[0]?.message }}</mat-error>
+            <p class="field-error">{{ loginForm.password().errors()[0]?.message }}</p>
           }
-        </mat-form-field>
-
-        @if (errorMessage()) {
-          <p class="error-message">{{ errorMessage() }}</p>
-        }
+        </div>
 
         <button
-          mat-flat-button
-          color="primary"
-          type="submit"
-          class="full-width submit-button"
-          [disabled]="isSubmitting()"
+          type="button"
+          class="link-button forgot-link"
+          (click)="openForgotPassword()"
+          i18n="@@login.forgotPassword"
         >
+          Mot de passe oublié ?
+        </button>
+
+        @if (errorMessage()) {
+          <p class="error-message" role="alert">{{ errorMessage() }}</p>
+        }
+
+        <button type="submit" class="submit-button" [disabled]="isSubmitting()">
           @if (isSubmitting()) {
-            <mat-progress-spinner diameter="20" mode="indeterminate" />
+            <mat-progress-spinner diameter="22" mode="indeterminate" />
           } @else {
-            <ng-container i18n="@@login.submit">Se connecter</ng-container>
+            <mat-icon aria-hidden="true">lock</mat-icon>
+            <span i18n="@@login.submit">Se connecter</span>
           }
         </button>
       </form>
-    </mat-card-content>
-  </mat-card>
+    </div>
+  </section>
 </div>

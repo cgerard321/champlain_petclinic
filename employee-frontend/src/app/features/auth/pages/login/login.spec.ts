@@ -19,10 +19,17 @@ import { LoginPage } from './login';
 
 /** The login subset of src/locale/en.json, kept in sync with that file. */
 const EN_LOGIN = {
-  'login.title': 'Login',
+  'login.title': 'Hello',
   'login.username': 'Username or email',
+  'login.usernamePlaceholder': 'Enter your username or email',
   'login.password': 'Password',
+  'login.passwordPlaceholder': 'Enter your password',
+  'login.forgotPassword': 'Forgot Password?',
   'login.submit': 'Sign in',
+  'login.noAccount': "Don't have an account?",
+  'login.signUp': 'Sign up',
+  'login.errors.usernameRequired': 'Username or email is required.',
+  'login.errors.passwordRequired': 'Password is required.',
 };
 
 describe('LoginPage', () => {
@@ -62,10 +69,12 @@ describe('LoginPage', () => {
     const page = await renderLogin();
 
     // Assert
-    expect(page.textContent).toContain('Connexion');
+    expect(page.textContent).toContain('Bienvenue');
     expect(page.textContent).toContain("Nom d'utilisateur ou courriel");
     expect(page.textContent).toContain('Mot de passe');
     expect(page.textContent).toContain('Se connecter');
+    expect(page.textContent).toContain("Le nom d'utilisateur ou le courriel est requis.");
+    expect(page.textContent).toContain('Le mot de passe est requis.');
   });
 
   it('renders the English labels once the translations are loaded', async () => {
@@ -76,10 +85,13 @@ describe('LoginPage', () => {
     const page = await renderLogin();
 
     // Assert
-    expect(page.textContent).toContain('Login');
+    expect(page.textContent).toContain('Welcome');
     expect(page.textContent).toContain('Username or email');
     expect(page.textContent).toContain('Password');
-    expect(page.textContent).toContain('Sign in');
+    expect(page.textContent).toContain('Login');
+    expect(page.textContent).toContain('Username or email is required.');
+    expect(page.textContent).toContain('Password is required.');
+
     expect(page.textContent).not.toContain('Mot de passe');
   });
 });
