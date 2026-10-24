@@ -27,6 +27,55 @@ body,
 
 .catalog-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.catalog-grid .card {
+  padding: 10px;
+  border-radius: 9px;
+}
+
+.catalog-grid .card img,
+.catalog-grid .card .product-image {
+  height: 120px;
+  margin-bottom: 6px;
+  object-fit: contain;
+}
+
+.catalog-grid .card .product-title {
+  margin: 3px 0;
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.catalog-grid .card h2.product-title {
+  margin: 4px 0;
+  font-size: 0.98rem;
+}
+
+.catalog-grid .card p {
+  margin: 2px 0;
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.catalog-grid .card .deliveryType-container {
+  margin-top: 1px;
+  font-size: 0.76rem;
+}
+
+.catalog-grid .card .avgrating-container {
+  transform: scale(0.85);
+  transform-origin: left center;
+  margin: -2px 0;
+}
+
+.catalog-grid .card button.add-to-cart-btn {
+  width: 100%;
+  min-height: 34px;
+  margin-top: 6px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
 }
 
 @media (max-width: 1200px) {
@@ -403,10 +452,6 @@ body,
 .product-card-compact .wishlist-heart-btn,
 .product-card-compact .stock-label {
   display: none;
-}
-
-.catalog-grid .card button.add-to-cart-btn {
-  width: 100%;
 }
 
 .block {
