@@ -62,6 +62,8 @@ export const UserProvider = ({
       );
 
       const data = response.data;
+
+      console.log('[UserProvider] /users/jwt returned:', data);
       setUser({
         username: data.username,
         email: data.email,
