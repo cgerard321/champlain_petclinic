@@ -48,7 +48,7 @@
   background-size: cover;
   background-repeat: no-repeat;
   opacity: 0;
-  animation: hero-fade 18s infinite;
+  animation: hero-fade 24s infinite;
 }
 
 .hero-slide:nth-child(1) {
@@ -66,6 +66,11 @@
   animation-delay: 12s;
 }
 
+.hero-slide:nth-child(4) {
+  background-image: url('/login-hero-4.jpg');
+  animation-delay: 18s;
+}
+
 /* The different slides rotate with a fade-in animation */
 @keyframes hero-fade {
   0% {
@@ -76,11 +81,11 @@
     opacity: 1;
   }
 
-  33% {
+  25% {
     opacity: 1;
   }
 
-  38% {
+  30% {
     opacity: 0;
   }
 
