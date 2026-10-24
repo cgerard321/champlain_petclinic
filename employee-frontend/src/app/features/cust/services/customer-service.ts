@@ -17,7 +17,6 @@ import { CustomerResponseModel } from '@features/cust/models/customerResponseMod
 export class CustomerService {
   private readonly http = inject(HttpClient);
   private readonly sse = inject(SseClient);
-  private readonly http = inject(HttpClient);
 
   private readonly apiUrl = '/api/gateway';
 
