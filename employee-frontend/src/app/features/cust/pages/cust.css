@@ -147,8 +147,20 @@ td {
 }
 
 td:first-child {
+  width: 1%;
   color: var(--text-primary);
   font-weight: 600;
+  white-space: nowrap;
+}
+
+.customer-name {
+  display: grid;
+  grid-template-columns: minmax(max-content, 1fr);
+}
+
+.customer-name button {
+  justify-self: stretch;
+  box-sizing: border-box;
 }
 
 tbody tr {
@@ -276,10 +288,12 @@ td button:focus-visible {
   .table-container {
     border-radius: 16px;
   }
+
 .customer-page {
   display: inline-grid;
   grid-auto-columns: 1fr;
 }
+
 .container button {
   grid-row: 1;
 }

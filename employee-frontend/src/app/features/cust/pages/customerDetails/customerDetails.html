@@ -1,127 +1,309 @@
-<h1>Customer details</h1>
-@if (isLoading()) {
-  <p role="status">Loading customer...</p>
-}
-@if (errorMessage()) {
-  <p role="alert">{{ errorMessage() }}</p>
-}
-@if (customer(); as details) {
-  <div class="profile-photo-container">
-    @if (details.photo?.fileData) {
-      <img
-        class="profile-photo"
-        [src]="'data:' + details.photo!.fileType + ';base64,' + details.photo!.fileData"
-        [alt]="details.firstName + ' ' + details.lastName + ' profile photo'"
-      />
-    } @else {
-      <div
-        class="profile-photo photo-placeholder"
-        role="img"
-        aria-label="No customer profile photo"
-      >
-        {{ details.firstName.charAt(0) }}{{ details.lastName.charAt(0) }}
-      </div>
-    }
-  </div>
-  @if (isEditing()) {
-    <form [formGroup]="form" (ngSubmit)="handleCustomerUpdated()">
-      <label for="firstName">First name</label>
-      <input id="firstName" formControlName="firstName" [readOnly]="isSaving()" />
-      @if (form.controls.firstName.touched && form.controls.firstName.invalid) {
-        <p role="alert">First name is required.</p>
-      }
-      <label for="lastName">Last name</label>
-      <input id="lastName" formControlName="lastName" [readOnly]="isSaving()" />
-      @if (form.controls.lastName.touched && form.controls.lastName.invalid) {
-        <p role="alert">Last name is required.</p>
-      }
-      <label for="address">Address</label>
-      <input id="address" formControlName="address" [readOnly]="isSaving()" />
-      @if (form.controls.address.touched && form.controls.address.invalid) {
-        <p role="alert">Address is required.</p>
-      }
-      <label for="city">City</label>
-      <input id="city" formControlName="city" [readOnly]="isSaving()" />
-      @if (form.controls.city.touched && form.controls.city.invalid) {
-        <p role="alert">City is required.</p>
-      }
-      <label for="telephone">Telephone</label>
-      <input id="telephone" formControlName="telephone" [readOnly]="isSaving()" />
-      @if (form.controls.telephone.touched && form.controls.telephone.invalid) {
-        <p role="alert">Telephone is required.</p>
-      }
-      <label for="province">Province</label>
-      <select id="province" formControlName="province">
-        <option value="">Select a province</option>
-        @for (province of provinces; track province) {
-          <option [value]="province">{{ province }}</option>
-        }
-      </select>
-
-      @if (form.controls.province.touched && form.controls.province.invalid) {
-        <p role="alert">Province is required.</p>
-      }
-      <button type="submit" [disabled]="isSaving()">
-        {{ isSaving() ? 'Saving...' : 'Save' }}
-      </button>
-    </form>
-    <button type="button" (click)="isEditing.set(false)" [disabled]="isSaving()">Cancel</button>
-  } @else {
-    <p>First name: {{ details.firstName }}</p>
-    <p>Last name: {{ details.lastName }}</p>
-    <p>Address: {{ details.address }}</p>
-    <p>City: {{ details.city }}</p>
-    <p>Telephone: {{ details.telephone }}</p>
-    <button type="button" (click)="handleEditCustomer()">Edit</button>
-  }
-
-  <section aria-labelledby="customer-pets-title">
-    <h2 id="customer-pets-title">Pets</h2>
-    @if (petTypesErrorMessage()) {
-      <p role="alert">{{ petTypesErrorMessage() }}</p>
-    }
-    @if (isLoadingPets()) {
-      <p role="status">Loading pets...</p>
-    } @else if (petErrorMessage()) {
-      <p role="alert">{{ petErrorMessage() }}</p>
-    } @else {
-      @for (pet of pets(); track pet.petId) {
-        <article>
-          <h3>{{ pet.name }}</h3>
-          @if (pet.photo?.fileData) {
-            <img
-              class="profile-photo pet-photo"
-              [src]="'data:' + pet.photo!.fileType + ';base64,' + pet.photo!.fileData"
-              [alt]="pet.name + ' profile photo'"
-              loading="lazy"
-            />
-          } @else {
-            <div
-              class="profile-photo pet-photo photo-placeholder"
-              role="img"
-              [attr.aria-label]="'No profile photo for ' + pet.name"
-            >
-              {{ pet.name.charAt(0) }}
-            </div>
-          }
-          <dl>
-            <dt>Type</dt>
-            <dd>{{ getPetTypeName(pet.petTypeId) }}</dd>
-            <dt>Birth date</dt>
-            <dd>{{ (pet.birthDate | date: 'mediumDate') || 'Unavailable' }}</dd>
-            <dt>Weight</dt>
-            <dd>{{ pet.weight }} kg</dd>
-          </dl>
-        </article>
-      } @empty {
-        <p>No pets registered for this customer.</p>
-      }
-    }
-  </section>
-  <button
-    type="button"
-    (click)="backToList()"
-  >
-    Retour à la liste des clients
+<section class="customer-details-page" [attr.aria-busy]="isLoading()">
+  <button class="back-button" type="button" (click)="backToList()">
+    <span aria-hidden="true">←</span>
+    <span i18n="@@cust.profile.back">Retour à la liste des clients</span>
   </button>
-}
+
+  <header class="page-heading">
+    <h1 i18n="@@cust.profile.title">Détails du client</h1>
+    <p i18n="@@cust.profile.subtitle">Coordonnées et animaux enregistrés</p>
+  </header>
+
+  @if (isLoading()) {
+    <p class="state-message" role="status" i18n="@@cust.profile.loading">Chargement du client...</p>
+  }
+  @if (errorMessage()) {
+    <p class="error-message" role="alert">{{ errorMessage() }}</p>
+  }
+  @if (customer(); as details) {
+    <header class="profile-header">
+      @if (details.photo?.fileData) {
+        <img
+          class="profile-photo"
+          [src]="'data:' + details.photo!.fileType + ';base64,' + details.photo!.fileData"
+          alt="Photo de profil de {{ details.firstName + ' ' + details.lastName }}"
+          i18n-alt="@@cust.profile.photoAlt"
+        />
+      } @else {
+        <div
+          class="profile-photo photo-placeholder"
+          role="img"
+          aria-label="Aucune photo de profil du client"
+          i18n-aria-label="@@cust.profile.noPhoto"
+        >
+          {{ details.firstName.charAt(0) }}{{ details.lastName.charAt(0) }}
+        </div>
+      }
+      <div class="profile-heading">
+        <p class="eyebrow" i18n="@@cust.profile.profile">Profil du client</p>
+        <h2>{{ details.firstName }} {{ details.lastName }}</h2>
+        <p>
+          {{ details.city }}<span aria-hidden="true"> · </span
+          >{{ getProvinceLabel(details.province) }}
+        </p>
+      </div>
+      @if (!isEditing()) {
+        <button
+          class="primary-button edit-button"
+          type="button"
+          (click)="handleEditCustomer()"
+          i18n="@@cust.profile.edit"
+        >
+          Modifier le client
+        </button>
+      }
+    </header>
+
+    <div class="details-layout">
+      <section class="detail-panel" aria-labelledby="customer-info-title">
+        <header class="panel-heading">
+          <h2 id="customer-info-title">
+            @if (isEditing()) {
+              <span i18n="@@cust.profile.editTitle">Modifier les informations du client</span>
+            } @else {
+              <span i18n="@@cust.profile.infoTitle">Informations du client</span>
+            }
+          </h2>
+          <p>
+            @if (isEditing()) {
+              <span i18n="@@cust.profile.editSubtitle"
+                >Modifiez les informations ci-dessous, puis enregistrez vos modifications.</span
+              >
+            } @else {
+              <span i18n="@@cust.profile.infoSubtitle"
+                >Informations personnelles et coordonnées</span
+              >
+            }
+          </p>
+        </header>
+        @if (isEditing()) {
+          <form
+            [formGroup]="form"
+            (ngSubmit)="handleCustomerUpdated()"
+            [attr.aria-busy]="isSaving()"
+          >
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="firstName" i18n="@@cust.profile.fields.firstName">Prénom</label>
+                <input id="firstName" formControlName="firstName" [readOnly]="isSaving()" />
+                @if (form.controls.firstName.touched && form.controls.firstName.invalid) {
+                  <p
+                    class="field-error"
+                    role="alert"
+                    i18n="@@cust.profile.validation.firstNameRequired"
+                  >
+                    Le prénom est requis
+                  </p>
+                }
+              </div>
+              <div class="form-field">
+                <label for="lastName" i18n="@@cust.profile.fields.lastName">Nom</label>
+                <input id="lastName" formControlName="lastName" [readOnly]="isSaving()" />
+                @if (form.controls.lastName.touched && form.controls.lastName.invalid) {
+                  <p
+                    class="field-error"
+                    role="alert"
+                    i18n="@@cust.profile.validation.lastNameRequired"
+                  >
+                    Le nom est requis
+                  </p>
+                }
+              </div>
+              <div class="form-field full-width">
+                <label for="address" i18n="@@cust.profile.fields.address">Adresse</label>
+                <input id="address" formControlName="address" [readOnly]="isSaving()" />
+                @if (form.controls.address.touched && form.controls.address.invalid) {
+                  <p
+                    class="field-error"
+                    role="alert"
+                    i18n="@@cust.profile.validation.addressRequired"
+                  >
+                    L'adresse est requise
+                  </p>
+                }
+              </div>
+              <div class="form-field">
+                <label for="city" i18n="@@cust.profile.fields.city">Ville</label>
+                <input id="city" formControlName="city" [readOnly]="isSaving()" />
+                @if (form.controls.city.touched && form.controls.city.invalid) {
+                  <p class="field-error" role="alert" i18n="@@cust.profile.validation.cityRequired">
+                    La ville est requise
+                  </p>
+                }
+              </div>
+              <div class="form-field">
+                <label for="province" i18n="@@cust.profile.fields.province">Province</label>
+                <select
+                  id="province"
+                  formControlName="province"
+                  [attr.disabled]="isSaving() ? '' : null"
+                >
+                  <option value="" i18n="@@cust.profile.selectProvince">
+                    Sélectionnez une province
+                  </option>
+                  @for (province of provinces; track province.value) {
+                    <option [value]="province.value">{{ province.label }}</option>
+                  }
+                </select>
+                @if (form.controls.province.touched && form.controls.province.invalid) {
+                  <p
+                    class="field-error"
+                    role="alert"
+                    i18n="@@cust.profile.validation.provinceRequired"
+                  >
+                    La province est requise
+                  </p>
+                }
+              </div>
+              <div class="form-field full-width">
+                <label for="telephone" i18n="@@cust.profile.fields.telephone">Téléphone</label>
+                <input
+                  id="telephone"
+                  type="text"
+                  formControlName="telephone"
+                  [readOnly]="isSaving()"
+                  aria-describedby="telephone-hint"
+                />
+                <p id="telephone-hint" class="field-hint" i18n="@@cust.profile.telephoneHint">
+                  Saisissez un numéro de téléphone à 10 chiffres.
+                </p>
+                @if (form.controls.telephone.touched && form.controls.telephone.invalid) {
+                  <p class="field-error" role="alert">
+                    @if (form.controls.telephone.hasError('required')) {
+                      <span i18n="@@cust.profile.validation.telephoneRequired"
+                        >Le numéro de téléphone est requis</span
+                      >
+                    } @else {
+                      <span i18n="@@cust.profile.validation.telephoneTenDigits"
+                        >Le numéro de téléphone doit contenir exactement 10 chiffres (chiffres
+                        seulement)</span
+                      >
+                    }
+                  </p>
+                }
+              </div>
+            </div>
+            <div class="form-actions">
+              <button
+                class="secondary-button"
+                type="button"
+                (click)="isEditing.set(false)"
+                [disabled]="isSaving()"
+                i18n="@@cust.profile.cancel"
+              >
+                Annuler
+              </button>
+              <button class="primary-button" type="submit" [disabled]="isSaving()">
+                @if (isSaving()) {
+                  <span i18n="@@cust.profile.saving">Enregistrement en cours...</span>
+                } @else {
+                  <span i18n="@@cust.profile.save">Enregistrer les modifications</span>
+                }
+              </button>
+            </div>
+          </form>
+        } @else {
+          <dl class="customer-info">
+            <div>
+              <dt i18n="@@cust.profile.fields.firstName">Prénom</dt>
+              <dd>{{ details.firstName }}</dd>
+            </div>
+            <div>
+              <dt i18n="@@cust.profile.fields.lastName">Nom</dt>
+              <dd>{{ details.lastName }}</dd>
+            </div>
+            <div class="full-width">
+              <dt i18n="@@cust.profile.fields.address">Adresse</dt>
+              <dd>{{ details.address || notAvailable }}</dd>
+            </div>
+            <div>
+              <dt i18n="@@cust.profile.fields.city">Ville</dt>
+              <dd>{{ details.city || notAvailable }}</dd>
+            </div>
+            <div>
+              <dt i18n="@@cust.profile.fields.province">Province</dt>
+              <dd>{{ getProvinceLabel(details.province) || notAvailable }}</dd>
+            </div>
+            <div class="full-width">
+              <dt i18n="@@cust.profile.fields.telephone">Téléphone</dt>
+              <dd>{{ details.telephone || notAvailable }}</dd>
+            </div>
+          </dl>
+        }
+      </section>
+
+      <section class="detail-panel pets-panel" aria-labelledby="customer-pets-title">
+        <header class="panel-heading pets-heading">
+          <div>
+            <h2 id="customer-pets-title" i18n="@@cust.profile.petsTitle">Animaux enregistrés</h2>
+            <p i18n="@@cust.profile.petsSubtitle">Animaux associés à ce client</p>
+          </div>
+          @if (!isLoadingPets() && !petErrorMessage()) {
+            <span
+              class="pet-count"
+              aria-label="{{ pets().length }} animaux enregistrés"
+              i18n-aria-label="@@cust.profile.petCount"
+              >{{ pets().length }}</span
+            >
+          }
+        </header>
+        @if (petTypesErrorMessage()) {
+          <p class="error-message" role="alert">{{ petTypesErrorMessage() }}</p>
+        }
+        @if (isLoadingPets()) {
+          <p class="state-message" role="status" i18n="@@cust.profile.loadingPets">
+            Chargement des animaux...
+          </p>
+        } @else if (petErrorMessage()) {
+          <p class="error-message" role="alert">{{ petErrorMessage() }}</p>
+        } @else {
+          <div class="pet-list">
+            @for (pet of pets(); track pet.petId) {
+              <article class="pet-card">
+                <header class="pet-heading">
+                  @if (pet.photo?.fileData) {
+                    <img
+                      class="profile-photo pet-photo"
+                      [src]="'data:' + pet.photo!.fileType + ';base64,' + pet.photo!.fileData"
+                      alt="Photo de profil de {{ pet.name }}"
+                      i18n-alt="@@cust.profile.photoAlt"
+                      loading="lazy"
+                    />
+                  } @else {
+                    <div
+                      class="profile-photo pet-photo photo-placeholder"
+                      role="img"
+                      aria-label="Aucune photo de profil pour {{ pet.name }}"
+                      i18n-aria-label="@@cust.profile.noPetPhoto"
+                    >
+                      {{ pet.name.charAt(0) }}
+                    </div>
+                  }
+                  <div>
+                    <h3>{{ pet.name }}</h3>
+                    <p>{{ getPetTypeName(pet.petTypeId) }}</p>
+                  </div>
+                </header>
+                <dl class="pet-info">
+                  <div>
+                    <dt i18n="@@cust.profile.birthDate">Date de naissance</dt>
+                    <dd>{{ (pet.birthDate | date: 'mediumDate') || notAvailable }}</dd>
+                  </div>
+                  <div>
+                    <dt i18n="@@cust.profile.weight">Poids</dt>
+                    <dd>{{ pet.weight }} kg</dd>
+                  </div>
+                </dl>
+              </article>
+            } @empty {
+              <div class="empty-state" role="status">
+                <h3 i18n="@@cust.profile.noPets">Aucun animal enregistré</h3>
+                <p i18n="@@cust.profile.noPetsHint">Les animaux de ce client apparaîtront ici.</p>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    </div>
+  }
+</section>
