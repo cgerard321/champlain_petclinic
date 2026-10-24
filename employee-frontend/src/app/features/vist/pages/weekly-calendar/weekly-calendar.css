@@ -131,3 +131,23 @@ dt:first-child {
   color: #555;
   font-size: 14px;
 }
+
+:host-context(.dark-mode) {
+  .calendar {
+    background: var(--mat-sys-surface-container-highest);
+    color: #e0e0e0;
+    border: 1px solid #111;
+  }
+
+  .calendar__button,
+  button {
+    background: #111;
+    color: #e0e0e0;
+    border: 1px solid #111;
+  }
+
+  .calendar__day {
+    border: 1px solid #111;
+    color: white;
+  }
+}

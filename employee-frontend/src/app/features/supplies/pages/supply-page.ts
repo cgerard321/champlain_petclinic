@@ -12,6 +12,7 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
@@ -45,7 +46,7 @@ interface SupplyFormValue {
 }
 
 @Component({
-  imports: [CurrencyPipe, MatIconModule, MatMenuModule, Table],
+  imports: [CurrencyPipe, MatIconModule, MatMenuModule, Table, MatTooltipModule],
   selector: 'app-supply',
   styleUrl: './supply-page.css',
   templateUrl: './supply-page.html',

@@ -28,6 +28,8 @@ export enum AppRoutePaths {
   UserCart = '/carts/:cartId',
   AddVisit = '/visits/add',
   CustomerProfile = '/customer/profile',
+  CustomerOrderHistory = '/customer/orders',
+  CustomerOrderDetails = '/customer/orders/:orderId',
   Emailing = '/emailing',
   MockPage = '/mockpage',
   VetDetails = '/vets/{vetId}',

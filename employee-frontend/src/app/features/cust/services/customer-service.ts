@@ -3,7 +3,13 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, filter, map } from 'rxjs';
 
 import { SseClient } from '@core/services/sse-client';
-import { Customer, Pet, PetType } from '@features/cust/models/customer.model';
+import {
+  Customer,
+  CustomerRequest,
+  Pet,
+  PetRequest,
+  PetType,
+} from '@features/cust/models/customer.model';
 import { CustomerRequestModel } from '@features/cust/models/customerRequestModel';
 import { CustomerResponseModel } from '@features/cust/models/customerResponseModel';
 
@@ -11,9 +17,12 @@ import { CustomerResponseModel } from '@features/cust/models/customerResponseMod
 export class CustomerService {
   private readonly http = inject(HttpClient);
   private readonly sse = inject(SseClient);
+  private readonly http = inject(HttpClient);
+
+  private readonly apiUrl = '/api/gateway';
 
   getCustomers(): Observable<Customer> {
-    return this.sse.stream('/api/gateway/customers', { keepAlive: false }).pipe(
+    return this.sse.stream(`${this.apiUrl}/customers`, { keepAlive: false }).pipe(
       filter((event): event is MessageEvent<string> => event.type !== 'error'),
       map((event) => JSON.parse(event.data) as Customer),
     );
@@ -38,22 +47,30 @@ export class CustomerService {
       customer,
     );
   }
+
   getPetDetails(customerId: string): Observable<Pet> {
     return this.sse
-      .stream(`/api/gateway/pets/customers/${customerId}/pets`, { keepAlive: false })
+      .stream(`${this.apiUrl}/pets/customers/${customerId}/pets`, {
+        keepAlive: false,
+      })
       .pipe(
         filter((event): event is MessageEvent<string> => event.type !== 'error'),
         map((event) => JSON.parse(event.data) as Pet),
       );
   }
+
   getPetTypes(): Observable<PetType> {
-    return this.sse
-      .stream('/api/gateway/customers/petTypes', {
-        keepAlive: false,
-      })
-      .pipe(
-        filter((event): event is MessageEvent<string> => event.type !== 'error'),
-        map((event) => JSON.parse(event.data) as PetType),
-      );
+    return this.sse.stream(`${this.apiUrl}/customers/petTypes`, { keepAlive: false }).pipe(
+      filter((event): event is MessageEvent<string> => event.type !== 'error'),
+      map((event) => JSON.parse(event.data) as PetType),
+    );
+  }
+
+  addCustomer(customer: CustomerRequest): Observable<Customer> {
+    return this.http.post<Customer>(`${this.apiUrl}/customers`, customer);
+  }
+
+  addPet(customerId: string, pet: PetRequest): Observable<Pet> {
+    return this.http.post<Pet>(`${this.apiUrl}/pets/customers/${customerId}/pets`, pet);
   }
 }

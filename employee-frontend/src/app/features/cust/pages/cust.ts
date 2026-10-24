@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { AuthState } from '@core/services/auth-state';
 import { Roles } from '@shared/models/roles';
 
+import { AddCustomer } from '@features/cust/components/customer-add/customer-add';
 import { PetDetails } from '@features/cust/components/customer-pet-details/customer-pet-details';
 import { Customer } from '@features/cust/models/customer.model';
 import { CustomerService } from '@features/cust/services/customer-service';
@@ -83,5 +84,11 @@ export class Cust implements OnInit {
 
   protected checkCustomerDetails(customerId: string) {
     this.router.navigate(['/customerDetails', customerId]);
+  }
+  protected addCustomerPopUp(): void {
+    this.dialog.open(AddCustomer, {
+      width: '650px',
+      maxWidth: '90vw',
+    });
   }
 }
