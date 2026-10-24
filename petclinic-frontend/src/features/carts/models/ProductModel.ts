@@ -1,4 +1,5 @@
 export interface ProductModel {
+  discountAmount?: number;
   productId: string;
   imageId: string;
   productName: string;

@@ -145,7 +145,8 @@
     "addToWishlist": "Ajouter à la liste de souhaits",
     "addToCartLabel": "Ajouter {{name}} au panier",
     "removeFromWishlistLabel": "Retirer {{name}} de la liste de souhaits",
-    "lowStockOne": "Il ne reste que 1 article en stock."
+    "lowStockOne": "Il ne reste que 1 article en stock.",
+    "promoDiscount": "Réduction promo : -{{amount}}"
   },
   "billing": {
     "close": "Fermer le formulaire de facturation",

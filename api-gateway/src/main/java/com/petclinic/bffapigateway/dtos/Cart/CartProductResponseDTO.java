@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CartProductResponseDTO {
 
+    private String productType;
+    private double discountAmount;
     private String productId;
     private String imageId;
     private String productName;
