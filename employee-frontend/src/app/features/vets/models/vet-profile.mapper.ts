@@ -1,7 +1,7 @@
 import { VetResponse, Workday } from '@features/vets/models/vet-api.model';
 import { VetProfile } from '@features/vets/models/vet-profile.model';
 
-function workdayLabels(): Record<Workday, string> {
+export function workdayLabels(): Record<Workday, string> {
   return {
     Monday: $localize`:@@vets.days.monday:Lundi`,
     Tuesday: $localize`:@@vets.days.tuesday:Mardi`,

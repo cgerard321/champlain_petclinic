@@ -1,7 +1,7 @@
 <form [formGroup]="form" (ngSubmit)="save()" aria-labelledby="edit-title">
   <h2 id="edit-title" i18n="@@vets.edit.title">Modifier le profil</h2>
   <p i18n="@@vets.edit.description">
-    Tous les champs sont obligatoires. Les spécialités, le statut et les horaires sont conservés.
+    Tous les champs sont obligatoires. Les spécialités et le statut sont conservés.
   </p>
   <fieldset [disabled]="saving()">
     <legend class="visually-hidden" i18n="@@vets.edit.legend">Informations du vétérinaire</legend>
@@ -40,6 +40,59 @@
         </p>
       </div>
     }
+    <section class="availability" aria-labelledby="availability-title">
+      <h3 id="availability-title" tabindex="-1" i18n="@@vets.availability.title">Disponibilités</h3>
+      <p class="hint" i18n="@@vets.availability.description">
+        Retirez une plage horaire ou une journée entière. Les retraits prennent effet à
+        l’enregistrement.
+      </p>
+      <p class="visually-hidden" role="status" aria-live="polite">{{ announcement() }}</p>
+      @if (availability().length) {
+        <ul class="day-list">
+          @for (entry of availability(); track entry.day) {
+            <li class="day">
+              <div class="day-header">
+                <span class="day-label">{{ entry.label }}</span>
+                <button
+                  class="remove-day"
+                  type="button"
+                  [id]="'remove-day-' + entry.day"
+                  (click)="removeDay(entry.day)"
+                >
+                  <span i18n="@@vets.availability.remove_day">Retirer la journée</span>
+                  <span class="visually-hidden">{{ entry.label }}</span>
+                </button>
+              </div>
+              @if (entry.hours.length) {
+                <ul class="hour-list">
+                  @for (hour of entry.hours; track hour.value) {
+                    <li class="hour">
+                      <span>{{ hour.label }}</span>
+                      <button
+                        class="remove-hour"
+                        type="button"
+                        [id]="'remove-hour-' + entry.day + '-' + hour.value"
+                        (click)="removeHour(entry.day, hour.value)"
+                      >
+                        <span aria-hidden="true">×</span>
+                        <span class="visually-hidden" i18n="@@vets.availability.remove_hour"
+                          >Retirer</span
+                        >
+                        <span class="visually-hidden">{{ entry.label }} {{ hour.label }}</span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              } @else {
+                <p class="hint" i18n="@@vets.availability.no_hours">Aucune heure précisée.</p>
+              }
+            </li>
+          }
+        </ul>
+      } @else {
+        <p role="status" i18n="@@vets.availability.empty">Aucune disponibilité au profil.</p>
+      }
+    </section>
     <div class="actions">
       <button type="submit" [disabled]="saving()">
         @if (saving()) {
