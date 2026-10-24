@@ -7,9 +7,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 
-import { isApiError } from '@core/models/api-error';
 import { LoginRequest } from '@features/auth/models/loginRequest';
 import { Auth } from '@features/auth/services/auth';
+import { AuthErrorMessages } from '@features/auth/services/auth-error-messages';
 import { ThemeService } from '@features/settings/services/themeservice';
 import { ModalForm } from '@shared/components/modal-form/modal-form';
 import { ModalFormData, ModalFormResult } from '@shared/components/modal-form/modal-form-models';
@@ -30,6 +30,7 @@ export class LoginPage {
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
   private readonly themeService = inject(ThemeService);
+  private readonly errorMessages = inject(AuthErrorMessages);
 
   protected readonly hidePassword = signal(true);
   protected readonly isSubmitting = signal(false);
@@ -40,8 +41,12 @@ export class LoginPage {
   protected readonly isEnglish = (localStorage.getItem('lang') ?? 'fr').startsWith('en');
 
   protected readonly loginForm = form(this.model, (schemaPath) => {
-    required(schemaPath.emailOrUsername, { message: 'Username or email is required' });
-    required(schemaPath.password, { message: 'Password is required' });
+    required(schemaPath.emailOrUsername, {
+      message: $localize`:@@login.errors.usernameRequired:Le nom d'utilisateur ou le courriel est requis.`,
+    });
+    required(schemaPath.password, {
+      message: $localize`:@@login.errors.passwordRequired:Le mot de passe est requis.`,
+    });
   });
 
   protected togglePasswordVisibility(): void {
@@ -66,6 +71,8 @@ export class LoginPage {
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
 
+    const credentials = { ...this.model() };
+
     this.auth.login(this.model()).subscribe({
       next: () => {
         this.isSubmitting.set(false);
@@ -74,7 +81,7 @@ export class LoginPage {
       },
       error: (err: unknown) => {
         this.isSubmitting.set(false);
-        this.errorMessage.set(isApiError(err) ? err.message : 'Could not reach the server.');
+        this.errorMessage.set(this.errorMessages.forLogin(err, credentials.emailOrUsername));
       },
     });
   }
@@ -119,17 +126,15 @@ export class LoginPage {
         return;
       }
 
-      this.auth.sendPasswordResetEmail(result.value.email.trim()).subscribe({
+      const email = result.value.email.trim();
+
+      this.auth.sendPasswordResetEmail(email).subscribe({
         next: () =>
           this.notify(
             $localize`:@@forgotPassword.sent:Si un compte existe pour cette adresse, un courriel de récupération vient d'être envoyé.`,
           ),
         error: (err: unknown) =>
-          this.errorMessage.set(
-            isApiError(err)
-              ? err.message
-              : $localize`:@@forgotPassword.errors.unreachable:Impossible de joindre le serveur.`,
-          ),
+          this.errorMessage.set(this.errorMessages.forForgotPassword(err, email)),
       });
     });
   }

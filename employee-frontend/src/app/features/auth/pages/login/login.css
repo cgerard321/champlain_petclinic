@@ -320,21 +320,41 @@
   --mat-progress-spinner-active-indicator-color: #fff;
 }
 
-@media (width <= 1100px) {
+/* On smaller screens, the hero image now appears behing the login form */
+@media (width <= 900px) {
   .login-page {
-    grid-template-columns: minmax(0, 1fr);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    background: transparent;
   }
 
   .hero {
-    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 0;
   }
 
   .panel {
-    box-shadow: none;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 460px;
+    padding: 24px clamp(20px, 6vw, 40px) 32px;
+    border-radius: 24px;
+    background: rgb(255 253 248 / 94%);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(6px);
   }
 
-  .brand {
-    margin-bottom: 40px;
+  .clinic {
+    margin-bottom: 32px;
+  }
+
+  .greeting {
+    margin-bottom: 1.75rem;
   }
 }
 

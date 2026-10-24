@@ -1,12 +1,26 @@
 {
   "locale": "en",
   "translations": {
+    "auth": {
+      "errors": {
+        "unreachable": "Could not reach the server.",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
     "login": {
       "title": "Welcome",
       "usernamePlaceholder": "Enter your username or email",
       "passwordPlaceholder": "Enter your password",
       "forgotPassword": "Forgot Password?",
-      "submit": "Login"
+      "submit": "Login",
+      "errors": {
+        "usernameRequired": "Username or email is required.",
+        "passwordRequired": "Password is required.",
+        "incorrectCredentials": "Incorrect username or password for user: {$username}",
+        "userNotFound": "User not found.",
+        "accountDisabled": "Your account has been disabled. Please contact support.",
+        "accountNotVerified": "Your account is not verified. A verification link has been sent to your email."
+      }
     },
     "forgotPassword": {
       "title": "Forgot password",
@@ -18,7 +32,8 @@
       "errors": {
         "emailRequired": "Email is required.",
         "emailInvalid": "Enter a valid email.",
-        "unreachable": "Could not reach the server."
+        "notFound": "No account is associated with {$email}.",
+        "sendFailed": "Unable to send the reset email. Please try again later."
       }
     },
     "navbar": {
