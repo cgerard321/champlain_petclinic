@@ -29,9 +29,8 @@ export class Cust implements OnInit {
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
 
-  protected readonly canViewCustomerDetails = computed(() =>
-    this.auth.hasRole(Roles.admin) ||
-    this.auth.hasRole(Roles.receptionist)
+  protected readonly canViewCustomerDetails = computed(
+    () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.receptionist),
   );
   protected readonly notAvailable = $localize`:@@cust.notAvailable:Non disponible`;
   protected readonly searchPlaceholder = $localize`:@@cust.searchPlaceholder:Rechercher un client par nom, prénom, ID, téléphone, adresse ou ville`;

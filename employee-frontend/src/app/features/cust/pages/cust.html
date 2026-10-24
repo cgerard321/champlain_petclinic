@@ -40,10 +40,7 @@
               <td>
                 <div class="customer-name">
                   @if (canViewCustomerDetails()) {
-                    <button
-                      type="button"
-                      (click)="checkCustomerDetails(customer.customerId)"
-                    >
+                    <button type="button" (click)="checkCustomerDetails(customer.customerId)">
                       {{ customer.firstName }} {{ customer.lastName }}
                     </button>
                   } @else {
