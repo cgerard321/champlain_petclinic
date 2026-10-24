@@ -16,6 +16,7 @@
       "inventory": "Inventory",
       "products": "Products",
       "promos": "Promos",
+      "users": "Users",
       "settings": "Settings",
       "logout": "Logout"
     },
