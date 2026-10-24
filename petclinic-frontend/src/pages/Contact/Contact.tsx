@@ -12,17 +12,18 @@ import { NavBar } from '@/layouts/AppNavBar';
 import { AppFooter } from '@/layouts/AppFooter';
 import { Reveal } from '@/shared/components';
 import { contact, clinic } from '@/shared/content';
+import { useTranslation } from 'react-i18next';
 
 import './Contact.css';
 
 type Status = {
   type: 'idle' | 'submitting' | 'success' | 'error';
-  message?: string;
 };
 
 export default function ContactPage(): JSX.Element {
   const [validated, setValidated] = useState(false);
   const [status, setStatus] = useState<Status>({ type: 'idle' });
+  const { t } = useTranslation('contact');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -57,7 +58,6 @@ export default function ContactPage(): JSX.Element {
 
       setStatus({
         type: 'success',
-        message: 'Thanks! Your message has been sent.',
       });
       setFormData({
         name: '',
@@ -72,7 +72,6 @@ export default function ContactPage(): JSX.Element {
       console.error(err);
       setStatus({
         type: 'error',
-        message: 'Something went wrong. Please try again.',
       });
     }
   };
@@ -85,10 +84,8 @@ export default function ContactPage(): JSX.Element {
 
       <header className="contact-intro">
         <div className="contact-intro-inner">
-          <h1 className="contact-title">Contact Us</h1>
-          <p className="contact-sub">
-            We’ll get back to you as soon as we can.
-          </p>
+          <h1 className="contact-title">{t('intro.title')}</h1>
+          <p className="contact-sub">{t('intro.subtitle')}</p>
         </div>
       </header>
 
@@ -98,7 +95,7 @@ export default function ContactPage(): JSX.Element {
             <Reveal>
               <Card className="shadow-soft contact-card h-100">
                 <Card.Body>
-                  <Card.Title className="mb-2">Clinic Details</Card.Title>
+                  <Card.Title className="mb-2">{t('details.title')}</Card.Title>
                   <div className="contact-detail">
                     <span className="icon" aria-hidden="true">
                       {'\uD83D\uDCCD'}
@@ -127,17 +124,19 @@ export default function ContactPage(): JSX.Element {
 
                   <hr className="my-3" />
 
-                  <Card.Title className="mb-2">Hours</Card.Title>
+                  <Card.Title className="mb-2">
+                    {t('details.hoursTitle')}
+                  </Card.Title>
                   <div className="hours">
                     {contact.hours.map(h => (
-                      <div key={h.days}>
-                        <span>{h.days}</span>
+                      <div key={h.id}>
+                        <span>{t(`hours.day.${h.id}`)}</span>
                         <span>
                           {'note' in h && h.note
-                            ? h.note
+                            ? t('hours.closed')
                             : h.open && h.close
                               ? `${h.open}–${h.close}`
-                              : 'Closed'}
+                              : t('hours.closed')}
                         </span>
                       </div>
                     ))}
@@ -150,7 +149,7 @@ export default function ContactPage(): JSX.Element {
                       rel="noreferrer"
                       className="map-link"
                     >
-                      Get directions →
+                      {t('details.directions')}
                     </a>
                   </div>
                 </Card.Body>
@@ -162,89 +161,89 @@ export default function ContactPage(): JSX.Element {
             <Reveal>
               <Card className="shadow-soft contact-card h-100">
                 <Card.Body>
-                  <Card.Title className="mb-2">Send a Message</Card.Title>
+                  <Card.Title className="mb-2">{t('form.title')}</Card.Title>
 
                   <div aria-live="polite" className="mb-2">
                     {status.type === 'success' && (
                       <Alert variant="success" className="py-2 mb-2">
-                        {status.message}
+                        {t('status.success')}
                       </Alert>
                     )}
                     {status.type === 'error' && (
                       <Alert variant="danger" className="py-2 mb-2">
-                        {status.message}
+                        {t('status.error')}
                       </Alert>
                     )}
                   </div>
 
                   <Form noValidate validated={validated} onSubmit={onSubmit}>
                     <Form.Group className="mb-2" controlId="contactName">
-                      <Form.Label>Name</Form.Label>
+                      <Form.Label>{t('form.name.label')}</Form.Label>
                       <Form.Control
                         name="name"
                         value={formData.name}
                         onChange={onChange}
-                        placeholder="Jane Doe"
+                        placeholder={t('form.name.placeholder')}
                         required
                       />
                       <Form.Control.Feedback type="invalid">
-                        Please enter your name.
+                        {t('form.name.error')}
                       </Form.Control.Feedback>
                     </Form.Group>
 
                     <Row className="g-2">
                       <Col md>
                         <Form.Group className="mb-2" controlId="contactEmail">
-                          <Form.Label>Email</Form.Label>
+                          <Form.Label>{t('form.email.label')}</Form.Label>
                           <Form.Control
                             type="email"
                             name="email"
                             value={formData.email}
                             onChange={onChange}
-                            placeholder="jane@example.com"
+                            placeholder={t('form.email.placeholder')}
                             required
                           />
                           <Form.Control.Feedback type="invalid">
-                            Please enter a valid email.
+                            {t('form.email.error')}
                           </Form.Control.Feedback>
                         </Form.Group>
                       </Col>
                       <Col md>
                         <Form.Group className="mb-2" controlId="contactPhone">
-                          <Form.Label>Phone (optional)</Form.Label>
+                          <Form.Label>{t('form.phone.label')}</Form.Label>
                           <Form.Control
                             name="phone"
                             value={formData.phone}
                             onChange={onChange}
-                            placeholder="(555) 555-5555"
+                            placeholder={t('form.phone.placeholder')}
                           />
                         </Form.Group>
                       </Col>
                     </Row>
 
                     <Form.Group className="mb-2" controlId="contactSubject">
-                      <Form.Label>Subject</Form.Label>
+                      <Form.Label>{t('form.subject.label')}</Form.Label>
                       <Form.Control
                         name="subject"
                         value={formData.subject}
                         onChange={onChange}
-                        placeholder="How can we help?"
+                        placeholder={t('form.subject.placeholder')}
                       />
                     </Form.Group>
 
                     <Form.Group className="mb-3" controlId="contactMessage">
-                      <Form.Label>Message</Form.Label>
+                      <Form.Label>{t('form.message.label')}</Form.Label>
                       <Form.Control
                         as="textarea"
                         rows={5}
                         name="message"
                         value={formData.message}
                         onChange={onChange}
-                        placeholder="Write your message…"
+                        placeholder={t('form.message.placeholder')}
                         required
                       />
                       <Form.Control.Feedback type="invalid">
-                        Please enter a message.
+                        {t('form.message.error')}
                       </Form.Control.Feedback>
                     </Form.Group>
 
@@ -260,7 +259,7 @@ export default function ContactPage(): JSX.Element {
 
                     <div className="d-flex gap-2">
                       <Button type="submit" disabled={submitting}>
-                        {submitting ? 'Sending…' : 'Send Message'}
+                        {submitting ? t('form.sending') : t('form.send')}
                       </Button>
                       <Button
                         variant="outline-secondary"
@@ -278,7 +277,7 @@ export default function ContactPage(): JSX.Element {
                         }}
                         disabled={submitting}
                       >
-                        Clear
+                        {t('form.clear')}
                       </Button>
                     </div>
                   </Form>
