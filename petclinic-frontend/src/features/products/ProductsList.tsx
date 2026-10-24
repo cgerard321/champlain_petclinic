@@ -173,36 +173,25 @@ const ProductList = function Productlist({
     });
   };
 
-  const RecentlyViewedProducts = (): JSX.Element => (
-    <Reveal delay={80}>
-      <div className="products-section-container ">
-        <h2 className="section-title category-title">{t('recent')}</h2>
-        <div className="recently-viewed-flex">
-          {recentlyClickedProducts.length > 0 ? (
-            recentlyClickedProducts
-              .filter(p => !p.isUnlisted)
-              .map((p, i) => (
-                <Reveal key={p.productId} delay={i * 60 + 120}>
-                  <Product product={p} recentlyViewed />
-                </Reveal>
-              ))
-          ) : (
-            <p>{t('noRecent')}</p>
-          )}
-        </div>
-      </div>
-    </Reveal>
-  );
   return (
     <div className="product-list-container">
       <div className="main-content">
-        {view === 'catalog' && recentlyClickedProducts.length > 0 && (
-          <RecentlyViewedProducts />
-        )}
         {view === 'catalog' && (
           <Reveal delay={80}>
             <div ref={catalogRef} className="products-section-container ">
-              <h2 className="section-title category-title">{t('catalog')}</h2>
+              <div className="shop-section-heading">
+                <div>
+                  <h2 className="section-title category-title">
+                    {t('catalog')}
+                  </h2>
+                  <p>{t('catalogHint')}</p>
+                </div>
+                {!isLoading && (
+                  <span>
+                    {t('productCount', { count: filteredList.length })}
+                  </span>
+                )}
+              </div>
               {isLoading ? (
                 <div className="products-loading-state">
                   <span
@@ -307,7 +296,12 @@ const ProductList = function Productlist({
           <>
             <Reveal delay={80}>
               <div className="products-section-container ">
-                <h2 className="section-title">{t('bundles')}</h2>
+                <div className="shop-section-heading">
+                  <div>
+                    <h2 className="section-title">{t('bundles')}</h2>
+                    <p>{t('bundlesHint')}</p>
+                  </div>
+                </div>
                 <div className="grid product-bundles-grid">
                   {bundleList.length > 0 ? (
                     bundleList.map((b, i) => (

@@ -51,7 +51,12 @@ export default function TrendingList(): JSX.Element {
 
   return (
     <div className="products-section-container ">
-      <h2 className="section-title category-title">{t('trending')}</h2>
+      <div className="shop-section-heading">
+        <div>
+          <h2 className="section-title category-title">{t('trending')}</h2>
+          <p>{t('trendingHint')}</p>
+        </div>
+      </div>
       <div className="grid">
         {topFourTrending.map((product: ProductModel) => (
           <div

@@ -14,6 +14,7 @@ import ProductFilterDrawer, {
 import ActiveFilterChips, {
   ActiveFilterChip,
 } from '@/features/products/components/ActiveFilterChips';
+import RecentlyViewedProducts from '@/features/products/components/RecentlyViewedProducts';
 import { useBodyScrollLock } from '@/features/products/hooks/useBodyScrollLock';
 import {
   FilterKey,
@@ -260,6 +261,7 @@ export default function Products(): JSX.Element {
           className="full-width-image"
         />
       </header>
+      <RecentlyViewedProducts compact />
       <div className="search-and-filter">
         <button
           ref={filterButtonRef}
