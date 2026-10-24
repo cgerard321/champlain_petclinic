@@ -32,8 +32,9 @@ use crate::domain::entities::service::DbType;
 use crate::shared::config::{
     ADMIN_ROLE_UUID, API_GATEWAY_DEV_ROLE, AUTH_SERVICE_DEV_ROLE, BILLING_SERVICE_DEV_ROLE,
     CART_SERVICE_DEV_ROLE, CUSTOMERS_SERVICE_DEV_ROLE, EDITOR_ROLE_UUID,
-    INVENTORY_SERVICE_DEV_ROLE, PRODUCTS_SERVICE_DEV_ROLE, READER_ROLE_UUID, SUDO_ROLE_UUID,
-    VET_SERVICE_DEV_ROLE, VISITS_SERVICE_DEV_ROLE,
+    EMPLOYEE_FRONTEND_DEV_ROLE, FILES_SERVICE_DEV_ROLE, INVENTORY_SERVICE_DEV_ROLE,
+    MAILER_SERVICE_DEV_ROLE, PETCLINIC_FRONTEND_DEV_ROLE, PRODUCTS_SERVICE_DEV_ROLE,
+    READER_ROLE_UUID, SUDO_ROLE_UUID, VET_SERVICE_DEV_ROLE, VISITS_SERVICE_DEV_ROLE,
 };
 use bollard::Docker;
 use rocket::fairing::AdHoc;
@@ -258,6 +259,10 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     let inventory_service_dev = INVENTORY_SERVICE_DEV_ROLE.hyphenated().to_string();
     let billing_service_dev = BILLING_SERVICE_DEV_ROLE.hyphenated().to_string();
     let api_gateway_dev = API_GATEWAY_DEV_ROLE.hyphenated().to_string();
+    let mailer_service_dev = MAILER_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let files_service_dev = FILES_SERVICE_DEV_ROLE.hyphenated().to_string();
+    let petclinic_frontend_dev = PETCLINIC_FRONTEND_DEV_ROLE.hyphenated().to_string();
+    let employee_frontend_dev = EMPLOYEE_FRONTEND_DEV_ROLE.hyphenated().to_string();
 
     sqlx::query(
         r#"
@@ -275,7 +280,11 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
         (?, 'CART_SERVICE_DEV',       'Cart Service Dev'),
         (?, 'INVENTORY_SERVICE_DEV',  'Inventory Service Dev'),
         (?, 'BILLING_SERVICE_DEV',    'Billing Service Dev'),
-        (?, 'API_GATEWAY_DEV',        'API Gateway Dev');
+        (?, 'API_GATEWAY_DEV',        'API Gateway Dev'),
+        (?, 'MAILER_SERVICE_DEV', 'Mailer Service Dev'),
+        (?, 'FILES_SERVICE_DEV', 'Files Service Dev'),
+        (?, 'PETCLINIC_FRONTEND_DEV', 'Petclinic Frontend Dev'),
+        (?, 'EMPLOYEE_FRONTEND_DEV', 'Employee Frontend Dev');
     "#,
     )
     .bind(&sudo)
@@ -291,6 +300,10 @@ async fn add_default_roles(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     .bind(&inventory_service_dev)
     .bind(&billing_service_dev)
     .bind(&api_gateway_dev)
+    .bind(&mailer_service_dev)
+    .bind(&files_service_dev)
+    .bind(&petclinic_frontend_dev)
+    .bind(&employee_frontend_dev)
     .execute(pool)
     .await?;
     Ok(())
@@ -339,17 +352,19 @@ async fn add_default_user(user_port: &DynUsersPort, pool: &MySqlPool) -> Result<
 
 async fn add_default_services(pool: &MySqlPool) -> Result<(), sqlx::Error> {
     use crate::shared::config::{
-        AUTH_SERVICE_DEV_ROLE, BILLING_SERVICE_DEV_ROLE, CART_SERVICE_DEV_ROLE,
-        CUSTOMERS_SERVICE_DEV_ROLE, INVENTORY_SERVICE_DEV_ROLE, PRODUCTS_SERVICE_DEV_ROLE,
-        VET_SERVICE_DEV_ROLE, VISITS_SERVICE_DEV_ROLE, API_GATEWAY_DEV_ROLE,
+        API_GATEWAY_DEV_ROLE, AUTH_SERVICE_DEV_ROLE, BILLING_SERVICE_DEV_ROLE,
+        CART_SERVICE_DEV_ROLE, CUSTOMERS_SERVICE_DEV_ROLE, EMPLOYEE_FRONTEND_DEV_ROLE,
+        FILES_SERVICE_DEV_ROLE, INVENTORY_SERVICE_DEV_ROLE, MAILER_SERVICE_DEV_ROLE,
+        PETCLINIC_FRONTEND_DEV_ROLE, PRODUCTS_SERVICE_DEV_ROLE, VET_SERVICE_DEV_ROLE,
+        VISITS_SERVICE_DEV_ROLE,
     };
 
     let services = vec![
-        ("petclinic-frontend", None),
-        ("employee-frontend", None),
+        ("petclinic-frontend", Some(PETCLINIC_FRONTEND_DEV_ROLE)),
+        ("employee-frontend", Some(EMPLOYEE_FRONTEND_DEV_ROLE)),
         ("api-gateway", Some(API_GATEWAY_DEV_ROLE)),
-        ("mailer-service", None),
-        ("files-service", None),
+        ("mailer-service", Some(MAILER_SERVICE_DEV_ROLE)),
+        ("files-service", Some(FILES_SERVICE_DEV_ROLE)),
         ("visits-service-new", Some(VISITS_SERVICE_DEV_ROLE)),
         ("inventory-service", Some(INVENTORY_SERVICE_DEV_ROLE)),
         ("vet-service", Some(VET_SERVICE_DEV_ROLE)),
