@@ -50,7 +50,7 @@ export default function TrendingList(): JSX.Element {
     .slice(0, 4);
 
   return (
-    <div className="products-section-container ">
+    <div className="products-section-container shop-trending-section">
       <div className="shop-section-heading">
         <div>
           <h2 className="section-title category-title">{t('trending')}</h2>

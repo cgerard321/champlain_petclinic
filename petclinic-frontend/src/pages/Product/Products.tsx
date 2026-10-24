@@ -21,6 +21,7 @@ import {
   ProductFilters,
   matchesFilters,
 } from '@/features/products/utils/productFilters';
+import { FaSlidersH, FaSortAmountDown } from 'react-icons/fa';
 import './Products.css';
 
 const PRICE_PRESETS: readonly PricePreset[] = [
@@ -246,6 +247,15 @@ export default function Products(): JSX.Element {
   };
   const toggleSidebar = (): void =>
     isSidebarOpen ? closeSidebar() : setIsSidebarOpen(true);
+  const sortOptions = [
+    ['default', 'sortDefault'],
+    ['rating-desc', 'ratingDesc'],
+    ['rating-asc', 'ratingAsc'],
+    ['price-desc', 'priceDesc'],
+    ['price-asc', 'priceAsc'],
+  ];
+  const selectedSortLabel =
+    sortOptions.find(([value]) => value === sortCriteria)?.[1] ?? 'sortDefault';
 
   return (
     <div>
@@ -271,7 +281,8 @@ export default function Products(): JSX.Element {
           aria-expanded={isSidebarOpen}
           aria-controls="products-sidebar"
         >
-          {t('filterButton')}
+          <FaSlidersH aria-hidden="true" />
+          <span>{t('filterButton')}</span>
           {activeFilterCount > 0 ? ` (${activeFilterCount})` : ''}
         </button>
         <div className="search-wrapper">
@@ -289,17 +300,12 @@ export default function Products(): JSX.Element {
             aria-controls="sort-menu"
             aria-expanded={showSortOptions}
           >
-            {t('sort')}
+            <FaSortAmountDown aria-hidden="true" />
+            <span>{t(selectedSortLabel)}</span>
           </button>
           {showSortOptions && (
             <div className="sort-options" role="menu" id="sort-menu">
-              {[
-                ['default', 'sortDefault'],
-                ['rating-desc', 'ratingDesc'],
-                ['rating-asc', 'ratingAsc'],
-                ['price-desc', 'priceDesc'],
-                ['price-asc', 'priceAsc'],
-              ].map(([value, label]) => (
+              {sortOptions.map(([value, label]) => (
                 <button
                   key={value}
                   role="menuitem"

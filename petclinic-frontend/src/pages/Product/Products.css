@@ -15,15 +15,30 @@
   border-radius: 18px;
 }
 
+.header-container::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  content: '';
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(15, 23, 42, 0.5) 0%,
+    rgba(15, 23, 42, 0.12) 46%,
+    transparent 72%
+  );
+}
+
 .overlay-text {
   position: absolute;
   bottom: 30px;
   left: 30px;
   color: white;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(15, 23, 42, 0.66);
+  backdrop-filter: blur(5px);
   padding: 20px;
   max-width: 420px;
-  z-index: 1;
+  z-index: 2;
   border-radius: 15px;
 }
 
