@@ -4,13 +4,13 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
-import { AuthState } from '@core/services/auth-state';
-import { Roles } from '@shared/models/roles';
 
+import { AuthState } from '@core/services/auth-state';
 import { AddCustomer } from '@features/cust/components/customer-add/customer-add';
 import { PetDetails } from '@features/cust/components/customer-pet-details/customer-pet-details';
 import { Customer } from '@features/cust/models/customer.model';
 import { CustomerService } from '@features/cust/services/customer-service';
+import { Roles } from '@shared/models/roles';
 
 @Component({
   imports: [MatProgressSpinnerModule, MatCardModule, MatDialogModule],
@@ -81,7 +81,7 @@ export class Cust implements OnInit {
     );
   });
 
-  protected checkCustomerDetails(customerId: string) {
+  protected checkCustomerDetails(customerId: string): void {
     this.router.navigate(['/customerDetails', customerId]);
   }
   protected addCustomerPopUp(): void {
