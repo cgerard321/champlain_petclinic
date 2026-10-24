@@ -1,6 +1,6 @@
 package com.petclinic.cartsservice.presentationlayer;
 
-import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReport;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportReason;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CreateOrderReportRequestModel {
 
-    private OrderReport.Reason reason;
+    private OrderReportReason reason;
 
     @Builder.Default
     private List<String> productIds = List.of();

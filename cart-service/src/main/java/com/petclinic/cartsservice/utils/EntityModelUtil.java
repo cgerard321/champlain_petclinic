@@ -4,6 +4,8 @@ import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.ShippingMethod;
 import com.petclinic.cartsservice.dataaccesslayer.Order;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReport;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportStatus;
 import com.petclinic.cartsservice.dataaccesslayer.PromoCode;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeRequestModel;
@@ -11,6 +13,8 @@ import com.petclinic.cartsservice.domainclientlayer.PromoCodeResponseModel;
 import com.petclinic.cartsservice.presentationlayer.BillingRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
+import com.petclinic.cartsservice.presentationlayer.CreateOrderReportRequestModel;
+import com.petclinic.cartsservice.presentationlayer.OrderReportResponseModel;
 import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatusCode;
@@ -156,6 +160,53 @@ public class EntityModelUtil {
                 .shippingCost(cart.getShippingCost())
                 .invoiceId(cart.getInvoiceId())
                 .orderDate(LocalDateTime.now())
+                .build();
+    }
+
+    public static OrderReport toOrderReport(
+            String orderId,
+            String customerId,
+            Order order,
+            CreateOrderReportRequestModel request,
+            List<OrderReport.AffectedItem> affectedItems
+    ) {
+        return OrderReport.builder()
+                .reportId("RPT-" + UUID.randomUUID().toString().toUpperCase(Locale.ROOT))
+                .orderId(orderId)
+                .customerId(customerId)
+                .customerName(order.getCustomerName())
+                .reason(request.getReason())
+                .affectedItems(affectedItems)
+                .description(request.getDescription().trim())
+                .status(OrderReportStatus.NEW)
+                .submittedAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static OrderReportResponseModel toOrderReportResponseModel(
+            OrderReport report
+    ) {
+        List<OrderReportResponseModel.AffectedItemResponse> affectedItems =
+                report.getAffectedItems() == null
+                        ? List.of()
+                        : report.getAffectedItems().stream()
+                        .map(item -> OrderReportResponseModel.AffectedItemResponse
+                                .builder()
+                                .productId(item.getProductId())
+                                .productName(item.getProductName())
+                                .build())
+                        .toList();
+
+        return OrderReportResponseModel.builder()
+                .reportId(report.getReportId())
+                .orderId(report.getOrderId())
+                .customerId(report.getCustomerId())
+                .customerName(report.getCustomerName())
+                .reason(report.getReason())
+                .affectedItems(affectedItems)
+                .description(report.getDescription())
+                .status(report.getStatus())
+                .submittedAt(report.getSubmittedAt())
                 .build();
     }
 

@@ -469,21 +469,27 @@ public Mono<Void> deleteCartByCartId(String cartId) {
     }
 
     public Flux<OrderResponseDTO> getOrdersByCustomerId(String customerId) {
-        return webClientBuilder.build()
-                .get()
-                .uri(
-                        ordersServiceUrl() + "/customer/{customerId}",
-                        customerId
-                )
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToFlux(OrderResponseDTO.class);
-    }
+
+            String ordersServiceUrl = cartServiceUrl.replace(
+                    "/api/v1/carts",
+                    "/api/v1/orders"
+            );
+
+            return webClientBuilder.build()
+                    .get()
+                    .uri(
+                            ordersServiceUrl + "/customer/{customerId}",
+                            customerId
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToFlux(OrderResponseDTO.class);
+        }
 
     public Mono<OrderReportResponseDTO> createOrderReport(
             String customerId,
             String orderId,
-            CreateOrderReportRequestDTO request
+            OrderReportRequestDTO request
     ) {
         return webClientBuilder.build()
                 .post()

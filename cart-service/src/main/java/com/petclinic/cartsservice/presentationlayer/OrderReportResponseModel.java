@@ -1,6 +1,7 @@
 package com.petclinic.cartsservice.presentationlayer;
 
-import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReport;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportReason;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,10 +20,10 @@ public class OrderReportResponseModel {
     private String orderId;
     private String customerId;
     private String customerName;
-    private OrderReport.Reason reason;
+    private OrderReportReason reason;
     private List<AffectedItemResponse> affectedItems;
     private String description;
-    private OrderReport.Status status;
+    private OrderReportStatus status;
     private LocalDateTime submittedAt;
 
     @Data

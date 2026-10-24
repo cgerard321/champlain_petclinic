@@ -4,7 +4,9 @@ import com.petclinic.cartsservice.dataaccesslayer.Order;
 import com.petclinic.cartsservice.dataaccesslayer.OrderRepository;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReport;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportReason;
 import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportRepository;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportStatus;
 import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import com.petclinic.cartsservice.presentationlayer.CreateOrderReportRequestModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
@@ -78,7 +80,7 @@ class OrderReportServiceUnitTest {
     void createOrderReport_validRequest_savesNewReport() {
         CreateOrderReportRequestModel request =
                 CreateOrderReportRequestModel.builder()
-                        .reason(OrderReport.Reason.DAMAGED_ITEM)
+                        .reason(OrderReportReason.DAMAGED_ITEM)
                         .productIds(List.of(PRODUCT_ID))
                         .description(
                                 "The package arrived with damaged dog food."
@@ -111,7 +113,7 @@ class OrderReportServiceUnitTest {
                             response.getReportId().startsWith("RPT-")
                     );
                     assertEquals(
-                            OrderReport.Status.NEW,
+                            OrderReportStatus.NEW,
                             response.getStatus()
                     );
                     assertEquals(ORDER_ID, response.getOrderId());
@@ -131,7 +133,7 @@ class OrderReportServiceUnitTest {
                 captor.getValue().getCustomerName()
         );
         assertEquals(
-                OrderReport.Status.NEW,
+                OrderReportStatus.NEW,
                 captor.getValue().getStatus()
         );
     }
@@ -187,7 +189,7 @@ class OrderReportServiceUnitTest {
     void createOrderReport_itemReasonWithoutProduct_returnsInvalidInput() {
         CreateOrderReportRequestModel request =
                 CreateOrderReportRequestModel.builder()
-                        .reason(OrderReport.Reason.MISSING_ITEM)
+                        .reason(OrderReportReason.MISSING_ITEM)
                         .productIds(List.of())
                         .description(
                                 "An item was missing from my package."
@@ -210,7 +212,7 @@ class OrderReportServiceUnitTest {
     void createOrderReport_productNotInOrder_returnsInvalidInput() {
         CreateOrderReportRequestModel request =
                 CreateOrderReportRequestModel.builder()
-                        .reason(OrderReport.Reason.WRONG_ITEM)
+                        .reason(OrderReportReason.WRONG_ITEM)
                         .productIds(List.of("another-product"))
                         .description(
                                 "The wrong product was included in the package."
@@ -237,7 +239,7 @@ class OrderReportServiceUnitTest {
     void createOrderReport_descriptionTooShort_returnsInvalidInput() {
         CreateOrderReportRequestModel request =
                 CreateOrderReportRequestModel.builder()
-                        .reason(OrderReport.Reason.OTHER)
+                        .reason(OrderReportReason.OTHER)
                         .description("Too short")
                         .build();
 
@@ -257,7 +259,7 @@ class OrderReportServiceUnitTest {
         CreateOrderReportRequestModel request =
                 CreateOrderReportRequestModel.builder()
                         .reason(
-                                OrderReport.Reason.PACKAGE_NOT_RECEIVED
+                                OrderReportReason.PACKAGE_NOT_RECEIVED
                         )
                         .productIds(List.of())
                         .description(
@@ -293,7 +295,7 @@ class OrderReportServiceUnitTest {
 
     private CreateOrderReportRequestModel validOtherRequest() {
         return CreateOrderReportRequestModel.builder()
-                .reason(OrderReport.Reason.OTHER)
+                .reason(OrderReportReason.OTHER)
                 .productIds(List.of())
                 .description(
                         "I need help with a problem related to this order."

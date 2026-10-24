@@ -1,7 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v1;
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
-import com.petclinic.bffapigateway.dtos.Cart.CreateOrderReportRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.OrderReportRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.OrderReportResponseDTO;
 import com.petclinic.bffapigateway.dtos.Cart.OrderResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
@@ -11,12 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -55,7 +50,7 @@ public class OrderControllerV1 {
     public Mono<ResponseEntity<OrderReportResponseDTO>> createOrderReport(
             @PathVariable String customerId,
             @PathVariable String orderId,
-            @RequestBody CreateOrderReportRequestDTO request
+            @RequestBody OrderReportRequestDTO request
     ) {
         return cartServiceClient.createOrderReport(
                         customerId,

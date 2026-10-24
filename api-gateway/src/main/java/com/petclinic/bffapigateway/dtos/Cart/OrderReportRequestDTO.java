@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateOrderReportRequestDTO {
+public class OrderReportRequestDTO {
 
     private String reason;
 

@@ -39,26 +39,11 @@ public class OrderReport {
     private String orderId;
     private String customerId;
     private String customerName;
-    private Reason reason;
+    private OrderReportReason reason;
     private List<AffectedItem> affectedItems;
     private String description;
-    private Status status;
+    private OrderReportStatus status;
     private LocalDateTime submittedAt;
-
-    public enum Reason {
-        DAMAGED_ITEM,
-        MISSING_ITEM,
-        WRONG_ITEM,
-        PACKAGE_NOT_RECEIVED,
-        OTHER
-    }
-
-    public enum Status {
-        NEW,
-        IN_REVIEW,
-        RESOLVED,
-        REJECTED
-    }
 
     @Data
     @Builder

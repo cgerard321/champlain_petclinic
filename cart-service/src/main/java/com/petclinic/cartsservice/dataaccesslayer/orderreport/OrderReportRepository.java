@@ -11,7 +11,7 @@ public interface OrderReportRepository
 
     Mono<Boolean> existsByOrderIdAndStatusIn(
             String orderId,
-            Collection<OrderReport.Status> statuses
+            Collection<OrderReportStatus> statuses
     );
 
     Flux<OrderReport> findAllByCustomerIdOrderBySubmittedAtDesc(

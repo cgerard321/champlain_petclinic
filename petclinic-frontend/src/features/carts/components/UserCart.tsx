@@ -134,39 +134,43 @@ const UserCart: React.FC = () => {
     setOrdersLoading(true);
     setOrdersError(null);
 
-    try {
-      const [orderData, reportData] = await Promise.all([
-        getCustomerOrders(customerId),
-        getCustomerOrderReports(customerId),
-      ]);
+    const ordersRequest = getCustomerOrders(customerId)
+      .then(orderData => {
+        setOrders(Array.isArray(orderData) ? orderData : []);
+      })
+      .catch(error => {
+        console.error('Failed to fetch orders:', error);
+        setOrders([]);
+        setOrdersError(t('orders.loadFailed'));
+      })
+      .finally(() => setOrdersLoading(false));
 
-      setOrders(Array.isArray(orderData) ? orderData : []);
+    const reportsRequest = getCustomerOrderReports(customerId)
+      .then(reportData => {
+        const latestReports = (
+          Array.isArray(reportData) ? reportData : []
+        ).reduce<Record<string, OrderReportSummary>>((reports, report) => {
+          const currentReport = reports[report.orderId];
 
-      const latestReports = (
-        Array.isArray(reportData) ? reportData : []
-      ).reduce<Record<string, OrderReportSummary>>((reports, report) => {
-        const currentReport = reports[report.orderId];
+          if (
+            !currentReport ||
+            new Date(report.submittedAt).getTime() >
+              new Date(currentReport.submittedAt).getTime()
+          ) {
+            reports[report.orderId] = report;
+          }
 
-        if (
-          !currentReport ||
-          new Date(report.submittedAt).getTime() >
-            new Date(currentReport.submittedAt).getTime()
-        ) {
-          reports[report.orderId] = report;
-        }
+          return reports;
+        }, {});
 
-        return reports;
-      }, {});
+        setReportsByOrderId(latestReports);
+      })
+      .catch(error => {
+        console.error('Failed to fetch order reports:', error);
+        setReportsByOrderId({});
+      });
 
-      setReportsByOrderId(latestReports);
-    } catch (error) {
-      console.error('Failed to fetch orders or reports:', error);
-      setOrders([]);
-      setReportsByOrderId({});
-      setOrdersError(t('orders.loadFailed'));
-    } finally {
-      setOrdersLoading(false);
-    }
+    await Promise.all([ordersRequest, reportsRequest]);
   }, [customerId, t]);
 
   useEffect(() => {
@@ -1472,66 +1476,66 @@ const UserCart: React.FC = () => {
             <p>{t('orders.empty')}</p>
           ) : (
             <div className="orders-list">
-              {orders.map(order => {
-                const report = reportsByOrderId[order.orderId];
-                const hasOpenReport = report
-                  ? isOpenOrderReport(report)
-                  : false;
+              {orders.map(order => (
+                <div key={order.orderId} className="order-card cart-card">
+                  <div className="order-header">
+                    <h3>{t('orders.orderNumber', { id: order.orderId })}</h3>
 
-                return (
-                  <div key={order.orderId} className="order-card cart-card">
-                    <div className="order-header">
-                      <h3>{t('orders.orderNumber', { id: order.orderId })}</h3>
+                    <p>
+                      {t('orders.placedOn')}{' '}
+                      {new Date(order.orderDate).toLocaleDateString()}
+                    </p>
+                  </div>
 
-                      <p>
-                        {t('orders.placedOn')}{' '}
-                        {new Date(order.orderDate).toLocaleDateString()}
-                      </p>
+                  {reportsByOrderId[order.orderId] && (
+                    <div className="order-report-banner" role="status">
+                      {t('reports.banner', {
+                        status: t(
+                          `reports.status.${reportsByOrderId[order.orderId].status}`
+                        ),
+                        reportId: reportsByOrderId[order.orderId].reportId,
+                      })}
                     </div>
+                  )}
 
-                    {report && (
-                      <div className="order-report-banner" role="status">
-                        {t('reports.banner', {
-                          status: t(`reports.status.${report.status}`),
-                          reportId: report.reportId,
-                        })}
-                      </div>
-                    )}
-
-                    <div className="order-products">
-                      {order.products.map(item => (
-                        <div key={item.productId} className="order-product">
-                          <div
-                            className="recent-purchase-image"
-                            onClick={() =>
-                              redirectToProductPageOnClick(item.productId)
-                            }
-                          >
-                            <ImageContainer
-                              productId={item.productId}
-                              imageId={item.imageId}
-                            />
-                          </div>
-
-                          <div className="order-product-details">
-                            <h4>{localizedName(item)}</h4>
-
-                            <p>
-                              {t('orders.quantity')} {item.quantityInCart}
-                            </p>
-
-                            <p>
-                              {t('orders.each', {
-                                price: formatPrice(item.productSalePrice),
-                              })}
-                            </p>
-                          </div>
+                  <div className="order-products">
+                    {order.products.map(item => (
+                      <div key={item.productId} className="order-product">
+                        <div
+                          className="recent-purchase-image"
+                          onClick={() =>
+                            redirectToProductPageOnClick(item.productId)
+                          }
+                        >
+                          <ImageContainer
+                            productId={item.productId}
+                            imageId={item.imageId}
+                          />
                         </div>
-                      ))}
-                    </div>
 
-                    <div className="order-footer">
-                      {!isStaff && !hasOpenReport && (
+                        <div className="order-product-details">
+                          <h4>{localizedName(item)}</h4>
+
+                          <p>
+                            {t('orders.quantity')} {item.quantityInCart}
+                          </p>
+
+                          <p>
+                            {t('orders.each', {
+                              price: formatPrice(item.productSalePrice),
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="order-footer">
+                    {!isStaff &&
+                      (!reportsByOrderId[order.orderId] ||
+                        !isOpenOrderReport(
+                          reportsByOrderId[order.orderId]
+                        )) && (
                         <button
                           type="button"
                           className="cart-button cart-button--outline"
@@ -1541,46 +1545,45 @@ const UserCart: React.FC = () => {
                         </button>
                       )}
 
-                      <button
-                        type="button"
-                        className="view-receipt-btn cart-button cart-button--brand cart-button--block"
-                        onClick={() => handleViewOrderReceipt(order)}
-                        style={{ marginTop: '1rem' }}
-                        aria-label={t('cart.receiptLabel')}
-                      >
-                        {t('buttons.viewReceipt')}
-                      </button>
-                      <span>
-                        {t('orders.subtotal')} {formatPrice(order.subtotal)}
-                      </span>
-                      <span>
-                        {order.shippingMethod
-                          ? t('orders.shippingWithMethod', {
-                              method: order.shippingMethod,
-                            })
-                          : t('orders.shipping')}{' '}
-                        {formatPrice(order.shippingCost ?? 0)}
-                      </span>
-                      <span>
-                        {t('orders.tvq')} {formatPrice(order.tvq)}
-                      </span>
-                      <span>
-                        {t('orders.tvc')} {formatPrice(order.tvc)}
-                      </span>
+                    <button
+                      type="button"
+                      className="view-receipt-btn cart-button cart-button--brand cart-button--block"
+                      onClick={() => handleViewOrderReceipt(order)}
+                      style={{ marginTop: '1rem' }}
+                      aria-label={t('cart.receiptLabel')}
+                    >
+                      {t('buttons.viewReceipt')}
+                    </button>
+                    <span>
+                      {t('orders.subtotal')} {formatPrice(order.subtotal)}
+                    </span>
+                    <span>
+                      {order.shippingMethod
+                        ? t('orders.shippingWithMethod', {
+                            method: order.shippingMethod,
+                          })
+                        : t('orders.shipping')}{' '}
+                      {formatPrice(order.shippingCost ?? 0)}
+                    </span>
+                    <span>
+                      {t('orders.tvq')} {formatPrice(order.tvq)}
+                    </span>
+                    <span>
+                      {t('orders.tvc')} {formatPrice(order.tvc)}
+                    </span>
 
-                      {order.promoPercent != null && (
-                        <span>
-                          {t('orders.promo', { percent: order.promoPercent })}
-                        </span>
-                      )}
+                    {order.promoPercent != null && (
+                      <span>
+                        {t('orders.promo', { percent: order.promoPercent })}
+                      </span>
+                    )}
 
-                      <strong>
-                        {t('orders.total')} {formatPrice(order.total)}
-                      </strong>
-                    </div>
+                    <strong>
+                      {t('orders.total')} {formatPrice(order.total)}
+                    </strong>
                   </div>
-                );
-              })}
+                </div>
+              ))}
             </div>
           )}
         </div>
