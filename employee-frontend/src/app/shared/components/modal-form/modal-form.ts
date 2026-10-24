@@ -45,6 +45,7 @@ type DynamicFormGroup = FormGroup<DynamicFormControls>;
   templateUrl: './modal-form.html',
   styleUrl: './modal-form.css',
 })
+export type ModalFormFieldType = 'string' | 'number' | 'enum' | 'image' | 'date' | 'password';
 export class ModalForm<T extends object> {
   private readonly dialogRef = inject(MatDialogRef<ModalForm<T>, ModalFormResult<T>>);
   private readonly locale = inject(LOCALE_ID);
