@@ -720,6 +720,63 @@
         "typeRequired": "Inventory type is required.",
         "descriptionRequired": "Description is required."
       }
+    },
+
+    "users": {
+      "title": "Users",
+      "description": "View and manage user accounts for inventory managers, vets, receptionists and customers.",
+      "table": {
+        "label": "User accounts"
+      },
+      "fields": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "actions": "Actions",
+        "password": "Password",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "phone": "Phone number",
+        "resume": "Résumé",
+        "address": "Address",
+        "city": "City",
+        "province": "Province"
+      },
+      "actions": {
+        "add": "Add user",
+        "addRole": "Add user: {$role}",
+        "next": "Next",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "editAria": "Edit {$name}",
+        "editTitle": "Edit user",
+        "saveChanges": "Save changes",
+        "delete": "Delete",
+        "deleteAria": "Delete {$name}",
+        "deleteTitle": "Delete user",
+        "deleteConfirm": "Are you sure you want to delete {$name}? This cannot be undone."
+      },
+      "loading": "Loading users…",
+      "error": "Unable to load the users.",
+      "empty": "No users found.",
+      "success": {
+        "created": "User created successfully.",
+        "updated": "User updated successfully.",
+        "deleted": "User deleted successfully."
+      },
+      "errors": {
+        "save": "The user could not be saved. Please try again.",
+        "delete": "The user could not be deleted. Please try again."
+      },
+      "validation": {
+        "email": "Enter a valid email address.",
+        "emailLength": "The email must have at least 6 characters.",
+        "password": "Use at least 8 characters with a number, an uppercase letter, a lowercase letter and a special character. No spaces.",
+        "nameLength": "Use 2 to 30 characters.",
+        "vetPhone": "The phone number must have exactly 20 characters, for example (514) 555-0123 #1234.",
+        "resumeLength": "The résumé must have at least 10 characters.",
+        "customerPhone": "Enter 10 digits, without spaces or dashes."
+      }
     }
   }
 }

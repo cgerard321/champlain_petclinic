@@ -52,6 +52,11 @@ export class UserService {
     );
   }
 
+  // Only deletes the account. The vet or customer profile of the user is not deleted.
+  deleteUser(userId: string): Observable<unknown> {
+    return this.http.delete(`${this.baseUrl}/${userId}`);
+  }
+
   createUser(request: UserCreateRequest): Observable<unknown> {
     const url = this.createUrls[request.role];
 
@@ -85,6 +90,7 @@ export class UserService {
     }
 
     if (request.role === 'CUST') {
+      // The gateway still calls the customer profile "owner"
       return this.http.post(url, {
         ...account,
         owner: {

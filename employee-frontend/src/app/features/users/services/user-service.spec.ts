@@ -83,6 +83,26 @@ describe('UserService', () => {
     expect(failed).toBe(true);
   });
 
+  it('should delete a user with the v2 endpoint', () => {
+    service.deleteUser('user-1').subscribe();
+
+    const request = http.expectOne(`${API_BASE_URL}/user-1`);
+    expect(request.request.method).toBe('DELETE');
+    request.flush(null, { status: 204, statusText: 'No Content' });
+  });
+
+  it('should report an error when the user cannot be deleted', () => {
+    let failed = false;
+
+    service.deleteUser('user-1').subscribe({ error: () => (failed = true) });
+
+    http
+      .expectOne(`${API_BASE_URL}/user-1`)
+      .flush(null, { status: 500, statusText: 'Server Error' });
+
+    expect(failed).toBe(true);
+  });
+
   it('should create an inventory manager with the v1 admin endpoint', () => {
     service
       .createUser({

@@ -76,7 +76,8 @@
 }
 
 .add-user-button,
-.edit-button {
+.edit-button,
+.delete-button {
   border: 0;
   border-radius: 999px;
   background: var(--forest-700);
@@ -92,9 +93,27 @@
   font-size: 0.95rem;
 }
 
-.edit-button {
+.edit-button,
+.delete-button {
   padding: 7px 14px;
   font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.delete-button {
+  border: 1px solid #8e0000;
+  background: #b71c1c;
+}
+
+.delete-button:hover {
+  background: #8e0000;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
 }
 
 .add-user-button:hover,
@@ -103,7 +122,8 @@
 }
 
 .add-user-button:focus-visible,
-.edit-button:focus-visible {
+.edit-button:focus-visible,
+.delete-button:focus-visible {
   outline: 3px solid var(--sage-400);
   outline-offset: 3px;
 }

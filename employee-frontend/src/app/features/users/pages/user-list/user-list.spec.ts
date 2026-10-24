@@ -1,3 +1,4 @@
+import { LOCALE_ID } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { of, Subject, throwError } from 'rxjs';
@@ -8,11 +9,14 @@ import { UserService } from '@features/users/services/user-service';
 
 import { UserList } from './user-list';
 
+// No translations are loaded in these tests, so the text is the French source text.
 interface DialogConfig {
   data: {
     title: string;
     submitLabel: string;
-    fields: { key: string; type: string; options?: unknown[] }[];
+    message?: string;
+    destructive?: boolean;
+    fields: { key: string; type: string; options?: { value: string; label: string }[] }[];
     initialValue: Record<string, string>;
   };
 }
@@ -42,9 +46,17 @@ describe('UserList', () => {
     roles: [{ id: 1, name: 'ADMIN' }],
   };
 
+  const customerUser: User = {
+    userId: 'user-4',
+    username: 'jane_customer',
+    email: 'jane@petclinic.com',
+    roles: [{ id: 4, name: 'CUST' }],
+  };
+
   const getUsers = vi.fn<UserService['getUsers']>();
   const updateUser = vi.fn<UserService['updateUser']>();
   const createUser = vi.fn<UserService['createUser']>();
+  const deleteUser = vi.fn<UserService['deleteUser']>();
 
   // Every call to MatDialog.open() gets its own result, like a real dialog
   const openDialog = vi.fn(() => {
@@ -67,6 +79,8 @@ describe('UserList', () => {
   const rows = (): NodeListOf<HTMLElement> => fixture.nativeElement.querySelectorAll('tbody tr');
   const editButtons = (): NodeListOf<HTMLButtonElement> =>
     fixture.nativeElement.querySelectorAll('.edit-button');
+  const deleteButtons = (): NodeListOf<HTMLButtonElement> =>
+    fixture.nativeElement.querySelectorAll('.delete-button');
   const clickAdd = (): void =>
     (fixture.nativeElement.querySelector('.add-user-button') as HTMLButtonElement).click();
 
@@ -81,32 +95,47 @@ describe('UserList', () => {
   const fieldKeys = (config: DialogConfig): string[] =>
     config.data.fields.map((field) => field.key);
 
-  beforeEach(async () => {
+  async function setup(locale = 'en-US'): Promise<void> {
+    TestBed.resetTestingModule();
     vi.clearAllMocks();
     dialogResults = [];
 
-    getUsers.mockReturnValue(of([vetUser, managerUser, adminUser]));
+    getUsers.mockReturnValue(of([vetUser, managerUser, adminUser, customerUser]));
     updateUser.mockReturnValue(of({}));
     createUser.mockReturnValue(of({}));
+    deleteUser.mockReturnValue(of({}));
 
     await TestBed.configureTestingModule({
       imports: [UserList],
-      providers: [{ provide: UserService, useValue: { getUsers, updateUser, createUser } }],
+      providers: [
+        { provide: UserService, useValue: { getUsers, updateUser, createUser, deleteUser } },
+        { provide: LOCALE_ID, useValue: locale },
+      ],
     })
       .overrideProvider(MatDialog, { useValue: { open: openDialog } })
       .compileComponents();
 
     fixture = TestBed.createComponent(UserList);
     fixture.detectChanges();
+  }
+
+  beforeEach(async () => {
+    await setup();
   });
 
   it('should display the name, email and role of every user', () => {
-    expect(rows()).toHaveLength(3);
+    expect(rows()).toHaveLength(4);
     expect(text()).toContain('dr_vet');
     expect(text()).toContain('vet@petclinic.com');
-    expect(text()).toContain('Vet');
-    expect(text()).toContain('Inventory Manager');
-    expect(text()).toContain('Administrator');
+    expect(text()).toContain('Vétérinaire');
+    expect(text()).toContain("Gestionnaire d'inventaire");
+    expect(text()).toContain('Administrateur');
+  });
+
+  it('should show the CUST role as a customer', () => {
+    expect(text()).toContain('Client');
+    expect(text()).not.toContain('Owner');
+    expect(text()).not.toContain('Propriétaire');
   });
 
   it('should show a message when there are no users', () => {
@@ -114,7 +143,7 @@ describe('UserList', () => {
     fixture = TestBed.createComponent(UserList);
     fixture.detectChanges();
 
-    expect(text()).toContain('No users found.');
+    expect(text()).toContain('Aucun utilisateur trouvé.');
     expect(rows()).toHaveLength(0);
   });
 
@@ -123,13 +152,19 @@ describe('UserList', () => {
     fixture = TestBed.createComponent(UserList);
     fixture.detectChanges();
 
-    expect(text()).toContain('Unable to load the users.');
+    expect(text()).toContain('Impossible de charger les utilisateurs.');
     expect(rows()).toHaveLength(0);
   });
 
-  it('should not offer to edit administrators', () => {
-    // Only the vet and the inventory manager can be edited
-    expect(editButtons()).toHaveLength(2);
+  it('should not offer to edit or delete administrators', () => {
+    // The vet, the inventory manager and the customer can be managed, the administrator cannot
+    expect(editButtons()).toHaveLength(3);
+    expect(deleteButtons()).toHaveLength(3);
+  });
+
+  it('should give the buttons a label that names the user', () => {
+    expect(editButtons().item(0).getAttribute('aria-label')).toBe('Modifier dr_vet');
+    expect(deleteButtons().item(0).getAttribute('aria-label')).toBe('Supprimer dr_vet');
   });
 
   describe('editing a user', () => {
@@ -137,7 +172,7 @@ describe('UserList', () => {
       editButtons().item(0).click();
 
       expect(openDialog).toHaveBeenCalledTimes(1);
-      expect(dialogConfig(0).data.title).toBe('Edit user');
+      expect(dialogConfig(0).data.title).toBe("Modifier l'utilisateur");
       expect(dialogConfig(0).data.initialValue).toEqual({
         username: 'dr_vet',
         email: 'vet@petclinic.com',
@@ -158,7 +193,7 @@ describe('UserList', () => {
         role: 'RECEPTIONIST',
       });
       expect(getUsers).toHaveBeenCalledTimes(2);
-      expect(text()).toContain('User updated successfully.');
+      expect(text()).toContain('Utilisateur modifié avec succès.');
     });
 
     it('should show the error and no success message when saving fails', () => {
@@ -171,7 +206,7 @@ describe('UserList', () => {
       fixture.detectChanges();
 
       expect(text()).toContain('Email already used');
-      expect(text()).not.toContain('User updated successfully.');
+      expect(text()).not.toContain('Utilisateur modifié avec succès.');
       expect(getUsers).toHaveBeenCalledTimes(1);
     });
 
@@ -182,7 +217,21 @@ describe('UserList', () => {
       closeDialog(0, { value: { username: 'dr_vet', email: 'vet@petclinic.com', role: 'VET' } });
       fixture.detectChanges();
 
-      expect(text()).toContain('The user could not be saved. Please try again.');
+      expect(text()).toContain("Impossible d'enregistrer l'utilisateur. Veuillez réessayer.");
+    });
+
+    it('should show the translated error to French users, not the English one of the backend', async () => {
+      await setup('fr-CA');
+      updateUser.mockReturnValue(throwError(() => ({ code: 400, message: 'Email already used' })));
+
+      editButtons().item(0).click();
+      closeDialog(0, {
+        value: { username: 'dr_vet', email: 'taken@petclinic.com', role: 'VET' },
+      });
+      fixture.detectChanges();
+
+      expect(text()).not.toContain('Email already used');
+      expect(text()).toContain("Impossible d'enregistrer l'utilisateur. Veuillez réessayer.");
     });
 
     it('should not save anything when the form is cancelled', () => {
@@ -195,14 +244,65 @@ describe('UserList', () => {
     });
   });
 
+  describe('deleting a user', () => {
+    it('should ask for a confirmation that names the user before deleting', () => {
+      deleteButtons().item(0).click();
+
+      expect(openDialog).toHaveBeenCalledTimes(1);
+      expect(dialogConfig(0).data.title).toBe("Supprimer l'utilisateur");
+      expect(dialogConfig(0).data.message).toContain('dr_vet');
+      expect(dialogConfig(0).data.destructive).toBe(true);
+      expect(deleteUser).not.toHaveBeenCalled();
+    });
+
+    it('should delete the user, reload the users and confirm the success', () => {
+      deleteButtons().item(0).click();
+      closeDialog(0, { value: {} });
+      fixture.detectChanges();
+
+      expect(deleteUser).toHaveBeenCalledWith('user-1');
+      expect(getUsers).toHaveBeenCalledTimes(2);
+      expect(text()).toContain('Utilisateur supprimé avec succès.');
+    });
+
+    it('should not delete anything when the confirmation is cancelled', () => {
+      deleteButtons().item(0).click();
+      closeDialog(0, undefined);
+      fixture.detectChanges();
+
+      expect(deleteUser).not.toHaveBeenCalled();
+      expect(getUsers).toHaveBeenCalledTimes(1);
+      expect(text()).not.toContain('Utilisateur supprimé avec succès.');
+    });
+
+    it('should show the error and no success message when deleting fails', () => {
+      deleteUser.mockReturnValue(throwError(() => new Error('server')));
+
+      deleteButtons().item(0).click();
+      closeDialog(0, { value: {} });
+      fixture.detectChanges();
+
+      expect(text()).toContain("Impossible de supprimer l'utilisateur. Veuillez réessayer.");
+      expect(text()).not.toContain('Utilisateur supprimé avec succès.');
+      expect(getUsers).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('adding a user', () => {
     it('should first ask for the role, with the four roles to choose from', () => {
       clickAdd();
 
       expect(openDialog).toHaveBeenCalledTimes(1);
-      expect(dialogConfig(0).data.title).toBe('Add user');
+      expect(dialogConfig(0).data.title).toBe('Ajouter un utilisateur');
       expect(fieldKeys(dialogConfig(0))).toEqual(['role']);
-      expect(dialogConfig(0).data.fields[0]?.options).toHaveLength(4);
+
+      const labels = dialogConfig(0).data.fields[0]?.options?.map((option) => option.label);
+      expect(labels).toEqual([
+        "Gestionnaire d'inventaire",
+        'Vétérinaire',
+        'Réceptionniste',
+        'Client',
+      ]);
     });
 
     it('should not ask for anything else when the role choice is cancelled', () => {
@@ -216,21 +316,21 @@ describe('UserList', () => {
     it('should only ask for the account fields for an inventory manager', () => {
       const config = chooseRole('INVENTORY_MANAGER');
 
-      expect(config.data.title).toBe('Add inventory manager');
+      expect(config.data.title).toBe("Ajouter un utilisateur : Gestionnaire d'inventaire");
       expect(fieldKeys(config)).toEqual(['username', 'email', 'password']);
     });
 
     it('should only ask for the account fields for a receptionist', () => {
       const config = chooseRole('RECEPTIONIST');
 
-      expect(config.data.title).toBe('Add receptionist');
+      expect(config.data.title).toBe('Ajouter un utilisateur : Réceptionniste');
       expect(fieldKeys(config)).toEqual(['username', 'email', 'password']);
     });
 
     it('should also ask for the vet profile when adding a vet', () => {
       const config = chooseRole('VET');
 
-      expect(config.data.title).toBe('Add vet');
+      expect(config.data.title).toBe('Ajouter un utilisateur : Vétérinaire');
       expect(fieldKeys(config)).toEqual([
         'username',
         'email',
@@ -242,10 +342,10 @@ describe('UserList', () => {
       ]);
     });
 
-    it('should also ask for the owner profile when adding an owner', () => {
+    it('should also ask for the customer profile when adding a customer', () => {
       const config = chooseRole('CUST');
 
-      expect(config.data.title).toBe('Add owner');
+      expect(config.data.title).toBe('Ajouter un utilisateur : Client');
       expect(fieldKeys(config)).toEqual([
         'username',
         'email',
@@ -287,7 +387,7 @@ describe('UserList', () => {
         }),
       );
       expect(getUsers).toHaveBeenCalledTimes(2);
-      expect(text()).toContain('User created successfully.');
+      expect(text()).toContain('Utilisateur créé avec succès.');
     });
 
     it('should send the vet profile when creating a vet', () => {
@@ -316,16 +416,16 @@ describe('UserList', () => {
       );
     });
 
-    it('should send the owner profile when creating an owner', () => {
+    it('should send the customer profile when creating a customer', () => {
       chooseRole('CUST');
       closeDialog(1, {
         value: {
-          username: 'new_owner',
-          email: 'owner@petclinic.com',
+          username: 'new_customer',
+          email: 'customer@petclinic.com',
           role: 'ignored',
           password: 'Passw0rd!',
           firstName: 'Olivia',
-          lastName: 'Owner',
+          lastName: 'Customer',
           address: '1 Main Street',
           city: 'Montreal',
           province: 'Quebec',
@@ -362,7 +462,7 @@ describe('UserList', () => {
       fixture.detectChanges();
 
       expect(text()).toContain('Username already taken');
-      expect(text()).not.toContain('User created successfully.');
+      expect(text()).not.toContain('Utilisateur créé avec succès.');
       expect(getUsers).toHaveBeenCalledTimes(1);
     });
   });

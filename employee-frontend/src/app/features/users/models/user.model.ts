@@ -20,7 +20,7 @@ export interface UserUpdateRequest {
 }
 
 // What the "Add user" form sends. The profile fields depend on the role:
-// vets need the vet fields and owners need the owner fields.
+// vets need the vet fields and customers need the customer fields.
 export interface UserCreateRequest {
   username: string;
   email: string;
@@ -31,7 +31,7 @@ export interface UserCreateRequest {
   // vets only
   phoneNumber?: string;
   resume?: string;
-  // owners only
+  // customers only
   address?: string;
   city?: string;
   province?: string;
@@ -50,31 +50,39 @@ export interface RoleOption {
   label: string;
 }
 
-// The roles an administrator can manage (values match the backend role names)
-export const USER_ROLE_OPTIONS: readonly RoleOption[] = [
-  { value: 'INVENTORY_MANAGER', label: 'Inventory Manager' },
-  { value: 'VET', label: 'Vet' },
-  { value: 'RECEPTIONIST', label: 'Receptionist' },
-  { value: 'CUST', label: 'Owner' },
-];
+// The roles an administrator can manage (these are the backend role names)
+export const MANAGED_ROLE_NAMES = ['INVENTORY_MANAGER', 'VET', 'RECEPTIONIST', 'CUST'];
+
+// The text shown for a role name. It is a function, and not a constant, because the
+// translations are only installed when the app starts.
+export function roleLabel(roleName: string): string {
+  switch (roleName) {
+    case 'ADMIN':
+      return $localize`:@@role.admin:Administrateur`;
+    case 'VET':
+      return $localize`:@@role.vet:Vétérinaire`;
+    case 'RECEPTIONIST':
+      return $localize`:@@role.receptionist:Réceptionniste`;
+    case 'INVENTORY_MANAGER':
+      return $localize`:@@role.inventoryManager:Gestionnaire d'inventaire`;
+    case 'CUST':
+      return $localize`:@@role.customer:Client`;
+    default:
+      return roleName;
+  }
+}
+
+// The roles to choose from in the forms
+export function userRoleOptions(): RoleOption[] {
+  return MANAGED_ROLE_NAMES.map((name) => ({ value: name, label: roleLabel(name) }));
+}
 
 // The role name of a user (we only use the first role)
 export function userRoleName(user: User): string {
   return user.roles[0]?.name ?? '';
 }
 
-// The text shown in the table for a role name
-export function roleLabel(roleName: string): string {
-  if (roleName === 'ADMIN') {
-    return 'Administrator';
-  }
-
-  const option = USER_ROLE_OPTIONS.find((item) => item.value === roleName);
-
-  return option ? option.label : roleName;
-}
-
-// Administrators are listed but cannot be edited from this page
+// Administrators are listed but cannot be edited or deleted from this page
 export function isManagedRole(roleName: string): boolean {
-  return USER_ROLE_OPTIONS.some((option) => option.value === roleName);
+  return MANAGED_ROLE_NAMES.includes(roleName);
 }

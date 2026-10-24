@@ -1,4 +1,13 @@
-import { Component, computed, inject, OnInit, signal, TemplateRef, viewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  LOCALE_ID,
+  OnInit,
+  signal,
+  TemplateRef,
+  viewChild,
+} from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
@@ -7,8 +16,8 @@ import {
   isManagedRole,
   roleLabel,
   User,
-  USER_ROLE_OPTIONS,
   userRoleName,
+  userRoleOptions,
 } from '@features/users/models/user.model';
 import { UserService } from '@features/users/services/user-service';
 import { ModalForm } from '@shared/components/modal-form/modal-form';
@@ -38,13 +47,16 @@ interface RoleChoice {
   role: string;
 }
 
+// The confirmation dialog has no fields
+type ConfirmValue = Record<string, never>;
+
 // Same rule as the backend: 8+ characters with a digit, a lowercase letter,
 // an uppercase letter and a special character, and no spaces.
 const PASSWORD_PATTERN =
   /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=*!()_.<>,{}])(?=\S+$).{8,}$/;
 
-// The owner service only accepts a phone number made of 10 digits.
-const OWNER_PHONE_PATTERN = /^[0-9]{10}$/;
+// The customer service only accepts a phone number made of 10 digits.
+const CUSTOMER_PHONE_PATTERN = /^[0-9]{10}$/;
 
 @Component({
   imports: [Table],
@@ -55,6 +67,10 @@ const OWNER_PHONE_PATTERN = /^[0-9]{10}$/;
 export class UserList implements OnInit {
   private readonly userService = inject(UserService);
   private readonly dialog = inject(MatDialog);
+  private readonly locale = inject(LOCALE_ID);
+
+  // The backend sends its error messages in English only
+  private readonly isFrench = this.locale.startsWith('fr');
 
   protected readonly users = signal<User[]>([]);
   protected readonly loading = signal(true);
@@ -63,15 +79,31 @@ export class UserList implements OnInit {
   protected readonly saveError = signal('');
   protected readonly successMessage = signal('');
 
-  protected readonly tableLabel = 'User accounts';
+  protected readonly tableLabel = $localize`:@@users.table.label:Comptes utilisateurs`;
   protected readonly userRowId = (user: User): string => user.userId;
   protected readonly actionsCell = viewChild<TemplateRef<{ $implicit: User }>>('actionsCell');
 
   protected readonly columns = computed<TableColumn<User>[]>(() => [
-    { id: 'name', header: 'Name', value: (user) => user.username },
-    { id: 'email', header: 'Email', value: (user) => user.email },
-    { id: 'role', header: 'Role', value: (user) => roleLabel(userRoleName(user)) },
-    { id: 'actions', header: 'Actions', template: this.actionsCell() },
+    {
+      id: 'name',
+      header: $localize`:@@users.fields.name:Nom`,
+      value: (user) => user.username,
+    },
+    {
+      id: 'email',
+      header: $localize`:@@users.fields.email:Courriel`,
+      value: (user) => user.email,
+    },
+    {
+      id: 'role',
+      header: $localize`:@@users.fields.role:Rôle`,
+      value: (user) => roleLabel(userRoleName(user)),
+    },
+    {
+      id: 'actions',
+      header: $localize`:@@users.fields.actions:Actions`,
+      template: this.actionsCell(),
+    },
   ]);
 
   ngOnInit(): void {
@@ -94,14 +126,25 @@ export class UserList implements OnInit {
     });
   }
 
-  // Administrators are shown in the list but cannot be edited here
+  // Administrators are shown in the list but cannot be edited or deleted here
   protected canEdit(user: User): boolean {
     return isManagedRole(userRoleName(user));
+  }
+
+  protected editLabel(user: User): string {
+    return $localize`:@@users.actions.editAria:Modifier ${user.username}:name:`;
+  }
+
+  protected deleteLabel(user: User): string {
+    return $localize`:@@users.actions.deleteAria:Supprimer ${user.username}:name:`;
   }
 
   // Step 1 of adding a user: choose the role. The next step asks for the fields of that role.
   protected openAddDialog(): void {
     this.clearMessages();
+
+    const title = $localize`:@@users.actions.add:Ajouter un utilisateur`;
+    const options = userRoleOptions();
 
     const dialogRef = this.dialog.open<
       ModalForm<RoleChoice>,
@@ -109,15 +152,21 @@ export class UserList implements OnInit {
       ModalFormResult<RoleChoice>
     >(ModalForm, {
       data: {
-        title: 'Add user',
-        submitLabel: 'Next',
-        cancelLabel: 'Cancel',
+        title,
+        submitLabel: $localize`:@@users.actions.next:Suivant`,
+        cancelLabel: $localize`:@@users.actions.cancel:Annuler`,
         fields: [
-          { key: 'role', label: 'Role', type: 'enum', required: true, options: USER_ROLE_OPTIONS },
+          {
+            key: 'role',
+            label: $localize`:@@users.fields.role:Rôle`,
+            type: 'enum',
+            required: true,
+            options,
+          },
         ],
-        initialValue: { role: USER_ROLE_OPTIONS[0]?.value ?? '' },
+        initialValue: { role: options[0]?.value ?? '' },
       },
-      ariaLabel: 'Add user',
+      ariaLabel: title,
       width: '560px',
       maxWidth: '95vw',
     });
@@ -136,11 +185,12 @@ export class UserList implements OnInit {
 
     this.clearMessages();
 
-    const dialogRef = this.openUserForm('Edit user', 'Save changes', this.editFields(), {
-      username: user.username,
-      email: user.email,
-      role: userRoleName(user),
-    });
+    const dialogRef = this.openUserForm(
+      $localize`:@@users.actions.editTitle:Modifier l'utilisateur`,
+      $localize`:@@users.actions.saveChanges:Enregistrer les modifications`,
+      this.editFields(),
+      { username: user.username, email: user.email, role: userRoleName(user) },
+    );
 
     // The dialog closes with undefined when the user cancels.
     dialogRef.afterClosed().subscribe((result) => {
@@ -150,11 +200,46 @@ export class UserList implements OnInit {
     });
   }
 
+  protected openDeleteDialog(user: User): void {
+    if (!this.canEdit(user)) {
+      return;
+    }
+
+    this.clearMessages();
+
+    const title = $localize`:@@users.actions.deleteTitle:Supprimer l'utilisateur`;
+
+    const dialogRef = this.dialog.open<
+      ModalForm<ConfirmValue>,
+      ModalFormData<ConfirmValue>,
+      ModalFormResult<ConfirmValue>
+    >(ModalForm, {
+      data: {
+        title,
+        message: $localize`:@@users.actions.deleteConfirm:Voulez-vous vraiment supprimer ${user.username}:name: ? Cette action est irréversible.`,
+        fields: [],
+        initialValue: {},
+        submitLabel: $localize`:@@users.actions.delete:Supprimer`,
+        cancelLabel: $localize`:@@users.actions.cancel:Annuler`,
+        destructive: true,
+      },
+      ariaLabel: title,
+      width: '440px',
+      maxWidth: '95vw',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.deleteUser(user);
+      }
+    });
+  }
+
   // Step 2 of adding a user: the fields depend on the role
   private openCreateDialog(role: string): void {
     const dialogRef = this.openUserForm(
-      `Add ${roleLabel(role).toLowerCase()}`,
-      'Add user',
+      $localize`:@@users.actions.addRole:Ajouter un utilisateur : ${roleLabel(role)}:role:`,
+      $localize`:@@users.actions.add:Ajouter un utilisateur`,
       this.createFields(role),
       this.emptyValue(role),
     );
@@ -177,7 +262,13 @@ export class UserList implements OnInit {
       ModalFormData<UserFormValue>,
       ModalFormResult<UserFormValue>
     >(ModalForm, {
-      data: { title, submitLabel, cancelLabel: 'Cancel', fields, initialValue },
+      data: {
+        title,
+        submitLabel,
+        cancelLabel: $localize`:@@users.actions.cancel:Annuler`,
+        fields,
+        initialValue,
+      },
       ariaLabel: title,
       width: '560px',
       maxWidth: '95vw',
@@ -201,42 +292,56 @@ export class UserList implements OnInit {
     };
   }
 
+  private nameField(): ModalFormField {
+    return {
+      key: 'username',
+      label: $localize`:@@users.fields.name:Nom`,
+      type: 'string',
+      required: true,
+    };
+  }
+
   private emailField(): ModalFormField {
     return {
       key: 'email',
-      label: 'Email',
+      label: $localize`:@@users.fields.email:Courriel`,
       type: 'string',
       required: true,
       validators: [Validators.email, Validators.minLength(6)],
       errorMessages: {
-        email: 'Enter a valid email address.',
-        minlength: 'The email must have at least 6 characters.',
+        email: $localize`:@@users.validation.email:Entrez une adresse courriel valide.`,
+        minlength: $localize`:@@users.validation.emailLength:Le courriel doit contenir au moins 6 caractères.`,
       },
     };
   }
 
   private editFields(): readonly ModalFormField[] {
     return [
-      { key: 'username', label: 'Name', type: 'string', required: true },
+      this.nameField(),
       this.emailField(),
-      { key: 'role', label: 'Role', type: 'enum', required: true, options: USER_ROLE_OPTIONS },
+      {
+        key: 'role',
+        label: $localize`:@@users.fields.role:Rôle`,
+        type: 'enum',
+        required: true,
+        options: userRoleOptions(),
+      },
     ];
   }
 
   // The account fields come first, then the profile fields of the role
   private createFields(role: string): readonly ModalFormField[] {
     const account: ModalFormField[] = [
-      { key: 'username', label: 'Name', type: 'string', required: true },
+      this.nameField(),
       this.emailField(),
       {
         key: 'password',
-        label: 'Password',
+        label: $localize`:@@users.fields.password:Mot de passe`,
         type: 'password',
         required: true,
         validators: [Validators.pattern(PASSWORD_PATTERN)],
         errorMessages: {
-          pattern:
-            'Use at least 8 characters with a number, an uppercase and a lowercase letter, and a special character (@#$%^&+=*!()_.<>,{}). No spaces.',
+          pattern: $localize`:@@users.validation.password:Utilisez au moins 8 caractères avec un chiffre, une majuscule, une minuscule et un caractère spécial. Aucun espace.`,
         },
       },
     ];
@@ -246,75 +351,94 @@ export class UserList implements OnInit {
     }
 
     if (role === 'CUST') {
-      return [...account, ...this.ownerFields()];
+      return [...account, ...this.customerFields()];
     }
 
     return account;
   }
 
-  private vetFields(): ModalFormField[] {
+  private personFields(): ModalFormField[] {
+    const lengthMessage = $localize`:@@users.validation.nameLength:Utilisez de 2 à 30 caractères.`;
+
     return [
       {
         key: 'firstName',
-        label: 'First name',
+        label: $localize`:@@users.fields.firstName:Prénom`,
         type: 'string',
         required: true,
         validators: [Validators.minLength(2), Validators.maxLength(30)],
-        errorMessages: {
-          minlength: 'Use 2 to 30 characters.',
-          maxlength: 'Use 2 to 30 characters.',
-        },
+        errorMessages: { minlength: lengthMessage, maxlength: lengthMessage },
       },
       {
         key: 'lastName',
-        label: 'Last name',
+        label: $localize`:@@users.fields.lastName:Nom de famille`,
         type: 'string',
         required: true,
         validators: [Validators.minLength(2), Validators.maxLength(30)],
-        errorMessages: {
-          minlength: 'Use 2 to 30 characters.',
-          maxlength: 'Use 2 to 30 characters.',
-        },
+        errorMessages: { minlength: lengthMessage, maxlength: lengthMessage },
       },
+    ];
+  }
+
+  private vetFields(): ModalFormField[] {
+    const phoneMessage = $localize`:@@users.validation.vetPhone:Le numéro de téléphone doit contenir exactement 20 caractères, par exemple (514) 555-0123 #1234.`;
+
+    return [
+      ...this.personFields(),
       {
         key: 'phoneNumber',
-        label: 'Phone number',
+        label: $localize`:@@users.fields.phone:Numéro de téléphone`,
         type: 'string',
         required: true,
         placeholder: '(514) 555-0123 #1234',
         // The vet service only accepts a phone number of exactly 20 characters.
         validators: [Validators.minLength(20), Validators.maxLength(20)],
-        errorMessages: {
-          minlength: 'The phone number must have exactly 20 characters, like (514) 555-0123 #1234.',
-          maxlength: 'The phone number must have exactly 20 characters, like (514) 555-0123 #1234.',
-        },
+        errorMessages: { minlength: phoneMessage, maxlength: phoneMessage },
       },
       {
         key: 'resume',
-        label: 'Resume',
+        label: $localize`:@@users.fields.resume:Résumé`,
         type: 'string',
         required: true,
         validators: [Validators.minLength(10)],
-        errorMessages: { minlength: 'The resume must have at least 10 characters.' },
+        errorMessages: {
+          minlength: $localize`:@@users.validation.resumeLength:Le résumé doit contenir au moins 10 caractères.`,
+        },
       },
     ];
   }
 
-  private ownerFields(): ModalFormField[] {
+  private customerFields(): ModalFormField[] {
     return [
-      { key: 'firstName', label: 'First name', type: 'string', required: true },
-      { key: 'lastName', label: 'Last name', type: 'string', required: true },
-      { key: 'address', label: 'Address', type: 'string', required: true },
-      { key: 'city', label: 'City', type: 'string', required: true },
-      { key: 'province', label: 'Province', type: 'string', required: true },
+      ...this.personFields(),
+      {
+        key: 'address',
+        label: $localize`:@@users.fields.address:Adresse`,
+        type: 'string',
+        required: true,
+      },
+      {
+        key: 'city',
+        label: $localize`:@@users.fields.city:Ville`,
+        type: 'string',
+        required: true,
+      },
+      {
+        key: 'province',
+        label: $localize`:@@users.fields.province:Province`,
+        type: 'string',
+        required: true,
+      },
       {
         key: 'telephone',
-        label: 'Phone number',
+        label: $localize`:@@users.fields.phone:Numéro de téléphone`,
         type: 'string',
         required: true,
         placeholder: '5145550123',
-        validators: [Validators.pattern(OWNER_PHONE_PATTERN)],
-        errorMessages: { pattern: 'Enter 10 digits, without spaces or dashes.' },
+        validators: [Validators.pattern(CUSTOMER_PHONE_PATTERN)],
+        errorMessages: {
+          pattern: $localize`:@@users.validation.customerPhone:Entrez 10 chiffres, sans espaces ni tirets.`,
+        },
       },
     ];
   }
@@ -331,7 +455,8 @@ export class UserList implements OnInit {
         email: value.email.trim(),
         role: value.role,
       }),
-      'User updated successfully.',
+      $localize`:@@users.success.updated:Utilisateur modifié avec succès.`,
+      $localize`:@@users.errors.save:Impossible d'enregistrer l'utilisateur. Veuillez réessayer.`,
     );
   }
 
@@ -351,12 +476,25 @@ export class UserList implements OnInit {
         province: value.province?.trim(),
         telephone: value.telephone?.trim(),
       }),
-      'User created successfully.',
+      $localize`:@@users.success.created:Utilisateur créé avec succès.`,
+      $localize`:@@users.errors.save:Impossible d'enregistrer l'utilisateur. Veuillez réessayer.`,
+    );
+  }
+
+  private deleteUser(user: User): void {
+    this.save(
+      this.userService.deleteUser(user.userId),
+      $localize`:@@users.success.deleted:Utilisateur supprimé avec succès.`,
+      $localize`:@@users.errors.delete:Impossible de supprimer l'utilisateur. Veuillez réessayer.`,
     );
   }
 
   // Shows the success message only when the backend accepted the change
-  private save(request$: ReturnType<UserService['updateUser']>, successMessage: string): void {
+  private save(
+    request$: ReturnType<UserService['updateUser']>,
+    successMessage: string,
+    errorMessage: string,
+  ): void {
     if (this.saving()) {
       return;
     }
@@ -371,9 +509,8 @@ export class UserList implements OnInit {
       },
       error: (error: unknown) => {
         this.saving.set(false);
-        this.saveError.set(
-          isApiError(error) ? error.message : 'The user could not be saved. Please try again.',
-        );
+        // English users see the message of the backend, French users see the translated one
+        this.saveError.set(!this.isFrench && isApiError(error) ? error.message : errorMessage);
       },
     });
   }
