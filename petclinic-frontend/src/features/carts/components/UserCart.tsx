@@ -49,6 +49,12 @@ import {
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import { getCustomerOrders } from '../api/getCustomerOrders';
 import type { OrderModel } from '../models/OrderModel';
+import ReportOrderModal from './ReportOrderModal';
+import {
+  getCustomerOrderReports,
+  isOpenOrderReport,
+  type OrderReportSummary,
+} from '../api/orderReports';
 interface ProductAPIResponse {
   productId: string;
   imageId?: string;
@@ -106,6 +112,10 @@ const UserCart: React.FC = () => {
   const [orders, setOrders] = useState<OrderModel[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState<string | null>(null);
+  const [reportsByOrderId, setReportsByOrderId] = useState<
+    Record<string, OrderReportSummary>
+  >({});
+  const [reportingOrder, setReportingOrder] = useState<OrderModel | null>(null);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
   const [shippingMethod, setShippingMethod] =
@@ -115,6 +125,8 @@ const UserCart: React.FC = () => {
   const fetchOrders = useCallback(async (): Promise<void> => {
     if (!customerId) {
       setOrders([]);
+      setReportsByOrderId({});
+      setReportingOrder(null);
       setOrdersLoading(false);
       return;
     }
@@ -122,15 +134,43 @@ const UserCart: React.FC = () => {
     setOrdersLoading(true);
     setOrdersError(null);
 
-    try {
-      const data = await getCustomerOrders(customerId);
-      setOrders(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Failed to fetch orders:', error);
-      setOrdersError(t('orders.loadFailed'));
-    } finally {
-      setOrdersLoading(false);
-    }
+    const ordersRequest = getCustomerOrders(customerId)
+      .then(orderData => {
+        setOrders(Array.isArray(orderData) ? orderData : []);
+      })
+      .catch(error => {
+        console.error('Failed to fetch orders:', error);
+        setOrders([]);
+        setOrdersError(t('orders.loadFailed'));
+      })
+      .finally(() => setOrdersLoading(false));
+
+    const reportsRequest = getCustomerOrderReports(customerId)
+      .then(reportData => {
+        const latestReports = (
+          Array.isArray(reportData) ? reportData : []
+        ).reduce<Record<string, OrderReportSummary>>((reports, report) => {
+          const currentReport = reports[report.orderId];
+
+          if (
+            !currentReport ||
+            new Date(report.submittedAt).getTime() >
+              new Date(currentReport.submittedAt).getTime()
+          ) {
+            reports[report.orderId] = report;
+          }
+
+          return reports;
+        }, {});
+
+        setReportsByOrderId(latestReports);
+      })
+      .catch(error => {
+        console.error('Failed to fetch order reports:', error);
+        setReportsByOrderId({});
+      });
+
+    await Promise.all([ordersRequest, reportsRequest]);
   }, [customerId, t]);
 
   useEffect(() => {
@@ -1447,6 +1487,17 @@ const UserCart: React.FC = () => {
                     </p>
                   </div>
 
+                  {reportsByOrderId[order.orderId] && (
+                    <div className="order-report-banner" role="status">
+                      {t('reports.banner', {
+                        status: t(
+                          `reports.status.${reportsByOrderId[order.orderId].status}`
+                        ),
+                        reportId: reportsByOrderId[order.orderId].reportId,
+                      })}
+                    </div>
+                  )}
+
                   <div className="order-products">
                     {order.products.map(item => (
                       <div key={item.productId} className="order-product">
@@ -1480,6 +1531,20 @@ const UserCart: React.FC = () => {
                   </div>
 
                   <div className="order-footer">
+                    {!isStaff &&
+                      (!reportsByOrderId[order.orderId] ||
+                        !isOpenOrderReport(
+                          reportsByOrderId[order.orderId]
+                        )) && (
+                        <button
+                          type="button"
+                          className="cart-button cart-button--outline"
+                          onClick={() => setReportingOrder(order)}
+                        >
+                          {t('reports.openButton')}
+                        </button>
+                      )}
+
                     <button
                       type="button"
                       className="view-receipt-btn cart-button cart-button--brand cart-button--block"
@@ -1782,6 +1847,23 @@ const UserCart: React.FC = () => {
             )}
           </div>
         </div>
+
+        {reportingOrder && customerId && (
+          <ReportOrderModal
+            customerId={customerId}
+            order={reportingOrder}
+            onClose={() => setReportingOrder(null)}
+            onSubmitted={report => {
+              setReportsByOrderId(current => ({
+                ...current,
+                [report.orderId]: report,
+              }));
+
+              setReportingOrder(null);
+              showToast(t('reports.success'), 'success');
+            }}
+          />
+        )}
 
         {showBillingForm && (
           <CartBillingForm
