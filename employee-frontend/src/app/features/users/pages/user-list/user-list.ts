@@ -55,6 +55,10 @@ type ConfirmValue = Record<string, never>;
 const PASSWORD_PATTERN =
   /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=*!()_.<>,{}])(?=\S+$).{8,}$/;
 
+// Angular's built-in email check accepts an address like "name@a", so this one also needs
+// a dot and an ending in the domain.
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@.]{2,}$/;
+
 // The customer service only accepts a phone number made of 10 digits.
 const CUSTOMER_PHONE_PATTERN = /^[0-9]{10}$/;
 
@@ -307,9 +311,9 @@ export class UserList implements OnInit {
       label: $localize`:@@users.fields.email:Courriel`,
       type: 'string',
       required: true,
-      validators: [Validators.email, Validators.minLength(6)],
+      validators: [Validators.pattern(EMAIL_PATTERN), Validators.minLength(6)],
       errorMessages: {
-        email: $localize`:@@users.validation.email:Entrez une adresse courriel valide.`,
+        pattern: $localize`:@@users.validation.email:Entrez une adresse courriel valide.`,
         minlength: $localize`:@@users.validation.emailLength:Le courriel doit contenir au moins 6 caractères.`,
       },
     };

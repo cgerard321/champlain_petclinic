@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable, switchMap, throwError } from 'rxjs';
+import { filter, map, Observable, switchMap, throwError, toArray } from 'rxjs';
 
+import { SseClient } from '@core/services/sse-client';
 import {
   User,
   UserChanges,
@@ -13,8 +14,12 @@ import {
 @Injectable({ providedIn: 'root' })
 export class UserService {
   private readonly http = inject(HttpClient);
+  private readonly sse = inject(SseClient);
 
-  // The v2 endpoints return plain JSON, and v1 has no way to edit an email.
+  // The list is streamed by the v1 gateway (SSE), like the inventories.
+  private readonly listUrl = '/api/gateway/users';
+
+  // Editing and deleting use the v2 endpoints, because v1 has no way to edit an email.
   private readonly baseUrl = '/api/v2/gateway/users';
 
   // Creating users uses the v1 gateway endpoints, one per role.
@@ -30,7 +35,13 @@ export class UserService {
   private readonly defaultVetWorkdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
   getUsers(): Observable<User[]> {
-    return this.http.get<User[]>(this.baseUrl);
+    return this.sse
+      .stream(this.listUrl, { keepAlive: false, responseType: 'event' }, {}, 'GET')
+      .pipe(
+        filter((event): event is MessageEvent => event.type !== 'error'),
+        map((event) => JSON.parse(event.data) as User),
+        toArray(),
+      );
   }
 
   // The backend saves username/email with PUT and the role with a separate PATCH.

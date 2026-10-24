@@ -1,5 +1,6 @@
 import { LOCALE_ID } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormControl, ValidatorFn } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
@@ -16,7 +17,12 @@ interface DialogConfig {
     submitLabel: string;
     message?: string;
     destructive?: boolean;
-    fields: { key: string; type: string; options?: { value: string; label: string }[] }[];
+    fields: {
+      key: string;
+      type: string;
+      options?: { value: string; label: string }[];
+      validators?: ValidatorFn[];
+    }[];
     initialValue: Record<string, string>;
   };
 }
@@ -94,6 +100,13 @@ describe('UserList', () => {
 
   const fieldKeys = (config: DialogConfig): string[] =>
     config.data.fields.map((field) => field.key);
+
+  // The errors of the email field of a form for an email value, or null when the email is valid
+  const emailErrors = (config: DialogConfig, value: string): unknown => {
+    const field = config.data.fields.find((item) => item.key === 'email');
+
+    return new FormControl(value, field?.validators ?? []).errors;
+  };
 
   async function setup(locale = 'en-US'): Promise<void> {
     TestBed.resetTestingModule();
@@ -234,6 +247,24 @@ describe('UserList', () => {
       expect(text()).toContain("Impossible d'enregistrer l'utilisateur. Veuillez réessayer.");
     });
 
+    it('should reject an email without a domain ending when editing, like name@a', () => {
+      editButtons().item(0).click();
+
+      expect(emailErrors(dialogConfig(0), 'carterjames@a')).not.toBeNull();
+      expect(emailErrors(dialogConfig(0), 'name@domain')).not.toBeNull();
+      expect(emailErrors(dialogConfig(0), 'name@.com')).not.toBeNull();
+      expect(emailErrors(dialogConfig(0), 'name@domain.c')).not.toBeNull();
+      expect(emailErrors(dialogConfig(0), 'name surname@domain.com')).not.toBeNull();
+      expect(emailErrors(dialogConfig(0), 'name@@domain.com')).not.toBeNull();
+    });
+
+    it('should accept a valid email when editing', () => {
+      editButtons().item(0).click();
+
+      expect(emailErrors(dialogConfig(0), 'vet@petclinic.com')).toBeNull();
+      expect(emailErrors(dialogConfig(0), 'first.last@mail.example.co')).toBeNull();
+    });
+
     it('should not save anything when the form is cancelled', () => {
       editButtons().item(0).click();
       closeDialog(0, undefined);
@@ -357,6 +388,13 @@ describe('UserList', () => {
         'province',
         'telephone',
       ]);
+    });
+
+    it('should also reject an email without a domain ending when adding a user', () => {
+      const config = chooseRole('RECEPTIONIST');
+
+      expect(emailErrors(config, 'desk@a')).not.toBeNull();
+      expect(emailErrors(config, 'desk@petclinic.com')).toBeNull();
     });
 
     it('should hide the password while it is typed', () => {

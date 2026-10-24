@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, HttpEventType, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
@@ -7,6 +7,7 @@ import { User } from '@features/users/models/user.model';
 import { UserService } from './user-service';
 
 const API_BASE_URL = '/api/v2/gateway/users';
+const LIST_URL = '/api/gateway/users';
 
 describe('UserService', () => {
   let service: UserService;
@@ -30,14 +31,82 @@ describe('UserService', () => {
 
   afterEach(() => http.verify());
 
-  it('should fetch the users from the API', () => {
-    service.getUsers().subscribe((result) => {
+  describe('getUsers', () => {
+    const managerUser: User = {
+      userId: 'user-2',
+      username: 'stock_boss',
+      email: 'stock@petclinic.com',
+      roles: [{ id: 3, name: 'INVENTORY_MANAGER' }],
+    };
+
+    it('should collect the streamed users once the SSE response completes', () => {
+      let result: User[] | undefined;
+
+      service.getUsers().subscribe((users) => {
+        result = users;
+      });
+
+      const request = http.expectOne(LIST_URL);
+
+      expect(request.request.method).toBe('GET');
+      expect(request.request.responseType).toBe('text');
+
+      const firstEvent = `data:${JSON.stringify(vetUser)}\n\n`;
+
+      request.event({
+        type: HttpEventType.DownloadProgress,
+        loaded: firstEvent.length,
+        partialText: firstEvent,
+      });
+
+      expect(result).toBeUndefined();
+      // The final response repeats the progress text; the first user must not be counted twice.
+      request.flush(`${firstEvent}data:${JSON.stringify(managerUser)}\n\n`);
+      expect(result).toEqual([vetUser, managerUser]);
+    });
+
+    it('should return an empty array when there are no users', () => {
+      let result: User[] | undefined;
+
+      service.getUsers().subscribe((users) => {
+        result = users;
+      });
+
+      http.expectOne(LIST_URL).flush('');
+
+      expect(result).toEqual([]);
+    });
+
+    it('should ignore SSE lines that are not data events', () => {
+      let result: User[] | undefined;
+
+      service.getUsers().subscribe((users) => {
+        result = users;
+      });
+
+      http
+        .expectOne(LIST_URL)
+        .flush(`: heartbeat\n\nevent:message\ndata:${JSON.stringify(vetUser)}\nretry:1000\n\n`);
+
       expect(result).toEqual([vetUser]);
     });
 
-    const request = http.expectOne(API_BASE_URL);
-    expect(request.request.method).toBe('GET');
-    request.flush([vetUser]);
+    it('should propagate an HTTP error when loading the users fails', () => {
+      let receivedError: HttpErrorResponse | undefined;
+
+      service.getUsers().subscribe({
+        error: (error: HttpErrorResponse) => {
+          receivedError = error;
+        },
+      });
+
+      http.expectOne(LIST_URL).flush('Server error', {
+        status: 500,
+        statusText: 'Internal Server Error',
+      });
+
+      expect(receivedError?.status).toBe(500);
+    });
   });
 
   it('should only send a PUT when the role did not change', () => {

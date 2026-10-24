@@ -105,7 +105,8 @@
       "vet": "Veterinarian",
       "receptionist": "Receptionist",
       "inventoryManager": "Inventory Manager",
-      "unknown": "Employee"
+      "unknown": "Employee",
+      "customer": "Customer"
     },
     "notFound": {
       "title": "Page Not Found",
