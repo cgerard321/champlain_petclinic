@@ -350,6 +350,15 @@ select.ng-touched.ng-invalid {
   border-top: 1px solid var(--detail-border);
 }
 
+.success-message {
+  padding: 1rem 1.3rem;
+  border: 1px solid var(--detail-border);
+  border-radius: 14px;
+  color: var(--detail-forest);
+  background: var(--detail-sage);
+  line-height: 1.6;
+}
+
 .state-message,
 .empty-state,
 .error-message {

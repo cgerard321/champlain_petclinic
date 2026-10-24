@@ -36,6 +36,7 @@ export class CustomerDetails implements OnInit {
   protected readonly petErrorMessage = signal<string | null>(null);
   protected readonly petTypesErrorMessage = signal<string | null>(null);
   protected readonly isSaving = signal(false);
+  protected readonly isSaved = signal(false);
   protected readonly isEditing = signal(false);
   protected readonly customer = signal<CustomerResponseModel | null>(null);
   protected readonly isLoading = signal(true);
@@ -161,6 +162,7 @@ export class CustomerDetails implements OnInit {
   protected handleEditCustomer(): void {
     const customer = this.customer();
     if (!customer) return;
+    this.isSaved.set(false);
     this.form.reset({
       firstName: customer.firstName,
       lastName: customer.lastName,
@@ -198,6 +200,7 @@ export class CustomerDetails implements OnInit {
       return;
 
     this.isSaving.set(true);
+    this.isSaved.set(false);
     this.errorMessage.set(null);
     this.customerService
       .updateCustomer(customer.customerId, {
@@ -213,6 +216,7 @@ export class CustomerDetails implements OnInit {
           this.customer.set({ ...updatedCustomer, photo: updatedCustomer.photo ?? customer.photo });
           this.isEditing.set(false);
           this.isSaving.set(false);
+          this.isSaved.set(true);
         },
         error: () => {
           this.errorMessage.set(

@@ -15,6 +15,11 @@
   @if (errorMessage()) {
     <p class="error-message" role="alert">{{ errorMessage() }}</p>
   }
+  @if (isSaved()) {
+    <p class="success-message" role="status" i18n="@@cust.profile.updateSuccess">
+      Le client a été mis à jour avec succès.
+    </p>
+  }
   @if (customer(); as details) {
     <header class="profile-header">
       @if (details.photo?.fileData) {

@@ -382,6 +382,7 @@
         "petCount": "{$INTERPOLATION} registered pets",
         "noPetPhoto": "No profile photo for {$INTERPOLATION}",
         "confirmSave": "Are you sure you want to save these changes?",
+        "updateSuccess": "Customer has been successfully updated.",
         "errors": {
           "noId": "No customer ID provided.",
           "load": "Could not load customer details.",
