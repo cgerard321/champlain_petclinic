@@ -12,4 +12,8 @@ import lombok.NoArgsConstructor;
 public class RatingRequestModel {
     private Byte rating;
     private String review;
+    private Byte qualityRating;
+    private Byte valueRating;
+    private Byte petSatisfactionRating;
+    private Byte ingredientsRating;
 }
