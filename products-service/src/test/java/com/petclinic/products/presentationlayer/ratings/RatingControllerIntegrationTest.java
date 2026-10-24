@@ -63,6 +63,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     Rating rating1Prod1 = Rating.builder()
             .rating((byte) 2)
             .review("It's not bad neither good")
+            .qualityRating((byte) 5)
+            .valueRating((byte) 4)
+            .petSatisfactionRating((byte) 5)
+            .ingredientsRating((byte) 4)
             .productId("e39286b6-d3ca-4f58-8b6f-30f1f1b9a2f6")
             .customerId("8e599d37-a69a-48d2-880e-1b621abf77b6")
             .build();
@@ -70,6 +74,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     Rating rating2Prod1 = Rating.builder()
             .rating((byte) 4)
             .review("It's good for its value")
+            .qualityRating((byte) 5)
+            .valueRating((byte) 4)
+            .petSatisfactionRating((byte) 5)
+            .ingredientsRating((byte) 4)
             .productId("e39286b6-d3ca-4f58-8b6f-30f1f1b9a2f6")
             .customerId("3a994002-47d9-4dea-9966-9df78050cf09")
             .build();
@@ -77,6 +85,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     Rating rating1Prod2 = Rating.builder()
             .rating((byte) 5)
             .review("It's great")
+            .qualityRating((byte) 5)
+            .valueRating((byte) 4)
+            .petSatisfactionRating((byte) 5)
+            .ingredientsRating((byte) 4)
             .productId("6866ec50-898d-435c-bfec-8ee513c5a6c1")
             .customerId("8e599d37-a69a-48d2-880e-1b621abf77b6")
             .build();
@@ -84,6 +96,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     Rating rating2Prod2 = Rating.builder()
             .rating((byte) 3)
             .review("It's not bad")
+            .qualityRating((byte) 5)
+            .valueRating((byte) 4)
+            .petSatisfactionRating((byte) 5)
+            .ingredientsRating((byte) 4)
             .productId("6866ec50-898d-435c-bfec-8ee513c5a6c1")
             .customerId("3a994002-47d9-4dea-9966-9df78050cf09")
             .build();
@@ -441,6 +457,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     public void whenAddRatingForProductWithExistingCustomer_thenReturnRatingAlreadyExists() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         webClient.post()
@@ -541,6 +561,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     public void whenAddRatingForNotFoundProduct_thenReturnNotFoundProduct() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         webClient.post()
@@ -616,6 +640,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
                 .review("It's great".repeat(1001))
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         webClient.put()
@@ -765,6 +793,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     public void whenUpdateRatingForNotFoundProduct_thenReturnNotFoundProduct() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         webClient.put()

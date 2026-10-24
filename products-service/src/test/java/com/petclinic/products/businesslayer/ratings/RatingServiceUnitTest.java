@@ -55,6 +55,10 @@ class RatingServiceUnitTest {
             .productId(productId)
             .customerId(UUID.randomUUID().toString())
             .rating((byte) 5)
+            .qualityRating((byte) 5)
+            .valueRating((byte) 4)
+            .petSatisfactionRating((byte) 5)
+            .ingredientsRating((byte) 4)
             .createdAt(LocalDateTime.now().minusHours(1))
             .review("Good stuff!")
             .build();
@@ -63,6 +67,10 @@ class RatingServiceUnitTest {
             .productId(productId)
             .customerId(UUID.randomUUID().toString())
             .rating((byte) 3)
+            .qualityRating((byte) 5)
+            .valueRating((byte) 4)
+            .petSatisfactionRating((byte) 5)
+            .ingredientsRating((byte) 4)
             .createdAt(LocalDateTime.now().minusHours(1))
             .review("It's alright..")
             .build();
@@ -168,6 +176,10 @@ class RatingServiceUnitTest {
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
                 .review(rating1.getReview())
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         when(productRepository.findProductByProductId(productId))
@@ -183,6 +195,10 @@ class RatingServiceUnitTest {
                     assertNotNull(response.getReview());
                     assertEquals(requestModel.getRating(), response.getRating());
                     assertEquals(requestModel.getReview(), response.getReview());
+                    assertEquals(requestModel.getQualityRating(), response.getQualityRating());
+                    assertEquals(requestModel.getValueRating(), response.getValueRating());
+                    assertEquals(requestModel.getPetSatisfactionRating(), response.getPetSatisfactionRating());
+                    assertEquals(requestModel.getIngredientsRating(), response.getIngredientsRating());
                     return true;
                 })
                 .verifyComplete();
@@ -193,6 +209,10 @@ class RatingServiceUnitTest {
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
                 .review(rating1.getReview())
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         when(productRepository.findProductByProductId(productId))
@@ -216,6 +236,10 @@ class RatingServiceUnitTest {
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
                 .review(null)
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         when(productRepository.findProductByProductId(productId))
@@ -241,6 +265,10 @@ class RatingServiceUnitTest {
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
                 .review("a".repeat(10001))
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         StepVerifier.create(ratingService.addRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))
@@ -272,6 +300,10 @@ class RatingServiceUnitTest {
 
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         when(productRepository.findProductByProductId(productId))
@@ -298,6 +330,52 @@ class RatingServiceUnitTest {
     }
 
     @Test
+    void whenAddRatingWithMissingCategoryRating_thenReturnInvalidInput() {
+        RatingRequestModel requestModel = RatingRequestModel.builder()
+                .rating((byte) 5)
+                .review("Great product")
+                .qualityRating(null)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
+                .build();
+
+        StepVerifier.create(ratingService.addRatingForProduct(
+                        productId,
+                        rating1.getCustomerId(),
+                        Mono.just(requestModel)))
+                .expectErrorMatches(error ->
+                        error instanceof InvalidInputException &&
+                                error.getMessage().equals("All category ratings must be provided"))
+                .verify();
+
+        verifyNoInteractions(productRepository);
+    }
+
+    @Test
+    void whenAddRatingWithInvalidCategoryRating_thenReturnInvalidInput() {
+        RatingRequestModel requestModel = RatingRequestModel.builder()
+                .rating((byte) 5)
+                .review("Great product")
+                .qualityRating((byte) 6)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
+                .build();
+
+        StepVerifier.create(ratingService.addRatingForProduct(
+                        productId,
+                        rating1.getCustomerId(),
+                        Mono.just(requestModel)))
+                .expectErrorMatches(error ->
+                        error instanceof InvalidInputException &&
+                                error.getMessage().equals("Category ratings must be between 1 and 5"))
+                .verify();
+
+        verifyNoInteractions(productRepository);
+    }
+
+    @Test
     void whenUpdateRating_thenReturnRating() {
         Product prod = Product.builder()
                 .productId(productId)
@@ -310,6 +388,10 @@ class RatingServiceUnitTest {
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
                 .review(rating1.getReview())
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         when(productRepository.findProductByProductId(productId))
@@ -326,6 +408,10 @@ class RatingServiceUnitTest {
                     assertNotNull(response.getRating());
                     assertNotNull(response.getReview());
                     assertEquals(requestModel.getRating(), response.getRating());
+                    assertEquals(requestModel.getQualityRating(), response.getQualityRating());
+                    assertEquals(requestModel.getValueRating(), response.getValueRating());
+                    assertEquals(requestModel.getPetSatisfactionRating(), response.getPetSatisfactionRating());
+                    assertEquals(requestModel.getIngredientsRating(), response.getIngredientsRating());
                     return true;
                 })
                 .verifyComplete();
@@ -335,6 +421,10 @@ class RatingServiceUnitTest {
     void whenUpdateRatingForNotFoundProduct_thenReturnNotFound(){
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         when(productRepository.findProductByProductId(productId))
@@ -358,6 +448,10 @@ class RatingServiceUnitTest {
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
                 .review(null)
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         when(productRepository.findProductByProductId(productId))
@@ -385,6 +479,10 @@ class RatingServiceUnitTest {
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
                 .review("a".repeat(10001))
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         StepVerifier.create(ratingService.updateRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))
@@ -408,6 +506,10 @@ class RatingServiceUnitTest {
     void whenUpdateRatingForNotFoundRating_thenReturnNotFound(){
         RatingRequestModel requestModel = RatingRequestModel.builder()
                 .rating(rating1.getRating())
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         when(productRepository.findProductByProductId(productId))
@@ -429,6 +531,52 @@ class RatingServiceUnitTest {
         StepVerifier.create(ratingService.updateRatingForProduct(productId, rating1.getCustomerId(), Mono.just(requestModel)))
                 .expectError(InvalidInputException.class)
                 .verify();
+    }
+
+    @Test
+    void whenUpdateRatingWithMissingCategoryRating_thenReturnInvalidInput() {
+        RatingRequestModel requestModel = RatingRequestModel.builder()
+                .rating((byte) 4)
+                .review("Updated review")
+                .qualityRating((byte) 4)
+                .valueRating(null)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
+                .build();
+
+        StepVerifier.create(ratingService.updateRatingForProduct(
+                        productId,
+                        rating1.getCustomerId(),
+                        Mono.just(requestModel)))
+                .expectErrorMatches(error ->
+                        error instanceof InvalidInputException &&
+                                error.getMessage().equals("All category ratings must be provided"))
+                .verify();
+
+        verifyNoInteractions(productRepository);
+    }
+
+    @Test
+    void whenUpdateRatingWithInvalidCategoryRating_thenReturnInvalidInput() {
+        RatingRequestModel requestModel = RatingRequestModel.builder()
+                .rating((byte) 4)
+                .review("Updated review")
+                .qualityRating((byte) 4)
+                .valueRating((byte) 3)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 0)
+                .build();
+
+        StepVerifier.create(ratingService.updateRatingForProduct(
+                        productId,
+                        rating1.getCustomerId(),
+                        Mono.just(requestModel)))
+                .expectErrorMatches(error ->
+                        error instanceof InvalidInputException &&
+                                error.getMessage().equals("Category ratings must be between 1 and 5"))
+                .verify();
+
+        verifyNoInteractions(productRepository);
     }
 
     @Test
@@ -593,6 +741,10 @@ class RatingServiceUnitTest {
         RatingRequestModel request = RatingRequestModel.builder()
                 .rating((byte) 4)
                 .review("Updated review")
+                .qualityRating((byte) 4)
+                .valueRating((byte) 3)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 2)
                 .build();
 
         StepVerifier.create(
@@ -602,7 +754,11 @@ class RatingServiceUnitTest {
                                 Mono.just(request)))
                 .expectNextMatches(response ->
                         response.getRating() == 4 &&
-                                response.getReview().equals("Updated review"))
+                                response.getReview().equals("Updated review") &&
+                                response.getQualityRating() == 4 &&
+                                response.getValueRating() == 3 &&
+                                response.getPetSatisfactionRating() == 5 &&
+                                response.getIngredientsRating() == 2)
                 .verifyComplete();
     }
 
@@ -635,6 +791,10 @@ class RatingServiceUnitTest {
         RatingRequestModel request = RatingRequestModel.builder()
                 .rating((byte) 4)
                 .review("Updated review")
+                .qualityRating((byte) 4)
+                .valueRating((byte) 3)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 2)
                 .build();
 
         StepVerifier.create(
