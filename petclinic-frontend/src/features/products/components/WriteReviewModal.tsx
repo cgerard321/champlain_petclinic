@@ -117,7 +117,7 @@ const WriteReviewModal = ({
         {/* Rating Section */}
         <div className="wrm-section">
           <label className="wrm-label">
-            {t('yourRating')} ({t('required')})
+            {t('yourRating')} ({t('required')}) *
           </label>
           <StarRating
             currentRating={localRating}

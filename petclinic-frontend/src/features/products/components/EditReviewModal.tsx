@@ -132,7 +132,7 @@ const EditReviewModal = ({
         {/* Rating Section */}
         <div className="erm-section">
           <label className="erm-label">
-            {t('yourRating')} ({t('required')})
+            {t('yourRating')} ({t('required')}) *
           </label>
           <StarRating
             currentRating={localRating}
