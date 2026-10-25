@@ -81,7 +81,7 @@
 
   <mat-dialog-actions align="end">
     <button type="button" class="dialog-cancel-button" (click)="cancel()">
-      {{ data.cancelLabel ?? 'Cancel' }}
+      {{ data.cancelLabel ?? cancelLabel }}
     </button>
 
     <button
@@ -90,7 +90,7 @@
       [disabled]="form.invalid"
       [class.destructive]="data.destructive"
     >
-      {{ data.submitLabel ?? 'Save' }}
+      {{ data.submitLabel ?? saveLabel }}
     </button>
   </mat-dialog-actions>
 </form>

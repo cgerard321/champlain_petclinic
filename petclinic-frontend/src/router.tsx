@@ -4,6 +4,8 @@ import Login from '@/pages/User/Login';
 import SignUp from '@/pages/User/SignUp';
 import Home from '@/pages/Home/Home.tsx';
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
+import OrderHistoryPage from '@/features/customers/components/OrderHistoryPage.tsx';
+import OrderDetailsPage from '@/features/customers/components/OrderDetailsPage.tsx';
 import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
 import Products from '@/pages/Product/Products.tsx';
 import Vet from '@/pages/Vet/Vet.tsx';
@@ -103,7 +105,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
-          <ProtectedRoute roles={['OWNER']}>
+          <ProtectedRoute roles={['CUST']}>
             <ProfileEdit />
           </ProtectedRoute>
         ),
@@ -219,7 +221,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerVisitsCalendar,
         element: (
-          <ProtectedRoute roles={['OWNER']}>
+          <ProtectedRoute roles={['CUST']}>
             <CustomerVisitsCalendar />
           </ProtectedRoute>
         ),
@@ -275,8 +277,24 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfile,
         element: (
-          <ProtectedRoute roles={['OWNER']}>
+          <ProtectedRoute roles={['CUST']}>
             <ProfilePage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerOrderHistory,
+        element: (
+          <ProtectedRoute roles={['CUST']}>
+            <OrderHistoryPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerOrderDetails,
+        element: (
+          <ProtectedRoute roles={['CUST']}>
+            <OrderDetailsPage />
           </ProtectedRoute>
         ),
       },
@@ -354,7 +372,7 @@ const router = createBrowserRouter([
   {
     path: AppRoutePaths.OwnerBookAppointment,
     element: (
-      <ProtectedRoute roles={['OWNER']}>
+      <ProtectedRoute roles={['CUST']}>
         <OwnerBookAppointment />
       </ProtectedRoute>
     ),

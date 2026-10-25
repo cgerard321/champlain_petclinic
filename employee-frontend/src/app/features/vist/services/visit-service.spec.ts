@@ -1,6 +1,8 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { vi } from 'vitest';
 
 import { AuthState } from '@core/services/auth-state';
 import { SseClient } from '@core/services/sse-client';
@@ -30,6 +32,8 @@ describe('VisitService', () => {
     isEmergency: false,
   };
 
+  const stream = vi.fn();
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
@@ -37,7 +41,7 @@ describe('VisitService', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: AuthState, useValue: { hasRole: () => false } },
-        { provide: SseClient, useValue: {} },
+        { provide: SseClient, useValue: { stream } },
       ],
     });
     service = TestBed.inject(VisitService);
@@ -45,6 +49,20 @@ describe('VisitService', () => {
   });
 
   afterEach(() => http.verify());
+
+  it('searches visits through the employee search endpoint', () => {
+    stream.mockReturnValue(
+      of(new MessageEvent('message', { data: JSON.stringify(completedVisit) })),
+    );
+    let result: Visit | undefined;
+
+    service.searchVisits('Leo & Max').subscribe((visit) => (result = visit));
+
+    expect(stream).toHaveBeenCalledWith('/api/gateway/visits/search?query=Leo%20%26%20Max', {
+      keepAlive: false,
+    });
+    expect(result?.visitId).toBe(completedVisit.visitId);
+  });
 
   it('gets the available time slots for the selected veterinarian and date', () => {
     service.getAvailableTimeSlots('vet-1', '2027-01-12').subscribe();
@@ -83,7 +101,17 @@ describe('VisitService', () => {
       practitionerId: completedVisit.practitionerId,
       status: Status.UPCOMING,
       isEmergency: false,
+      followUpOfVisitId: completedVisit.visitId,
     });
     request.flush({ ...completedVisit, status: Status.UPCOMING });
+  });
+
+  it('saves a note on the visit', () => {
+    service.addVetNote(completedVisit.visitId, 'Keep giving the meds').subscribe();
+
+    const request = http.expectOne(`/api/gateway/visits/${completedVisit.visitId}/note`);
+    expect(request.request.method).toBe('PATCH');
+    expect(request.request.body).toEqual({ vetNote: 'Keep giving the meds' });
+    request.flush({ ...completedVisit, vetNote: 'Keep giving the meds' });
   });
 });

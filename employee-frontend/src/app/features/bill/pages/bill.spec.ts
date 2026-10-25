@@ -40,6 +40,8 @@ describe('Bill page', () => {
     getMyBills: Mock<() => Observable<BillRecord>>;
     getBillById: Mock<(billId: string) => Observable<BillRecord>>;
     openDialog: Mock;
+    getReceptionistBills: Mock<() => Observable<BillRecord>>;
+    payBill: Mock;
   };
 
   afterEach(() => {
@@ -55,6 +57,10 @@ describe('Bill page', () => {
     const getMyBills = vi.fn<() => Observable<BillRecord>>(() => of(...bills));
 
     const getBillById = vi.fn<(billId: string) => Observable<BillRecord>>(() => of(sampleBill));
+
+    const getReceptionistBills = vi.fn<() => Observable<BillRecord>>(() => of(...bills));
+
+    const payBill = vi.fn();
 
     const openDialog = vi.fn();
 
@@ -73,6 +79,8 @@ describe('Bill page', () => {
             getAllBills,
             getMyBills,
             getBillById,
+            getReceptionistBills,
+            payBill,
           },
         },
         {
@@ -93,6 +101,8 @@ describe('Bill page', () => {
       getAllBills,
       getMyBills,
       getBillById,
+      getReceptionistBills,
+      payBill,
       openDialog,
     };
   }
@@ -179,16 +189,19 @@ describe('Bill page', () => {
     expect(host.querySelector('tbody')?.textContent).not.toContain('BILL-123');
   });
 
-  it('does not load bills for receptionists', async () => {
-    const { host, getAllBills, getMyBills } = await render([Roles.receptionist]);
+  it('allows receptionists to view bills and pay unpaid bills', async () => {
+    const { host, getAllBills, getMyBills, getReceptionistBills } = await render([
+      Roles.receptionist,
+    ]);
 
+    expect(getReceptionistBills).toHaveBeenCalledOnce();
     expect(getAllBills).not.toHaveBeenCalled();
     expect(getMyBills).not.toHaveBeenCalled();
 
-    expect(host.querySelector('tbody')).toBeNull();
+    expect(host.querySelector('tbody')?.textContent).toContain('BILL-123');
+    expect(host.querySelector('.bill-row-actions')?.textContent).toContain('Pay Bill');
+    expect(host.querySelector('.bill-row-actions')?.textContent).not.toContain('Update');
     expect(host.querySelector('.bill-archive-action')).toBeNull();
-
-    expect(host.textContent).toContain('You do not have permission');
   });
 
   it('allows administrators to open bill details in a dialog', async () => {

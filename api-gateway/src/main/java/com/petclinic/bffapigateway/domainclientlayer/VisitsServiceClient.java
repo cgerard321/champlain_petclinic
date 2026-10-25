@@ -445,6 +445,39 @@ public class VisitsServiceClient {
                 .bodyToMono(VisitResponseDTO.class);
     }
 
+    public Mono<VisitResponseDTO> addVetNote(String visitId, VetNoteRequestDTO request){
+        return webClient
+                .patch()
+                .uri("/" + visitId + "/note")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(JsonNode.class)
+                        .flatMap(errorNode -> Mono.error(new BadRequestException(errorNode.get("message").asText()))))
+                .bodyToMono(VisitResponseDTO.class);
+    }
+
+    public Mono<VisitResponseDTO> confirmFollowUpVisit(String visitId){
+        return webClient
+                .patch()
+                .uri("/" + visitId + "/confirm")
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(JsonNode.class)
+                        .flatMap(errorNode -> Mono.error(new BadRequestException(errorNode.get("message").asText()))))
+                .bodyToMono(VisitResponseDTO.class);
+    }
+
+    public Mono<VisitResponseDTO> rescheduleFollowUpVisit(String visitId, RescheduleRequestDTO request){
+        return webClient
+                .patch()
+                .uri("/" + visitId + "/reschedule")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, response -> response.bodyToMono(JsonNode.class)
+                        .flatMap(errorNode -> Mono.error(new BadRequestException(errorNode.get("message").asText()))))
+                .bodyToMono(VisitResponseDTO.class);
+    }
 
 
 

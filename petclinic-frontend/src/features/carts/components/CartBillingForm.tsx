@@ -6,7 +6,7 @@ import { getUserDetails } from '@/features/customers/api/getUserDetails';
 import './cart-shared.css';
 import './CartBillingForm.css';
 export interface BillingInfo {
-  fullName: string;
+  customerName: string;
   email: string;
   phoneNumber: string;
   address: string;
@@ -63,7 +63,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
   const { user } = useUser();
   const { t } = useTranslation('carts');
   const [billing, setBilling] = useState<BillingInfo>({
-    fullName: '',
+    customerName: '',
     email: '',
     phoneNumber: '',
     address: '',
@@ -98,13 +98,13 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
 
         const customer = customerResponse.data;
         const userDetails = userResponse.data;
-        const fullName = [customer.firstName, customer.lastName]
+        const customerName = [customer.firstName, customer.lastName]
           .filter(Boolean)
           .join(' ');
 
         setBilling(previous => ({
           ...previous,
-          fullName: previous.fullName || fullName,
+          customerName: previous.customerName || customerName,
           email: previous.email || userDetails.email || '',
           phoneNumber: previous.phoneNumber || customer.telephone || '',
           address: previous.address || customer.address || '',
@@ -167,7 +167,7 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
     setSuccess(t('billing.success'));
     onSubmit(billing);
     setBilling({
-      fullName: '',
+      customerName: '',
       email: '',
       phoneNumber: '',
       address: '',
@@ -204,9 +204,9 @@ const CartBillingForm: React.FC<CartBillingFormProps> = ({
           <div className="main-fields">
             <input
               type="text"
-              name="fullName"
-              placeholder={t('billing.fullName')}
-              value={billing.fullName}
+              name="customerName"
+              placeholder={t('billing.customerName')}
+              value={billing.customerName}
               onChange={handleChange}
               required
             />

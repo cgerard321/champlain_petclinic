@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
@@ -58,6 +59,7 @@ public class BillServiceImpl implements BillService{
     @Override
     public Flux<BillResponseDTO> getAllBills() {
         return updateOverdueBills()
+                .thenMany(archiveBill())
                 .thenMany(billRepository.findAll())
                 .map(EntityDtoUtil::toBillResponseDto);
     }
@@ -116,6 +118,7 @@ public class BillServiceImpl implements BillService{
                 : billRepository.findAllByArchiveFalse();
 
         return updateOverdueBills()
+                .thenMany(archiveBill())
                 .thenMany(bills)
                 .filter(filterCriteria)
                 .skip((long) pageable.getPageNumber() * pageable.getPageSize())
@@ -144,6 +147,7 @@ public class BillServiceImpl implements BillService{
                         (vetLastName == null || bill.getVetLastName().equals(vetLastName));
 
         return updateOverdueBills()
+                .thenMany(archiveBill())
                 .thenMany(billRepository.findAll())
                 .filter(filterCriteria)
                 .map(EntityDtoUtil::toBillResponseDto);
@@ -492,6 +496,19 @@ public class BillServiceImpl implements BillService{
                 });
     }
 
+    //automated archiving checks every day at midnight
+    @Scheduled(cron = "0 0 0 * * *")
+    public void scheduleBillArchiving(){
+        log.info("Starting automatic bill archiving check");
+        archiveBill()
+                .then()
+                .doOnSuccess(unused ->
+                        log.info("Completed automatic bill archiving check"))
+                .doOnError(error ->
+                        log.error("Error during automatic bill archiving: {}", error.getMessage(), error))
+                .subscribe();
+    }
+
     private Mail generateConfirmationEmail(UserDetails user){
         return new Mail(
                 user.getEmail(), "Pet Clinic - Payment Confirmation", "default", "Pet Clinic confirmation email",
@@ -580,9 +597,6 @@ public class BillServiceImpl implements BillService{
 
         return customerMono.flatMapMany(customer ->
                 billRepository.findByCustomerId(customerId)
-                        // Only return bills where first/last name match the customer record
-                        .filter(bill -> bill.getCustomerFirstName().equals(customer.getFirstName())
-                                && bill.getCustomerLastName().equals(customer.getLastName()))
                         .map(EntityDtoUtil::toBillResponseDto)
         );
     }
@@ -624,15 +638,8 @@ public class BillServiceImpl implements BillService{
     public Mono<BigDecimal> calculateCurrentBalance(String customerId) {
         return billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.UNPAID)
                 .concatWith(billRepository.findByCustomerIdAndBillStatus(customerId, BillStatus.OVERDUE))
-                .map(bill -> {
-                    BigDecimal total = bill.getAmount();
-                    // Check interest exemption first - if exempt, don't add interest regardless of status
-                    if (!bill.isInterestExempt()) {
-                        BigDecimal interest = InterestCalculationUtil.calculateInterest(bill);
-                        total = total.add(interest);
-                    }
-                    return total;
-                })
+                .map(EntityDtoUtil::toBillResponseDto)
+                .map(BillResponseDTO::getTotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer not found")));
     }

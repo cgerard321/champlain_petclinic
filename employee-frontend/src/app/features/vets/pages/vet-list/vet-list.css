@@ -79,7 +79,28 @@ h1 {
 }
 
 .profile-grid > li {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+}
+
+app-vet-profile-card {
+  flex: 1;
+}
+
+.profile-link {
+  display: block;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #254e3e;
+  color: #fff;
+  text-align: center;
+}
+
+.profile-link:focus-visible {
+  outline: 3px solid #254e3e;
+  outline-offset: 3px;
 }
 
 .empty-state {
@@ -104,4 +125,26 @@ h1 {
   .profile-grid {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+:host-context(.dark-mode) {
+  color: white !important;
+}
+
+:host-context(.dark-mode) .page-description{
+  color:#a3b8ac;
+}
+
+:host-context(.dark-mode) .back-link {
+  color: #a3b8ac;
+}
+
+:host-context(.dark-mode) .preview-notice {
+  background-color: var(--mat-sys-surface-container-highest) !important;
+  border: 1px solid rgb(255 255 255 / 12%)  !important;
+  color: white;
+}
+
+:host-context(.dark-mode) .preview-notice p {
+  color:#a3b8ac;
 }

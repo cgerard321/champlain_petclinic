@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 // Assuming this function gets the visit by visitId
 import { Visit } from '../models/Visit';
 import './VisitByVisitId.css';
 import { getVisit } from '../api/getVisit';
 import { cancelVisit } from '../api/cancelVisit';
 import CancellationModal from '@/features/visits/components/CancellationModal.tsx';
+import RescheduleModal from '@/features/visits/components/RescheduleModal.tsx';
+import { confirmVisit } from '../api/confirmVisit';
+import { rescheduleVisit } from '../api/rescheduleVisit';
+import AutoDismissAlert from '@/shared/components/AutoDismissAlert';
 // import EditingVisit from './EditingVisit';
 // import { updateVisit } from '../api/updateVisit';
 
@@ -13,6 +18,10 @@ export default function VisitDetails(): JSX.Element {
   const { visitId } = useParams<{ visitId: string }>(); // Extract visitId from URL parameters
   const [visit, setVisit] = useState<Visit | null>(null); // State for the visit
   const navigate = useNavigate();
+  const { t } = useTranslation('visits');
+  const [alertShow, setAlertShow] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState<'success' | 'error'>('success');
 
   useEffect(() => {
     if (visitId) {
@@ -30,9 +39,47 @@ export default function VisitDetails(): JSX.Element {
     return <div>Loading...</div>;
   }
 
+  const showAlert = (message: string, type: 'success' | 'error'): void => {
+    setAlertMessage(message);
+    setAlertType(type);
+    setAlertShow(true);
+  };
+
+  const isFollowUp = !!visit.followUpOfVisitId;
+  const isMoreThan24HoursAway =
+    new Date(visit.visitDate).getTime() - Date.now() > 24 * 60 * 60 * 1000;
+  const isConfirmedFollowUp = isFollowUp && visit.status === 'CONFIRMED';
+  const canChangeFollowUp =
+    isFollowUp && isMoreThan24HoursAway && visit.status === 'UPCOMING';
+
+  const handleConfirm = async (): Promise<void> => {
+    try {
+      await confirmVisit(visit.visitId, updatedVisit => setVisit(updatedVisit));
+      showAlert(t('followUp.confirmed'), 'success');
+    } catch {
+      showAlert(t('followUp.error'), 'error');
+    }
+  };
+
+  const handleReschedule = async (visitDate: string): Promise<void> => {
+    try {
+      await rescheduleVisit(visit.visitId, visitDate, updatedVisit =>
+        setVisit(updatedVisit)
+      );
+      showAlert(t('followUp.rescheduled'), 'success');
+    } catch {
+      showAlert(t('followUp.error'), 'error');
+    }
+  };
+
   return (
     <div className="visit-details-container">
       <h1 className="visit-details-title">Visit Details</h1>
+      {isFollowUp && (
+        <div className="follow-up-label-container">
+          <span className="follow-up-label">{t('followUp.label')}</span>
+        </div>
+      )}
 
       <div className="visit-info">
         <div className="visit-field">
@@ -114,6 +161,13 @@ export default function VisitDetails(): JSX.Element {
           <span className="visit-label">Visit End Date:</span>
           <span className="visit-value">{visit.visitEndDate}</span>
         </div>
+
+        {visit.status === 'COMPLETED' && visit.vetNote && (
+          <div className="visit-field">
+            <span className="visit-label">Vet Note:</span>
+            <span className="visit-value">{visit.vetNote}</span>
+          </div>
+        )}
       </div>
 
       <div className="button-visit-details">
@@ -125,17 +179,52 @@ export default function VisitDetails(): JSX.Element {
           Return to visits
         </button>
 
-        {(visit.status === 'CONFIRMED' || visit.status === 'UPCOMING') && (
-          <CancellationModal
-            showButton={<button className="btn-cancel">Cancel</button>}
-            onConfirm={cancellationRequest =>
-              cancelVisit(visit.visitId, cancellationRequest, updatedVisit =>
-                setVisit(updatedVisit)
-              )
+        {(visit.status === 'CONFIRMED' || visit.status === 'UPCOMING') &&
+          !isConfirmedFollowUp && (
+            <CancellationModal
+              showButton={<button className="btn btn-danger">Cancel</button>}
+              onConfirm={cancellationRequest =>
+                cancelVisit(visit.visitId, cancellationRequest, updatedVisit =>
+                  setVisit(updatedVisit)
+                )
+              }
+            />
+          )}
+
+        {canChangeFollowUp && (
+          <button className="btn btn-success" onClick={handleConfirm}>
+            {t('followUp.confirm')}
+          </button>
+        )}
+
+        {canChangeFollowUp && (
+          <RescheduleModal
+            showButton={
+              <button className="btn btn-primary">
+                {t('followUp.reschedule')}
+              </button>
             }
+            visit={visit}
+            onConfirm={handleReschedule}
           />
         )}
       </div>
+
+      {isConfirmedFollowUp && (
+        <p className="follow-up-note">{t('followUp.confirmedNote')}</p>
+      )}
+
+      {isFollowUp && !isMoreThan24HoursAway && visit.status === 'UPCOMING' && (
+        <p className="follow-up-note">{t('followUp.tooLate')}</p>
+      )}
+
+      <AutoDismissAlert
+        show={alertShow}
+        message={alertMessage}
+        type={alertType}
+        duration={5000}
+        onClose={() => setAlertShow(false)}
+      />
     </div>
   );
 }

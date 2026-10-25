@@ -5,9 +5,11 @@ import { EMPTY, filter, map, switchMap, Observable } from 'rxjs';
 import { CurrentUserResponse } from '@core/models/current-user-response';
 import { AuthState } from '@core/services/auth-state';
 import { SseClient } from '@core/services/sse-client';
+import { Pet, Customer } from '@features/cust/models/customer.model';
 import { Status } from '@features/vist/models/Status';
 import { TimeSlot } from '@features/vist/models/TimeSlot';
 import { Visit } from '@features/vist/models/Visit';
+import { VisitResponseModel } from '@features/vist/models/VisitResponseModel';
 
 @Injectable({ providedIn: 'root' })
 export class VisitService {
@@ -46,6 +48,21 @@ export class VisitService {
       );
   }
 
+  searchVisits(query: string): Observable<Visit> {
+    return this.sse
+      .stream(`/api/gateway/visits/search?query=${encodeURIComponent(query)}`, {
+        keepAlive: false,
+      })
+      .pipe(
+        filter((event): event is MessageEvent<string> => event.type !== 'error'),
+        map((event) => JSON.parse(event.data) as Visit),
+      );
+  }
+
+  getVisitById(visitId: string): Observable<VisitResponseModel> {
+    return this.http.get<VisitResponseModel>(`/api/gateway/visits/${encodeURIComponent(visitId)}`);
+  }
+
   getAvailableTimeSlots(practitionerId: string, date: string): Observable<TimeSlot[]> {
     return this.http.get<TimeSlot[]>(
       `/api/gateway/visits/availability/vets/${practitionerId}/slots`,
@@ -76,6 +93,19 @@ export class VisitService {
       practitionerId: completedVisit.practitionerId,
       status: Status.UPCOMING,
       isEmergency: false,
+      followUpOfVisitId: completedVisit.visitId,
     });
+  }
+
+  getPetById(petId: string): Observable<Pet> {
+    return this.http.get<Pet>(`/api/gateway/pets/${petId}`);
+  }
+
+  getCustomerById(customerId: string): Observable<Customer> {
+    return this.http.get<Customer>(`/api/gateway/customers/${customerId}`);
+  }
+
+  addVetNote(visitId: string, vetNote: string): Observable<Visit> {
+    return this.http.patch<Visit>(`/api/gateway/visits/${visitId}/note`, { vetNote });
   }
 }
