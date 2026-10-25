@@ -71,14 +71,22 @@ export class SupplyPage {
     viewChild.required<TemplateRef<unknown>>('restockDialog');
   private restockDialogRef: MatDialogRef<unknown> | null = null;
   protected readonly restockingSupply = signal<Supply | null>(null);
+  protected readonly restockAddingLabel = $localize`:@@supply.restock.adding:Ajout en cours…`;
+  protected readonly restockAddLabel = $localize`:@@supply.restock.add:Ajouter au stock`;
   protected readonly restockPending = signal(false);
   protected readonly restockError = signal('');
   protected readonly uncertainRestocks = signal<ReadonlySet<string>>(new Set());
   protected readonly restockModel = signal<{ quantity: number | null }>({ quantity: null });
   protected readonly restockForm = form(this.restockModel, (path) => {
-    required(path.quantity, { message: 'Quantity is required.' });
-    min(path.quantity, 1, { message: 'Enter an integer greater than 0.' });
-    max(path.quantity, 2147483647, { message: 'Quantity must not exceed 2147483647.' });
+    required(path.quantity, {
+      message: $localize`:@@supply.restock.quantityRequired:La quantité est obligatoire.`,
+    });
+    min(path.quantity, 1, {
+      message: $localize`:@@supply.restock.quantityPositive:Saisissez un entier supérieur à 0.`,
+    });
+    max(path.quantity, 2147483647, {
+      message: $localize`:@@supply.restock.quantityMax:La quantité ne doit pas dépasser 2147483647.`,
+    });
   });
 
   protected canRestock(supply: Supply): boolean {
@@ -96,7 +104,7 @@ export class SupplyPage {
     this.restockForm().reset({ quantity: null });
     this.restockError.set('');
     const dialogRef = this.dialog.open(this.restockDialogTemplate(), {
-      ariaLabel: `Restock ${supply.productName}`,
+      ariaLabel: $localize`:@@supply.restock.ariaLabel:Réapprovisionner ${this.localizedSupplyName(supply.productName)}:name:`,
     });
     this.restockDialogRef = dialogRef;
     dialogRef.afterClosed().subscribe(() => {
@@ -118,7 +126,9 @@ export class SupplyPage {
     const supply = this.restockingSupply();
     const inventoryId = this.inventoryId;
     if (!supply || !inventoryId || !this.canRestock(supply)) {
-      this.restockError.set('You no longer have permission to restock this supply.');
+      this.restockError.set(
+        $localize`:@@supply.restock.permission:Vous n’avez plus la permission de réapprovisionner cet article.`,
+      );
       return;
     }
 
@@ -129,7 +139,9 @@ export class SupplyPage {
       quantity <= 0 ||
       quantity > 2147483647
     ) {
-      this.restockError.set('Enter an integer between 1 and 2147483647.');
+      this.restockError.set(
+        $localize`:@@supply.restock.quantityInteger:Saisissez un entier entre 1 et 2147483647.`,
+      );
       return;
     }
 
@@ -155,10 +167,14 @@ export class SupplyPage {
           // additive request could duplicate it; require reconciliation by reloading the page.
           this.uncertainRestocks.update((ids) => new Set([...ids, supply.productId]));
           this.restockError.set(
-            'Unable to confirm restock. Stock may have changed. Reload the page to check quantities before trying again.',
+            $localize`:@@supply.restock.uncertain:Impossible de confirmer le réapprovisionnement. Le stock a peut-être changé. Rechargez la page pour vérifier les quantités avant de réessayer.`,
           );
         } else {
-          this.restockError.set(isApiError(error) ? error.message : 'Unable to restock supply.');
+          this.restockError.set(
+            isApiError(error)
+              ? error.message
+              : $localize`:@@supply.restock.failed:Impossible de réapprovisionner l’article.`,
+          );
         }
       },
     });

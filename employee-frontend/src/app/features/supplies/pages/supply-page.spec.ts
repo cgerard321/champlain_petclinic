@@ -172,7 +172,7 @@ describe('SupplyPage', () => {
         component['restockModel'].set({ quantity });
         component['submitRestock'](submitEvent());
         expect(restockSupply).not.toHaveBeenCalled();
-        expect(component['restockError']()).toContain('integer');
+        expect(component['restockError']()).toContain('entier');
       },
     );
 
@@ -233,7 +233,7 @@ describe('SupplyPage', () => {
         component['restockModel'].set({ quantity: 2 });
         restockSupply.mockReturnValue(throwError(() => failure));
         component['submitRestock'](submitEvent());
-        expect(component['restockError']()).toContain('Stock may have changed');
+        expect(component['restockError']()).toContain('Le stock a peut-être changé');
         component['submitRestock'](submitEvent());
         expect(restockSupply).toHaveBeenCalledTimes(1);
         expect(component['canRestock'](eligible)).toBe(false);
@@ -732,7 +732,7 @@ describe('SupplyPage restock modal rendering', () => {
     await fixture.whenStable();
     const modal = document.querySelector('mat-dialog-container')!;
     expect(modal.textContent).toContain('Bandages');
-    expect(modal.textContent).toContain('Current quantity: 0');
+    expect(modal.textContent).toContain('Quantité actuelle : 0');
     const input = modal.querySelector<HTMLInputElement>('#restockQuantity')!;
     input.value = '3';
     input.dispatchEvent(new Event('input', { bubbles: true }));

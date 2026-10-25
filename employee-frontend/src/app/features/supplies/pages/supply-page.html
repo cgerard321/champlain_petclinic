@@ -255,13 +255,16 @@
 </ng-template>
 
 <ng-template #restockDialog>
-  <h2 mat-dialog-title>Restock supply</h2>
+  <h2 mat-dialog-title i18n="@@supply.restock.title">Réapprovisionner un article</h2>
   <form (submit)="submitRestock($event)">
     <mat-dialog-content>
       @if (restockingSupply(); as supply) {
-        <p>{{ supply.productName }} — Current quantity: {{ supply.productQuantity }}</p>
+        <p i18n="@@supply.restock.currentQuantity">
+          {{ localizedSupplyName(supply.productName) }} — Quantité actuelle :
+          {{ supply.productQuantity }}
+        </p>
       }
-      <label for="restockQuantity">Quantity to add</label>
+      <label for="restockQuantity" i18n="@@supply.restock.quantity">Quantité à ajouter</label>
       <input
         id="restockQuantity"
         type="number"
@@ -282,8 +285,9 @@
         class="dialog-cancel-button"
         [disabled]="restockPending()"
         (click)="cancelRestock()"
+        i18n="@@supply.restock.cancel"
       >
-        Cancel
+        Annuler
       </button>
       <button
         type="submit"
@@ -294,7 +298,7 @@
           uncertainRestocks().has(restockingSupply()?.productId ?? '')
         "
       >
-        {{ restockPending() ? 'Adding stock...' : 'Add stock' }}
+        {{ restockPending() ? restockAddingLabel : restockAddLabel }}
       </button>
     </mat-dialog-actions>
   </form>
