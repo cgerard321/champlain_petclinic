@@ -52,7 +52,7 @@ const emptyFilters: BillFilters = {
 @Component({
   selector: 'app-bill',
   imports: [CurrencyPipe, FormsModule],
-  styleUrl: './bill.css',
+  styleUrls: ['./bill.css', './bill-search.css'],
   templateUrl: './bill.html',
 })
 export class Bill implements OnInit {
