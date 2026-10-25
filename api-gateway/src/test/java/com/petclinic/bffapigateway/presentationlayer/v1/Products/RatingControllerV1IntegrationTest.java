@@ -51,7 +51,7 @@ class RatingControllerV1IntegrationTest {
         String customerId = UUID.randomUUID().toString();
 
         ratingMock.stubFor(get(urlEqualTo("/ratings/%s".formatted(productId)))
-                .willReturn(okForContentType("text/event-stream;charset=UTF-8", "data:{\"rating\": 5, \"review\": \"It's great\"}\n\ndata: {\"rating\": 1, \"review\": \"Horrible\"}\n\n"))
+                .willReturn(okForContentType("text/event-stream;charset=UTF-8", "data:{\"rating\": 5, \"review\": \"It's great\", \"qualityRating\": 5, \"valueRating\": 4, \"petSatisfactionRating\": 5, \"ingredientsRating\": 4}\n\ndata: {\"rating\": 1, \"review\": \"Horrible\", \"qualityRating\": 2, \"valueRating\": 1, \"petSatisfactionRating\": 1, \"ingredientsRating\": 2}\n\n"))
         );
 
         authMock.stubFor(post(urlEqualTo("/users/validate-token"))
@@ -74,6 +74,14 @@ class RatingControllerV1IntegrationTest {
                 .expectBodyList(RatingResponseModel.class)
                 .value(ratingResponseModels -> {
                     assertNotNull(ratingResponseModels);
+                    assertEquals((byte) 5, ratingResponseModels.get(0).getQualityRating());
+                    assertEquals((byte) 4, ratingResponseModels.get(0).getValueRating());
+                    assertEquals((byte) 5, ratingResponseModels.get(0).getPetSatisfactionRating());
+                    assertEquals((byte) 4, ratingResponseModels.get(0).getIngredientsRating());
+                    assertEquals((byte) 2, ratingResponseModels.get(1).getQualityRating());
+                    assertEquals((byte) 1, ratingResponseModels.get(1).getValueRating());
+                    assertEquals((byte) 1, ratingResponseModels.get(1).getPetSatisfactionRating());
+                    assertEquals((byte) 2, ratingResponseModels.get(1).getIngredientsRating());
                 })
                 .hasSize(2);
 
@@ -117,7 +125,7 @@ class RatingControllerV1IntegrationTest {
         String customerId = UUID.randomUUID().toString();
 
         ratingMock.stubFor(get(urlEqualTo("/ratings/%s/%s".formatted(productId, customerId)))
-                .willReturn(okForContentType("application/json", "{\"rating\": 5, \"review\": \"It's great\"}"))
+                .willReturn(okForContentType("application/json", "{\"rating\": 5, \"review\": \"It's great\", \"qualityRating\": 5, \"valueRating\": 4, \"petSatisfactionRating\": 5, \"ingredientsRating\": 4}"))
         );
 
         authMock.stubFor(post(urlEqualTo("/users/validate-token"))
@@ -138,7 +146,11 @@ class RatingControllerV1IntegrationTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.rating").isEqualTo(5)
-                .jsonPath("$.review").isEqualTo("It's great");
+                .jsonPath("$.review").isEqualTo("It's great")
+                .jsonPath("$.qualityRating").isEqualTo(5)
+                .jsonPath("$.valueRating").isEqualTo(4)
+                .jsonPath("$.petSatisfactionRating").isEqualTo(5)
+                .jsonPath("$.ingredientsRating").isEqualTo(4);
     }
 
     @Test
@@ -170,9 +182,12 @@ class RatingControllerV1IntegrationTest {
         String customerId = UUID.randomUUID().toString();
 
         ratingMock.stubFor(post(urlEqualTo("/ratings/%s/%s".formatted(productId, customerId)))
-
-                .withRequestBody(matchingJsonSchema("{\"rating\": 3}"))
-                .willReturn(okForContentType("application/json", "{\"rating\": 3, \"review\": \"It's not bad neither good\"}"))
+                .withRequestBody(matchingJsonPath("$.rating", equalTo("3")))
+                .withRequestBody(matchingJsonPath("$.qualityRating", equalTo("5")))
+                .withRequestBody(matchingJsonPath("$.valueRating", equalTo("4")))
+                .withRequestBody(matchingJsonPath("$.petSatisfactionRating", equalTo("5")))
+                .withRequestBody(matchingJsonPath("$.ingredientsRating", equalTo("4")))
+                .willReturn(okForContentType("application/json", "{\"rating\": 3, \"review\": \"It's not bad neither good\", \"qualityRating\": 5, \"valueRating\": 4, \"petSatisfactionRating\": 5, \"ingredientsRating\": 4}"))
         );
 
         authMock.stubFor(post(urlEqualTo("/users/validate-token"))
@@ -192,12 +207,16 @@ class RatingControllerV1IntegrationTest {
                 .cookie("Bearer", jwtToken)
                 .cookie("XSRF-TOKEN", CSRF_TOKEN)
                 .header("X-XSRF-TOKEN", CSRF_TOKEN)
-                .bodyValue("{\"rating\": 3}")
+                .bodyValue("{\"rating\": 3, \"qualityRating\": 5, \"valueRating\": 4, \"petSatisfactionRating\": 5, \"ingredientsRating\": 4}")
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.rating").isEqualTo(3)
-                .jsonPath("$.review").isEqualTo("It's not bad neither good");
+                .jsonPath("$.review").isEqualTo("It's not bad neither good")
+                .jsonPath("$.qualityRating").isEqualTo(5)
+                .jsonPath("$.valueRating").isEqualTo(4)
+                .jsonPath("$.petSatisfactionRating").isEqualTo(5)
+                .jsonPath("$.ingredientsRating").isEqualTo(4);
     }
 
     @Test
@@ -327,8 +346,12 @@ class RatingControllerV1IntegrationTest {
         String customerId = UUID.randomUUID().toString();
 
         ratingMock.stubFor(put(urlEqualTo("/ratings/%s/%s".formatted(productId, customerId)))
-                .withRequestBody(matchingJsonSchema("{\"rating\": 4}"))
-                .willReturn(okForContentType("application/json", "{\"rating\": 4, \"review\": \"It's alright\"}"))
+                .withRequestBody(matchingJsonPath("$.rating", equalTo("4")))
+                .withRequestBody(matchingJsonPath("$.qualityRating", equalTo("4")))
+                .withRequestBody(matchingJsonPath("$.valueRating", equalTo("3")))
+                .withRequestBody(matchingJsonPath("$.petSatisfactionRating", equalTo("5")))
+                .withRequestBody(matchingJsonPath("$.ingredientsRating", equalTo("2")))
+                .willReturn(okForContentType("application/json", "{\"rating\": 4, \"review\": \"It's alright\", \"qualityRating\": 4, \"valueRating\": 3, \"petSatisfactionRating\": 5, \"ingredientsRating\": 2}"))
         );
 
         authMock.stubFor(post(urlEqualTo("/users/validate-token"))
@@ -348,12 +371,16 @@ class RatingControllerV1IntegrationTest {
                 .cookie("Bearer", jwtToken)
                 .cookie("XSRF-TOKEN", CSRF_TOKEN)
                 .header("X-XSRF-TOKEN", CSRF_TOKEN)
-                .bodyValue("{\"rating\": 4}")
+                .bodyValue("{\"rating\": 4, \"qualityRating\": 4, \"valueRating\": 3, \"petSatisfactionRating\": 5, \"ingredientsRating\": 2}")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.rating").isEqualTo(4)
-                .jsonPath("$.review").isEqualTo("It's alright");
+                .jsonPath("$.review").isEqualTo("It's alright")
+                .jsonPath("$.qualityRating").isEqualTo(4)
+                .jsonPath("$.valueRating").isEqualTo(3)
+                .jsonPath("$.petSatisfactionRating").isEqualTo(5)
+                .jsonPath("$.ingredientsRating").isEqualTo(2);
 
     }
 
