@@ -87,7 +87,7 @@ public class BFFApiGatewayController {
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
-    //not for me to mess with
+    // Receptionists need customer bill lookup access for CPC-2181.
     @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
     @GetMapping(value = "bills/customer/{customerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByCustomerId(final @PathVariable String customerId)
