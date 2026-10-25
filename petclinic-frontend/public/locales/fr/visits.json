@@ -1,0 +1,23 @@
+{
+  "followUp": {
+    "label": "Suivi",
+    "confirm": "Confirmer",
+    "reschedule": "Reporter",
+    "rescheduleTitle": "Reporter la visite de suivi",
+    "confirmReschedule": "Confirmer la nouvelle heure",
+    "noSlots": "Aucune heure disponible pour cette date.",
+    "confirmed": "Votre visite de suivi est confirmée.",
+    "rescheduled": "Votre visite de suivi a été reportée.",
+    "error": "Cette visite n'a pas pu être mise à jour. Veuillez réessayer.",
+    "tooLate": "Cette visite de suivi ne peut plus être confirmée ni reportée, car elle commence dans moins de 24 heures.",
+    "confirmedNote": "Vous avez confirmé cette visite de suivi. À bientôt!",
+    "pet": "Animal",
+    "veterinarian": "Vétérinaire",
+    "date": "Date",
+    "time": "Heure disponible",
+    "loadingSlots": "Chargement des heures...",
+    "slotsError": "Impossible de charger les heures disponibles.",
+    "dateRequired": "La date est requise",
+    "timeRequired": "L'heure est requise"
+  }
+}
