@@ -719,6 +719,99 @@
         "typeRequired": "Inventory type is required.",
         "descriptionRequired": "Description is required."
       }
+    },
+    "bill":{
+      "header": "Billing",
+      "subheader": "Bills",
+      "description": "Review and manage billing records",
+      "createBillButton": "Create Bill",
+      "findBillById": "Find a bill By ID",
+      "searchButton": "Find Bill",
+      "searchPlaceholder": "Enter Bill ID",
+      "myBills": "My Bills",
+      "adminBills": "Bill Overview",
+      "vetViewBills": "View bills associated with your veterinarian account",
+      "adminViewBills": "View, update, and archive billing records",
+      "selectUnpaidBill": "Select an unpaid bill to process a payment",
+      "archiving":"Archiving...",
+      "archiveBill":"Archive Eligible Bills",
+      "activeButton":"Active Bills",
+      "archivedButton":"Archived Bills",
+      "hideFilter":"Hide Filters",
+      "custId":"Customer ID",
+      "custName":"Customer Name",
+      "vetName":"Veterinarian Name",
+      "vistType":"Visit Type",
+      "status":"Status",
+      "allStatus":"All statuses",
+      "paid":"PAID",
+      "unpaid":"UNPAID",
+      "overdue":"OVERDUE",
+      "creationYear":"Creation Year",
+      "creationMonth":"Creation Month",
+      "currency":"Currency",
+      "clearFilter":"Clear Filters",
+      "notAvailable":"Not Available",
+      "exempt":"Exempt",
+      "detailButton":"Details",
+      "downloading":"Downloading...",
+      "download":"Download PDF",
+      "updateButton":"Update",
+      "noArchive":"No archived bills",
+      "noActive":"No active bills",
+      "noArchiveRecord":"There are no archived billing records",
+      "noActiveRecord":"There are no active billing records",
+      "noBillsFound":"No bills found",
+      "noBills":"There are no bills to display",
+      "noVetBills":"There are no bills associated with your veterinarian account",
+      "notPermitted":"You do not have permission to access billing records",
+      "detailLoading":"Loading bill details...",
+
+
+      "month":{
+        "months":"All months",
+        "jan":"January",
+        "feb":"February",
+        "mar":"March",
+        "apr":"April",
+        "may":"May",
+        "june":"June",
+        "july":"July",
+        "aug":"August",
+        "sept":"September",
+        "oct":"October",
+        "nov":"November",
+        "dec":"December"
+      },
+
+      "tableBill":{
+        "billId":"Bill ID",
+        "cust":"Customer",
+        "vet":"Veterinarian",
+        "amount":"Amount",
+        "interest":"Interest",
+        "status":"Status",
+        "archived":"Archived",
+        "actions":"Actions",
+        "active":"Active"
+      },
+
+      "interestOpt":{
+        "saving":"Saving...",
+        "remove":"Remove Interest Exemption",
+        "exempt":"Exempt Interest"
+      },
+
+      "payment":{
+        "payBill":"Pay Bill",
+        "cardNumber":"Card Number",
+        "cvv":"CVV",
+        "expDate":"Expiration Date (MM/YY)",
+        "process":"Processing...",
+        "confirm":"Confirm Payment",
+        "cancel":"Cancel"
+      }
+
     }
   }
 }

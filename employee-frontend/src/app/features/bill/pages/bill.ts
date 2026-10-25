@@ -77,6 +77,16 @@ export class Bill implements OnInit {
   protected readonly paymentMessage = signal('');
   protected readonly paymentError = signal('');
 
+  protected readonly billStatusTranslation: Record<string, string> = {
+    PAID: $localize`:@@bill.paid:PAYÉE`,
+    UNPAID: $localize`:@@bill.unpaid:IMPAYÉE`,
+    OVERDUE: $localize`:@@bill.overdue:EN RETARD`,
+  };
+
+  protected translate(status: string): string {
+    return this.billStatusTranslation[status] ?? status;
+  }
+
   protected payment: PaymentRequest = {
     cardNumber: '',
     cvv: '',
