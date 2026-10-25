@@ -50,16 +50,21 @@ class InventoryControllerIntegrationTest {
     com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditRepository supplyAuditRepository;
 
     private Product setRestockQuantity(Integer quantity) {
+        return setRestockProduct(quantity, quantity == 0 ? Status.OUT_OF_STOCK : Status.RE_ORDER);
+    }
+
+    private Product setRestockProduct(Integer quantity, Status status) {
         Product product = productRepository.findProductByInventoryIdAndProductId("1", "123F567C9").block();
         assertNotNull(product);
         product.setProductQuantity(quantity);
-        // Deliberately stale: eligibility must use quantity, not the stored status.
-        product.setStatus(Status.AVAILABLE);
+        product.setStatus(status);
+        product.setLastUpdatedAt(java.time.LocalDateTime.of(2000, 1, 1, 0, 0));
         return productRepository.save(product).block();
     }
 
     @ParameterizedTest
-    @CsvSource({"0,1,1,RE_ORDER", "1,5,6,RE_ORDER", "19,1,20,AVAILABLE", "0,2147483647,2147483647,AVAILABLE"})
+    @CsvSource({"0,1,1,RE_ORDER", "1,5,6,RE_ORDER", "19,1,20,AVAILABLE",
+            "25,5,30,AVAILABLE", "0,2147483647,2147483647,AVAILABLE"})
     void restock_addsQuantityAndRecalculatesStatus(int initial, int amount, int total, Status status) {
         Product before = setRestockQuantity(initial);
         String actor = "restock-test-" + UUID.randomUUID();
@@ -76,6 +81,7 @@ class InventoryControllerIntegrationTest {
         assertNotNull(saved);
         assertEquals(total, saved.getProductQuantity());
         assertEquals(status, saved.getStatus());
+        assertThat(saved.getLastUpdatedAt()).isAfter(before.getLastUpdatedAt());
         assertEquals(before.getProductName(), saved.getProductName());
         assertEquals(before.getProductPrice(), saved.getProductPrice());
         var audit = supplyAuditRepository
@@ -90,9 +96,9 @@ class InventoryControllerIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {20, 100, -1})
-    void restock_rejectsIneligibleCurrentQuantity(int quantity) {
-        setRestockQuantity(quantity);
+    @ValueSource(ints = {0, 1, 19, 20, 100})
+    void restock_rejectsAvailableRegardlessOfQuantity(int quantity) {
+        setRestockProduct(quantity, Status.AVAILABLE);
         webTestClient.put().uri("/inventory/1/products/123F567C9/restockProduct?productQuantity=1")
                 .exchange().expectStatus().isBadRequest().expectBody()
                 .jsonPath("$.message").value(message -> assertTrue(message.toString().contains("Only RE ORDER")));
@@ -102,11 +108,12 @@ class InventoryControllerIntegrationTest {
 
     @Test
     void restock_rejectsOverflowWithoutChangingStock() {
-        setRestockQuantity(1);
+        setRestockQuantity(com.petclinic.inventoryservice.utils.EntityDTOUtil.REORDER_THRESHOLD + 1);
         webTestClient.put().uri("/inventory/1/products/123F567C9/restockProduct?productQuantity=2147483647")
                 .exchange().expectStatus().isBadRequest().expectBody()
                 .jsonPath("$.message").value(message -> assertTrue(message.toString().contains("maximum stock")));
-        assertEquals(1, productRepository.findProductByInventoryIdAndProductId("1", "123F567C9")
+        assertEquals(com.petclinic.inventoryservice.utils.EntityDTOUtil.REORDER_THRESHOLD + 1,
+                productRepository.findProductByInventoryIdAndProductId("1", "123F567C9")
                 .block().getProductQuantity());
     }
 
@@ -1420,6 +1427,7 @@ class InventoryControllerIntegrationTest {
     @Test
     void restockLowStockProduct_WithValidInputs_ShouldSucceed() {
         // Arrange
+        setRestockQuantity(10);
         int restockQuantity = 5;
         String inventoryId = "1"; // Using the existing inventory setup
         String productId = "123F567C9"; // Using the existing product setup
