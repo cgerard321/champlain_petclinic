@@ -1,0 +1,88 @@
+import { Workday } from '@features/vets/models/vet-api.model';
+import { Status } from '@features/vist/models/Status';
+import { Visit } from '@features/vist/models/Visit';
+
+export const DAYS = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+] as const satisfies readonly Workday[];
+
+export type Schedule = Record<Workday, readonly string[]>;
+
+export interface RemovedSlot {
+  readonly day: Workday;
+  readonly hour: string;
+}
+
+const ACTIVE_STATUSES: readonly Status[] = [Status.SCHEDULED, Status.CONFIRMED, Status.UPCOMING];
+
+const DAY_OF_WEEK: Record<Workday, number> = {
+  Sunday: 0,
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
+};
+
+export function emptySchedule(): Schedule {
+  return Object.fromEntries(DAYS.map((day) => [day, [] as readonly string[]])) as Schedule;
+}
+
+export function readSchedule(workHoursJson: string | null): Schedule {
+  const schedule = emptySchedule();
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(workHoursJson || '{}');
+  } catch {
+    return schedule;
+  }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return schedule;
+  const record = parsed as Record<string, unknown>;
+  for (const day of DAYS) {
+    const raw = record[day];
+    if (Array.isArray(raw)) {
+      schedule[day] = raw.filter((hour): hour is string => typeof hour === 'string');
+    }
+  }
+  return schedule;
+}
+
+export function hourRange(hour: string): readonly [number, number] | null {
+  const match = /^Hour_(\d{1,2})_(\d{1,2})$/.exec(hour);
+  return match ? [Number(match[1]), Number(match[2])] : null;
+}
+
+export function hourLabel(hour: string): string {
+  const range = hourRange(hour);
+  return range ? `${range[0]}:00–${range[1]}:00` : hour;
+}
+
+export function visitsAffectedBy(
+  visits: readonly Visit[],
+  removed: readonly RemovedSlot[],
+  now: Date = new Date(),
+): Visit[] {
+  if (!removed.length) return [];
+  return visits.filter((visit) => {
+    if (!ACTIVE_STATUSES.includes(visit.status)) return false;
+    const start = new Date(visit.visitDate);
+    if (Number.isNaN(start.getTime()) || start <= now) return false;
+    const end = new Date(visit.visitEndDate);
+    const spanMs = Number.isNaN(end.getTime()) ? 0 : end.getTime() - start.getTime();
+    const duration = spanMs > 0 ? Math.min(spanMs / 3_600_000, 24) : 1;
+    const startHour = start.getHours() + start.getMinutes() / 60;
+    const endHour = startHour + duration;
+    return removed.some((slot) => {
+      if (DAY_OF_WEEK[slot.day] !== start.getDay()) return false;
+      const range = hourRange(slot.hour);
+      return !!range && startHour < range[1] && endHour > range[0];
+    });
+  });
+}

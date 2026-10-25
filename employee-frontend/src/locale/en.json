@@ -341,8 +341,15 @@
         "no_hours": "No hours specified.",
         "empty": "No availability on this profile.",
         "confirm_title": "Remove this availability?",
-        "confirm_message": "The following availability will be removed from the profile: {$slots}. This cannot be undone once saved.",
-        "confirm": "Remove"
+        "confirm_message": "The following availability will be removed from the profile: {$slots}.",
+        "confirm": "Remove",
+        "confirm_final": "This cannot be undone once saved.",
+        "visits_one": "1 visit booked in these slots will be cancelled.",
+        "visits_many": "{$count} visits booked in these slots will be cancelled.",
+        "visits_unknown": "Booked visits for these slots could not be checked.",
+        "cancel_reason": "The veterinarian is no longer available at this time.",
+        "cancel_failed_one": "One visit could not be cancelled. Cancel it from the visits page.",
+        "cancel_failed_many": "{$count} visits could not be cancelled. Cancel them from the visits page."
       },
       "detail": {
         "back": "Back to directory",

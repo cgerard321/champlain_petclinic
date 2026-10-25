@@ -6,6 +6,7 @@ import { CurrentUserResponse } from '@core/models/current-user-response';
 import { AuthState } from '@core/services/auth-state';
 import { SseClient } from '@core/services/sse-client';
 import { Pet, Customer } from '@features/cust/models/customer.model';
+import { CancellationReason } from '@features/vist/models/CancellationReasons';
 import { Status } from '@features/vist/models/Status';
 import { TimeSlot } from '@features/vist/models/TimeSlot';
 import { Visit } from '@features/vist/models/Visit';
@@ -107,5 +108,12 @@ export class VisitService {
 
   addVetNote(visitId: string, vetNote: string): Observable<Visit> {
     return this.http.patch<Visit>(`/api/gateway/visits/${visitId}/note`, { vetNote });
+  }
+
+  cancelVisit(visitId: string, details: string): Observable<Visit> {
+    return this.http.patch<Visit>(`/api/gateway/visits/${visitId}/cancel`, {
+      cancellationReason: CancellationReason.OTHER,
+      cancellationReasonDetails: details,
+    });
   }
 }

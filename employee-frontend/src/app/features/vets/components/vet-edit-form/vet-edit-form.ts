@@ -15,48 +15,23 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 
+import {
+  DAYS,
+  emptySchedule,
+  hourLabel,
+  readSchedule,
+  RemovedSlot,
+  Schedule,
+  visitsAffectedBy,
+} from '@features/vets/models/availability';
 import { VetResponse, VetUpdateRequest, Workday } from '@features/vets/models/vet-api.model';
 import { workdayLabels } from '@features/vets/models/vet-profile.mapper';
+import { Visit } from '@features/vist/models/Visit';
 import { ConfirmDialog } from '@shared/components/confirm-dialog/confirm-dialog';
 
-const DAYS = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
-] as const satisfies readonly Workday[];
-
-type Schedule = Record<Workday, readonly string[]>;
-
-function emptySchedule(): Schedule {
-  return Object.fromEntries(DAYS.map((day) => [day, [] as readonly string[]])) as Schedule;
-}
-
-function readSchedule(workHoursJson: string | null): Schedule {
-  const schedule = emptySchedule();
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(workHoursJson || '{}');
-  } catch {
-    return schedule;
-  }
-  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return schedule;
-  const record = parsed as Record<string, unknown>;
-  for (const day of DAYS) {
-    const raw = record[day];
-    if (Array.isArray(raw)) {
-      schedule[day] = raw.filter((hour): hour is string => typeof hour === 'string');
-    }
-  }
-  return schedule;
-}
-
-function hourLabel(hour: string): string {
-  const match = /^Hour_(\d{1,2})_(\d{1,2})$/.exec(hour);
-  return match ? `${match[1]}:00–${match[2]}:00` : hour;
+export interface VetSavePayload {
+  readonly request: VetUpdateRequest;
+  readonly visitsToCancel: readonly Visit[];
 }
 
 @Component({
@@ -69,7 +44,9 @@ export class VetEditForm {
   readonly vet = input.required<VetResponse>();
   readonly saving = input(false);
   readonly error = input('');
-  readonly submitted = output<VetUpdateRequest>();
+  readonly visits = input<readonly Visit[]>([]);
+  readonly visitsUnavailable = input(false);
+  readonly submitted = output<VetSavePayload>();
   readonly cancelled = output<void>();
   private readonly fb = inject(FormBuilder);
   private readonly dialog = inject(MatDialog);
@@ -141,6 +118,18 @@ export class VetEditForm {
       hours: schedule[day].map((hour) => ({ value: hour, label: hourLabel(hour) })),
     }));
   });
+  protected readonly removedSlots = computed<readonly RemovedSlot[]>(() => {
+    const initialSchedule = this.initialSchedule();
+    const schedule = this.schedule();
+    return DAYS.flatMap((day) =>
+      initialSchedule[day]
+        .filter((hour) => !schedule[day].includes(hour))
+        .map((hour) => ({ day, hour })),
+    );
+  });
+  protected readonly affectedVisits = computed(() =>
+    visitsAffectedBy(this.visits(), this.removedSlots()),
+  );
   private readonly removed = computed(() => {
     const initialDays = this.initialDays();
     const initialSchedule = this.initialSchedule();
@@ -243,7 +232,7 @@ export class VetEditForm {
       .open(ConfirmDialog, {
         data: {
           title: $localize`:@@vets.availability.confirm_title:Retirer ces disponibilités ?`,
-          message: $localize`:@@vets.availability.confirm_message:Ces disponibilités seront retirées du profil : ${removed.join(' ; ')}:slots:. Cette action est définitive une fois enregistrée.`,
+          message: this.confirmMessage(removed),
           confirmLabel: $localize`:@@vets.availability.confirm:Retirer`,
           cancelLabel: $localize`:@@vets.actions.cancel:Annuler`,
         },
@@ -253,6 +242,30 @@ export class VetEditForm {
       .subscribe((confirmed) => {
         if (confirmed) this.emit();
       });
+  }
+
+  private confirmMessage(removed: readonly string[]): string {
+    const parts = [
+      $localize`:@@vets.availability.confirm_message:Ces disponibilités seront retirées du profil : ${removed.join(' ; ')}:slots:.`,
+    ];
+    const count = this.affectedVisits().length;
+    if (this.visitsUnavailable()) {
+      parts.push(
+        $localize`:@@vets.availability.visits_unknown:Les visites réservées sur ces créneaux n'ont pas pu être vérifiées.`,
+      );
+    } else if (count === 1) {
+      parts.push(
+        $localize`:@@vets.availability.visits_one:1 visite réservée sur ces créneaux sera annulée.`,
+      );
+    } else if (count > 1) {
+      parts.push(
+        $localize`:@@vets.availability.visits_many:${count}:count: visites réservées sur ces créneaux seront annulées.`,
+      );
+    }
+    parts.push(
+      $localize`:@@vets.availability.confirm_final:Cette action est définitive une fois enregistrée.`,
+    );
+    return parts.join(' ');
   }
 
   private emit(): void {
@@ -265,16 +278,19 @@ export class VetEditForm {
       if (schedule[day].length) workHours[day] = schedule[day];
     }
     this.submitted.emit({
-      ...this.form.getRawValue(),
-      vetId: vet.vetId,
-      vetBillId: vet.vetBillId,
-      workday: untouched
-        ? (vet.workday ?? [])
-        : DAYS.filter((day) => days.includes(day) || schedule[day].length > 0),
-      workHoursJson: untouched ? vet.workHoursJson : JSON.stringify(workHours),
-      active: vet.active,
-      specialties: vet.specialties ?? [],
-      photoDefault: false,
+      visitsToCancel: this.affectedVisits(),
+      request: {
+        ...this.form.getRawValue(),
+        vetId: vet.vetId,
+        vetBillId: vet.vetBillId,
+        workday: untouched
+          ? (vet.workday ?? [])
+          : DAYS.filter((day) => days.includes(day) || schedule[day].length > 0),
+        workHoursJson: untouched ? vet.workHoursJson : JSON.stringify(workHours),
+        active: vet.active,
+        specialties: vet.specialties ?? [],
+        photoDefault: false,
+      },
     });
   }
 }
