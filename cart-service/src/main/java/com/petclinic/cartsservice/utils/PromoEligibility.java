@@ -18,7 +18,8 @@ public final class PromoEligibility {
         return switch (scope(promo)) {
             case "CART" -> true;
             case "PRODUCT" -> promo.getProductIds() != null && promo.getProductIds().contains(product.getProductId());
-            case "PRODUCT_TYPE" -> promo.getProductTypes() != null && promo.getProductTypes().contains(product.getProductType());
+            case "PRODUCT_TYPE" -> !product.isPromoLookupFailed() && promo.getProductTypes() != null
+                    && promo.getProductTypes().contains(product.getProductType());
             default -> false;
         };
     }

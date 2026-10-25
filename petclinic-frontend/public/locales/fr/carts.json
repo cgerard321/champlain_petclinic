@@ -24,6 +24,7 @@
     "emptyMessage": "Votre panier est vide! Pourquoi ne pas y ajouter quelque chose?",
     "voucherPlaceholder": "Entrez le code promo",
     "currentPromo": "Promo actuelle : {{percent}} %",
+    "promoLookupWarning": "Aucun rabais n’a été appliqué aux articles suivants, car nous n’avons pas pu vérifier leur admissibilité. Appliquez de nouveau la promotion pour réessayer :",
     "receiptLabel": "Voir votre dernier reçu"
   },
   "summary": {

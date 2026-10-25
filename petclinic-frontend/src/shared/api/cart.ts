@@ -4,6 +4,7 @@ import axiosInstance from '@/shared/api/axiosInstance';
 export type ShippingMethod = 'PICKUP' | 'STANDARD' | 'EXPRESS';
 
 export interface CartProductModel {
+  promoLookupFailed?: boolean;
   productId: string;
   productName: string;
   productSalePrice: number;

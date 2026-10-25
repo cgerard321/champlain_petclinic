@@ -14,6 +14,7 @@ import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistTransferDirection;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
+import org.springframework.beans.BeanUtils;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
@@ -873,6 +874,9 @@ public class CartServiceImpl implements CartService {
                 .flatMap(cart -> {
                     cart.setPromoPercent(null);
                     cart.setAppliedPromo(null);
+                    if (cart.getProducts() != null) {
+                        cart.getProducts().forEach(p -> p.setPromoLookupFailed(false));
+                    }
                     return cartRepository.save(cart);
                 })
                 .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts()));
@@ -893,11 +897,24 @@ public class CartServiceImpl implements CartService {
                             List<CartProduct> products = cart.getProducts() == null ? List.of() : cart.getProducts();
                             // Existing carts may predate product type snapshots.
                             return Flux.fromIterable(products)
-                                    .concatMap(p -> "PRODUCT_TYPE".equals(promo.getScope())
-                                            ? productClient.getProductByProductId(p.getProductId()).map(current -> {
-                                                p.setProductType(current.getProductType());
-                                                return p;
-                                            }) : Mono.just(p))
+                                    .concatMap(p -> {
+                                        CartProduct item = new CartProduct();
+                                        BeanUtils.copyProperties(p, item);
+                                        item.setPromoLookupFailed(false);
+                                        if (!"PRODUCT_TYPE".equals(promo.getScope())) {
+                                            return Mono.just(item);
+                                        }
+                                        return productClient.getProductByProductId(p.getProductId())
+                                                .map(current -> {
+                                                    item.setProductType(current.getProductType());
+                                                    return item;
+                                                })
+                                                .onErrorResume(error -> Mono.empty())
+                                                .switchIfEmpty(Mono.fromSupplier(() -> {
+                                                    item.setPromoLookupFailed(true);
+                                                    return item;
+                                                }));
+                                    })
                                     .collectList()
                                     .flatMap(items -> {
                                         if (items.stream().noneMatch(p -> PromoEligibility.isEligible(promo, p))) {
@@ -905,6 +922,7 @@ public class CartServiceImpl implements CartService {
                                         }
                                         cart.setAppliedPromo(promo);
                                         cart.setPromoPercent(promo.getDiscount());
+                                        cart.setProducts(items);
                                         return cartRepository.save(cart);
                                     });
                         }))

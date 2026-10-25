@@ -1621,12 +1621,14 @@ public class CartServiceClientTest {
     @Test
     void scopedPromoAndPerItemDiscountSurviveGatewayRoundTrip() throws Exception {
         prepareResponse(response -> response.setHeader("Content-Type", "application/json").setBody(
-                "{\"cartId\":\"cart\",\"promoPercent\":25,\"discountAmount\":10,\"products\":[{\"productId\":\"food\",\"discountAmount\":10},{\"productId\":\"toy\",\"discountAmount\":0}]}"));
+                "{\"cartId\":\"cart\",\"promoPercent\":25,\"discountAmount\":10,\"products\":[{\"productId\":\"food\",\"discountAmount\":10},{\"productId\":\"toy\",\"discountAmount\":0,\"promoLookupFailed\":true}]}"));
         StepVerifier.create(mockCartServiceClient.applyPromoCodeToCart("cart", " FOOD25 "))
                 .assertNext(cart -> {
                     assertEquals(10, cart.getDiscountAmount());
                     assertEquals(10, cart.getProducts().get(0).getDiscountAmount());
                     assertEquals(0, cart.getProducts().get(1).getDiscountAmount());
+                    assertFalse(cart.getProducts().get(0).isPromoLookupFailed());
+                    assertTrue(cart.getProducts().get(1).isPromoLookupFailed());
                 }).verifyComplete();
         var request = mockWebServer.takeRequest();
         assertEquals("/api/v1/carts/cart/promo", request.getPath());

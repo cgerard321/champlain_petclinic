@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartProductResponseDTO {
+    private boolean promoLookupFailed;
 
     private String productType;
     private double discountAmount;

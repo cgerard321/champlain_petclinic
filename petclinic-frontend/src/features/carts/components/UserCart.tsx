@@ -50,6 +50,7 @@ import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import { getCustomerOrders } from '../api/getCustomerOrders';
 import type { OrderModel } from '../models/OrderModel';
 interface ProductAPIResponse {
+  promoLookupFailed?: boolean;
   discountAmount?: number;
   productId: string;
   imageId?: string;
@@ -140,6 +141,7 @@ const UserCart: React.FC = () => {
 
   const toProductModel = useCallback(
     (product: ProductAPIResponse): ProductModel => ({
+      promoLookupFailed: product.promoLookupFailed ?? false,
       discountAmount: product.discountAmount ?? 0,
       productId: String(product.productId ?? ''),
       imageId: product.imageId ?? '',
@@ -1322,6 +1324,22 @@ const UserCart: React.FC = () => {
                   </div>
                 )}
               </div>
+
+              {promoPercent != null &&
+                cartItems.some(item => item.promoLookupFailed) && (
+                  <div className="alert alert-warning" role="status">
+                    <p>{t('cart.promoLookupWarning')}</p>
+                    <ul>
+                      {cartItems
+                        .filter(item => item.promoLookupFailed)
+                        .map(item => (
+                          <li key={item.productId}>
+                            {item.productName || item.productId}
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                )}
 
               {cartItems.length > 0 && (
                 <div className="voucher-code-section" style={{ marginTop: 12 }}>

@@ -69,6 +69,72 @@ class ScopedPromoTest {
     }
 
     @Test
+    void failedLookupSkipsOnlyThatDiscountAndRetryRestoresIt() {
+        promo.setScope("PRODUCT_TYPE");
+        promo.setProductTypes(List.of("FOOD"));
+        when(products.getProductByProductId("food"))
+                .thenReturn(Mono.error(new RuntimeException("Products unavailable")));
+        when(products.getProductByProductId("toy"))
+                .thenReturn(Mono.just(ProductResponseModel.builder().productType("FOOD").build()));
+
+        StepVerifier.create(service.applyPromoCodeToCart("cart", "SAVE"))
+                .assertNext(result -> {
+                    assertEquals(2, result.getProducts().size());
+                    assertTrue(result.getProducts().get(0).isPromoLookupFailed());
+                    assertEquals(0, result.getProducts().get(0).getDiscountAmount());
+                    assertFalse(result.getProducts().get(1).isPromoLookupFailed());
+                    assertEquals(15, result.getProducts().get(1).getDiscountAmount());
+                    assertEquals(15, result.getDiscountAmount());
+                }).verifyComplete();
+        verify(products).getProductByProductId("toy");
+        var reloaded = EntityModelUtil.toCartResponseModel(cart, cart.getProducts());
+        assertTrue(reloaded.getProducts().get(0).isPromoLookupFailed());
+        assertEquals(15, reloaded.getDiscountAmount());
+        Cart checkout = EntityModelUtil.storeCartOrder(cart);
+        assertEquals(0, checkout.getProducts().get(0).getDiscountAmount());
+        assertEquals(15, checkout.getProducts().get(1).getDiscountAmount());
+
+        when(products.getProductByProductId("food"))
+                .thenReturn(Mono.just(ProductResponseModel.builder().productType("FOOD").build()));
+        StepVerifier.create(service.applyPromoCodeToCart("cart", "SAVE"))
+                .assertNext(result -> {
+                    assertFalse(result.getProducts().get(0).isPromoLookupFailed());
+                    assertEquals(25, result.getDiscountAmount());
+                }).verifyComplete();
+    }
+
+    @Test
+    void emptyProductLookupIsExcludedAndClearingPromoClearsWarning() {
+        promo.setScope("PRODUCT_TYPE");
+        promo.setProductTypes(List.of("FOOD"));
+        when(products.getProductByProductId("food")).thenReturn(Mono.empty());
+        when(products.getProductByProductId("toy"))
+                .thenReturn(Mono.just(ProductResponseModel.builder().productType("FOOD").build()));
+        StepVerifier.create(service.applyPromoCodeToCart("cart", "SAVE"))
+                .assertNext(result -> assertTrue(result.getProducts().get(0).isPromoLookupFailed()))
+                .verifyComplete();
+        StepVerifier.create(service.clearPromoFromCart("cart"))
+                .assertNext(result -> {
+                    assertNull(result.getPromoPercent());
+                    assertEquals(0, result.getDiscountAmount());
+                    assertTrue(result.getProducts().stream().noneMatch(CartProduct::isPromoLookupFailed));
+                }).verifyComplete();
+    }
+
+    @Test
+    void allLookupsFailNeverSavesOrChangesExistingCart() {
+        promo.setScope("PRODUCT_TYPE");
+        promo.setProductTypes(List.of("FOOD"));
+        when(products.getProductByProductId(anyString()))
+                .thenReturn(Mono.error(new RuntimeException("Products unavailable")));
+        StepVerifier.create(service.applyPromoCodeToCart("cart", "SAVE"))
+                .expectError(InvalidInputException.class).verify();
+        verify(carts, never()).save(any());
+        assertNull(cart.getAppliedPromo());
+        assertTrue(cart.getProducts().stream().noneMatch(CartProduct::isPromoLookupFailed));
+    }
+
+    @Test
     void discountRecalculatesAfterQuantityChangeRemovalAndClear() {
         promo.setScope("PRODUCT"); promo.setProductIds(List.of("food"));
         service.applyPromoCodeToCart("cart", "SAVE").block();
