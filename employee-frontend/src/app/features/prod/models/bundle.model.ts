@@ -6,3 +6,10 @@ export interface Bundle {
   originalTotalPrice: number;
   bundlePrice: number;
 }
+
+export interface BundleRequest {
+  bundleName: string;
+  bundleDescription: string;
+  productIds: string[];
+  bundlePrice: number;
+}

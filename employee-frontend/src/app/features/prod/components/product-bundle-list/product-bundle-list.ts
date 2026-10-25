@@ -20,6 +20,16 @@ import { forkJoin } from 'rxjs';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { ProductThumbnail } from '@features/prod/components/product-thumbnail/product-thumbnail';
 import { environment } from '@environments/environment';
+import { MatDialog } from '@angular/material/dialog';
+import {
+  ProductBundleAddDialog,
+  ProductBundleAddDialogData,
+} from '@features/prod/components/product-bundle-add-dialog/product-bundle-add-dialog';
+import { ProductDeleteDialog } from '@features/prod/components/product-delete-dialog/product-delete-dialog';
+import {
+  ProductBundleUpdateDialog,
+  ProductBundleUpdateDialogData,
+} from '@features/prod/components/product-bundle-update-dialog/product-bundle-update-dialog';
 
 @Component({
   imports: [
@@ -41,10 +51,13 @@ import { environment } from '@environments/environment';
 export class ProductBundleList implements OnInit {
   protected readonly customerPortal = environment.customerPortal;
   private readonly auth = inject(AuthState);
+  private readonly dialog = inject(MatDialog);
   private readonly bundlesService = inject(BundleService);
   private readonly productService = inject(ProductService);
+  private readonly deletingBundleId = signal<string | null>(null);
   protected readonly products = signal<Product[]>([]);
   protected readonly rawBundles = signal<Bundle[]>([]);
+  protected readonly deleteErrorMessage = signal<string | null>(null);
   protected readonly isLoading = signal<boolean>(true);
   protected readonly bundles = computed(() => {
     const byId = new Map(this.products().map((p) => [p.productId, p]));
@@ -61,16 +74,96 @@ export class ProductBundleList implements OnInit {
     return roles.includes(Roles.admin) || roles.includes(Roles.inventoryManager);
   });
   protected openAddBundle(): void {
+    if (!this.canManageBundles()) {
+      return;
+    }
+
+    this.dialog
+      .open<ProductBundleAddDialog, ProductBundleAddDialogData>(ProductBundleAddDialog, {
+        autoFocus: 'first-tabbable',
+        width: '850px',
+        maxWidth: '95vw',
+        maxHeight: '150vh',
+        data: {
+          products: this.products(),
+        },
+      })
+      .afterClosed()
+      .subscribe((bundle?: Bundle) => {
+        if (bundle) {
+          this.loadBundles();
+        }
+      });
     return;
   }
-  protected deleteBundle(bundleId: string): void {
+  protected openUpdateBundle(curBundle: Bundle): void {
+    if (!this.canManageBundles()) {
+      return;
+    }
 
+    this.dialog
+      .open<ProductBundleUpdateDialog, ProductBundleUpdateDialogData>(ProductBundleUpdateDialog, {
+        autoFocus: 'first-tabbable',
+        width: '850px',
+        maxWidth: '95vw',
+        maxHeight: '150vh',
+        data: {
+          products: this.products(),
+          bundle: curBundle,
+        },
+      })
+      .afterClosed()
+      .subscribe((bundle?: Bundle) => {
+        if (bundle) {
+          this.loadBundles();
+        }
+      });
+    return;
+  }
+  protected deleteBundle(bundle: Bundle): void {
+    this.deletingBundleId.set(bundle.bundleId);
+    this.deleteErrorMessage.set(null);
+    this.bundlesService.deleteBundle(bundle.bundleId).subscribe({
+      next: () => {
+        this.deletingBundleId.set(null);
+        this.loadBundles();
+      },
+      error: (error) => {
+        this.deletingBundleId.set(null);
+        this.deleteErrorMessage.set(error.message);
+      },
+    });
+  }
+
+  protected openBundleDelete(bundle: Bundle): void {
+    if (!this.canManageBundles() || this.deletingBundleId()) {
+      return;
+    }
+
+    this.deleteErrorMessage.set(null);
+    this.dialog
+      .open(ProductDeleteDialog, {
+        data: {
+          title: 'Delete bundle?',
+          message: `Are you sure you want to delete ${bundle.bundleName}? This cannot be undone.`,
+          confirmLabel: 'Delete',
+        },
+        width: '520px',
+        maxWidth: '95vw',
+      })
+      .afterClosed()
+      .subscribe((confirmed?: boolean) => {
+        if (confirmed) {
+          this.deleteBundle(bundle);
+        }
+      });
   }
 
   ngOnInit(): void {
     this.loadBundles();
   }
   protected loadBundles(): void {
+    this.isLoading.set(true);
     forkJoin({
       products: this.productService.getProducts(),
       bundles: this.bundlesService.getBundles(),

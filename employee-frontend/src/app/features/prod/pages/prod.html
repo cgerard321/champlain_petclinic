@@ -1,5 +1,8 @@
 <section class="product-page">
-  <mat-tab-group>
+  <mat-tab-group
+    selectedIndex="{{ selectedTabIndex() }}"
+    (selectedTabChange)="handleSelectedTabChange($event)"
+  >
     <mat-tab label="Products">
       <div class="product-header">
         <div>
@@ -116,7 +119,7 @@
         <mat-card class="review-settings-card">
           <mat-card-header>
             <mat-card-title>Review Settings</mat-card-title>
-            <mat-card-subtitle> Set how long customers can edit their reviews. </mat-card-subtitle>
+            <mat-card-subtitle> Set how long customers can edit their reviews.</mat-card-subtitle>
           </mat-card-header>
 
           <mat-card-content>

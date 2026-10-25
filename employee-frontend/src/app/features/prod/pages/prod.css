@@ -128,6 +128,7 @@ dd {
 .delete-error-message {
   color: var(--mat-sys-error, #b00020);
   margin: 0 0 16px;
+  margin: 0 0 16px;
 }
 
 @media (width <= 560px) {

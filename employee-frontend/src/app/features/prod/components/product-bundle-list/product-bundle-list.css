@@ -51,6 +51,17 @@
   text-decoration: line-through;
 }
 
+.bundle-card-actions .delete-button {
+  --mdc-outlined-button-outline-color: var(--mat-sys-error, #d32f2f);
+
+  border-color: var(--mat-sys-error, #d32f2f);
+  color: var(--mat-sys-error, #d32f2f);
+}
+
+.bundle-card-actions .delete-button:hover {
+  background-color: rgb(211 47 47 / 8%);
+}
+
 .bundle-items-title {
   font-size: 14px;
   font-weight: 500;

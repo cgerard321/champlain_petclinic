@@ -4,7 +4,13 @@
     <p>Manage bundles available to the clinic.</p>
   </div>
   @if (canManageBundles()) {
-    <button mat-flat-button color="primary" type="button" (click)="openAddBundle()">
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="openAddBundle()"
+      disabled="{{ isLoading() }}"
+    >
       Add Bundle
     </button>
   }
@@ -59,12 +65,13 @@
             }
           </ul>
         </mat-card-content>
-        <mat-card-actions class="product-card-actions" align="end">
+        <mat-card-actions class="bundle-card-actions" align="end">
           @if (canManageBundles()) {
             <button
               mat-flat-button
               color="primary"
               type="button"
+              (click)="openUpdateBundle(bundle)"
             >
               Update
             </button>
@@ -72,6 +79,7 @@
               mat-stroked-button
               class="delete-button"
               type="button"
+              (click)="openBundleDelete(bundle)"
             >
               Delete
             </button>

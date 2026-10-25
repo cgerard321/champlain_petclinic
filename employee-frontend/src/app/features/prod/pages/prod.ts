@@ -31,7 +31,7 @@ import { Product } from '@features/prod/models/product.model';
 import { ProductService } from '@features/prod/services/product.service';
 import { ReviewSettingsService } from '@features/prod/services/review-settings.service';
 import { Roles } from '@shared/models/roles';
-import { MatTab, MatTabGroup } from '@angular/material/tabs';
+import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
 import { ProductBundleList } from '@features/prod/components/product-bundle-list/product-bundle-list';
 
 @Component({
@@ -78,6 +78,9 @@ export class Prod implements OnInit {
     const roles = this.auth.roles();
     return roles.includes(Roles.admin) || roles.includes(Roles.inventoryManager);
   });
+  protected readonly selectedTabIndex = signal<number>(
+    Number(sessionStorage.getItem('productSelectedTabIndex') ?? 0),
+  );
 
   ngOnInit(): void {
     merge(
@@ -275,5 +278,9 @@ export class Prod implements OnInit {
       (error instanceof HttpErrorResponse && error.status === 409) ||
       (isApiError(error) && String(error.code) === '409')
     );
+  }
+
+  protected handleSelectedTabChange(event: MatTabChangeEvent): void {
+    sessionStorage.setItem('productSelectedTabIndex', event.index.toString());
   }
 }
