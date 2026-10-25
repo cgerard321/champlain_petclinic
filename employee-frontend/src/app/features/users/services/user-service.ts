@@ -90,6 +90,7 @@ export class UserService {
         vet: {
           firstName: request.firstName,
           lastName: request.lastName,
+          email: request.email,
           phoneNumber: request.phoneNumber ?? '(514) 555-0123 #1234', // Satisfies VetRequestDTO.phoneNumber
           resume: request.resume,
           specialties: null, // Send null or empty set if backend allows
