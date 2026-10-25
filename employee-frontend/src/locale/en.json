@@ -328,6 +328,11 @@
         "title": "Edit profile",
         "description": "All fields are required. Specialties, status, and working hours are preserved.",
         "legend": "Veterinarian information",
+        "available_specialties": "Available specialties",
+        "all_specialties_selected": "All specialties selected",
+        "custom_specialty": "Other specialty",
+        "add": "Add",
+        "add_custom": "Add specialty",
         "saving": "Saving…",
         "leave": "Leave this page and discard unsaved changes?"
       },
@@ -336,6 +341,12 @@
         "title": "Veterinarian profile",
         "loading": "Loading profile…",
         "saved": "The profile has been saved."
+      },
+      "specialty":{
+        "radiology": "Radiology",
+        "surgery": "Surgery",
+        "dentistry": "Dentistry",
+        "general": "General"
       }
     },
     "cust": {
