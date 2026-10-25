@@ -114,6 +114,6 @@ export class UserService {
       };
     }
 
-    return this.http.post(url, payload, { responseType: 'text' });
+    return this.http.post(url, payload, { responseType: 'text' as 'json' });
   }
 }
