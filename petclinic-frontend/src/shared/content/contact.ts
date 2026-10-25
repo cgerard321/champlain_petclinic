@@ -10,5 +10,5 @@ export const contact = {
     href: '+14506727360',
   },
 
-  email: 'ChamplainPetClinic@gmail.com',
+  email: 'info.champlainpetclinic@gmail.com',
 } as const;
