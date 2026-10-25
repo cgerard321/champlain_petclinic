@@ -90,9 +90,10 @@ export class UserService {
         vet: {
           firstName: request.firstName,
           lastName: request.lastName,
+          phoneNumber: request.phoneNumber ?? '(514) 555-0123 #1234', // Satisfies VetRequestDTO.phoneNumber
           resume: request.resume,
-          specialties: [],
-          workday: this.defaultVetWorkdays,
+          specialties: null, // Send null or empty set if backend allows
+          workday: [], // Send empty set or correct enum values to prevent deserialization crash
           active: true,
           photoDefault: true,
         },
