@@ -1,0 +1,137 @@
+
+.customer-orders {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+}
+
+.customer-orders__heading {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.customer-orders__heading h1 {
+    font-weight: 700;
+    color: #252b38;
+    margin-bottom: 10px;
+}
+
+.customer-orders__heading p {
+    color: #697386;
+}
+
+.customer-orders__card {
+    background: #fff;
+    border: 1px solid #e3e7ed;
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 20px;
+    box-shadow: 0 3px 12px rgba(20, 30, 50, 0.05);
+}
+
+.customer-orders__card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.customer-orders__order-id {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.customer-orders__muted {
+    color: #697386;
+    font-size: 0.92rem;
+}
+
+.customer-orders__price {
+    font-size: 1.35rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.customer-orders__card-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.customer-orders__product {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 20px 0;
+    border-bottom: 1px solid #edf0f4;
+}
+
+.customer-orders__product:last-child {
+    border-bottom: none;
+}
+
+.customer-orders__product-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.customer-orders__product-price {
+    text-align: right;
+    min-width: 150px;
+}
+
+.customer-orders__summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 20px;
+    padding: 7px 0;
+}
+
+.customer-orders__summary-row span:last-child {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.customer-orders__total {
+    border-top: 1px solid #e3e7ed;
+    margin-top: 12px;
+    padding-top: 18px;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.customer-orders__actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.customer-orders__back {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 26px;
+    text-decoration: none;
+}
+
+@media (max-width: 576px) {
+    .customer-orders {
+        padding: 28px 16px 60px;
+    }
+
+    .customer-orders__card {
+        padding: 18px;
+    }
+
+    .customer-orders__product {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .customer-orders__product-price {
+        text-align: left;
+        min-width: 0;
+    }
+}

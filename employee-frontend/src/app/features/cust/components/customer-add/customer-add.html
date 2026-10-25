@@ -1,0 +1,121 @@
+<header class="dialog-header">
+  <div>
+    <h2 mat-dialog-title class="dialog-title" i18n="@@cust.addCustomer.title">Ajouter Un Client</h2>
+  </div>
+
+  <button
+    class="dialog-close-button"
+    mat-icon-button
+    type="button"
+    aria-label="Close Add Customer dialog"
+    (click)="close()"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</header>
+
+<mat-dialog-content class="details-content">
+  <form [formGroup]="customerForm" (ngSubmit)="onSubmit()">
+    <!-- First Name -->
+    <label for="firstName" i18n="@@cust.addCustomer.fields.firstName">Prénom: </label>
+
+    <input id="firstName" type="text" formControlName="firstName" />
+
+    @if (
+      customerForm.controls.firstName.touched &&
+      customerForm.controls.firstName.hasError('required')
+    ) {
+      <span class="error" i18n="@@cust.addCustomer.error.firstName">Prénom requis</span>
+    }
+
+    <br />
+
+    <!-- Last Name -->
+    <label for="lastName" i18n="@@cust.addCustomer.fields.lastName">Nom de Famille: </label>
+
+    <input id="lastName" type="text" formControlName="lastName" />
+
+    @if (
+      customerForm.controls.lastName.touched && customerForm.controls.lastName.hasError('required')
+    ) {
+      <span class="error" i18n="@@cust.addCustomer.error.lastName">Nom de Famille requis</span>
+    }
+
+    <br />
+
+    <!-- Address -->
+    <label for="address" i18n="@@cust.addCustomer.fields.address">Adresse: </label>
+
+    <input id="address" type="text" formControlName="address" />
+
+    @if (
+      customerForm.controls.address.touched && customerForm.controls.address.hasError('required')
+    ) {
+      <span class="error" i18n="@@cust.addCustomer.error.address">Adresse requise</span>
+    }
+
+    <br />
+
+    <!-- City -->
+    <label for="city" i18n="@@cust.addCustomer.fields.city">Ville: </label>
+
+    <input id="city" type="text" formControlName="city" />
+
+    @if (customerForm.controls.city.touched && customerForm.controls.city.hasError('required')) {
+      <span class="error" i18n="@@cust.addCustomer.error.city">Ville requise</span>
+    }
+
+    <br />
+
+    <label for="province">Province</label>
+
+    <select id="province" formControlName="province">
+      <option [ngValue]="null" disabled>Sélectionner une province</option>
+
+      @for (province of provincesOfCanada; track province) {
+        <option [ngValue]="province">
+          {{ provinceLabels[province] }}
+        </option>
+      }
+    </select>
+
+    @if (
+      customerForm.controls.province.touched && customerForm.controls.province.hasError('required')
+    ) {
+      <span class="error" i18n="@@cust.addCustomer.error.province"> Province requise </span>
+    }
+
+    <br />
+
+    <!-- Telephone -->
+    <label for="telephone" i18n="@@cust.addCustomer.fields.phone">Téléphone: </label>
+
+    <input id="telephone" type="text" formControlName="telephone" />
+
+    @if (
+      customerForm.controls.telephone.touched &&
+      customerForm.controls.telephone.hasError('required')
+    ) {
+      <span class="error" i18n="@@cust.addCustomer.error.phoneM">Num de Téléphone requis</span>
+    }
+    @if (
+      customerForm.controls.telephone.touched && customerForm.controls.telephone.hasError('pattern')
+    ) {
+      <span class="error" i18n="@@cust.addCustomer.error.phoneL">
+        Num de Téléphone doit être composé de dix chiffres
+      </span>
+    }
+
+    <br />
+
+    <!-- API Error -->
+    @if (apiError) {
+      <span class="error">
+        {{ apiError }}
+      </span>
+    }
+
+    <!-- Submit -->
+    <button type="submit" i18n="@@cust.addCustomer.submit">Ajouter</button>
+  </form>
+</mat-dialog-content>

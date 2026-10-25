@@ -38,7 +38,7 @@ x-healthchecks:
 
   postgres: &postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d images -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d $${POSTGRES_DB} -h localhost"]
       interval: 10s
       timeout: 5s
       retries: 10

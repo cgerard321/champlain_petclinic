@@ -23,4 +23,5 @@ export interface VisitResponseModel {
   ownerLastName: string;
   prescriptionFile?: FileDetails;
   vetNote?: string;
+  followUpOfVisitId?: string;
 }

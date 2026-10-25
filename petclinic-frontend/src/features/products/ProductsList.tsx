@@ -1,8 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import {
-  localizedProduct,
-  normalizeProductSearch,
-} from '@/features/products/utils/localizedProduct';
+import { matchesFilters } from '@/features/products/utils/productFilters';
 import * as React from 'react';
 import { useState, useEffect, useCallback, useMemo, useRef, JSX } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
@@ -35,8 +32,10 @@ interface ProductsListProps {
     maxStars?: number;
     deliveryType?: string;
     productType?: string;
+    availability?: string;
   };
   sortCriteria?: string;
+  onClearFilters?: () => void;
 }
 
 const ProductList = function Productlist({
@@ -44,6 +43,7 @@ const ProductList = function Productlist({
   view,
   filters,
   sortCriteria,
+  onClearFilters,
 }: ProductsListProps): JSX.Element {
   const { t, i18n } = useTranslation('products');
   const language = i18n.resolvedLanguage || i18n.language || 'en';
@@ -77,7 +77,7 @@ const ProductList = function Productlist({
         filters.minStars,
         filters.maxStars,
         filters.deliveryType ?? '',
-        filters.productType ?? ''
+        filters.productType?.includes(',') ? '' : filters.productType ?? ''
       );
       const visible = list.filter(p => !p.isUnlisted);
       setProductList(visible);
@@ -133,25 +133,12 @@ const ProductList = function Productlist({
         break;
     }
 
-    if (searchQuery === '') {
-      setFilteredList(sorted);
-    } else {
-      const query = normalizeProductSearch(searchQuery);
-      setFilteredList(
-        sorted.filter(
-          p =>
-            normalizeProductSearch(localizedProduct(p, language).name).includes(
-              query
-            ) ||
-            normalizeProductSearch(
-              t(`types.${(p.productType || '').toUpperCase()}`, {
-                defaultValue: p.productType || '',
-              })
-            ).includes(query)
-        )
-      );
-    }
-  }, [sortCriteria, productList, searchQuery, language, t]);
+    setFilteredList(
+      sorted.filter(product =>
+        matchesFilters(product, filters, { query: searchQuery, language, t })
+      )
+    );
+  }, [sortCriteria, productList, searchQuery, language, t, filters]);
 
   const totalPages = Math.ceil(filteredList.length / CATALOG_PAGE_SIZE);
   const firstVisibleProduct = currentPage * CATALOG_PAGE_SIZE + 1;
@@ -196,7 +183,7 @@ const ProductList = function Productlist({
               .filter(p => !p.isUnlisted)
               .map((p, i) => (
                 <Reveal key={p.productId} delay={i * 60 + 120}>
-                  <Product product={p} />
+                  <Product product={p} recentlyViewed />
                 </Reveal>
               ))
           ) : (
@@ -209,6 +196,9 @@ const ProductList = function Productlist({
   return (
     <div className="product-list-container">
       <div className="main-content">
+        {view === 'catalog' && recentlyClickedProducts.length > 0 && (
+          <RecentlyViewedProducts />
+        )}
         {view === 'catalog' && (
           <Reveal delay={80}>
             <div ref={catalogRef} className="products-section-container ">
@@ -232,29 +222,48 @@ const ProductList = function Productlist({
                               current => current.productId === p.productId
                             ) ?? p
                           }
+                          recentlyViewed={recentlyClickedProducts.some(
+                            recentlyViewedProduct =>
+                              recentlyViewedProduct.productId === p.productId
+                          )}
                         />
                       </div>
                     </Reveal>
                   ))}
                 </div>
               ) : (
-                <p style={{ textAlign: 'center', margin: '40px 0' }}>
-                  {t('noItems')}
-                </p>
+                <div className="no-products-results">
+                  <p>
+                    {filters.availability ||
+                    filters.minPrice !== undefined ||
+                    filters.maxPrice !== undefined ||
+                    filters.deliveryType ||
+                    filters.productType ||
+                    (filters.minStars ?? 0) > 0 ||
+                    (filters.maxStars ?? 5) < 5
+                      ? t('noFilteredItems')
+                      : t('noItems')}
+                  </p>
+                  {onClearFilters && (
+                    <button type="button" onClick={onClearFilters}>
+                      {t('clearFilters')}
+                    </button>
+                  )}
+                </div>
               )}
               {!isLoading && filteredList.length > 0 && (
                 <div className="catalog-pagination-container">
                   <nav
                     className="catalog-pagination"
-                    aria-label="Product pages"
+                    aria-label={t('productPages')}
                   >
                     <button
                       type="button"
                       className="catalog-pagination-button"
                       onClick={() => handlePageChange(-1)}
                       disabled={currentPage === 0}
-                      aria-label="Previous product page"
-                      title="Previous page"
+                      aria-label={t('previousProductPage')}
+                      title={t('previousPage')}
                     >
                       <span aria-hidden="true">&lsaquo;</span>
                     </button>
@@ -262,7 +271,9 @@ const ProductList = function Productlist({
                     <span
                       className="catalog-page-number active"
                       aria-current="page"
-                      aria-label={`Current product page ${currentPage + 1}`}
+                      aria-label={t('currentProductPage', {
+                        count: currentPage + 1,
+                      })}
                     >
                       {currentPage + 1}
                     </span>
@@ -272,8 +283,8 @@ const ProductList = function Productlist({
                       className="catalog-pagination-button"
                       onClick={() => handlePageChange(1)}
                       disabled={currentPage + 1 >= totalPages}
-                      aria-label="Next product page"
-                      title="Next page"
+                      aria-label={t('nextProductPage')}
+                      title={t('nextPage')}
                     >
                       <span aria-hidden="true">&rsaquo;</span>
                     </button>
@@ -310,10 +321,6 @@ const ProductList = function Productlist({
                 </div>
               </div>
             </Reveal>
-            <div>
-              <hr />
-            </div>
-            <RecentlyViewedProducts />
           </>
         )}
       </div>
