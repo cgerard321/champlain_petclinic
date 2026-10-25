@@ -45,7 +45,7 @@ export class VetEditForm {
   readonly saving = input(false);
   readonly error = input('');
   readonly visits = input<readonly Visit[]>([]);
-  readonly visitsUnavailable = input(false);
+  readonly visitsChecked = input(false);
   readonly submitted = output<VetSavePayload>();
   readonly cancelled = output<void>();
   private readonly fb = inject(FormBuilder);
@@ -249,7 +249,7 @@ export class VetEditForm {
       $localize`:@@vets.availability.confirm_message:Ces disponibilités seront retirées du profil : ${removed.join(' ; ')}:slots:.`,
     ];
     const count = this.affectedVisits().length;
-    if (this.visitsUnavailable()) {
+    if (!this.visitsChecked()) {
       parts.push(
         $localize`:@@vets.availability.visits_unknown:Les visites réservées sur ces créneaux n'ont pas pu être vérifiées.`,
       );

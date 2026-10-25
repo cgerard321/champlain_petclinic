@@ -45,7 +45,7 @@ export class VetDetail {
   protected readonly editing = signal(false);
   protected readonly saved = signal(false);
   protected readonly visits = signal<readonly Visit[]>([]);
-  protected readonly visitsUnavailable = signal(false);
+  protected readonly visitsStatus = signal<'loading' | 'ready' | 'failed'>('loading');
   protected readonly warning = signal('');
   protected readonly profile = computed(() => {
     const vet = this.vet();
@@ -112,7 +112,7 @@ export class VetDetail {
     const vet = this.vet();
     if (!vet) return;
     this.visits.set([]);
-    this.visitsUnavailable.set(false);
+    this.visitsStatus.set('loading');
     this.visitService
       .getVisitsByPractitionerId(vet.vetId)
       .pipe(
@@ -121,8 +121,12 @@ export class VetDetail {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((visits) => {
-        if (visits) this.visits.set(visits);
-        else this.visitsUnavailable.set(true);
+        if (visits) {
+          this.visits.set(visits);
+          this.visitsStatus.set('ready');
+        } else {
+          this.visitsStatus.set('failed');
+        }
       });
   }
 
@@ -173,7 +177,7 @@ export class VetDetail {
 
   private cancelVisits(visits: readonly Visit[]): Observable<number> {
     if (!visits.length) return of(0);
-    const details = $localize`:@@vets.availability.cancel_reason:Le vétérinaire n'est plus disponible à cette heure.`;
+    const details = 'Veterinarian no longer available at this time.';
     return forkJoin(
       visits.map((visit) =>
         this.visitService.cancelVisit(visit.visitId, details).pipe(
@@ -186,10 +190,10 @@ export class VetDetail {
 
   private cancelWarning(failed: number): string {
     if (failed === 1) {
-      return $localize`:@@vets.availability.cancel_failed_one:Une visite n'a pas pu être annulée. Annulez-la depuis la page des visites.`;
+      return $localize`:@@vets.availability.cancel_failed_one:Le profil est enregistré, mais une visite n'a pas pu être annulée : elle reste active. Signalez-la à un administrateur.`;
     }
     if (failed > 1) {
-      return $localize`:@@vets.availability.cancel_failed_many:${failed}:count: visites n'ont pas pu être annulées. Annulez-les depuis la page des visites.`;
+      return $localize`:@@vets.availability.cancel_failed_many:Le profil est enregistré, mais ${failed}:count: visites n'ont pas pu être annulées : elles restent actives. Signalez-les à un administrateur.`;
     }
     return '';
   }

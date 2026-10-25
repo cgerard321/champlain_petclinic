@@ -347,9 +347,8 @@
         "visits_one": "1 visit booked in these slots will be cancelled.",
         "visits_many": "{$count} visits booked in these slots will be cancelled.",
         "visits_unknown": "Booked visits for these slots could not be checked.",
-        "cancel_reason": "The veterinarian is no longer available at this time.",
-        "cancel_failed_one": "One visit could not be cancelled. Cancel it from the visits page.",
-        "cancel_failed_many": "{$count} visits could not be cancelled. Cancel them from the visits page."
+        "cancel_failed_one": "The profile was saved, but one visit could not be cancelled: it is still active. Report it to an administrator.",
+        "cancel_failed_many": "The profile was saved, but {$count} visits could not be cancelled: they are still active. Report them to an administrator."
       },
       "detail": {
         "back": "Back to directory",

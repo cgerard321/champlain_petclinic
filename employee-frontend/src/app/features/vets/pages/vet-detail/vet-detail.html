@@ -19,7 +19,7 @@
         [saving]="saving()"
         [error]="saveError()"
         [visits]="visits()"
-        [visitsUnavailable]="visitsUnavailable()"
+        [visitsChecked]="visitsStatus() === 'ready'"
         (submitted)="save($event)"
         (cancelled)="cancel()"
       />
