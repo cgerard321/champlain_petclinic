@@ -299,7 +299,7 @@ export class UserList implements OnInit {
   private nameField(): ModalFormField {
     return {
       key: 'username',
-      label: $localize`:@@users.fields.name:Nom`,
+      label: $localize`:@@users.fields.name:Nom d'utilisateur`,
       type: 'string',
       required: true,
     };
