@@ -250,12 +250,21 @@ export function NavBar(): JSX.Element {
             {user.userId ? (
               <NavDropdown title={user.username} id="user-dropdown">
                 {isCustomer && (
-                  <NavDropdown.Item
-                    as={Link}
-                    to={AppRoutePaths.CustomerProfile}
-                  >
-                    {t('nav.profile')}
-                  </NavDropdown.Item>
+                  <>
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.CustomerProfile}
+                    >
+                      {t('nav.profile')}
+                    </NavDropdown.Item>
+
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.CustomerOrderHistory}
+                    >
+                      {t('nav.orderHistory')}
+                    </NavDropdown.Item>
+                  </>
                 )}
                 {isAdmin && (
                   <NavDropdown.Item as={Link} to={AppRoutePaths.Home}>

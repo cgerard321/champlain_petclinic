@@ -359,7 +359,40 @@ class CustomerServiceImplTest {
         verify(repo).findCustomerByCustomerId(customerId);
         verify(repo).save(any(Customer.class));
     }
+    @Test
+    void updateCustomer_ShouldPreserveExistingPhotoId() {
+        String customerId = "customerId-123";
+        String photoId = "existing-photo-123";
 
+        Customer existingCustomer = buildCustomer();
+        existingCustomer.setPhotoId(photoId);
+
+        CustomerRequestDTO request = buildCustomerRequestDTO();
+        request.setFirstName("Updated Name");
+        request.setAddress("Updated Address");
+        request.setCity("Updated City");
+        request.setProvince("Quebec");
+        request.setTelephone("5145551234");
+
+        when(repo.findCustomerByCustomerId(customerId))
+                .thenReturn(Mono.just(existingCustomer));
+        when(repo.save(any(Customer.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(customerService.updateCustomer(Mono.just(request), customerId))
+                .assertNext(updated -> {
+                    assertEquals("Updated Name", updated.getFirstName());
+                    assertEquals("Updated Address", updated.getAddress());
+                    assertEquals("Updated City", updated.getCity());
+                    assertEquals("Quebec", updated.getProvince());
+                    assertEquals("5145551234", updated.getTelephone());
+                })
+                .verifyComplete();
+
+        verify(repo).save(argThat(customer ->
+                photoId.equals(customer.getPhotoId())
+        ));
+    }
     @Test
     void getCustomerByCustomerId_WithIncludePhotoTrue_ShouldReturnCustomerWithPhoto() {
         Customer customerEntity = buildCustomer();

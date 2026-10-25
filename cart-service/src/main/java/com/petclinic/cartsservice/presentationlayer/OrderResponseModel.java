@@ -18,7 +18,11 @@ public class OrderResponseModel {
     private String orderId;
     private String customerId;
     private String customerName;
-    private String customerAddress;
+    private String address;
+    private String city;
+    private String province;
+    private String postalCode;
+    private String email;
     private LocalDateTime orderDate;
     private List<CartProduct> products;
     private double subtotal;
@@ -49,7 +53,7 @@ public class OrderResponseModel {
         this.orderId = orderId;
         this.customerId = customerId;
         this.customerName = customerName;
-        this.customerAddress = customerAddress;
+        this.address = customerAddress;
         this.orderDate = orderDate;
         this.products = products;
         this.subtotal = subtotal;

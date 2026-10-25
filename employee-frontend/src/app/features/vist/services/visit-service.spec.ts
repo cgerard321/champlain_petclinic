@@ -101,6 +101,7 @@ describe('VisitService', () => {
       practitionerId: completedVisit.practitionerId,
       status: Status.UPCOMING,
       isEmergency: false,
+      followUpOfVisitId: completedVisit.visitId,
     });
     request.flush({ ...completedVisit, status: Status.UPCOMING });
   });
