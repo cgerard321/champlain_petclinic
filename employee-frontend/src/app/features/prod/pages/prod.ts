@@ -9,6 +9,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
 import {
   catchError,
   debounceTime,
@@ -23,6 +24,7 @@ import {
 import { isApiError } from '@core/models/api-error';
 import { AuthState } from '@core/services/auth-state';
 import { ProductAddDialog } from '@features/prod/components/product-add-dialog/product-add-dialog';
+import { ProductBundleList } from '@features/prod/components/product-bundle-list/product-bundle-list';
 import { ProductDeleteDialog } from '@features/prod/components/product-delete-dialog/product-delete-dialog';
 import { ProductDetailsDialog } from '@features/prod/components/product-details-dialog/product-details-dialog';
 import { ProductThumbnail } from '@features/prod/components/product-thumbnail/product-thumbnail';
@@ -31,8 +33,6 @@ import { Product } from '@features/prod/models/product.model';
 import { ProductService } from '@features/prod/services/product.service';
 import { ReviewSettingsService } from '@features/prod/services/review-settings.service';
 import { Roles } from '@shared/models/roles';
-import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
-import { ProductBundleList } from '@features/prod/components/product-bundle-list/product-bundle-list';
 
 @Component({
   imports: [

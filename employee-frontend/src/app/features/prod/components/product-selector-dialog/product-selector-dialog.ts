@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import {
   MAT_DIALOG_DATA,
@@ -11,7 +12,6 @@ import { MatInput } from '@angular/material/input';
 import { MatList, MatListItem } from '@angular/material/list';
 
 import { Product } from '@features/prod/models/product.model';
-import { MatButton } from '@angular/material/button';
 
 export interface ProductSelectorDialogData {
   alreadySelected: Set<string>;

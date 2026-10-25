@@ -9,27 +9,27 @@ import {
   MatCardSubtitle,
   MatCardTitle,
 } from '@angular/material/card';
+import { MatDialog } from '@angular/material/dialog';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { forkJoin } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
-import { Bundle } from '@features/prod/models/bundle.model';
-import { BundleService } from '@features/prod/services/bundle.service';
-import { Roles } from '@shared/models/roles';
-import { ProductService } from '@features/prod/services/product.service';
-import { Product } from '@features/prod/models/product.model';
-import { forkJoin } from 'rxjs';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { ProductThumbnail } from '@features/prod/components/product-thumbnail/product-thumbnail';
 import { environment } from '@environments/environment';
-import { MatDialog } from '@angular/material/dialog';
 import {
   ProductBundleAddDialog,
   ProductBundleAddDialogData,
 } from '@features/prod/components/product-bundle-add-dialog/product-bundle-add-dialog';
-import { ProductDeleteDialog } from '@features/prod/components/product-delete-dialog/product-delete-dialog';
 import {
   ProductBundleUpdateDialog,
   ProductBundleUpdateDialogData,
 } from '@features/prod/components/product-bundle-update-dialog/product-bundle-update-dialog';
+import { ProductDeleteDialog } from '@features/prod/components/product-delete-dialog/product-delete-dialog';
+import { ProductThumbnail } from '@features/prod/components/product-thumbnail/product-thumbnail';
+import { Bundle } from '@features/prod/models/bundle.model';
+import { Product } from '@features/prod/models/product.model';
+import { BundleService } from '@features/prod/services/bundle.service';
+import { ProductService } from '@features/prod/services/product.service';
+import { Roles } from '@shared/models/roles';
 
 @Component({
   imports: [
@@ -72,6 +72,10 @@ export class ProductBundleList implements OnInit {
   protected readonly canManageBundles = computed(() => {
     const roles = this.auth.roles();
     return roles.includes(Roles.admin) || roles.includes(Roles.inventoryManager);
+  });
+  protected readonly canDeleteBundles = computed(() => {
+    const roles = this.auth.roles();
+    return roles.includes(Roles.admin);
   });
   protected openAddBundle(): void {
     if (!this.canManageBundles()) {
@@ -136,7 +140,7 @@ export class ProductBundleList implements OnInit {
   }
 
   protected openBundleDelete(bundle: Bundle): void {
-    if (!this.canManageBundles() || this.deletingBundleId()) {
+    if (!this.canManageBundles() || this.deletingBundleId() || !this.canDeleteBundles()) {
       return;
     }
 

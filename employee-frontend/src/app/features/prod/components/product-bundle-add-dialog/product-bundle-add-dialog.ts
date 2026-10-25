@@ -1,5 +1,6 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { form, FormField, required, requiredError, validate } from '@angular/forms/signals';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatChipGrid, MatChipRemove, MatChipRow } from '@angular/material/chips';
 import { ErrorStateMatcher } from '@angular/material/core';
@@ -12,6 +13,7 @@ import {
   MatDialogRef,
   MatDialogTitle,
 } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
 import {
   MatError,
   MatFormField,
@@ -20,18 +22,17 @@ import {
   MatPrefix,
   MatSuffix,
 } from '@angular/material/input';
-import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { form, FormField, required, requiredError, validate } from '@angular/forms/signals';
-import { Bundle, BundleRequest } from '@features/prod/models/bundle.model';
+import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
+
+import { isApiError } from '@core/models/api-error';
 import {
   ProductSelectorDialog,
   ProductSelectorDialogData,
 } from '@features/prod/components/product-selector-dialog/product-selector-dialog';
+import { Bundle, BundleRequest } from '@features/prod/models/bundle.model';
 import { Product } from '@features/prod/models/product.model';
-import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
 import { BundleService } from '@features/prod/services/bundle.service';
-import { isApiError } from '@core/models/api-error';
 
 interface ProductBundleFormModel {
   bundleName: string;
@@ -153,6 +154,10 @@ export class ProductBundleAddDialog {
       this.errorMessage.set('Bundle price must be greater than zero.');
       return false;
     }
+    if (current.bundlePrice >= current.bundleOriginalPrice) {
+      this.errorMessage.set('Bundle price must be less than the original price.');
+      return false;
+    }
     if (current.productIds.size < 1) {
       this.errorMessage.set('Cannot have less than one item in bundle.');
       return false;
@@ -238,7 +243,7 @@ export class ProductBundleAddDialog {
     this.itemsChipGrid().updateErrorState();
     this.manualInput()?.updateErrorState();
 
-    if (ids.size > 1) this.calculateBundleDiscountPrice();
+    this.calculateBundleDiscountPrice();
   }
 
   protected getProductByProductId(id: string): Product | undefined {

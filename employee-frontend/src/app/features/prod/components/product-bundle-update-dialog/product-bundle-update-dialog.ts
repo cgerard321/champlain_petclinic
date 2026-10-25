@@ -1,7 +1,9 @@
-import { Component, computed, inject, OnInit, signal, viewChild } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
+import { Component, computed, inject, OnInit, signal, viewChild } from '@angular/core';
+import { form, FormField, required, requiredError, validate } from '@angular/forms/signals';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatChipGrid, MatChipRemove, MatChipRow } from '@angular/material/chips';
+import { ErrorStateMatcher } from '@angular/material/core';
 import {
   MAT_DIALOG_DATA,
   MatDialog,
@@ -11,6 +13,7 @@ import {
   MatDialogRef,
   MatDialogTitle,
 } from '@angular/material/dialog';
+import { MatIcon } from '@angular/material/icon';
 import {
   MatError,
   MatFormField,
@@ -19,20 +22,18 @@ import {
   MatPrefix,
   MatSuffix,
 } from '@angular/material/input';
-import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
-import { Bundle, BundleRequest } from '@features/prod/models/bundle.model';
-import { BundleService } from '@features/prod/services/bundle.service';
-import { form, FormField, required, requiredError, validate } from '@angular/forms/signals';
-import { ErrorStateMatcher } from '@angular/material/core';
+
 import { isApiError } from '@core/models/api-error';
+import { ProductBundleAddDialog } from '@features/prod/components/product-bundle-add-dialog/product-bundle-add-dialog';
 import {
   ProductSelectorDialog,
   ProductSelectorDialogData,
 } from '@features/prod/components/product-selector-dialog/product-selector-dialog';
+import { Bundle, BundleRequest } from '@features/prod/models/bundle.model';
 import { Product } from '@features/prod/models/product.model';
-import { ProductBundleAddDialog } from '@features/prod/components/product-bundle-add-dialog/product-bundle-add-dialog';
+import { BundleService } from '@features/prod/services/bundle.service';
 
 interface ProductBundleFormModel {
   bundleName: string;
@@ -91,7 +92,7 @@ export class ProductBundleUpdateDialog implements OnInit {
   protected readonly selectedProductIds = signal<Set<string>>(new Set());
   protected readonly isSubmitting = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
-  protected selectedTabIndex = signal<number>(0);
+  protected readonly selectedTabIndex = signal<number>(0);
   protected readonly model = signal<ProductBundleFormModel>({
     bundleName: '',
     bundleDescription: '',
@@ -171,6 +172,10 @@ export class ProductBundleUpdateDialog implements OnInit {
       this.errorMessage.set('Bundle price must be greater than zero.');
       return false;
     }
+    if (current.bundlePrice >= current.bundleOriginalPrice) {
+      this.errorMessage.set('Bundle price must be less than the original price.');
+      return false;
+    }
     if (current.productIds.size < 1) {
       this.errorMessage.set('Cannot have less than one item in bundle.');
       return false;
@@ -208,7 +213,6 @@ export class ProductBundleUpdateDialog implements OnInit {
       },
       error: (error) => {
         this.handleError(error);
-        console.log(error);
       },
     });
   }
@@ -256,7 +260,7 @@ export class ProductBundleUpdateDialog implements OnInit {
     }));
     this.itemsChipGrid().updateErrorState();
     this.manualInput()?.updateErrorState();
-    if (ids.size > 1) this.calculateBundleDiscountPrice();
+    this.calculateBundleDiscountPrice();
   }
 
   protected getProductByProductId(id: string): Product | undefined {

@@ -15,6 +15,11 @@
     </button>
   }
 </div>
+@if (deleteErrorMessage()) {
+  <div class="delete-error-message" role="alert">
+    {{ deleteErrorMessage() }}
+  </div>
+}
 @if (isLoading()) {
   <div class="bundle-state-container" role="status">
     <mat-progress-spinner mode="indeterminate" diameter="40" />
@@ -75,6 +80,8 @@
             >
               Update
             </button>
+          }
+          @if (canDeleteBundles()) {
             <button
               mat-stroked-button
               class="delete-button"
