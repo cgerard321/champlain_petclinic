@@ -213,8 +213,9 @@ class UserControllerV1UnitTest {
 
     @Test
     void whenUpdateUsername_thenReturnNotFound() {
-        when(authServiceClient.updateUsername(EXISTING_USER_ID_1, UPDATED_USERNAME, TOKEN))
-                .thenReturn(Mono.empty());
+        doReturn(Mono.empty())
+                .when(authServiceClient)
+                .updateUsername(EXISTING_USER_ID_1, UPDATED_USERNAME, TOKEN);
 
         client.patch()
                 .uri("/api/gateway/users/{userId}/username", EXISTING_USER_ID_1)

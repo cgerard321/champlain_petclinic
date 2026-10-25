@@ -57,12 +57,14 @@ public class UserControllerV1 {
                     ResponseEntity.BodyBuilder response =
                             ResponseEntity.status(authResponse.getStatusCode());
 
-                    authResponse.getHeaders().get(HttpHeaders.SET_COOKIE)
+                    authResponse.getHeaders()
+                            .getOrEmpty(HttpHeaders.SET_COOKIE)
                             .forEach(cookie ->
                                     response.header(HttpHeaders.SET_COOKIE, cookie));
 
                     return response.body(authResponse.getBody());
-                });
+                })
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.CUST, Roles.ADMIN})
