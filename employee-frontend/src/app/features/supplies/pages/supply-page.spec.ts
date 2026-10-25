@@ -8,8 +8,8 @@ import { vi } from 'vitest';
 import { AuthState } from '@core/services/auth-state';
 import { Status } from '@features/supplies/models/status';
 import { Supply } from '@features/supplies/models/supply';
-import { SupplySummaryDialog } from '@features/supplies/pages/supply-summary-dialog';
 import { SupplyService } from '@features/supplies/services/supply-service';
+import { SupplySummaryDialog } from '@shared/components/supply-summary-dialog/supply-summary-dialog';
 import { Roles } from '@shared/models/roles';
 
 import { SupplyPage } from './supply-page';

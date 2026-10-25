@@ -22,11 +22,6 @@ import {
   SupplyHistoryDialog,
   SupplyHistoryDialogData,
 } from '@features/supplies/pages/supply-history-dialog';
-import {
-  SupplySummaryAction,
-  SupplySummaryDialog,
-  SupplySummaryDialogData,
-} from '@features/supplies/pages/supply-summary-dialog';
 import { SupplyService } from '@features/supplies/services/supply-service';
 import { ALLOWED_IMAGE_TYPES, ImageAction } from '@shared/components/image-editor/image-editor';
 import { ModalForm } from '@shared/components/modal-form/modal-form';
@@ -35,6 +30,11 @@ import {
   ModalFormField,
   ModalFormResult,
 } from '@shared/components/modal-form/modal-form-models';
+import {
+  SupplySummaryAction,
+  SupplySummaryDialog,
+  SupplySummaryDialogData,
+} from '@shared/components/supply-summary-dialog/supply-summary-dialog';
 import { Table, TableColumn } from '@shared/components/table/table';
 import { Roles } from '@shared/models/roles';
 
