@@ -5,6 +5,7 @@ import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 import { MarkdownReviewBody } from '@/features/products/components/MarkdownReviewBody.tsx';
 import { FaPen, FaThumbsUp, FaTrash } from 'react-icons/fa';
 import { Button } from 'react-bootstrap';
+import StarRating from '@/features/products/components/StarRating.tsx';
 
 interface ReviewProps {
   rating: RatingModel;
@@ -45,6 +46,28 @@ export function Review({
       setIsLiking(false);
     }
   };
+
+  const categoryRatings = [
+    {
+      label: t('qualityOfProduct'),
+      rating: rating.qualityRating,
+    },
+    {
+      label: t('valueOfProduct'),
+      rating: rating.valueRating,
+    },
+    {
+      label: t('petSatisfaction'),
+      rating: rating.petSatisfactionRating,
+    },
+    {
+      label: t('ingredients'),
+      rating: rating.ingredientsRating,
+    },
+  ].filter(
+    (category): category is { label: string; rating: number } =>
+      typeof category.rating === 'number'
+  );
 
   return (
     <div className="reviewbox">
@@ -98,6 +121,19 @@ export function Review({
           </svg>
         ))}
       </div>
+      {categoryRatings.length > 0 && (
+        <div className="review-category-ratings">
+          {categoryRatings.map(category => (
+            <div className="review-category-rating" key={category.label}>
+              <span className="review-category-label">{category.label}</span>
+
+              <StarRating currentRating={category.rating} viewOnly={true} />
+
+              <span className="review-category-value">{category.rating}/5</span>
+            </div>
+          ))}
+        </div>
+      )}
       <MarkdownReviewBody
         setHasOverflow={b => {
           if (!hasOverflow && b) setHasOverflow(b);
