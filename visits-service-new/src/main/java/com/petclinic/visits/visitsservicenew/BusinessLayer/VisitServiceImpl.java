@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.BusinessLayer.Availability.AvailabilityService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions.PrescriptionService;
 import com.petclinic.visits.visitsservicenew.DataLayer.CancellationReason;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
@@ -19,6 +20,7 @@ import com.petclinic.visits.visitsservicenew.Exceptions.DuplicateTimeException;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.CancellationRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.RescheduleRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VetNoteRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
@@ -64,6 +66,7 @@ public class VisitServiceImpl implements VisitService {
 
     private final PrescriptionService prescriptionService;
     private final FilesServiceClient filesServiceClient;
+    private final AvailabilityService availabilityService;
 
     /**
      * Get all visits from the repo
@@ -390,6 +393,45 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
 
+    @Override
+    public Mono<VisitResponseDTO> confirmFollowUpVisit(String visitId) {
+        return findFollowUpVisitToChange(visitId)
+                .filter(visit -> visit.getStatus() == Status.UPCOMING)
+                .switchIfEmpty(Mono.error(new BadRequestException("Only upcoming follow-up visits can be confirmed.")))
+                .flatMap(visit -> {
+                    visit.setStatus(Status.CONFIRMED);
+                    return repo.save(visit);
+                })
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
+    }
+
+    @Override
+    public Mono<VisitResponseDTO> rescheduleFollowUpVisit(String visitId, RescheduleRequestDTO request) {
+        if (request == null || request.getVisitDate() == null) {
+            return Mono.error(new BadRequestException("Please choose a new date for the visit"));
+        }
+
+        if (isLessThan24HoursAway(request.getVisitDate())) {
+            return Mono.error(new BadRequestException("A visit must be rescheduled to at least 24 hours from now."));
+        }
+
+        return findFollowUpVisitToChange(visitId)
+                .filter(visit -> visit.getStatus() == Status.UPCOMING)
+                .switchIfEmpty(Mono.error(new BadRequestException("Only upcoming follow-up visits can be rescheduled.")))
+                .flatMap(visit -> availabilityService
+                        .getAvailableTimeSlotsForDate(visit.getPractitionerId(), request.getVisitDate().toLocalDate())
+                        .filter(slot -> slot.isAvailable() && slot.getStartTime().equals(request.getVisitDate()))
+                        .next()
+                        .switchIfEmpty(Mono.error(new BadRequestException("The selected time slot is not available.")))
+                        .thenReturn(visit))
+                .flatMap(visit -> {
+                    visit.setVisitDate(request.getVisitDate());
+                    visit.setVisitEndDate(request.getVisitDate().plusHours(1));
+                    return repo.save(visit);
+                })
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
+    }
+
 
 //    @Override
 //    public Mono<VetDTO> testingGetVetDTO(String vetId) {
@@ -425,6 +467,7 @@ public class VisitServiceImpl implements VisitService {
 
                                     updatedVisit.setPrescriptionFileId(existingVisit.getPrescriptionFileId());
                                     updatedVisit.setVetNote(existingVisit.getVetNote());
+                                    updatedVisit.setFollowUpOfVisitId(existingVisit.getFollowUpOfVisitId());
 
                                     if (updatedVisit.getStatus() == null) {
                                         updatedVisit.setStatus(existingVisit.getStatus());
@@ -482,6 +525,25 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
 
+
+    /**
+     * Find a follow-up visit that can still be changed by the customer (more than 24 hours before it starts)
+     *
+     * @param visitId The visit ID to find
+     * @return The follow-up visit or an error if it can't be changed
+     */
+    private Mono<Visit> findFollowUpVisitToChange(String visitId) {
+        return repo.findByVisitId(visitId)
+                .switchIfEmpty(Mono.error(new NotFoundException("No visit was found with visitId: " + visitId)))
+                .filter(visit -> visit.getFollowUpOfVisitId() != null)
+                .switchIfEmpty(Mono.error(new BadRequestException("Only follow-up visits can be confirmed or rescheduled.")))
+                .filter(visit -> !isLessThan24HoursAway(visit.getVisitDate()))
+                .switchIfEmpty(Mono.error(new BadRequestException("A visit can't be changed less than 24 hours before it starts.")));
+    }
+
+    private boolean isLessThan24HoursAway(LocalDateTime visitDate) {
+        return visitDate.isBefore(LocalDateTime.now().plusHours(24));
+    }
 
     /**
      * Validate if a pet exist. If it doesn't exist, returns 404 NotFound

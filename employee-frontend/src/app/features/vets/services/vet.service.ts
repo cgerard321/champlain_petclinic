@@ -13,10 +13,16 @@ export class VetService {
   private readonly baseUrl = '/api/v2/gateway/vets';
 
   getVets(): Observable<VetResponse[]> {
-    return this.sse.stream(this.baseUrl, { responseType: 'text', keepAlive: false }).pipe(
-      map((data) => JSON.parse(data) as VetResponse),
-      toArray(),
-    );
+    return this.sse
+      .stream(
+        this.baseUrl,
+        { responseType: 'text', keepAlive: false },
+        { headers: { Accept: 'text/event-stream' } },
+      )
+      .pipe(
+        map((data) => JSON.parse(data) as VetResponse),
+        toArray(),
+      );
   }
 
   getVetById(vetId: string): Observable<VetResponse> {
