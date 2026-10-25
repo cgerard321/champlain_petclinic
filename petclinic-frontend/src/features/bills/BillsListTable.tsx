@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState, useMemo } from 'react';
 import './BillsListTable.css';
 import PaymentForm from './PaymentForm';
 import { Currency, convertCurrency } from './utils/convertCurrency';
+import { useTranslation } from 'react-i18next';
 
 interface BillsListTableProps {
   currency: Currency;
@@ -15,6 +16,7 @@ export default function BillsListTable({
   currency,
   setCurrency,
 }: BillsListTableProps): JSX.Element {
+  const { t, i18n } = useTranslation('bills');
   const { user } = useUser();
   const [bills, setBills] = useState<Bill[]>([]);
   const [filteredBills, setFilteredBills] = useState<Bill[]>([]);
@@ -63,11 +65,11 @@ export default function BillsListTable({
       setFilteredBills(billsData);
     } catch (err) {
       console.error('Error fetching bills:', err);
-      setError('Failed to fetch bills');
+      setError(t('errors.fetchBills'));
       setBills([]);
       setFilteredBills([]);
     }
-  }, [user?.userId]);
+  }, [user?.userId, t]);
 
   useEffect(() => {
     void fetchBills();
@@ -164,7 +166,7 @@ export default function BillsListTable({
       const min = Number(customMin);
       const max = Number(customMax);
       if (isNaN(min) || isNaN(max)) {
-        setError('Min and max must be numbers');
+        setError(t('errors.invalidAmountRange'));
         return;
       }
       base = base.filter(b => (b.amount ?? 0) >= min && (b.amount ?? 0) <= max);
@@ -174,7 +176,7 @@ export default function BillsListTable({
     if (amountRangeOption.startsWith('0-')) {
       const max = Number(amountRangeOption.split('-')[1]);
       if (isNaN(max)) {
-        setError('Invalid amount option');
+        setError(t('errors.invalidAmountOption'));
         return;
       }
       base = base.filter(b => (b.amount ?? 0) <= max);
@@ -324,25 +326,25 @@ export default function BillsListTable({
                 alignItems: 'center',
               }}
             >
-              <h3>Filter by Status</h3>
+              <h3>{t('filterStatus.title')}</h3>
               <button
                 className="modal-close-btn"
                 onClick={() => toggleSection('status')}
               >
-                Close
+                {t('buttons.close')}
               </button>
             </div>
             <div style={{ marginTop: '12px' }}>
               <div className="form-grid">
-                <label htmlFor="statusFilter">Status</label>
+                <label htmlFor="statusFilter">{t('status')}</label>
                 <select
                   id="statusFilter"
                   value={selectedStatus}
                   onChange={e => setSelectedStatus(e.target.value)}
                 >
-                  <option value="all">All</option>
-                  <option value="paid">Paid</option>
-                  <option value="unpaid">Unpaid</option>
+                  <option value="all">{t('filterStatus.options.all')}</option>
+                  <option value="paid">{t('statusType.paid')}</option>
+                  <option value="unpaid">{t('statusType.unpaid')}</option>
                 </select>
 
                 <div className="form-actions">
@@ -350,7 +352,7 @@ export default function BillsListTable({
                     className="primary-modal-btn wide-btn"
                     onClick={() => toggleSection('status')}
                   >
-                    Apply
+                    {t('buttons.apply')}
                   </button>
                   <button
                     onClick={() => {
@@ -360,7 +362,7 @@ export default function BillsListTable({
                       toggleSection('status');
                     }}
                   >
-                    Clear
+                    {t('buttons.clear')}
                   </button>
                 </div>
               </div>
@@ -379,41 +381,43 @@ export default function BillsListTable({
                 alignItems: 'center',
               }}
             >
-              <h3>Filter by Amount</h3>
+              <h3>{t('filterAmount.title')}</h3>
               <button
                 className="modal-close-btn"
                 onClick={() => toggleSection('amount')}
               >
-                Close
+                {t('buttons.close')}
               </button>
             </div>
             <div style={{ marginTop: '12px' }}>
               <div className="form-grid">
-                <label>Amount range</label>
+                <label>{t('filterAmount.label')}</label>
                 <select
                   value={amountRangeOption}
                   onChange={e => setAmountRangeOption(e.target.value)}
                 >
-                  <option value="none">None</option>
+                  <option value="none">{t('filterAmount.options.none')}</option>
                   <option value="0-100">&lt; 100</option>
                   <option value="0-200">&lt; 200</option>
                   <option value="0-500">&lt; 500</option>
-                  <option value="custom">Custom</option>
+                  <option value="custom">
+                    {t('filterAmount.options.custom')}
+                  </option>
                 </select>
 
                 {amountRangeOption === 'custom' && (
                   <>
-                    <label>Custom Min</label>
+                    <label>{t('filterAmount.custom.labelMin')}</label>
                     <input
                       type="number"
-                      placeholder="min"
+                      placeholder={t('filterAmount.custom.min')}
                       value={customMin}
                       onChange={e => setCustomMin(e.target.value)}
                     />
-                    <label>Custom Max</label>
+                    <label>{t('filterAmount.custom.labelMax')}</label>
                     <input
                       type="number"
-                      placeholder="max"
+                      placeholder={t('filterAmount.custom.max')}
                       value={customMax}
                       onChange={e => setCustomMax(e.target.value)}
                     />
@@ -428,7 +432,7 @@ export default function BillsListTable({
                       toggleSection('amount');
                     }}
                   >
-                    Apply
+                    {t('buttons.apply')}
                   </button>
                   <button
                     onClick={() => {
@@ -440,7 +444,7 @@ export default function BillsListTable({
                       toggleSection('amount');
                     }}
                   >
-                    Clear
+                    {t('buttons.clear')}
                   </button>
                 </div>
               </div>
@@ -459,12 +463,12 @@ export default function BillsListTable({
                 alignItems: 'center',
               }}
             >
-              <h3>Filter by Date</h3>
+              <h3>{t('filterDate.title')}</h3>
               <button
                 className="modal-close-btn"
                 onClick={() => toggleSection('date')}
               >
-                Close
+                {t('buttons.close')}
               </button>
             </div>
             <div style={{ marginTop: '12px' }}>
@@ -474,11 +478,13 @@ export default function BillsListTable({
                   value={dateMode}
                   onChange={e => setDateMode(e.target.value as 'due' | 'visit')}
                 >
-                  <option value="due">Due date</option>
-                  <option value="visit">Visit date</option>
+                  <option value="due">{t('filterDate.options.dueDate')}</option>
+                  <option value="visit">
+                    {t('filterDate.options.visitDate')}
+                  </option>
                 </select>
 
-                <label>Month</label>
+                <label>{t('filterDate.month')}</label>
                 <select
                   value={dateMonth}
                   onChange={e =>
@@ -487,17 +493,18 @@ export default function BillsListTable({
                     )
                   }
                 >
-                  <option value="any">Any</option>
+                  <option value="any">{t('filterDate.options.any')}</option>
                   {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
                     <option key={m} value={m}>
-                      {new Date(0, m - 1).toLocaleString('default', {
-                        month: 'long',
-                      })}
+                      {new Date(2000, m - 1, 1).toLocaleString(
+                        i18n.language.startsWith('fr') ? 'fr-CA' : 'en-CA',
+                        { month: 'long' }
+                      )}
                     </option>
                   ))}
                 </select>
 
-                <label>Year</label>
+                <label>{t('filterDate.year')}</label>
                 <select
                   value={dateYear}
                   onChange={e =>
@@ -506,7 +513,7 @@ export default function BillsListTable({
                     )
                   }
                 >
-                  <option value="any">Any</option>
+                  <option value="any">{t('filterDate.options.any')}</option>
                   {Array.from({ length: 7 })
                     .map((_, i) => new Date().getFullYear() - 5 + i)
                     .map(y => (
@@ -524,7 +531,7 @@ export default function BillsListTable({
                       toggleSection('date');
                     }}
                   >
-                    Apply
+                    {t('buttons.apply')}
                   </button>
                   <button
                     onClick={() => {
@@ -535,7 +542,7 @@ export default function BillsListTable({
                       toggleSection('date');
                     }}
                   >
-                    Clear
+                    {t('buttons.clear')}
                   </button>
                 </div>
               </div>
@@ -549,7 +556,7 @@ export default function BillsListTable({
       ) : (
         <div className="billsListContainer">
           {safeFilteredBills.length === 0 ? (
-            <p>No bills to display.</p>
+            <p>{t('billCard.empty')}</p>
           ) : (
             safeFilteredBills.map(bill => (
               <div
@@ -560,24 +567,24 @@ export default function BillsListTable({
                 <div className="billCardContent">
                   <div className="billColumn leftColumn">
                     <div className="billField vet">
-                      <strong>Vet:</strong>
+                      <strong>{t('billCard.vet')}</strong>
                       <span className="billValue">
                         {bill.vetFirstName} {bill.vetLastName}
                       </span>
                     </div>
                     <div className="billField total">
-                      <strong>Total due:</strong>
+                      <strong>{t('billCard.totalDue')}</strong>
                       <span className="billValue">{formatTotalDue(bill)}</span>
                     </div>
                   </div>
 
                   <div className="billColumn rightColumn">
                     <div className="billField date">
-                      <strong>Appointment date:</strong>
+                      <strong>{t('billCard.date')}</strong>
                       <span className="billValue">{bill.date}</span>
                     </div>
                     <div className="billField status">
-                      <strong>Status:</strong>
+                      <strong>{t('status')}</strong>
                       <span
                         className={
                           bill.billStatus === 'OVERDUE'
@@ -588,8 +595,10 @@ export default function BillsListTable({
                         }
                       >
                         {bill.billStatus === 'OVERDUE'
-                          ? 'Overdue'
-                          : bill.billStatus}
+                          ? t('statusType.overdue')
+                          : bill.billStatus === 'PAID'
+                            ? t('statusType.paid')
+                            : t('statusType.unpaid')}
                       </span>
                     </div>
                   </div>
@@ -600,7 +609,7 @@ export default function BillsListTable({
                     className="detailsButton"
                     onClick={() => openDetails(bill)}
                   >
-                    Details
+                    {t('buttons.details')}
                   </button>
                 </div>
               </div>
@@ -619,80 +628,86 @@ export default function BillsListTable({
                 alignItems: 'center',
               }}
             >
-              <h3>Bill Details</h3>
-              <button onClick={closeDetails}>Close</button>
+              <h3>{t('billCard.detail.title')}</h3>
+              <button onClick={closeDetails}>{t('buttons.close')}</button>
             </div>
 
             <div style={{ marginTop: '12px' }}>
               <p>
-                <strong>Bill ID:</strong> {detailBill.billId}
+                <strong>{t('billCard.detail.id')}</strong> {detailBill.billId}
               </p>
               <p>
-                <strong>Customer:</strong> {detailBill.customerFirstName}{' '}
-                {detailBill.customerLastName}
+                <strong>{t('billCard.detail.customer')}</strong>{' '}
+                {detailBill.customerFirstName} {detailBill.customerLastName}
               </p>
               <p>
-                <strong>Visit Type:</strong> {detailBill.visitType}
+                <strong>{t('billCard.detail.visit')}</strong>{' '}
+                {t(`visitTypes.${String(detailBill.visitType).toLowerCase()}`)}
               </p>
               <p>
-                <strong>Vet:</strong> {detailBill.vetFirstName}{' '}
+                <strong>{t('billCard.vet')}</strong> {detailBill.vetFirstName}{' '}
                 {detailBill.vetLastName}
               </p>
               <p>
-                <strong>Date:</strong> {detailBill.date}
+                <strong>{t('billCard.date')}:</strong> {detailBill.date}
               </p>
               <p>
-                <strong>Amount:</strong>{' '}
+                <strong>{t('billCard.detail.amount')}:</strong>{' '}
                 {currency === 'CAD'
                   ? `CAD $${detailBill.amount.toFixed(2)}`
                   : `USD $${convertCurrency(detailBill.amount, 'CAD', 'USD').toFixed(2)}`}
               </p>
               <p>
-                <strong>GST (5%):</strong>{' '}
+                <strong>{t('billCard.detail.gst')}</strong>{' '}
                 {currency === 'CAD'
                   ? `CAD $${detailBill.gstAmount.toFixed(2)}`
                   : `USD $${convertCurrency(detailBill.gstAmount, 'CAD', 'USD').toFixed(2)}`}
               </p>
               <p>
-                <strong>QST (9.975%):</strong>{' '}
+                <strong>{t('billCard.detail.qst')}</strong>{' '}
                 {currency === 'CAD'
                   ? `CAD $${detailBill.qstAmount.toFixed(2)}`
                   : `USD $${convertCurrency(detailBill.qstAmount, 'CAD', 'USD').toFixed(2)}`}
               </p>
               <p>
-                <strong>Total Tax:</strong>{' '}
+                <strong>{t('billCard.detail.tax')}</strong>{' '}
                 {currency === 'CAD'
                   ? `CAD $${detailBill.taxedAmount.toFixed(2)}`
                   : `USD $${convertCurrency(detailBill.taxedAmount, 'CAD', 'USD').toFixed(2)}`}
               </p>
               <p>
-                <strong>Interest:</strong>{' '}
+                <strong>{t('billCard.detail.interest')}</strong>{' '}
                 {currency === 'CAD'
                   ? `CAD $${(detailBill.interest || 0).toFixed(2)}`
                   : `USD $${convertCurrency(detailBill.interest || 0, 'CAD', 'USD').toFixed(2)}`}
               </p>
               <p>
-                <strong>Total Due:</strong>{' '}
+                <strong>{t('billCard.totalDue')}</strong>{' '}
                 {currency === 'CAD'
                   ? `CAD $${detailBill.totalAmount.toFixed(2)}`
                   : `USD $${convertCurrency(detailBill.totalAmount, 'CAD', 'USD').toFixed(2)}`}
               </p>
               <p>
-                <strong>Status:</strong> {detailBill.billStatus}
+                <strong>{t('status')}</strong> {detailBill.billStatus}
               </p>
               <p>
-                <strong>Due Date:</strong> {detailBill.dueDate}
+                <strong>{t('billCard.detail.dueDate')}</strong>{' '}
+                {detailBill.dueDate}
               </p>
               <p>
-                <strong>Time Remaining:</strong>{' '}
+                <strong>{t('billCard.detail.time')}</strong>{' '}
                 {detailBill.billStatus === 'PAID' ? (
-                  <span style={{ color: 'green' }}>This bill is paid</span>
+                  <span style={{ color: 'green' }}>
+                    {t('billCard.detail.timeStatus.paid')}
+                  </span>
                 ) : detailBill.timeRemaining === 0 ? (
                   <span style={{ color: 'red' }}>
-                    0 days remaining to pay bill
+                    {t('billCard.detail.timeStatus.zero')}
                   </span>
                 ) : (
-                  `${detailBill.timeRemaining} days remaining to pay bill`
+                  t('billCard.detail.timeStatus.unpaid', {
+                    count: detailBill.timeRemaining,
+                  })
                 )}
               </p>
             </div>
@@ -703,7 +718,7 @@ export default function BillsListTable({
                   handleDownloadPdf(user.userId, detailBill.billId)
                 }
               >
-                Download PDF
+                {t('buttons.downloadPdf')}
               </button>
               {detailBill.billStatus !== 'PAID' && (
                 <button
@@ -712,7 +727,7 @@ export default function BillsListTable({
                     closeDetails();
                   }}
                 >
-                  Pay Bill
+                  {t('buttons.payBill')}
                 </button>
               )}
             </div>
