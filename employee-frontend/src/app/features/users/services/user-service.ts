@@ -84,36 +84,45 @@ export class UserService {
       password: request.password,
     };
 
-    let payload: unknown = account;
-
     if (request.role === 'VET') {
-      payload = {
-        ...account,
-        vet: {
-          firstName: request.firstName,
-          lastName: request.lastName,
-          phoneNumber: request.phoneNumber,
-          resume: request.resume,
-          specialties: [],
-          workday: this.defaultVetWorkdays,
-          active: true,
-          photoDefault: true,
+      return this.http.post(
+        url,
+        {
+          ...account,
+          vet: {
+            firstName: request.firstName,
+            lastName: request.lastName,
+            phoneNumber: request.phoneNumber,
+            resume: request.resume,
+            specialties: [],
+            workday: this.defaultVetWorkdays,
+            active: true,
+            photoDefault: true,
+          },
         },
-      };
-    } else if (request.role === 'CUST') {
-      payload = {
-        ...account,
-        owner: {
-          firstName: request.firstName,
-          lastName: request.lastName,
-          address: request.address,
-          city: request.city,
-          province: request.province,
-          telephone: request.telephone,
-        },
-      };
+        { responseType: 'text' as 'json' },
+      );
     }
 
-    return this.http.post(url, payload, { responseType: 'text' as 'json' });
+    if (request.role === 'CUST') {
+      // The gateway still calls the customer profile "owner"
+      return this.http.post(
+        url,
+        {
+          ...account,
+          owner: {
+            firstName: request.firstName,
+            lastName: request.lastName,
+            address: request.address,
+            city: request.city,
+            province: request.province,
+            telephone: request.telephone,
+          },
+        },
+        { responseType: 'text' as 'json' },
+      );
+    }
+
+    return this.http.post(url, account, { responseType: 'text' as 'json' });
   }
 }
