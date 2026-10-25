@@ -8,6 +8,7 @@ import { vi } from 'vitest';
 import { AuthState } from '@core/services/auth-state';
 import { Status } from '@features/supplies/models/status';
 import { Supply } from '@features/supplies/models/supply';
+import { SupplySummaryDialog } from '@features/supplies/pages/supply-summary-dialog';
 import { SupplyService } from '@features/supplies/services/supply-service';
 import { Roles } from '@shared/models/roles';
 
@@ -224,6 +225,44 @@ describe('SupplyPage', () => {
 
   it('should allow an admin to manage supplies', () => {
     expect(component['canManageSupplies']()).toBe(true);
+  });
+
+  it('should open the summary for all users and limit its actions to their list permissions', () => {
+    roles.set([Roles.vet]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.summary-button')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.edit-button.desktop-action-button')).toBeNull();
+
+    component['openSupplySummary'](supplyOne);
+
+    expect(openDialog).toHaveBeenCalledWith(
+      SupplySummaryDialog,
+      expect.objectContaining({
+        data: expect.objectContaining({
+          supply: supplyOne,
+          canManage: false,
+          canConsume: true,
+          consumeDisabled: false,
+        }),
+      }),
+    );
+  });
+
+  it('should show management actions in the summary only for inventory managers and admins', () => {
+    roles.set([Roles.inventoryManager]);
+
+    component['openSupplySummary'](supplyOne);
+
+    expect(openDialog).toHaveBeenCalledWith(
+      SupplySummaryDialog,
+      expect.objectContaining({
+        data: expect.objectContaining({
+          canManage: true,
+          canConsume: false,
+        }),
+      }),
+    );
   });
 
   it('should hide an open form and preserve its draft when management access is removed', () => {

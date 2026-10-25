@@ -1,0 +1,82 @@
+.summary-content {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.summary-content h3,
+.summary-content p {
+  margin: 0;
+}
+
+.summary-content h3 {
+  font-size: 1.25rem;
+}
+
+.description {
+  white-space: pre-wrap;
+}
+
+.supply-photo {
+  width: min(100%, 320px);
+  max-height: 220px;
+  justify-self: center;
+  border-radius: 12px;
+  object-fit: contain;
+}
+
+.no-photo {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1.5rem;
+  margin: 0;
+}
+
+dl div {
+  min-width: 0;
+}
+
+dt {
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+dd {
+  overflow-wrap: anywhere;
+  margin: 0.2rem 0 0;
+}
+
+mat-dialog-actions {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+button {
+  min-height: 38px;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--mat-sys-outline);
+  border-radius: 999px;
+  color: var(--mat-sys-on-surface);
+  background: var(--mat-sys-surface);
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.delete-button {
+  color: #b00020;
+}
+
+@media (width <= 520px) {
+  dl {
+    grid-template-columns: 1fr;
+  }
+}

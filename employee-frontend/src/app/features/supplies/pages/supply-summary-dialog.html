@@ -1,0 +1,98 @@
+<h2 mat-dialog-title i18n="@@supply.summary.title">Résumé de l'article</h2>
+
+<mat-dialog-content class="summary-content">
+  @if (data.photoUrl) {
+    <img class="supply-photo" [src]="data.photoUrl" [alt]="data.displayName" />
+  } @else {
+    <p class="no-photo" i18n="@@supply.summary.noPhoto">Aucune photo</p>
+  }
+
+  <h3>{{ data.displayName }}</h3>
+  <p class="description">{{ data.displayDescription }}</p>
+
+  <dl>
+    <div>
+      <dt i18n="@@supply.summary.productId">ID de l'article</dt>
+      <dd>{{ data.supply.productId }}</dd>
+    </div>
+    <div>
+      <dt i18n="@@supply.summary.inventoryId">ID de l'inventaire</dt>
+      <dd>{{ data.supply.inventoryId }}</dd>
+    </div>
+    <div>
+      <dt i18n="@@supply.fields.supplierName">Nom du fournisseur</dt>
+      <dd>{{ data.supply.supplierName?.trim() || notRecorded }}</dd>
+    </div>
+    <div>
+      <dt i18n="@@supply.fields.costPrice">Prix coûtant (CAD)</dt>
+      <dd>{{ data.supply.productPrice | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}</dd>
+    </div>
+    <div>
+      <dt i18n="@@supply.fields.salePrice">Prix de vente (CAD)</dt>
+      <dd>{{ data.supply.productSalePrice | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}</dd>
+    </div>
+    <div>
+      <dt i18n="@@supply.fields.quantity">Quantité</dt>
+      <dd>{{ data.supply.productQuantity }}</dd>
+    </div>
+    <div>
+      <dt i18n="@@supply.fields.expiration">Date d'expiration</dt>
+      <dd>{{ data.supply.expirationDate || '—' }}</dd>
+    </div>
+    <div>
+      <dt i18n="@@supply.fields.status">État</dt>
+      <dd>{{ data.statusLabel }}</dd>
+    </div>
+    <div>
+      <dt i18n="@@supply.summary.photoType">Type de photo</dt>
+      <dd>{{ data.photoUrl ? data.supply.photoType : '—' }}</dd>
+    </div>
+    <div>
+      <dt i18n="@@supply.summary.lastUpdated">Dernière mise à jour</dt>
+      <dd>{{ data.supply.lastUpdatedAt | date: 'medium' }}</dd>
+    </div>
+  </dl>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  @if (data.canManage) {
+    <button
+      type="button"
+      class="edit-button"
+      (click)="chooseAction('edit')"
+      i18n="@@supply.actions.edit"
+    >
+      Modifier
+    </button>
+    <button
+      type="button"
+      class="delete-button"
+      (click)="chooseAction('delete')"
+      i18n="@@supply.actions.deleteButton"
+    >
+      Supprimer
+    </button>
+    <button
+      type="button"
+      class="history-button"
+      (click)="chooseAction('history')"
+      i18n="@@supply.actions.history"
+    >
+      Historique
+    </button>
+  }
+  @if (data.canConsume) {
+    <button
+      type="button"
+      class="consume-button"
+      [disabled]="data.consumeDisabled"
+      (click)="chooseAction('consume')"
+      i18n="@@supply.actions.consumeButton"
+    >
+      Utiliser
+    </button>
+  }
+  <button type="button" class="close-button" (click)="close()" i18n="@@supply.summary.close">
+    Fermer
+  </button>
+</mat-dialog-actions>
