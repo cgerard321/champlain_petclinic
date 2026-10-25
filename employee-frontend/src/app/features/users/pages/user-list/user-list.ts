@@ -395,7 +395,7 @@ export class UserList implements OnInit {
         placeholder: '(514) 555-0123 #1234',
         validators: [Validators.minLength(10)],
         errorMessages: {
-          minlength: $localize`:@@users.validation.phoneLength:Le numéro de téléphone est trop court.`,
+          minlength: $localize`:@@users.validation.phoneLength:The phone number is too short.`,
         },
       },
       {
