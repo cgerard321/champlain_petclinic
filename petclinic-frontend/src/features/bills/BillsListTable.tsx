@@ -649,10 +649,10 @@ export default function BillsListTable({
                 {detailBill.vetLastName}
               </p>
               <p>
-                <strong>{t('billCard.date')}:</strong> {detailBill.date}
+                <strong>{t('billCard.date')}</strong> {detailBill.date}
               </p>
               <p>
-                <strong>{t('billCard.detail.amount')}:</strong>{' '}
+                <strong>{t('billCard.detail.amount')}</strong>{' '}
                 {currency === 'CAD'
                   ? `CAD $${detailBill.amount.toFixed(2)}`
                   : `USD $${convertCurrency(detailBill.amount, 'CAD', 'USD').toFixed(2)}`}
