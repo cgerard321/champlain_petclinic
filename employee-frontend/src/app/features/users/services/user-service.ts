@@ -90,7 +90,6 @@ export class UserService {
         vet: {
           firstName: request.firstName,
           lastName: request.lastName,
-          phoneNumber: request.phoneNumber,
           resume: request.resume,
           specialties: [],
           workday: this.defaultVetWorkdays,
