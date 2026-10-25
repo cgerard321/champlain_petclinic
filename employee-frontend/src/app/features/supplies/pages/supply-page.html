@@ -159,6 +159,22 @@
 
 <ng-template #actionsCell let-supply>
   <div class="action-buttons">
+    <button
+      type="button"
+      class="edit-button summary-button desktop-action-button"
+      (click)="openSupplySummary(supply)"
+      i18n="@@supply.actions.summary"
+    >
+      Info
+    </button>
+    <button
+      type="button"
+      class="history-button mobile-actions-button"
+      [matMenuTriggerFor]="supplyActionsMenu"
+      i18n="@@supply.fields.actions"
+    >
+      Actions
+    </button>
     @if (canManageSupplies()) {
       @if (canRestock(supply)) {
         <button
@@ -251,6 +267,22 @@
         </button>
       </span>
     }
+    <mat-menu #supplyActionsMenu="matMenu">
+      <button mat-menu-item (click)="openSupplySummary(supply)" i18n="@@supply.actions.summary">
+        Info
+      </button>
+      @if (canManageSupplies()) {
+        <button mat-menu-item (click)="editSupply(supply)" i18n="@@supply.actions.edit">
+          Modifier
+        </button>
+        <button mat-menu-item (click)="deleteSupply(supply)" i18n="@@supply.actions.deleteButton">
+          Supprimer
+        </button>
+        <button mat-menu-item (click)="openSupplyHistory(supply)" i18n="@@supply.actions.history">
+          Historique
+        </button>
+      }
+    </mat-menu>
   </div>
 </ng-template>
 

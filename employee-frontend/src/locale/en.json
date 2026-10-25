@@ -584,6 +584,7 @@
         "consume": "Consume supply",
         "consuming": "Consuming...",
         "consumeButton": "Consume",
+        "summary": "Info",
         "cannotConsumeStock": "Cannot consume - out of stock",
         "cannotConsumeExpired": "Cannot consume - expired"
       },
@@ -602,6 +603,16 @@
         "cancel": "Cancel",
         "currentQuantity": "{$INTERPOLATION} — Current quantity: {$INTERPOLATION_1}",
         "quantity": "Quantity to add"
+        },
+      "summary": {
+        "ariaLabel": "Summary for {$name}",
+        "title": "Supply summary",
+        "noPhoto": "No photo",
+        "productId": "Supply ID",
+        "inventoryId": "Inventory ID",
+        "photoType": "Photo type",
+        "lastUpdated": "Last updated",
+        "close": "Close"
       },
       "history": {
         "ariaLabel": "History for {$name}",
