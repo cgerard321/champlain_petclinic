@@ -183,6 +183,13 @@ export class Bill implements OnInit {
 
   protected updateBillSearch(value: string): void {
     this.billSearchInput.set(value);
+
+    if (!value.trim()) {
+      this.billSearchQuery.set('');
+      this.showBillSearchSuggestions.set(false);
+      return;
+    }
+
     this.showBillSearchSuggestions.set(true);
   }
 
