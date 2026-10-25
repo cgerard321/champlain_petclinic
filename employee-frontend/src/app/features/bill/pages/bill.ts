@@ -141,10 +141,9 @@ export class Bill implements OnInit {
   }
 
   protected downloadPdf(bill: BillRecord): void {
-    if (!this.canViewDetails() || this.downloadingPdfId() !== null) {
+    if (!this.canViewBillList() || this.downloadingPdfId() !== null) {
       return;
     }
-
     const currency = this.currency();
 
     this.downloadingPdfId.set(bill.billId);
