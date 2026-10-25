@@ -108,6 +108,10 @@
         <dt>Interest</dt>
         <dd>
           {{ bill().interest ?? 0 | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
+
+          @if (bill().interestExempt) {
+            <span> (Exempt)</span>
+          }
         </dd>
       </div>
 
@@ -135,10 +139,29 @@
         <dd>{{ bill().archive ? 'Yes' : 'No' }}</dd>
       </div>
 
+      <!-- Interest Exemption Management -->
       <div class="bill-details-field">
         <dt>Interest Exempt</dt>
+
         <dd>
           {{ bill().interestExempt ? 'Yes' : 'No' }}
+
+          @if (canManageInterest()) {
+            <button
+              type="button"
+              class="bill-details-exemption-button"
+              [disabled]="updatingInterest()"
+              (click)="toggleInterestExemption()"
+            >
+              {{
+                updatingInterest()
+                  ? 'Saving...'
+                  : bill().interestExempt
+                    ? 'Remove Exemption'
+                    : 'Exempt Interest'
+              }}
+            </button>
+          }
         </dd>
       </div>
 
@@ -156,8 +179,29 @@
       </div>
     </dl>
   </section>
+
+  <!-- Interest Exemption Error -->
+  @if (interestError(); as message) {
+    <p role="alert" class="bill-details-action-error">
+      {{ message }}
+    </p>
+  }
+
+  <!-- Interest Exemption Success -->
+  @if (interestSuccess(); as message) {
+    <p role="status" class="bill-details-action-success">
+      {{ message }}
+    </p>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="bill-details-footer">
-  <button type="button" class="bill-details-close-button" (click)="close()">Close</button>
+  <button
+    type="button"
+    class="bill-details-close-button"
+    [disabled]="updatingInterest()"
+    (click)="close()"
+  >
+    Close
+  </button>
 </mat-dialog-actions>

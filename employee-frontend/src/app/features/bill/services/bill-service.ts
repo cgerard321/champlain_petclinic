@@ -114,9 +114,11 @@ export class BillService {
 
   setInterestExempt(billId: string, exempt: boolean): Observable<void> {
     return this.http.patch<void>(
-      `/api/v2/gateway/bills/${encodeURIComponent(billId)}/exempt-interest`,
+      `${this.baseUrl}/${encodeURIComponent(billId)}/exempt-interest`,
       null,
-      { params: { exempt } },
+      {
+        params: { exempt },
+      },
     );
   }
 

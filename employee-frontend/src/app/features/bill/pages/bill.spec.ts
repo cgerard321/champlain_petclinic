@@ -29,7 +29,17 @@ describe('Bill page', () => {
     billStatus: 'UNPAID',
     archive: false,
     interest: 0,
+    interestExempt: false,
     taxedAmount: 14.98,
+  };
+
+  const overdueBill: BillRecord = {
+    ...sampleBill,
+    billStatus: 'OVERDUE',
+    dueDate: new Date(2024, 0, 1),
+    interest: 20,
+    totalAmount: 134.98,
+    interestExempt: false,
   };
 
   type RenderResult = {
@@ -38,7 +48,8 @@ describe('Bill page', () => {
     getAllBills: Mock<() => Observable<BillRecord>>;
     getMyBills: Mock<() => Observable<BillRecord>>;
     getBillById: Mock<(billId: string) => Observable<BillRecord>>;
-    openDialog: Mock;
+    setInterestExempt: Mock<(billId: string, exempt: boolean) => Observable<void>>;
+    openDialog: Mock<(...args: unknown[]) => { afterClosed: () => Observable<unknown> }>;
     getReceptionistBills: Mock<() => Observable<BillRecord>>;
     payBill: Mock;
   };
@@ -55,9 +66,16 @@ describe('Bill page', () => {
 
     const getReceptionistBills = vi.fn<() => Observable<BillRecord>>(() => of(...bills));
 
+    const setInterestExempt = vi.fn<(billId: string, exempt: boolean) => Observable<void>>(() =>
+      of(undefined),
+    );
+
     const payBill = vi.fn();
 
-    const openDialog = vi.fn();
+    // Both the confirmation dialog and Bill Details use afterClosed().
+    const openDialog = vi.fn<(...args: unknown[]) => { afterClosed: () => Observable<unknown> }>(
+      () => ({ afterClosed: () => of(undefined) }),
+    );
 
     await TestBed.configureTestingModule({
       imports: [Bill],
@@ -75,6 +93,7 @@ describe('Bill page', () => {
             getMyBills,
             getBillById,
             getReceptionistBills,
+            setInterestExempt,
             payBill,
           },
         },
@@ -96,10 +115,17 @@ describe('Bill page', () => {
       getAllBills,
       getMyBills,
       getBillById,
+      setInterestExempt,
       getReceptionistBills,
       payBill,
       openDialog,
     };
+  }
+
+  function findInterestButton(host: HTMLElement): HTMLButtonElement | undefined {
+    return Array.from(host.querySelectorAll<HTMLButtonElement>('.bill-row-actions button')).find(
+      (button) => /(?:Exempt Interest|Remove Interest Exemption)/.test(button.textContent ?? ''),
+    );
   }
 
   it('allows administrators to view all bills', async () => {
@@ -129,7 +155,6 @@ describe('Bill page', () => {
     const { host } = await render([Roles.vet]);
 
     expect(host.querySelector('.bill-table-button--outline')).not.toBeNull();
-
     expect(host.querySelector('.bill-table-button--primary')).toBeNull();
     expect(host.querySelector('.bill-archive-action')).toBeNull();
     expect(host.querySelector('.bill-view-actions')).toBeNull();
@@ -281,9 +306,199 @@ describe('Bill page', () => {
     fixture.detectChanges();
 
     expect(getBillById).toHaveBeenCalledWith('BILL-123');
-
     expect(host.querySelector('[role="alert"]')?.textContent).toContain('Bill not found');
-
     expect(openDialog).not.toHaveBeenCalled();
+  });
+
+  describe('CPC-2135: overdue interest exemption', () => {
+    it('shows Exempt Interest only for administrators on overdue bills', async () => {
+      const { host } = await render([Roles.admin], [overdueBill]);
+
+      expect(findInterestButton(host)?.textContent).toContain('Exempt Interest');
+    });
+
+    it.each(['UNPAID', 'PAID'] as const)(
+      'does not show the exemption action for %s bills',
+      async (billStatus) => {
+        const bill: BillRecord = { ...sampleBill, billStatus };
+        const { host } = await render([Roles.admin], [bill]);
+
+        expect(findInterestButton(host)).toBeUndefined();
+      },
+    );
+
+    it.each([Roles.vet, Roles.receptionist])(
+      'does not show the exemption action to %s',
+      async (role) => {
+        const { host } = await render([role], [overdueBill]);
+
+        expect(findInterestButton(host)).toBeUndefined();
+      },
+    );
+
+    it('does not make an update request until the administrator confirms', async () => {
+      const { fixture, host, openDialog, setInterestExempt } = await render(
+        [Roles.admin],
+        [overdueBill],
+      );
+
+      const button = findInterestButton(host);
+      expect(button).toBeDefined();
+
+      openDialog.mockReturnValueOnce({ afterClosed: () => of(undefined) });
+      button?.click();
+      fixture.detectChanges();
+
+      expect(openDialog).toHaveBeenCalledOnce();
+      expect(setInterestExempt).not.toHaveBeenCalled();
+    });
+
+    it('does not change the exemption when confirmation is cancelled', async () => {
+      const { fixture, host, openDialog, setInterestExempt } = await render(
+        [Roles.admin],
+        [overdueBill],
+      );
+
+      openDialog.mockReturnValueOnce({ afterClosed: () => of(false) });
+      findInterestButton(host)?.click();
+      fixture.detectChanges();
+
+      expect(setInterestExempt).not.toHaveBeenCalled();
+      expect(host.querySelector('tbody')?.textContent).toContain('134.98');
+      expect(host.querySelector('tbody')?.textContent).not.toContain('(Exempt)');
+    });
+
+    it('enables interest exemption and refreshes the total immediately', async () => {
+      const { fixture, host, openDialog, setInterestExempt, getBillById } = await render(
+        [Roles.admin],
+        [overdueBill],
+      );
+
+      const exemptBill: BillRecord = {
+        ...overdueBill,
+        interestExempt: true,
+        interest: 0,
+        totalAmount: 114.98,
+      };
+
+      openDialog.mockReturnValueOnce({ afterClosed: () => of(true) });
+      getBillById.mockReturnValue(of(exemptBill));
+
+      findInterestButton(host)?.click();
+      fixture.detectChanges();
+
+      expect(setInterestExempt).toHaveBeenCalledTimes(1);
+      expect(setInterestExempt).toHaveBeenCalledWith('BILL-123', true);
+      expect(getBillById).toHaveBeenCalledWith('BILL-123');
+      expect(host.querySelector('tbody')?.textContent).toContain('114.98');
+      expect(host.querySelector('tbody')?.textContent).toContain('(Exempt)');
+      expect(host.querySelector('tbody')?.textContent).toContain('OVERDUE');
+      expect(host.querySelector('[role="status"]')?.textContent).toContain(
+        'Interest exemption applied.',
+      );
+      expect(findInterestButton(host)?.textContent).toContain('Remove Interest Exemption');
+    });
+
+    it('removes the exemption and refreshes interest and total', async () => {
+      const exemptBill: BillRecord = {
+        ...overdueBill,
+        interestExempt: true,
+        interest: 0,
+        totalAmount: 114.98,
+      };
+
+      const { fixture, host, openDialog, setInterestExempt, getBillById } = await render(
+        [Roles.admin],
+        [exemptBill],
+      );
+
+      openDialog.mockReturnValueOnce({ afterClosed: () => of(true) });
+      getBillById.mockReturnValue(of(overdueBill));
+
+      findInterestButton(host)?.click();
+      fixture.detectChanges();
+
+      expect(setInterestExempt).toHaveBeenCalledTimes(1);
+      expect(setInterestExempt).toHaveBeenCalledWith('BILL-123', false);
+      expect(host.querySelector('tbody')?.textContent).toContain('134.98');
+      expect(host.querySelector('tbody')?.textContent).not.toContain('(Exempt)');
+      expect(host.querySelector('tbody')?.textContent).toContain('OVERDUE');
+      expect(host.querySelector('[role="status"]')?.textContent).toContain(
+        'Interest exemption removed.',
+      );
+      expect(findInterestButton(host)?.textContent).toContain('Exempt Interest');
+    });
+
+    it('shows an error and keeps the original bill if the update fails', async () => {
+      const { fixture, host, openDialog, setInterestExempt, getBillById } = await render(
+        [Roles.admin],
+        [overdueBill],
+      );
+
+      openDialog.mockReturnValueOnce({ afterClosed: () => of(true) });
+      setInterestExempt.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
+
+      findInterestButton(host)?.click();
+      fixture.detectChanges();
+
+      expect(setInterestExempt).toHaveBeenCalledTimes(1);
+      expect(setInterestExempt).toHaveBeenCalledWith('BILL-123', true);
+      expect(getBillById).not.toHaveBeenCalled();
+      expect(host.querySelector('[role="alert"]')?.textContent).toContain(
+        'Unable to update interest exemption',
+      );
+      expect(host.querySelector('tbody')?.textContent).toContain('134.98');
+      expect(host.querySelector('tbody')?.textContent).not.toContain('(Exempt)');
+    });
+
+    it('explains when the exemption saves but refreshing the bill fails', async () => {
+      const { fixture, host, openDialog, setInterestExempt, getBillById } = await render(
+        [Roles.admin],
+        [overdueBill],
+      );
+
+      openDialog.mockReturnValueOnce({ afterClosed: () => of(true) });
+      getBillById.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 503 })));
+
+      findInterestButton(host)?.click();
+      fixture.detectChanges();
+
+      expect(setInterestExempt).toHaveBeenCalledTimes(1);
+      expect(setInterestExempt).toHaveBeenCalledWith('BILL-123', true);
+      expect(getBillById).toHaveBeenCalledWith('BILL-123');
+      expect(host.querySelector('[role="alert"]')?.textContent).toContain(
+        'The exemption was saved, but the bill could not be refreshed',
+      );
+    });
+
+    it('updates the table when Bill Details closes with a refreshed bill', async () => {
+      const { fixture, host, openDialog, getBillById } = await render([Roles.admin], [overdueBill]);
+
+      const exemptBill: BillRecord = {
+        ...overdueBill,
+        interestExempt: true,
+        interest: 0,
+        totalAmount: 114.98,
+      };
+
+      getBillById.mockReturnValue(of(overdueBill));
+      openDialog.mockReturnValueOnce({ afterClosed: () => of(exemptBill) });
+
+      const detailsButton = Array.from(
+        host.querySelectorAll<HTMLButtonElement>('.bill-row-actions button'),
+      ).find((button) => button.textContent?.trim() === 'Details');
+
+      expect(detailsButton).toBeDefined();
+      detailsButton?.click();
+      fixture.detectChanges();
+
+      expect(openDialog).toHaveBeenCalledWith(
+        BillDetails,
+        expect.objectContaining({ data: overdueBill }),
+      );
+      expect(host.querySelector('tbody')?.textContent).toContain('114.98');
+      expect(host.querySelector('tbody')?.textContent).toContain('(Exempt)');
+      expect(findInterestButton(host)?.textContent).toContain('Remove Interest Exemption');
+    });
   });
 });
