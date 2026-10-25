@@ -387,7 +387,7 @@ export class UserList implements OnInit {
   private vetFields(): ModalFormField[] {
     const phonePattern = /^[\d\s()\-+#]{7,20}$/;
     // const phoneMessage = $localize`:@@users.validation.vetPhone:Le numéro de téléphone doit contenir exactement 20 caractères, par exemple (514) 555-0123 #1234.`;
-    const phoneMessage = $localize`:@@users.validation.vetPhone:Entrez un numéro de téléphone valide, par exemple (514) 555-0123 ou 5141234567 #1234.`;
+    const phoneMessage = $localize`:@@users.validation.vetPhone:Entrez un numéro de téléphone valide, par exemple (514) 555-0123 ou 5145550123.`;
 
     return [
       ...this.personFields(),
@@ -396,7 +396,7 @@ export class UserList implements OnInit {
         label: $localize`:@@users.fields.phone:Numéro de téléphone`,
         type: 'string',
         required: true,
-        placeholder: '(514) 555-0123 #1234',
+        placeholder: '(514) 555-0123 #1234 / 5141234567 #1234 / 5141234567',
         // The vet service only accepts a phone number of exactly 20 characters.
         // validators: [Validators.minLength(20), Validators.maxLength(20)],
         validators: [Validators.pattern(phonePattern)],

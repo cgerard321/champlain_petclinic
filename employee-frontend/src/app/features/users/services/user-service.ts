@@ -85,44 +85,36 @@ export class UserService {
     };
 
     if (request.role === 'VET') {
-      return this.http.post(
-        url,
-        {
-          ...account,
-          vet: {
-            firstName: request.firstName,
-            lastName: request.lastName,
-            phoneNumber: request.phoneNumber,
-            resume: request.resume,
-            specialties: [],
-            workday: this.defaultVetWorkdays,
-            active: true,
-            photoDefault: true,
-          },
+      return this.http.post(url, {
+        ...account,
+        vet: {
+          firstName: request.firstName,
+          lastName: request.lastName,
+          phoneNumber: request.phoneNumber,
+          resume: request.resume,
+          specialties: [],
+          workday: this.defaultVetWorkdays,
+          active: true,
+          photoDefault: true,
         },
-        { responseType: 'text' as 'json' },
-      );
+      });
     }
 
     if (request.role === 'CUST') {
       // The gateway still calls the customer profile "owner"
-      return this.http.post(
-        url,
-        {
-          ...account,
-          owner: {
-            firstName: request.firstName,
-            lastName: request.lastName,
-            address: request.address,
-            city: request.city,
-            province: request.province,
-            telephone: request.telephone,
-          },
+      return this.http.post(url, {
+        ...account,
+        owner: {
+          firstName: request.firstName,
+          lastName: request.lastName,
+          address: request.address,
+          city: request.city,
+          province: request.province,
+          telephone: request.telephone,
         },
-        { responseType: 'text' as 'json' },
-      );
+      });
     }
 
-    return this.http.post(url, account, { responseType: 'text' as 'json' });
+    return this.http.post(url, account);
   }
 }
