@@ -131,7 +131,9 @@ const EditReviewModal = ({
 
         {/* Rating Section */}
         <div className="erm-section">
-          <label className="erm-label">{t('yourRating')}</label>
+          <label className="erm-label">
+            {t('yourRating')} ({t('required')})
+          </label>
           <StarRating
             currentRating={localRating}
             viewOnly={false}
@@ -141,7 +143,9 @@ const EditReviewModal = ({
 
         {/* Rating Categories Section */}
         <div className="erm-section">
-          <label className="erm-label">{t('qualityOfProduct')}</label>
+          <label className="erm-label">
+            {t('qualityOfProduct')} ({t('optional')})
+          </label>
           <StarRating
             currentRating={categoryRatings.qualityRating}
             viewOnly={false}
@@ -152,7 +156,9 @@ const EditReviewModal = ({
         </div>
 
         <div className="erm-section">
-          <label className="erm-label">{t('valueOfProduct')}</label>
+          <label className="erm-label">
+            {t('valueOfProduct')} ({t('optional')})
+          </label>
           <StarRating
             currentRating={categoryRatings.valueRating}
             viewOnly={false}
@@ -161,7 +167,9 @@ const EditReviewModal = ({
         </div>
 
         <div className="erm-section">
-          <label className="erm-label">{t('petSatisfaction')}</label>
+          <label className="erm-label">
+            {t('petSatisfaction')} ({t('optional')})
+          </label>
           <StarRating
             currentRating={categoryRatings.petSatisfactionRating}
             viewOnly={false}
@@ -172,7 +180,9 @@ const EditReviewModal = ({
         </div>
 
         <div className="erm-section">
-          <label className="erm-label">{t('ingredients')}</label>
+          <label className="erm-label">
+            {t('ingredients')} ({t('optional')})
+          </label>
           <StarRating
             currentRating={categoryRatings.ingredientsRating}
             viewOnly={false}

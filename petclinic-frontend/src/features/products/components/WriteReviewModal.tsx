@@ -116,7 +116,9 @@ const WriteReviewModal = ({
 
         {/* Rating Section */}
         <div className="wrm-section">
-          <label className="wrm-label">{t('yourRating')}</label>
+          <label className="wrm-label">
+            {t('yourRating')} ({t('required')})
+          </label>
           <StarRating
             currentRating={localRating}
             viewOnly={false}
@@ -126,7 +128,9 @@ const WriteReviewModal = ({
 
         {/* Rating Categories Section */}
         <div className="wrm-section">
-          <label className="wrm-label">{t('qualityOfProduct')}</label>
+          <label className="wrm-label">
+            {t('qualityOfProduct')} ({t('optional')})
+          </label>
           <StarRating
             currentRating={categoryRatings.qualityRating}
             viewOnly={false}
@@ -137,7 +141,9 @@ const WriteReviewModal = ({
         </div>
 
         <div className="wrm-section">
-          <label className="wrm-label">{t('valueOfProduct')}</label>
+          <label className="wrm-label">
+            {t('valueOfProduct')} ({t('optional')})
+          </label>
           <StarRating
             currentRating={categoryRatings.valueRating}
             viewOnly={false}
@@ -146,7 +152,9 @@ const WriteReviewModal = ({
         </div>
 
         <div className="wrm-section">
-          <label className="wrm-label">{t('petSatisfaction')}</label>
+          <label className="wrm-label">
+            {t('petSatisfaction')} ({t('optional')})
+          </label>
           <StarRating
             currentRating={categoryRatings.petSatisfactionRating}
             viewOnly={false}
@@ -157,7 +165,9 @@ const WriteReviewModal = ({
         </div>
 
         <div className="wrm-section">
-          <label className="wrm-label">{t('ingredients')}</label>
+          <label className="wrm-label">
+            {t('ingredients')} ({t('optional')})
+          </label>
           <StarRating
             currentRating={categoryRatings.ingredientsRating}
             viewOnly={false}
