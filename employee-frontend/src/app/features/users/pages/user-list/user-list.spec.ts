@@ -108,6 +108,12 @@ describe('UserList', () => {
     return new FormControl(value, field?.validators ?? []).errors;
   };
 
+  const phoneErrors = (config: DialogConfig, value: string): unknown => {
+    const field = config.data.fields.find((item) => item.key === 'phoneNumber');
+
+    return new FormControl(value, field?.validators ?? []).errors;
+  };
+
   async function setup(locale = 'en-US'): Promise<void> {
     TestBed.resetTestingModule();
     vi.clearAllMocks();
@@ -334,6 +340,14 @@ describe('UserList', () => {
         'Réceptionniste',
         'Client',
       ]);
+    });
+
+    it('should accept both formatted and unformatted phone numbers for vets', () => {
+      const config = chooseRole('VET');
+
+      expect(phoneErrors(config, '(514) 555-0123 #1234')).toBeNull();
+      expect(phoneErrors(config, '5141234567 #1234')).toBeNull();
+      expect(phoneErrors(config, '123')).not.toBeNull(); // Too short / invalid format
     });
 
     it('should not ask for anything else when the role choice is cancelled', () => {

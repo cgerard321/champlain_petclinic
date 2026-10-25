@@ -84,8 +84,10 @@ export class UserService {
       password: request.password,
     };
 
+    let payload: unknown = account;
+
     if (request.role === 'VET') {
-      return this.http.post(url, {
+      payload = {
         ...account,
         vet: {
           firstName: request.firstName,
@@ -97,12 +99,9 @@ export class UserService {
           active: true,
           photoDefault: true,
         },
-      });
-    }
-
-    if (request.role === 'CUST') {
-      // The gateway still calls the customer profile "owner"
-      return this.http.post(url, {
+      };
+    } else if (request.role === 'CUST') {
+      payload = {
         ...account,
         owner: {
           firstName: request.firstName,
@@ -112,9 +111,9 @@ export class UserService {
           province: request.province,
           telephone: request.telephone,
         },
-      });
+      };
     }
 
-    return this.http.post(url, account);
+    return this.http.post(url, payload, { responseType: 'text' });
   }
 }
