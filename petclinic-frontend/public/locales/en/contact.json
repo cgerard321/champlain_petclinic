@@ -1,0 +1,53 @@
+{
+  "intro": {
+    "title": "Contact Us",
+    "subtitle": "We’ll get back to you as soon as we can."
+  },
+  "details": {
+    "title": "Clinic Details",
+    "hoursTitle": "Hours",
+    "directions": "Get directions →"
+  },
+  "form": {
+    "title": "Send a Message",
+    "name": {
+      "label": "Name",
+      "placeholder": "Jane Doe",
+      "error": "Please enter your name."
+    },
+    "email": {
+      "label": "Email",
+      "placeholder": "jane@example.com",
+      "error": "Please enter a valid email."
+    },
+    "phone": {
+      "label": "Phone (optional)",
+      "placeholder": "(555) 555-5555"
+    },
+    "subject": {
+      "label": "Subject",
+      "placeholder": "How can we help?"
+    },
+    "message": {
+      "label": "Message",
+      "placeholder": "Write your message…",
+      "error": "Please enter a message."
+    },
+    "send": "Send Message",
+    "sending": "Sending…",
+    "clear": "Clear"
+  },
+  "status": {
+    "success": "Thanks! Your message has been sent.",
+    "error": "Something went wrong. Please try again."
+  },
+  "hours": {
+    "day": {
+      "weekdays": "Mon - Fri",
+      "saturday": "Sat",
+      "sunday": "Sun"
+    },
+    "closed": "Closed"
+  }
+}
+

@@ -4,6 +4,7 @@ import { getAllProducts } from '@/features/products/api/getAllProducts';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import Product from './components/Product';
 import { useUser } from '@/context/UserContext';
+import { addProductToRecentlyViewed } from './utils/recentlyViewed';
 
 export default function TrendingList(): JSX.Element {
   const { t } = useTranslation('products');
@@ -19,30 +20,8 @@ export default function TrendingList(): JSX.Element {
   useEffect(() => {
     fetchProducts();
   }, []);
-  const addToRecentlyViewed = (product: ProductModel): void => {
-    if (!user?.userId) return;
-
-    const savedProducts = localStorage.getItem(
-      `recentlyClickedProducts_${user.userId}`
-    );
-    const currentProducts = savedProducts ? JSON.parse(savedProducts) : [];
-    const updatedProducts = currentProducts.filter(
-      (p: ProductModel) => p.productId !== product.productId
-    );
-
-    updatedProducts.unshift(product);
-
-    if (updatedProducts.length > 5) {
-      updatedProducts.pop();
-    }
-    localStorage.setItem(
-      `recentlyClickedProducts_${user.userId}`,
-      JSON.stringify(updatedProducts)
-    );
-  };
-
   const handleProductClick = (product: ProductModel): void => {
-    addToRecentlyViewed(product);
+    addProductToRecentlyViewed(product, user?.userId);
   };
 
   const topFourTrending = [...trendingList]
