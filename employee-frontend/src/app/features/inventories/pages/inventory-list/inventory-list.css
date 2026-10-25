@@ -37,7 +37,7 @@
 
 .inventory-page h1 {
   position: relative;
-  margin: 0 0 2rem;
+  margin: 0;
   padding-bottom: 1rem;
   color: var(--forest-700);
   font-size: clamp(1.8rem, 3vw, 2.35rem);
@@ -58,10 +58,11 @@
 }
 
 .page-header {
-  display: flex;
-  align-items: center;
+ display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 16px;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .field-error {
@@ -161,6 +162,7 @@
   border: none;
   border-radius: 999px;
   color: var(--white);
+  font: inherit;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 160ms ease;
@@ -173,8 +175,9 @@
 
 .inventory-actions .edit-button,
 .inventory-actions .delete-button {
-  padding: 6px 14px;
-  font-size: 0.8rem;
+  padding: 7px 8px;
+  font-size: 0.75rem;
+  white-space: nowrap;
 }
 
 .add-inventory-button,
@@ -737,6 +740,11 @@
   .inventory-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .inventory-card-link {
