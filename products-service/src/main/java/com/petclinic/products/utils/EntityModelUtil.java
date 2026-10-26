@@ -58,6 +58,12 @@ public class EntityModelUtil {
                 .rating(requestModel.getRating())
                 .review(requestModel.getReview() != null ? requestModel.getReview() : "")
                 .createdAt(LocalDateTime.now())
+                .qualityRating(requestModel.getQualityRating())
+                .valueRating(requestModel.getValueRating())
+                .petSatisfactionRating(
+                        requestModel.getPetSatisfactionRating()
+                )
+                .ingredientsRating(requestModel.getIngredientsRating())
                 .build();
     }
 

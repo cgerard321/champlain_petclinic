@@ -29,21 +29,29 @@ public class EntityModelUtil {
         BeanUtils.copyProperties(cart, resp);
 
         //This prevents a crash if products is null
-        List<CartProduct> safeProducts = products == null ? List.of() : products;
+        List<CartProduct> safeProducts = products == null ? List.of() : copyCartProducts(products);
+        PromoCode appliedPromo = cart.getAppliedPromo();
+        Double promo = appliedPromo == null ? cart.getPromoPercent()
+                : (appliedPromo.isActive() && isPromoActive(appliedPromo.getExpirationDate())
+                    ? appliedPromo.getDiscount() : null);
+        resp.setPromoPercent(promo);
+        double discount = 0.0;
 
         double subtotal = 0.0;
         for (CartProduct p : safeProducts) {
             double price = p.getProductSalePrice() != null ? p.getProductSalePrice() : 0.0;
             int qty = p.getQuantityInCart() != null ? p.getQuantityInCart() : 0;
             subtotal += price * qty;
+            boolean eligible = appliedPromo == null || PromoEligibility.isEligible(appliedPromo, p);
+            double lineDiscount = eligible && promo != null && promo >= 0 && promo <= 100
+                    ? round2(price * qty * promo / 100.0) : 0.0;
+            p.setDiscountAmount(lineDiscount);
+            discount += lineDiscount;
         }
         subtotal = round2(subtotal);
 
-        Double promo = resp.getPromoPercent();
-        double discountedSubtotal = subtotal;
-        if (promo != null && promo >= 0.0 && promo <= 100.0) {
-            discountedSubtotal = round2(subtotal * (1.0 - (promo / 100.0)));
-        }
+        resp.setDiscountAmount(round2(discount));
+        double discountedSubtotal = round2(subtotal - discount);
 
         ShippingMethod shippingMethod = cart.getShippingMethod() == null
                 ? ShippingMethod.PICKUP
@@ -102,6 +110,7 @@ public class EntityModelUtil {
         if (promoCodeRequestModel.getActive() != null) {
             promoCode.setActive(promoCodeRequestModel.getActive());
         }
+        PromoEligibility.setScope(promoCode, promoCodeRequestModel);
         return promoCode;
     }
 
@@ -117,6 +126,9 @@ public class EntityModelUtil {
 
     public static PromoCodeResponseModel toPromoCodeResponseModel(PromoCode promoCode) {
         PromoCodeResponseModel responseModel = new PromoCodeResponseModel();
+        responseModel.setScope(PromoEligibility.scope(promoCode));
+        responseModel.setProductIds(promoCode.getProductIds());
+        responseModel.setProductTypes(promoCode.getProductTypes());
         responseModel.setId(promoCode.getId());
         responseModel.setName(promoCode.getName());
         responseModel.setCode(promoCode.getCode());
@@ -183,6 +195,7 @@ public class EntityModelUtil {
         orderCart.setProducts(products);
         CartResponseModel calculatedCart =
                 toCartResponseModel(orderCart, products);
+        orderCart.setProducts(calculatedCart.getProducts());
         orderCart.setSubtotal(calculatedCart.getSubtotal());
         orderCart.setPromoPercent(calculatedCart.getPromoPercent());
         orderCart.setTvq(calculatedCart.getTvq());

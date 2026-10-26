@@ -20,6 +20,7 @@ import { ArchiveBillsDialog } from '@features/bill/components/archive-bills-dial
 import { BillDetails } from '@features/bill/components/bill-details/bill-details';
 import { BillUpdate } from '@features/bill/components/bill-update/bill-update';
 import { CreateBill } from '@features/bill/components/createBill/create-bill';
+import { CustomerBillLookup } from '@features/bill/components/customer-bill-lookup/customer-bill-lookup';
 import { BillRecord, PaymentRequest } from '@features/bill/models/bill.model';
 import { BillService } from '@features/bill/services/bill-service';
 import { Roles } from '@shared/models/roles';
@@ -46,7 +47,7 @@ const emptyFilters: BillFilters = {
 
 @Component({
   selector: 'app-bill',
-  imports: [CurrencyPipe, FormsModule],
+  imports: [CurrencyPipe, FormsModule, CustomerBillLookup],
   styleUrl: './bill.css',
   templateUrl: './bill.html',
 })
@@ -71,6 +72,9 @@ export class Bill implements OnInit {
 
   protected readonly canViewOwnBills = computed(() => this.auth.hasRole(Roles.vet));
   protected readonly canPayBill = computed(() => this.auth.hasRole(Roles.receptionist));
+  protected readonly showCustomerBillLookup = computed(
+    () => this.canPayBill() && !this.canViewBills() && !this.canViewOwnBills(),
+  );
 
   protected readonly selectedBill = signal<BillRecord | null>(null);
   protected readonly paying = signal(false);
@@ -137,10 +141,9 @@ export class Bill implements OnInit {
   }
 
   protected downloadPdf(bill: BillRecord): void {
-    if (!this.canViewDetails() || this.downloadingPdfId() !== null) {
+    if (!this.canViewBillList() || this.downloadingPdfId() !== null) {
       return;
     }
-
     const currency = this.currency();
 
     this.downloadingPdfId.set(bill.billId);

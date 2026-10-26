@@ -1,9 +1,9 @@
 package com.petclinic.visits.visitsservicenew.Utils;
 
 
-import com.itextpdf.text.*;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.pdf.*;
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.*;
+import java.awt.Color;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.MedicationDTO;
 
@@ -23,12 +23,12 @@ public class PrescriptionPdfGenerator {
 
         // Header
         Paragraph header = new Paragraph("PetClinic\n123 Main Street\n(514) 555-1234",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, BaseColor.BLACK));
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14, Color.BLACK));
         header.setAlignment(Element.ALIGN_CENTER);
         document.add(header);
 
         Paragraph title = new Paragraph("PRESCRIPTION",
-                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16, BaseColor.BLACK));
+                FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16, Color.BLACK));
         title.setAlignment(Element.ALIGN_CENTER);
         title.setSpacingBefore(12);
         title.setSpacingAfter(12);
@@ -103,7 +103,7 @@ public class PrescriptionPdfGenerator {
 
         // Footer
         Paragraph footer = new Paragraph("Please follow dosing instructions. Contact PetClinic if you have questions.",
-                FontFactory.getFont(FontFactory.HELVETICA, 9, BaseColor.GRAY));
+                FontFactory.getFont(FontFactory.HELVETICA, 9, Color.GRAY));
         footer.setSpacingBefore(20);
         footer.setAlignment(Element.ALIGN_CENTER);
         document.add(footer);
@@ -124,8 +124,8 @@ public class PrescriptionPdfGenerator {
     }
 
     private static void addHeaderCell(PdfPTable table, String text) {
-        PdfPCell cell = new PdfPCell(new Phrase(text, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, BaseColor.WHITE)));
-        cell.setBackgroundColor(BaseColor.GRAY);
+        PdfPCell cell = new PdfPCell(new Phrase(text, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 10, Color.WHITE)));
+        cell.setBackgroundColor(Color.GRAY);
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         cell.setPadding(5);
         table.addCell(cell);
