@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Cart.*;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.webjars.NotFoundException;
@@ -1614,6 +1616,188 @@ public class CartServiceClientTest {
                         error instanceof WebClientResponseException &&
                                 ((WebClientResponseException) error)
                                         .getStatusCode().value() == 500)
+                .verify();
+    }
+
+    @Test
+    void createOrderReport_successReturnsReport() throws InterruptedException {
+        OrderReportRequestDTO request = OrderReportRequestDTO.builder()
+                .reason("DAMAGED_ITEM")
+                .productIds(List.of("product-123"))
+                .description("The product arrived damaged.")
+                .build();
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(201)
+                .setBody("""
+                        {
+                          "reportId": "RPT-123",
+                          "orderId": "order-123",
+                          "customerId": "customer-123",
+                          "customerName": "Test Customer",
+                          "reason": "DAMAGED_ITEM",
+                          "affectedItems": [
+                            {
+                              "productId": "product-123",
+                              "productName": "Dog Food"
+                            }
+                          ],
+                          "description": "The product arrived damaged.",
+                          "status": "NEW",
+                          "submittedAt": "2026-10-25T10:00:00"
+                        }
+                        """));
+
+        StepVerifier.create(mockCartServiceClient.createOrderReport(
+                        "customer-123",
+                        "order-123",
+                        request
+                ))
+                .assertNext(report -> {
+                    assertEquals("RPT-123", report.getReportId());
+                    assertEquals("NEW", report.getStatus());
+                    assertEquals(1, report.getAffectedItems().size());
+                })
+                .verifyComplete();
+
+        var recordedRequest = mockWebServer.takeRequest();
+        assertEquals("POST", recordedRequest.getMethod());
+        assertEquals(
+                "/api/v1/orders/customer/customer-123/order-123/reports",
+                recordedRequest.getPath()
+        );
+        assertTrue(recordedRequest.getBody().readUtf8()
+                .contains("\"reason\":\"DAMAGED_ITEM\""));
+    }
+
+    @Test
+    void getCustomerOrderReports_successReturnsReports()
+            throws InterruptedException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody("""
+                        [
+                          {
+                            "reportId": "RPT-123",
+                            "orderId": "order-123",
+                            "customerId": "customer-123",
+                            "reason": "OTHER",
+                            "affectedItems": [],
+                            "description": "I need help with this order.",
+                            "status": "NEW",
+                            "submittedAt": "2026-10-25T10:00:00"
+                          }
+                        ]
+                        """));
+
+        StepVerifier.create(mockCartServiceClient.getCustomerOrderReports(
+                        "customer-123"
+                ))
+                .assertNext(report -> {
+                    assertEquals("RPT-123", report.getReportId());
+                    assertEquals("customer-123", report.getCustomerId());
+                })
+                .verifyComplete();
+
+        var recordedRequest = mockWebServer.takeRequest();
+        assertEquals("GET", recordedRequest.getMethod());
+        assertEquals(
+                "/api/v1/orders/customer/customer-123/reports",
+                recordedRequest.getPath()
+        );
+    }
+
+    @Test
+    void createOrderReport_conflictPreservesServiceMessage() {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(409)
+                .setBody("""
+                        {"message":"An open report already exists"}
+                        """));
+
+        StepVerifier.create(mockCartServiceClient.createOrderReport(
+                        "customer-123",
+                        "order-123",
+                        OrderReportRequestDTO.builder()
+                                .reason("OTHER")
+                                .description("I need help with this order.")
+                                .build()
+                ))
+                .expectErrorSatisfies(error -> {
+                    assertInstanceOf(GenericHttpException.class, error);
+                    GenericHttpException exception =
+                            (GenericHttpException) error;
+                    assertEquals(HttpStatus.CONFLICT,
+                            exception.getHttpStatus());
+                    assertEquals("An open report already exists",
+                            exception.getMessage());
+                })
+                .verify();
+    }
+
+    @Test
+    void getCustomerOrderReports_emptyErrorBodyUsesFallbackMessage() {
+        prepareResponse(response -> response.setResponseCode(500));
+
+        StepVerifier.create(mockCartServiceClient.getCustomerOrderReports(
+                        "customer-123"
+                ))
+                .expectErrorSatisfies(error -> {
+                    assertInstanceOf(GenericHttpException.class, error);
+                    GenericHttpException exception =
+                            (GenericHttpException) error;
+                    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR,
+                            exception.getHttpStatus());
+                    assertEquals("Order report request failed",
+                            exception.getMessage());
+                })
+                .verify();
+    }
+
+    @Test
+    void getCustomerOrderReports_missingMessageUsesFallbackMessage() {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("{}"));
+
+        StepVerifier.create(mockCartServiceClient.getCustomerOrderReports(
+                        "customer-123"
+                ))
+                .expectErrorSatisfies(error -> {
+                    assertInstanceOf(GenericHttpException.class, error);
+                    GenericHttpException exception =
+                            (GenericHttpException) error;
+                    assertEquals(HttpStatus.BAD_REQUEST,
+                            exception.getHttpStatus());
+                    assertEquals("Order report request failed",
+                            exception.getMessage());
+                })
+                .verify();
+    }
+
+    @Test
+    void getCustomerOrderReports_unknownStatusUsesBadGateway() {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(599)
+                .setBody("not-json"));
+
+        StepVerifier.create(mockCartServiceClient.getCustomerOrderReports(
+                        "customer-123"
+                ))
+                .expectErrorSatisfies(error -> {
+                    assertInstanceOf(GenericHttpException.class, error);
+                    GenericHttpException exception =
+                            (GenericHttpException) error;
+                    assertEquals(HttpStatus.BAD_GATEWAY,
+                            exception.getHttpStatus());
+                    assertEquals("Order report request failed",
+                            exception.getMessage());
+                })
                 .verify();
     }
 
