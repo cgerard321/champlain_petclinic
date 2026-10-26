@@ -543,36 +543,3 @@
     align-items: flex-start;
   }
 }
-
-
-/* --- Dark Mode --- */
-:host-context(.dark-mode) .page-header{
-  color: #e0e0e0;
-}
-
-:host-context(.dark-mode) .clear-filters-button{
-  background-color: var(--mat-sys-surface);
-}
-
-:host-context(.dark-mode) .filter-field input{
-  border-color: var(--sage-300);
-}
-
-:host-context(.dark-mode) .filter-field input:hover:not(:disabled) {
-  border-color: var(--sage-400);
-}
-
-:host-context(.dark-mode) .filter-field select {
-  border-color: var(--sage-300);
-  color: var(--text-secondary);
-}
-
-:host-context(.dark-mode) .filter-field select option {
-  background-color: #1e1e1e;
-  border-color: black;
-  color: var(--text-secondary);
-}
-
-:host-context(.dark-mode) .filter-field select:hover:not(:disabled) {
-  border-color: var(--sage-400);
-}

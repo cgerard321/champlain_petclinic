@@ -281,3 +281,74 @@
   outline: 3px solid rgb(36 75 63 / 22%);
   outline-offset: 3px;
 }
+
+/* --- Dark Mode --- */
+:host-context(.dark-mode) {
+  --cream: var(--mat-sys-surface-container-highest);
+  --white: var(--mat-sys-surface-container-highest);
+  --text-muted: #7f958a;
+  --border-strong: rgb(36 75 63 / 20%);
+  --sage-50: #121f1a;
+  --sage-300: var(--sage-400);
+  --sage-400: #3f5a4b;
+  --forest-700: #e3eeee;
+  --text-primary: #e6efe9;
+  --text-secondary: #a3b8ac;
+  --border: rgb(36 75 63 / 12%);
+}
+
+:host-context(.dark-mode) .page-header {
+  color: #e0e0e0;
+}
+
+:host-context(.dark-mode) .clear-filters-button {
+  background-color: var(--mat-sys-surface);
+}
+
+:host-context(.dark-mode) .filter-field input,
+:host-context(.dark-mode) .filter-field select {
+  border-color: var(--sage-300);
+}
+
+:host-context(.dark-mode) .filter-field input:hover:not(:disabled),
+:host-context(.dark-mode) .filter-field select:hover:not(:disabled) {
+  border-color: var(--sage-400);
+}
+
+:host-context(.dark-mode) .filter-field select {
+  color: var(--text-secondary);
+}
+
+:host-context(.dark-mode) .filter-field select option {
+  background-color: #1e1e1e;
+  border-color: black;
+  color: var(--text-secondary);
+}
+
+/* Supply-page specific */
+:host-context(.dark-mode) .supply-page {
+  background: none;
+}
+
+:host-context(.dark-mode) .state-message {
+  background: var(--mat-sys-surface);
+  border: none;
+  box-shadow: none;
+}
+
+:host-context(.dark-mode) .clear-filters-button {
+  color: #fff;
+}
+
+:host-context(.dark-mode) .add-supply-button,
+:host-context(.dark-mode) .edit-button {
+  color: #111;
+}
+
+:host-context(.dark-mode) .delete-button {
+  color: #fff;
+}
+
+:host-context(.dark-mode) .filter-field select {
+  color: #7f958a;
+}
