@@ -3,7 +3,7 @@
 <form class="bill-update-form" (submit)="submit($event)">
   <mat-dialog-content class="bill-update-content">
     <div class="bill-update-summary">
-      <p><strong i18n="@@bill.tableBill.billId">ID de la facture:</strong> {{ bill.billId }}</p>
+      <p><strong i18n="@@bill.tableBill.billId">N° de la facture:</strong> {{ bill.billId }}</p>
       <p>
         <strong i18n="@@bill.tableBill.cust">Client(e):</strong>
         {{ bill.customerFirstName }} {{ bill.customerLastName }}
@@ -14,7 +14,7 @@
       </p>
       <p>
         <strong i18n="@@bill.creationDate">Date de création:</strong>
-        {{ bill.date | date: 'dd/MM/yyyy' : '' : 'fr-CA' }}
+        {{ bill.date | date: 'mediumDate' }}
       </p>
     </div>
 
@@ -22,7 +22,7 @@
       <mat-label i18n="@@bill.vistType">Type de visite</mat-label>
       <mat-select [formField]="billForm.visitType">
         @for (type of visitTypes; track type) {
-          <mat-option [value]="type">{{ type }}</mat-option>
+          <mat-option [value]="type">{{ translateVisit(type) }}</mat-option>
         }
       </mat-select>
     </mat-form-field>
@@ -42,11 +42,11 @@
     <mat-form-field appearance="outline">
       <mat-label i18n="@@bill.tableBill.status">Statut</mat-label>
       <mat-select [formField]="billForm.billStatus">
-        <mat-option value="UNPAID" i18n="@@bill.unpaid">IMPAYÉE</mat-option>
-        <mat-option value="PAID" i18n="@@bill.paid">PAYÉE</mat-option>
+        <mat-option value="UNPAID" i18n="@@bill.statusTypes.unpaid">IMPAYÉE</mat-option>
+        <mat-option value="PAID" i18n="@@bill.statusTypes.paid">PAYÉE</mat-option>
 
         @if (bill.billStatus === 'OVERDUE') {
-          <mat-option value="OVERDUE" i18n="@@bill.overdue">EN RETARD</mat-option>
+          <mat-option value="OVERDUE" i18n="@@bill.statusTypes.overdue">EN RETARD</mat-option>
         }
       </mat-select>
     </mat-form-field>

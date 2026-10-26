@@ -23,6 +23,7 @@ import { CreateBill } from '@features/bill/components/createBill/create-bill';
 import { CustomerBillLookup } from '@features/bill/components/customer-bill-lookup/customer-bill-lookup';
 import { BillRecord, PaymentRequest } from '@features/bill/models/bill.model';
 import { BillService } from '@features/bill/services/bill-service';
+import { translateBillStatus, translateVisitType } from '@features/bill/utils/bill-translations';
 import { ConfirmDialog } from '@shared/components/confirm-dialog/confirm-dialog';
 import { Roles } from '@shared/models/roles';
 
@@ -61,6 +62,9 @@ export class Bill implements OnInit {
   private detailsRequest?: Subscription;
   private paymentDialog?: MatDialogRef<unknown>;
 
+  protected readonly translateStatus = translateBillStatus;
+  protected readonly translateVisit = translateVisitType;
+
   protected readonly bills = signal<BillRecord[]>([]);
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -81,29 +85,6 @@ export class Bill implements OnInit {
   protected readonly paying = signal(false);
   protected readonly paymentMessage = signal('');
   protected readonly paymentError = signal('');
-
-  protected readonly billStatusTranslation: Record<string, string> = {
-    PAID: $localize`:@@bill.paid:PAYÉE`,
-    UNPAID: $localize`:@@bill.unpaid:IMPAYÉE`,
-    OVERDUE: $localize`:@@bill.overdue:EN RETARD`,
-  };
-
-  protected translate(status: string): string {
-    return this.billStatusTranslation[status] ?? status;
-  }
-
-  protected readonly visitTypesTranslation: Record<string, string> = {
-    'Check-up': $localize`:@@bill.visitTypes:Examen vétérinaire`,
-    Vaccine: $localize`:@@bill.visitTypes:Vaccin`,
-    Surgery: $localize`:@@bill.visitTypes:Chirurgie`,
-    Dental: $localize`:@@bill.visitTypes:Dentaire`,
-    Emergency: $localize`:@@bill.visitTypes:Urgence`,
-    Regular: $localize`:@@bill.visitTypes:Régulier`,
-  };
-
-  protected translateVisit(type: string): string {
-    return this.visitTypesTranslation[type] ?? type;
-  }
 
   protected payment: PaymentRequest = {
     cardNumber: '',
@@ -136,12 +117,12 @@ export class Bill implements OnInit {
     this.dialog
       .open(ConfirmDialog, {
         data: {
-          title: 'Confirm Interest Exemption',
+          title: $localize`:@@bill.exemption.title:Confirmer l'exemption de l'intérêt`,
           message: exempt
-            ? 'Exempt this overdue bill from interest? Interest will become $0.00.'
-            : 'Remove interest exemption and recalculate overdue interest?',
-          confirmLabel: 'Confirm',
-          cancelLabel: 'Cancel',
+            ? $localize`:@@bill.exemption.exempt:Exempter cette facture en retard des intérêts ? Les intérêts seront ramenés à 0,00 $.`
+            : $localize`:@@bill.exemption.remove:Retirer l'exemption d'intérêts et recalculer les intérêts?`,
+          confirmLabel: $localize`:@@bill.confirm:Confirmer`,
+          cancelLabel: $localize`:@@bill.cancel:Annuler`,
         },
       })
       .afterClosed()
@@ -182,8 +163,8 @@ export class Bill implements OnInit {
 
           this.billActionSuccess.set(
             exempt
-              ? $localize`:@@bill.interestOpt.applied:Exonération des intérêts appliquée`
-              : $localize`:@@bill.interestOpt.removed:Exonération des intérêts retirée`,
+              ? $localize`:@@bill.interestOpt.applied:Exemption des intérêts appliquée`
+              : $localize`:@@bill.interestOpt.removed:Exemption des intérêts retirée`,
           );
         },
 
@@ -351,7 +332,7 @@ export class Bill implements OnInit {
     if (!trimmedId) {
       this.isDetailsLoading.set(false);
       this.detailsError.set(
-        $localize`:@@bill.detailErr.enterBillId:Veuillez saisir l'ID de la facture.`,
+        $localize`:@@bill.detailErr.enterBillId:Veuillez saisir le N° de la facture.`,
       );
       return;
     }

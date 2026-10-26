@@ -158,7 +158,7 @@
 
           <div id="bill-filter-panel" class="bill-filters">
             <label>
-              <ng-container i18n="@@bill.custId">ID du client(e)r</ng-container>
+              <ng-container i18n="@@bill.custId">N° du client(e)r</ng-container>
               <input
                 type="text"
                 [ngModel]="filters().customerId"
@@ -200,10 +200,10 @@
             <label>
               <ng-container i18n="@@bill.status"> Statut</ng-container>
               <select [ngModel]="filters().status" (ngModelChange)="updateFilter('status', $event)">
-                <option value="" i18n="@@bill.allStatus">Tout les statuts</option>
-                <option value="PAID" i18n="@@bill.paid">PAYÉE</option>
-                <option value="UNPAID" i18n="@@bill.unpaid">IMPAYÉE</option>
-                <option value="OVERDUE" i18n="@@bill.overdue">EN RETARD</option>
+                <option value="" i18n="@@bill.statusTypes.allStatus">Tout les statuts</option>
+                <option value="PAID" i18n="@@bill.statusTypes.paid">PAYÉE</option>
+                <option value="UNPAID" i18n="@@bill.statusTypes.unpaid">IMPAYÉE</option>
+                <option value="OVERDUE" i18n="@@bill.statusTypes.overdue">EN RETARD</option>
               </select>
             </label>
 
@@ -277,7 +277,7 @@
             <table class="bill-table">
               <thead>
                 <tr>
-                  <th scope="col" i18n="@@bill.tableBill.billId">ID de la facture</th>
+                  <th scope="col" i18n="@@bill.tableBill.billId">N° de la facture</th>
                   <th scope="col" i18n="@@bill.tableBill.cust">Client(e)</th>
                   <th scope="col" i18n="@@bill.tableBill.vet">Vétérinaire</th>
                   <th scope="col" i18n="@@bill.tableBill.amount">Montant</th>
@@ -324,7 +324,7 @@
                       }
                     </td>
 
-                    <td data-label="Status">{{ translate(bill.billStatus) }}</td>
+                    <td data-label="Status">{{ translateStatus(bill.billStatus) }}</td>
 
                     <td data-label="Archived">
                       <span
@@ -378,27 +378,28 @@
                           </button>
                           <!-- CPC-2135: Interest exemption is overdue-only -->
                           @if (bill.billStatus === 'OVERDUE') {
-                          <button
-                            type="button"
-                            class="bill-table-button bill-table-button--outline"
-                            [disabled]="updatingInterestId() !== null"
-                            [attr.aria-pressed]="bill.interestExempt === true"
-                            (click)="toggleInterestExemption(bill)"
-                          >
-                            @if (updatingInterestId() === bill.billId) {
-                              <ng-container i18n="@@bill.interestOpt.saving"
-                                >Enregistrement en cours...</ng-container
-                              >
-                            } @else if (bill.interestExempt) {
-                              <ng-container i18n="@@bill.interestOpt.remove"
-                                >Enlever l'exemption d'intérêts</ng-container
-                              >
-                            } @else {
-                              <ng-container i18n="@@bill.interestOpt.exempt">
-                                Exempter les intérêts</ng-container
-                              >
-                            }
-                          </button>}
+                            <button
+                              type="button"
+                              class="bill-table-button bill-table-button--outline"
+                              [disabled]="updatingInterestId() !== null"
+                              [attr.aria-pressed]="bill.interestExempt === true"
+                              (click)="toggleInterestExemption(bill)"
+                            >
+                              @if (updatingInterestId() === bill.billId) {
+                                <ng-container i18n="@@bill.interestOpt.saving"
+                                  >Enregistrement en cours...</ng-container
+                                >
+                              } @else if (bill.interestExempt) {
+                                <ng-container i18n="@@bill.interestOpt.remove"
+                                  >Enlever l'exemption d'intérêts</ng-container
+                                >
+                              } @else {
+                                <ng-container i18n="@@bill.interestOpt.exempt">
+                                  Exempter les intérêts</ng-container
+                                >
+                              }
+                            </button>
+                          }
                         }
 
                         @if (canPayBill() && bill.billStatus === 'UNPAID' && !bill.archive) {

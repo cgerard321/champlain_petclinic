@@ -12,6 +12,7 @@ import { finalize, switchMap, take } from 'rxjs';
 import { AuthState } from '@core/services/auth-state';
 import { BillRecord } from '@features/bill/models/bill.model';
 import { BillService } from '@features/bill/services/bill-service';
+import { translateBillStatus, translateVisitType } from '@features/bill/utils/bill-translations';
 import { ConfirmDialog } from '@shared/components/confirm-dialog/confirm-dialog';
 import { Roles } from '@shared/models/roles';
 
@@ -30,28 +31,9 @@ export class BillDetails {
 
   protected readonly bill = signal(inject<BillRecord>(MAT_DIALOG_DATA));
 
-  protected readonly billStatusTranslation: Record<string, string> = {
-    PAID: $localize`:@@bill.paid:PAYÉE`,
-    UNPAID: $localize`:@@bill.unpaid:IMPAYÉE`,
-    OVERDUE: $localize`:@@bill.overdue:EN RETARD`,
-  };
+  protected readonly translateStatus = translateBillStatus;
+  protected readonly translateVisit = translateVisitType;
 
-  protected readonly visitTypesTranslation: Record<string, string> = {
-    'Check-up': $localize`:@@bill.visitTypes:Examen vétérinaire`,
-    Vaccine: $localize`:@@bill.visitTypes:Vaccin`,
-    Surgery: $localize`:@@bill.visitTypes:Chirurgie`,
-    Dental: $localize`:@@bill.visitTypes:Dentaire`,
-    Emergency: $localize`:@@bill.visitTypes:Urgence`,
-    Regular: $localize`:@@bill.visitTypes:Régulier`,
-  };
-
-  protected translate(status: string): string {
-    return this.billStatusTranslation[status] ?? status;
-  }
-
-  protected translateVisit(type: string): string {
-    return this.visitTypesTranslation[type] ?? type;
-  }
   protected readonly updatingInterest = signal(false);
   protected readonly interestError = signal<string | null>(null);
   protected readonly interestSuccess = signal<string | null>(null);
@@ -73,12 +55,12 @@ export class BillDetails {
     this.dialog
       .open(ConfirmDialog, {
         data: {
-          title: 'Confirm Interest Exemption',
+          title: $localize`:@@bill.exemption.title:Confirmer l'exemption de l'intérêt`,
           message: exempt
-            ? 'Exempt this overdue bill from interest? The interest will become $0.00.'
-            : 'Remove the exemption and recalculate overdue interest?',
-          confirmLabel: 'Confirm',
-          cancelLabel: 'Cancel',
+            ? $localize`:@@bill.exemption.exempt:Exempter cette facture en retard des intérêts ? Les intérêts seront ramenés à 0,00 $.`
+            : $localize`:@@bill.exemption.remove:Retirer l'exemption d'intérêts et recalculer les intérêts?`,
+          confirmLabel: $localize`:@@bill.confirm:Confirmer`,
+          cancelLabel: $localize`:@@bill.cancel:Annuler`,
         },
       })
       .afterClosed()

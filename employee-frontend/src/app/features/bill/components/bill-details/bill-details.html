@@ -11,7 +11,7 @@
     [class.bill-status--paid]="bill().billStatus === 'PAID'"
     [class.bill-status--overdue]="bill().billStatus === 'OVERDUE'"
   >
-    {{ translate(bill().billStatus) }}
+    {{ translateStatus(bill().billStatus) }}
   </span>
 </div>
 
@@ -22,7 +22,7 @@
 
     <dl class="bill-details-grid">
       <div class="bill-details-field">
-        <dt i18n="@@bill.tableBill.billId">ID de la facture</dt>
+        <dt i18n="@@bill.tableBill.billId">N° de la facture</dt>
         <dd>{{ bill().billId }}</dd>
       </div>
 
@@ -44,7 +44,7 @@
       </div>
 
       <div class="bill-details-field">
-        <dt i18n="@@bill.tableBill.custId">ID du client(e)</dt>
+        <dt i18n="@@bill.tableBill.custId">N° du client(e)</dt>
         <dd>{{ bill().customerId }}</dd>
       </div>
 
@@ -57,18 +57,18 @@
       </div>
 
       <div class="bill-details-field">
-        <dt i18n="@@bill.tableBill.vetId">ID du vétérinaire</dt>
+        <dt i18n="@@bill.tableBill.vetId">N° du vétérinaire</dt>
         <dd>{{ bill().vetId }}</dd>
       </div>
 
       <div class="bill-details-field">
         <dt i18n="@@bill.creationDate">Date de création</dt>
-        <dd>{{ bill().date | date: 'dd/MM/yyyy' : '' : 'fr-CA' }}</dd>
+        <dd>{{ bill().date | date: 'mediumDate' }}</dd>
       </div>
 
       <div class="bill-details-field">
         <dt i18n="@@bill.tableBill.dueDate">Date d'échéance</dt>
-        <dd>{{ bill().dueDate | date: 'dd/MM/yyyy' : '' : 'fr-CA' }}</dd>
+        <dd>{{ bill().dueDate | date: 'mediumDate' }}</dd>
       </div>
     </dl>
   </section>
@@ -133,7 +133,7 @@
     <dl class="bill-details-grid">
       <div class="bill-details-field">
         <dt i18n="@@bill.detail.payStat">Statut du paiement</dt>
-        <dd>{{ translate(bill().billStatus) }}</dd>
+        <dd>{{ translateStatus(bill().billStatus) }}</dd>
       </div>
 
       <div class="bill-details-field">
@@ -164,13 +164,17 @@
               [disabled]="updatingInterest()"
               (click)="toggleInterestExemption()"
             >
-              {{
-                updatingInterest()
-                  ? 'Saving...'
-                  : bill().interestExempt
-                    ? 'Remove Exemption'
-                    : 'Exempt Interest'
-              }}
+              @if (updatingInterest()) {
+                <ng-container i18n="@@bill.interestOpt.saving"
+                  >Enregistrement en cours...</ng-container
+                >
+              } @else if (bill().interestExempt) {
+                <ng-container i18n="@@bill.interestOpt.remove"
+                  >Enlever l'exemption d'intérêts</ng-container
+                >
+              } @else {
+                <ng-container i18n="@@bill.interestOpt.exempt"> Exempter les intérêts</ng-container>
+              }
             </button>
           }
         </dd>

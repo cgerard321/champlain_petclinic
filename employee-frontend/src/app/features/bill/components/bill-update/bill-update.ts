@@ -10,6 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 
 import { BillRecord, BillUpdateRequest } from '@features/bill/models/bill.model';
 import { BillService } from '@features/bill/services/bill-service';
+import { translateVisitType } from '@features/bill/utils/bill-translations';
 
 @Component({
   selector: 'app-bill-update',
@@ -34,6 +35,8 @@ export class BillUpdate {
   protected readonly isSaving = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
+  protected readonly translateVisit = translateVisitType;
+
   protected readonly model = signal<BillUpdateRequest>({
     customerId: this.bill.customerId,
     vetId: this.bill.vetId,
@@ -56,16 +59,6 @@ export class BillUpdate {
       message: $localize`:@@bill.message.dueDateReq:La date d'échéance est requise`,
     });
   });
-
-  protected readonly billStatusTranslation: Record<string, string> = {
-    PAID: $localize`:@@bill.paid:PAYÉE`,
-    UNPAID: $localize`:@@bill.unpaid:IMPAYÉE`,
-    OVERDUE: $localize`:@@bill.overdue:EN RETARD`,
-  };
-
-  protected translate(status: string): string {
-    return this.billStatusTranslation[status] ?? status;
-  }
 
   protected submit(event: Event): void {
     event.preventDefault();

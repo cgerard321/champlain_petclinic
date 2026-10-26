@@ -767,11 +767,12 @@
       "vetName":"Veterinarian Name",
       "vistType":"Visit Type",
       "status":"Status",
-      "allStatus":"All statuses",
-
-      "paid":"PAID",
-      "unpaid":"UNPAID",
-      "overdue":"OVERDUE",
+      "statusTypes":{
+        "allStatus":"All statuses",
+        "paid":"PAID",
+        "unpaid":"UNPAID",
+        "overdue":"OVERDUE"
+      },
       "creationYear":"Creation Year",
       "creationMonth":"Creation Month",
       "creationDate":"Creation Date",
@@ -793,6 +794,7 @@
       "notPermitted":"You do not have permission to access billing records",
       "detailLoading":"Loading bill details...",
 
+      "confirm":"Confirm",
       "update":"Save Changes",
       "submit":"Submit",
       "cancel":"Cancel",
@@ -935,7 +937,25 @@
         "vaccine":"Vaccine",
         "regular":"Regular",
         "emergency":"Emergency"
+      },
 
+      "lookup":{
+        "billByCust":"Bills by Customer",
+        "select":"Select a customer to view their bills",
+        "loadCust":"Loading customers...",
+        "loadUnable":"Unable to load customers. Please try again",
+        "try":"Try Again",
+        "noCust":"No customers available",
+        "selectCust":"Select a customer",
+        "loadBill":"Loading bills...",
+        "loadBillUnable":"Unable to load bills. Please try again",
+        "custNoBills":"This customer has no bills"
+      },
+
+      "exemption":{
+        "title":"Confirm Interest Exemption",
+        "exempt":"Exempt this overdue bill from interest? Interest will become",
+        "remove":"Remove interest exemption and recalculate overdue interest?"
       }
 
 
