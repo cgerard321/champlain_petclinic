@@ -6,7 +6,7 @@ filter.addWords(...CUSTOM_BAD_WORDS);
 
 const FUZZY_BAD_WORDS = Array.from(
   new Set(filter.list.map(word => word.toLowerCase()))
-).filter(word => word.length >= 6 && /^[a-z]+$/.test(word));
+).filter(word => word.length >= 5 && /^[a-z]+$/.test(word));
 
 const normalizeCharacter = (character: string): string =>
   character
@@ -57,6 +57,28 @@ const normalizeReview = (input: string): NormalizedReview => {
   return { text, sourceRanges };
 };
 
+const hasOneExtraLetter = (word: string, candidate: string): boolean => {
+  if (word.length !== candidate.length + 1) return false;
+
+  let wordIndex = 0;
+  let candidateIndex = 0;
+  let skippedExtraLetter = false;
+
+  while (wordIndex < word.length && candidateIndex < candidate.length) {
+    if (word[wordIndex] === candidate[candidateIndex]) {
+      wordIndex++;
+      candidateIndex++;
+    } else if (skippedExtraLetter) {
+      return false;
+    } else {
+      skippedExtraLetter = true;
+      wordIndex++;
+    }
+  }
+
+  return true;
+};
+
 const isWithinEditDistance = (
   left: string,
   right: string,
@@ -97,6 +119,8 @@ const isProfaneWord = (word: string): boolean => {
   if (!/^[a-z]+$/.test(word)) return false;
 
   return FUZZY_BAD_WORDS.some(candidate => {
+    if (candidate.length === 5) return hasOneExtraLetter(word, candidate);
+
     const maxDistance = candidate.length >= 8 ? 2 : 1;
     return (
       Math.abs(word.length - candidate.length) <= maxDistance &&
