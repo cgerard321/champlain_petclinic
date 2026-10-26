@@ -8,6 +8,7 @@ import com.petclinic.cartsservice.dataaccesslayer.PromoCode;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeResponseModel;
+import com.petclinic.cartsservice.presentationlayer.BillingRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
@@ -28,21 +29,29 @@ public class EntityModelUtil {
         BeanUtils.copyProperties(cart, resp);
 
         //This prevents a crash if products is null
-        List<CartProduct> safeProducts = products == null ? List.of() : products;
+        List<CartProduct> safeProducts = products == null ? List.of() : copyCartProducts(products);
+        PromoCode appliedPromo = cart.getAppliedPromo();
+        Double promo = appliedPromo == null ? cart.getPromoPercent()
+                : (appliedPromo.isActive() && isPromoActive(appliedPromo.getExpirationDate())
+                    ? appliedPromo.getDiscount() : null);
+        resp.setPromoPercent(promo);
+        double discount = 0.0;
 
         double subtotal = 0.0;
         for (CartProduct p : safeProducts) {
             double price = p.getProductSalePrice() != null ? p.getProductSalePrice() : 0.0;
             int qty = p.getQuantityInCart() != null ? p.getQuantityInCart() : 0;
             subtotal += price * qty;
+            boolean eligible = appliedPromo == null || PromoEligibility.isEligible(appliedPromo, p);
+            double lineDiscount = eligible && promo != null && promo >= 0 && promo <= 100
+                    ? round2(price * qty * promo / 100.0) : 0.0;
+            p.setDiscountAmount(lineDiscount);
+            discount += lineDiscount;
         }
         subtotal = round2(subtotal);
 
-        Double promo = resp.getPromoPercent();
-        double discountedSubtotal = subtotal;
-        if (promo != null && promo >= 0.0 && promo <= 100.0) {
-            discountedSubtotal = round2(subtotal * (1.0 - (promo / 100.0)));
-        }
+        resp.setDiscountAmount(round2(discount));
+        double discountedSubtotal = round2(subtotal - discount);
 
         ShippingMethod shippingMethod = cart.getShippingMethod() == null
                 ? ShippingMethod.PICKUP
@@ -101,6 +110,7 @@ public class EntityModelUtil {
         if (promoCodeRequestModel.getActive() != null) {
             promoCode.setActive(promoCodeRequestModel.getActive());
         }
+        PromoEligibility.setScope(promoCode, promoCodeRequestModel);
         return promoCode;
     }
 
@@ -116,6 +126,9 @@ public class EntityModelUtil {
 
     public static PromoCodeResponseModel toPromoCodeResponseModel(PromoCode promoCode) {
         PromoCodeResponseModel responseModel = new PromoCodeResponseModel();
+        responseModel.setScope(PromoEligibility.scope(promoCode));
+        responseModel.setProductIds(promoCode.getProductIds());
+        responseModel.setProductTypes(promoCode.getProductTypes());
         responseModel.setId(promoCode.getId());
         responseModel.setName(promoCode.getName());
         responseModel.setCode(promoCode.getCode());
@@ -135,12 +148,16 @@ public class EntityModelUtil {
         return responseModel;
     }
 
-    public static Order toOrder(Cart cart, CustomerResponseModel customer) {
+    public static Order toOrder(Cart cart, CustomerResponseModel customer, BillingRequestModel billing) {
         return Order.builder()
                 .orderId(UUID.randomUUID().toString())
                 .customerId(customer.getCustomerId())
-                .customerName(customer.getFullName())
-                .customerAddress(customer.getAddress())
+                .customerName(billing.getCustomerName())
+                .address(billing.getAddress())
+                .city(billing.getCity())
+                .email(billing.getEmail())
+                .postalCode(billing.getPostalCode())
+                .province(billing.getProvince())
                 .products(copyCartProducts(cart.getProducts()))
                 .subtotal(cart.getSubtotal())
                 .promoPercent(cart.getPromoPercent())
@@ -172,17 +189,13 @@ public class EntityModelUtil {
 
     public static Cart storeCartOrder(Cart cart) {
         Cart orderCart = new Cart();
-
         BeanUtils.copyProperties(cart, orderCart);
-
         List<CartProduct> products =
                 copyCartProducts(cart.getProducts());
-
         orderCart.setProducts(products);
-
         CartResponseModel calculatedCart =
                 toCartResponseModel(orderCart, products);
-
+        orderCart.setProducts(calculatedCart.getProducts());
         orderCart.setSubtotal(calculatedCart.getSubtotal());
         orderCart.setPromoPercent(calculatedCart.getPromoPercent());
         orderCart.setTvq(calculatedCart.getTvq());
@@ -190,7 +203,6 @@ public class EntityModelUtil {
         orderCart.setTotal(calculatedCart.getTotal());
         orderCart.setShippingMethod(calculatedCart.getShippingMethod());
         orderCart.setShippingCost(calculatedCart.getShippingCost());
-
         return orderCart;
     }
 

@@ -508,41 +508,75 @@ public class CartControllerV1UnitTest {
     }
 
     // Tests for checkoutCart endpoint
+
     @Test
     @DisplayName("POST /api/gateway/carts/{cartId}/checkout - Should checkout cart successfully")
     void checkoutCart_withValidId_shouldCheckoutCart() {
         // Arrange
         String cartId = "cart-123";
+        BillingRequestDTO billing = BillingRequestDTO.builder()
+                .customerName("Test Customer")
+                .email("customer@example.com")
+                .address("123 Test Street")
+                .city("Montreal")
+                .province("Quebec")
+                .postalCode("H1A 1A1")
+                .build();
+
         CartResponseDTO checkedOutCart = buildCartResponseDTO();
-        when(cartServiceClient.checkoutCart(cartId))
+
+        when(cartServiceClient.checkoutCart(eq(cartId), any(BillingRequestDTO.class)))
                 .thenReturn(Mono.just(checkedOutCart));
 
         // Act & Assert
         webTestClient.post()
                 .uri(baseCartURL + "/" + cartId + "/checkout")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .bodyValue(billing)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(CartResponseDTO.class)
                 .isEqualTo(checkedOutCart);
 
-        verify(cartServiceClient, times(1)).checkoutCart(cartId);
+        ArgumentCaptor<BillingRequestDTO> billingCaptor =
+                ArgumentCaptor.forClass(BillingRequestDTO.class);
+        verify(cartServiceClient).checkoutCart(eq(cartId), billingCaptor.capture());
+        BillingRequestDTO capturedBilling = billingCaptor.getValue();
+        assertEquals("Test Customer", capturedBilling.getCustomerName());
+        assertEquals("customer@example.com", capturedBilling.getEmail());
+        assertEquals("123 Test Street", capturedBilling.getAddress());
+        assertEquals("Montreal", capturedBilling.getCity());
+        assertEquals("Quebec", capturedBilling.getProvince());
+        assertEquals("H1A 1A1", capturedBilling.getPostalCode());
     }
+
+
 
     @Test
     @DisplayName("POST /api/gateway/carts/{cartId}/checkout - Should return 404 when cart not found")
     void checkoutCart_withNonExistingId_shouldReturnNotFound() {
         // Arrange
         String cartId = "non-existent-cart";
-        when(cartServiceClient.checkoutCart(cartId))
+        BillingRequestDTO billing = BillingRequestDTO.builder()
+                .customerName("Test Customer")
+                .email("customer@example.com")
+                .address("123 Test Street")
+                .city("Montreal")
+                .province("Quebec")
+                .postalCode("H1A 1A1")
+                .build();
+        when(cartServiceClient.checkoutCart(eq(cartId), any(BillingRequestDTO.class)))
                 .thenReturn(Mono.empty());
 
         // Act & Assert
         webTestClient.post()
                 .uri(baseCartURL + "/" + cartId + "/checkout")
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .bodyValue(billing)
                 .exchange()
                 .expectStatus().isNotFound();
 
-        verify(cartServiceClient, times(1)).checkoutCart(cartId);
+        verify(cartServiceClient).checkoutCart(eq(cartId), any(BillingRequestDTO.class));
     }
 
     // Tests for wishlist operations
@@ -744,45 +778,45 @@ public class CartControllerV1UnitTest {
         String cartId = "cart-123";
         CartResponseDTO response = buildCartResponseDTO();
 
-        when(cartServiceClient.applyPromoToCart(eq(cartId), eq(10.0))).thenReturn(Mono.just(response));
+        when(cartServiceClient.applyPromoCodeToCart(eq(cartId), eq("SAVE10"))).thenReturn(Mono.just(response));
 
         webTestClient.put()
                 .uri(baseCartURL + "/" + cartId + "/promo")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new ApplyPromoRequestDTO(10.0))
+                .bodyValue(new ApplyPromoRequestDTO("SAVE10"))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(CartResponseDTO.class)
                 .isEqualTo(response);
 
-        verify(cartServiceClient).applyPromoToCart(eq(cartId), eq(10.0));
+        verify(cartServiceClient).applyPromoCodeToCart(eq(cartId), eq("SAVE10"));
     }
 
     @Test
     @DisplayName("PUT /api/gateway/carts/{cartId}/promo - Should return 400 when client rejects promo")
     void applyPromoToCart_withInvalidInput_shouldReturnBadRequest() {
         String cartId = "cart-123";
-        when(cartServiceClient.applyPromoToCart(eq(cartId), eq(5.0)))
-                .thenReturn(Mono.error(new InvalidInputException("promoPercent must be between 1 and 50")));
+        when(cartServiceClient.applyPromoCodeToCart(eq(cartId), eq("INVALID")))
+                .thenReturn(Mono.error(new InvalidInputException("Promo code is invalid")));
 
         webTestClient.put()
                 .uri(baseCartURL + "/" + cartId + "/promo")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new ApplyPromoRequestDTO(5.0))
+                .bodyValue(new ApplyPromoRequestDTO("INVALID"))
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody(CartResponseDTO.class)
-                .value(body -> assertEquals("promoPercent must be between 1 and 50", body.getMessage()));
+                .value(body -> assertEquals("Promo code is invalid", body.getMessage()));
 
-        verify(cartServiceClient).applyPromoToCart(eq(cartId), eq(5.0));
+        verify(cartServiceClient).applyPromoCodeToCart(eq(cartId), eq("INVALID"));
     }
 
     @Test
     @DisplayName("PUT /api/gateway/carts/{cartId}/promo - Should return 400 when promo percent missing")
     void applyPromoToCart_withMissingPercent_shouldReturnBadRequest() {
         String cartId = "cart-123";
-        when(cartServiceClient.applyPromoToCart(eq(cartId), isNull()))
-                .thenReturn(Mono.error(new InvalidInputException("promoPercent must be provided")));
+        when(cartServiceClient.applyPromoCodeToCart(eq(cartId), isNull()))
+                .thenReturn(Mono.error(new InvalidInputException("Promo code must be provided")));
 
         webTestClient.put()
                 .uri(baseCartURL + "/" + cartId + "/promo")
@@ -791,9 +825,9 @@ public class CartControllerV1UnitTest {
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody(CartResponseDTO.class)
-                .value(body -> assertEquals("promoPercent must be provided", body.getMessage()));
+                .value(body -> assertEquals("Promo code must be provided", body.getMessage()));
 
-        verify(cartServiceClient).applyPromoToCart(eq(cartId), isNull());
+        verify(cartServiceClient).applyPromoCodeToCart(eq(cartId), isNull());
     }
 
     @Test

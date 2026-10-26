@@ -17,7 +17,10 @@ import ProductBundle from './components/ProductBundle';
 import './components/Image.css';
 //import ProductSearch from './components/ProductSearch';
 import Reveal from '@/shared/components/animations/Reveal';
-import { loadRecentlyViewed } from './utils/recentlyViewed';
+import {
+  addProductToRecentlyViewed,
+  loadRecentlyViewed,
+} from './utils/recentlyViewed';
 
 const CATALOG_PAGE_SIZE = 8;
 
@@ -161,15 +164,12 @@ const ProductList = function Productlist({
   }, [totalPages]);
 
   const handleProductClick = (product: ProductModel): void => {
+    addProductToRecentlyViewed(product, user.userId);
+
     setRecentlyClickedProducts(prev => {
       const updated = prev.filter(p => p.productId !== product.productId);
       updated.unshift(product);
-      if (updated.length > 5) updated.pop();
-      localStorage.setItem(
-        `recentlyClickedProducts_${user.userId}`,
-        JSON.stringify(updated)
-      );
-      return updated;
+      return updated.slice(0, 5);
     });
   };
 
@@ -183,7 +183,7 @@ const ProductList = function Productlist({
               .filter(p => !p.isUnlisted)
               .map((p, i) => (
                 <Reveal key={p.productId} delay={i * 60 + 120}>
-                  <Product product={p} />
+                  <Product product={p} recentlyViewed />
                 </Reveal>
               ))
           ) : (
@@ -196,6 +196,9 @@ const ProductList = function Productlist({
   return (
     <div className="product-list-container">
       <div className="main-content">
+        {view === 'catalog' && recentlyClickedProducts.length > 0 && (
+          <RecentlyViewedProducts />
+        )}
         {view === 'catalog' && (
           <Reveal delay={80}>
             <div ref={catalogRef} className="products-section-container ">
@@ -219,6 +222,10 @@ const ProductList = function Productlist({
                               current => current.productId === p.productId
                             ) ?? p
                           }
+                          recentlyViewed={recentlyClickedProducts.some(
+                            recentlyViewedProduct =>
+                              recentlyViewedProduct.productId === p.productId
+                          )}
                         />
                       </div>
                     </Reveal>
@@ -314,10 +321,6 @@ const ProductList = function Productlist({
                 </div>
               </div>
             </Reveal>
-            <div>
-              <hr />
-            </div>
-            <RecentlyViewedProducts />
           </>
         )}
       </div>

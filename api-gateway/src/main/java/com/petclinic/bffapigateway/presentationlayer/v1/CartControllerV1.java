@@ -281,8 +281,8 @@ public class CartControllerV1 {
     
     @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PostMapping("/{cartId}/checkout")
-    public Mono<ResponseEntity<CartResponseDTO>> checkoutCart(@PathVariable String cartId) {
-        return mapToOkOrNotFound(cartServiceClient.checkoutCart(cartId));
+    public Mono<ResponseEntity<CartResponseDTO>> checkoutCart(@PathVariable String cartId, @RequestBody BillingRequestDTO billing) {
+        return mapToOkOrNotFound(cartServiceClient.checkoutCart(cartId, billing));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.CUST})
@@ -340,9 +340,9 @@ public class CartControllerV1 {
         @PathVariable String cartId,
         @RequestBody(required = false) ApplyPromoRequestDTO promoRequest) {
 
-    Double promoPercent = promoRequest != null ? promoRequest.getPromoPercent() : null;
+    String promoCode = promoRequest != null ? promoRequest.getPromoCode() : null;
 
-    return cartServiceClient.applyPromoToCart(cartId, promoPercent)
+    return cartServiceClient.applyPromoCodeToCart(cartId, promoCode)
         .map(ResponseEntity::ok)
         .onErrorResume(e -> mapCartErrorWithMessage(
             e,

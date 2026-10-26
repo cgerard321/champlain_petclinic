@@ -22,4 +22,8 @@ public class Rating {
     private Byte rating;
     private String review;
     private LocalDateTime createdAt;
+    private Byte qualityRating;
+    private Byte valueRating;
+    private Byte petSatisfactionRating;
+    private Byte ingredientsRating;
 }
