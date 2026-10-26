@@ -469,18 +469,42 @@ public class BillServiceImpl implements BillService{
 
     @Override
     public Mono<Void> setInterestExempt(String billId, boolean exempt) {
-        log.info("exempt called");
         return billRepository.findByBillId(billId)
-            .flatMap(bill -> {
-                bill.setInterestExempt(exempt);
-                // If setting exemption to true, also clear any existing interest
-                if (exempt) {
-                    bill.setInterest(BigDecimal.ZERO);
-                }
-                return billRepository.save(bill);
-            })
-            .then();
+                .switchIfEmpty(Mono.error(
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Bill not found"
+                        )
+                ))
+                .flatMap(bill -> {
+
+                    if (bill.getBillStatus() != BillStatus.OVERDUE) {
+                        return Mono.error(
+                                new ResponseStatusException(
+                                        HttpStatus.BAD_REQUEST,
+                                        "Interest exemption is only available for OVERDUE bills"
+                                )
+                        );
+                    }
+
+                    bill.setInterestExempt(exempt);
+
+                    BigDecimal interest =
+                            InterestCalculationUtil.calculateInterest(bill);
+
+                    bill.setInterest(interest);
+
+                    BigDecimal totalAmount =
+                            EntityDtoUtil.toBillResponseDto(bill)
+                                    .getTotalAmount();
+
+                    bill.setTotalAmount(totalAmount);
+
+                    return billRepository.save(bill);
+                })
+                .then();
     }
+
     @Override
     public Flux<Bill> archiveBill() {
         return billRepository.findAllByArchiveFalse()
