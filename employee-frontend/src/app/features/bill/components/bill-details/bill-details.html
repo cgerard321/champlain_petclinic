@@ -63,12 +63,12 @@
 
       <div class="bill-details-field">
         <dt i18n="@@bill.creationDate">Date de création</dt>
-        <dd>{{ bill().date }}</dd>
+        <dd>{{ bill().date | date: 'dd/MM/yyyy' : '' : 'fr-CA' }}</dd>
       </div>
 
       <div class="bill-details-field">
         <dt i18n="@@bill.tableBill.dueDate">Date d'échéance</dt>
-        <dd>{{ bill().dueDate }}</dd>
+        <dd>{{ bill().dueDate | date: 'dd/MM/yyyy' : '' : 'fr-CA' }}</dd>
       </div>
     </dl>
   </section>

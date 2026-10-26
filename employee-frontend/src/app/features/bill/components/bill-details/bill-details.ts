@@ -1,4 +1,4 @@
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
@@ -6,7 +6,7 @@ import { BillRecord } from '@features/bill/models/bill.model';
 
 @Component({
   selector: 'app-bill-details',
-  imports: [CurrencyPipe, MatDialogModule],
+  imports: [CurrencyPipe, MatDialogModule, DatePipe],
   templateUrl: './bill-details.html',
   styleUrl: './bill-details.css',
 })
