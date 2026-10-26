@@ -1,6 +1,6 @@
 import { Filter } from 'bad-words';
 
-const CUSTOM_BAD_WORDS = ['tabarnak', 'calice', 'crisse'];
+const CUSTOM_BAD_WORDS = ['tabarnak', 'calice', 'crisse', 'kill'];
 const filter = new Filter();
 filter.addWords(...CUSTOM_BAD_WORDS);
 
@@ -136,12 +136,44 @@ const getProfaneSourceRanges = (input: string): SourceRange[] => {
   let match: RegExpExecArray | null;
 
   while ((match = words.exec(text)) !== null) {
-    if (!isProfaneWord(match[0])) continue;
+    const tokenStart = match.index;
+    const tokenEnd = tokenStart + match[0].length;
+    const boundaries = [tokenStart];
 
-    const start = sourceRanges[match.index]?.start;
-    const lastCharacter = sourceRanges[match.index + match[0].length - 1];
-    if (start !== undefined && lastCharacter) {
-      profaneRanges.push({ start, end: lastCharacter.end });
+    for (let index = tokenStart + 1; index < tokenEnd; index++) {
+      const previousCharacter = sourceRanges[index - 1];
+      const currentCharacter = sourceRanges[index];
+      if (
+        previousCharacter &&
+        currentCharacter &&
+        previousCharacter.end < currentCharacter.start
+      ) {
+        boundaries.push(index);
+      }
+    }
+    boundaries.push(tokenEnd);
+
+
+    for (
+      let startBoundary = 0;
+      startBoundary < boundaries.length - 1;
+      startBoundary++
+    ) {
+      for (
+        let endBoundary = startBoundary + 1;
+        endBoundary < boundaries.length;
+        endBoundary++
+      ) {
+        const startIndex = boundaries[startBoundary];
+        const endIndex = boundaries[endBoundary];
+        if (!isProfaneWord(text.slice(startIndex, endIndex))) continue;
+
+        const start = sourceRanges[startIndex]?.start;
+        const lastCharacter = sourceRanges[endIndex - 1];
+        if (start !== undefined && lastCharacter) {
+          profaneRanges.push({ start, end: lastCharacter.end });
+        }
+      }
     }
   }
 
