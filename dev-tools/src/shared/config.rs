@@ -16,4 +16,9 @@ pub const PRODUCTS_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("84ab3608-e5d4-4e45-8b02
 pub const CART_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("a51e4699-3250-4cf7-ac2a-836675f62175");
 pub const INVENTORY_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("a7975ad7-f86e-49b7-898d-95da0175f4e5");
 pub const BILLING_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("d1d928c3-b8a8-4a01-8eaf-9f7dc1cf9739");
+pub const MAILER_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("5947f103-798c-40a9-921c-4b29a9b2967a");
+pub const FILES_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("dca9bb01-095e-4a93-b1a6-9e373979ab87");
+pub const PETCLINIC_FRONTEND_DEV_ROLE: Uuid = uuid::uuid!("7e6bb3c0-181f-47c4-84fe-0c3e0d7e9f98");
+pub const EMPLOYEE_FRONTEND_DEV_ROLE: Uuid = uuid::uuid!("9bb4041d-8dc7-403e-8641-c1d888684c5a");
+
 pub const DEFAULT_TAIL_AMOUNT: usize = 100;
