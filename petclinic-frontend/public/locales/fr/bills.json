@@ -1,0 +1,119 @@
+{
+  "title": "Vos factures",
+  "sidebar": {
+    "title": "Options",
+    "ariaLabel": "Options de facturation"
+  },
+  "buttons": {
+    "close": "Fermer",
+    "apply": "Appliquer",
+    "clear": "Effacer",
+    "details": "Détails",
+    "downloadPdf": "Télécharger le PDF",
+    "payBill": "Payer la facture",
+    "filterStatus": "Filtrer par statut",
+    "filterAmount": "Filtrer par montant",
+    "filterDate": "Filtrer par date",
+    "currency": "Devise:"
+  },
+  "status": "Statut:",
+  "statusType": {
+    "paid": "PAYÉE",
+    "unpaid": "IMPAYÉE",
+    "overdue": "EN RETARD"
+  },
+  "currency": {
+    "ariaLabel": "Sélectionner la devise"
+  },
+  "balance": {
+    "title": "Solde actuel"
+  },
+  "filterStatus": {
+    "title": "Filtrer par statut",
+    "options": {
+      "all": "Tous"
+    }
+  },
+  "filterAmount": {
+    "title": "Filtrer par montant",
+    "label": "Fourchette de montants",
+    "options": {
+      "none": "Aucun",
+      "custom": "Personnalisé"
+    },
+    "custom": {
+      "labelMin": "Minimum personnalisé",
+      "labelMax": "Maximum personnalisé",
+      "min": "min",
+      "max": "max"
+    }
+  },
+  "filterDate": {
+    "title": "Filtrer par date",
+    "mode": "Mode de date",
+    "month": "Mois",
+    "year": "Année",
+    "options": {
+      "any": "Toutes",
+      "dueDate": "Date d'échéance",
+      "visitDate": "Date de visite"
+    }
+  },
+  "billCard": {
+    "empty": "Aucune facture à afficher.",
+    "vet": "Vétérinaire:",
+    "totalDue": "Total dû:",
+    "date": "Date du rendez-vous:",
+    "detail": {
+      "title": "Détails de la facture",
+      "id": "Numéro de facture:",
+      "customer": "Client:",
+      "visit": "Type de visite:",
+      "amount": "Montant:",
+      "gst": "TPS (5 %):",
+      "qst": "TVQ (9,975 %):",
+      "tax": "Taxes totales:",
+      "interest": "Intérêts:",
+      "dueDate": "Date d'échéance:",
+      "time": "Temps restant:",
+      "timeStatus": {
+        "paid": "Cette facture est payée",
+        "zero": "0 jour restant pour payer la facture",
+        "unpaid": "{{count}} jours restants pour payer la facture"
+      }
+    }
+  },
+  "visitTypes": {
+    "regular": "Régulière",
+    "vaccine": "Vaccination",
+    "emergency": "Urgence",
+    "checkup": "Examen de contrôle",
+    "dental": "Dentaire",
+    "surgery": "Chirurgie"
+  },
+  "paymentForm": {
+    "cancel": "Annuler",
+    "processing": "Traitement en cours...",
+    "cardNumber": "Numéro de carte",
+    "expirationDate": "Date d'expiration",
+    "cvv": "CVV",
+    "amounts": {
+      "baseAmount": "Montant de base",
+      "totalAmount": "Montant total"
+    }
+  },
+  "errors": {
+    "fetchBalance": "Échec de la récupération du solde actuel",
+    "fetchBills": "Échec de la récupération des factures",
+    "invalidAmountRange": "Le minimum et le maximum doivent être des nombres",
+    "invalidAmountOption": "Option de montant invalide",
+    "cardNumberRequired": "Le numéro de carte est obligatoire",
+    "cardNumberLength": "Le numéro de carte doit contenir 16 chiffres",
+    "cvvRequired": "Le CVV est obligatoire",
+    "cvvLength": "Le CVV doit contenir 3 chiffres",
+    "expirationDateRequired": "La date d'expiration est obligatoire",
+    "expirationDateFormat": "Format invalide. Utilisez MM/AA",
+    "cardExpired": "La carte est expirée",
+    "paymentFailed": "Le paiement a échoué. Veuillez réessayer."
+  }
+}
