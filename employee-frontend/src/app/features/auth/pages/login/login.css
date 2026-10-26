@@ -14,7 +14,7 @@
   --text-secondary: #66766d;
   --text-muted: #7d8982;
   --border: rgb(36 75 63 / 14%);
-  --border-strong: rgba(10, 24, 20, 0.22);
+  --border-strong: rgb(10, 24, 20 / 22%);
   --error: #9b1c31;
   --shadow-sm: 0 2px 6px rgb(28 61 51 / 6%), 0 1px 2px rgb(28 61 51 / 5%);
   --shadow-md: 0 10px 25px rgb(28 61 51 / 10%), 0 3px 8px rgb(28 61 51 / 6%);
