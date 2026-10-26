@@ -5,6 +5,9 @@ export interface Promo {
   discount: number;
   expirationDate: string;
   active: boolean;
+  scope?: 'CART' | 'PRODUCT' | 'PRODUCT_TYPE';
+  productIds?: string[];
+  productTypes?: string[];
 }
 
 export interface PromoRequest {
@@ -13,4 +16,7 @@ export interface PromoRequest {
   discount: number;
   expirationDate: string;
   active: boolean;
+  scope?: 'CART' | 'PRODUCT' | 'PRODUCT_TYPE';
+  productIds?: string[];
+  productTypes?: string[];
 }

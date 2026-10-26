@@ -3,14 +3,21 @@ import { useState, useEffect, useMemo } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import StarRating from './StarRating.tsx';
 import ReviewBox from './ReviewBox.tsx';
-import { RatingModel } from '../models/ProductModels/RatingModel';
+import {
+  RatingCategories,
+  RatingModel,
+} from '../models/ProductModels/RatingModel';
 import './EditReviewModal.css';
 
 interface EditReviewModalProps {
   show: boolean;
   onClose: () => void;
   currentUserRating: RatingModel;
-  updateRating: (rating: number, review: string | null) => void;
+  updateRating: (
+    rating: number,
+    review: string | null,
+    categoryRatings: RatingCategories
+  ) => Promise<void>;
 }
 
 const EditReviewModal = ({
@@ -27,13 +34,35 @@ const EditReviewModal = ({
   const [localRating, setLocalRating] = useState<number>(
     currentUserRating.rating
   );
+  const [categoryRatings, setCategoryRatings] = useState<RatingCategories>({
+    qualityRating: currentUserRating.qualityRating ?? 0,
+    valueRating: currentUserRating.valueRating ?? 0,
+    petSatisfactionRating: currentUserRating.petSatisfactionRating ?? 0,
+    ingredientsRating: currentUserRating.ingredientsRating ?? 0,
+  });
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
     setReviewText(currentUserRating.review);
     setLocalRating(currentUserRating.rating);
     setError('');
+    setCategoryRatings({
+      qualityRating: currentUserRating.qualityRating ?? 0,
+      valueRating: currentUserRating.valueRating ?? 0,
+      petSatisfactionRating: currentUserRating.petSatisfactionRating ?? 0,
+      ingredientsRating: currentUserRating.ingredientsRating ?? 0,
+    });
   }, [currentUserRating, show]);
+
+  const updateCategoryRating = (
+    category: keyof RatingCategories,
+    rating: number
+  ): void => {
+    setCategoryRatings(current => ({
+      ...current,
+      [category]: rating,
+    }));
+  };
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleSubmit = async () => {
@@ -51,7 +80,7 @@ const EditReviewModal = ({
     }
 
     try {
-      await updateRating(localRating, reviewText);
+      await updateRating(localRating, reviewText, categoryRatings);
       setError('');
       onClose();
     } catch (err) {
@@ -102,11 +131,64 @@ const EditReviewModal = ({
 
         {/* Rating Section */}
         <div className="erm-section">
-          <label className="erm-label">{t('yourRating')}</label>
+          <label className="erm-label">
+            {t('yourRating')} ({t('required')}) *
+          </label>
           <StarRating
             currentRating={localRating}
             viewOnly={false}
             updateRating={newRating => setLocalRating(newRating)}
+          />
+        </div>
+
+        {/* Rating Categories Section */}
+        <div className="erm-section">
+          <label className="erm-label">
+            {t('qualityOfProduct')} ({t('optional')})
+          </label>
+          <StarRating
+            currentRating={categoryRatings.qualityRating}
+            viewOnly={false}
+            updateRating={rating =>
+              updateCategoryRating('qualityRating', rating)
+            }
+          />
+        </div>
+
+        <div className="erm-section">
+          <label className="erm-label">
+            {t('valueOfProduct')} ({t('optional')})
+          </label>
+          <StarRating
+            currentRating={categoryRatings.valueRating}
+            viewOnly={false}
+            updateRating={rating => updateCategoryRating('valueRating', rating)}
+          />
+        </div>
+
+        <div className="erm-section">
+          <label className="erm-label">
+            {t('petSatisfaction')} ({t('optional')})
+          </label>
+          <StarRating
+            currentRating={categoryRatings.petSatisfactionRating}
+            viewOnly={false}
+            updateRating={rating =>
+              updateCategoryRating('petSatisfactionRating', rating)
+            }
+          />
+        </div>
+
+        <div className="erm-section">
+          <label className="erm-label">
+            {t('ingredients')} ({t('optional')})
+          </label>
+          <StarRating
+            currentRating={categoryRatings.ingredientsRating}
+            viewOnly={false}
+            updateRating={rating =>
+              updateCategoryRating('ingredientsRating', rating)
+            }
           />
         </div>
 
