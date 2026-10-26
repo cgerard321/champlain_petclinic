@@ -184,7 +184,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .username("Vet1")
                 .userIdentifier(new UserIdentifier("69f852ca-625b-11ee-8c99-0242ac120002"))
                 .roles(roles2)
-                .email("ionascueric0@gmail.com")
+                .email("carterjames@email.com")
                 .password(passwordEncoder.encode("pwd"))
                 .verified(true)
                 .build();
