@@ -385,6 +385,31 @@ public class CustomersControllerV1UnitTests {
     }
 
     @Test
+    void whenGetCustomerById_withIncludePhotoTrue_thenReturnCustomerWithPhoto() {
+        CustomerResponseDTO customer = new CustomerResponseDTO();
+        customer.setCustomerId(customerId);
+        FileDetails photo = new FileDetails();
+        photo.setFileData("mockPhotoData".getBytes());
+        photo.setFileType("image/png");
+        customer.setPhoto(photo);
+
+        when(customersServiceClient.getCustomer(customerId, true))
+                .thenReturn(Mono.just(customer));
+
+        client.get()
+                .uri("/api/gateway/customers/{customerId}?includePhoto=true", customerId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CustomerResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto.getPhoto());
+                    assertEquals("image/png", dto.getPhoto().getFileType());
+                });
+
+        verify(customersServiceClient, times(1)).getCustomer(customerId, true);
+    }
+
+    @Test
     void whenUpdateCustomer_withNonExistentCustomer_thenReturnNotFound() {
         CustomerRequestDTO requestDTO = new CustomerRequestDTO();
         requestDTO.setFirstName("John");
@@ -535,16 +560,6 @@ public class CustomersControllerV1UnitTests {
         verify(customersServiceClient, times(1)).deleteCustomerPhoto(customerId);
     }
 
-    @Test
-    void whenDeleteCustomerPhoto_withNonExistentCustomer_thenReturnNotFound() {
-        when(customersServiceClient.deleteCustomerPhoto(customerId)).thenReturn(Mono.empty());
-
-        client.delete()
-                .uri("/api/gateway/customers/{customerId}/photo", customerId)
-                .exchange()
-                .expectStatus().isNotFound();
-        verify(customersServiceClient, times(1)).deleteCustomerPhoto(customerId);
-    }
 
     @Test
     void whenDeletePetPhoto_withValidPet_thenReturnOk() {
@@ -636,6 +651,16 @@ public class CustomersControllerV1UnitTests {
                 .expectStatus().isBadRequest();
 
         verify(customersServiceClient, times(1)).createPetForCustomer(customerId, petRequest);
+    }
+    @Test
+    void whenDeleteCustomerPhoto_andServiceReturnsNoContent_thenReturnNoContent() {
+        when(customersServiceClient.deleteCustomerPhoto(customerId)).thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/gateway/customers/{customerId}/photo", customerId)
+                .exchange()
+                .expectStatus().isNoContent();
+        verify(customersServiceClient, times(1)).deleteCustomerPhoto(customerId);
     }
 
     @Test

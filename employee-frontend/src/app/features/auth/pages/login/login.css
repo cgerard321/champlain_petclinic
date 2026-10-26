@@ -33,3 +33,7 @@
 .error-message {
   color: var(--mat-sys-error, #b00020);
 }
+
+:host-context(.dark-mode) .login-page {
+  background: var(--mat-sys-surface);
+}

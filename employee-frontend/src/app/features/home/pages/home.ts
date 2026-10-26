@@ -27,7 +27,9 @@ export class Home {
     this.http.get<CurrentUserResponse>('/api/gateway/users/jwt').pipe(
       catchError((error) => {
         console.error('Failed to fetch current user credentials:', error);
-        this.errorMessage.set('Failed to load user information. Please try again later.');
+        this.errorMessage.set(
+          $localize`:@@home.loadError:Impossible de charger les informations de l'utilisateur. Veuillez réessayer plus tard.`,
+        );
         return of(null);
       }),
     ),

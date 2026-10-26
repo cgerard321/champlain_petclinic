@@ -1,8 +1,12 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
+import { useEffect, useMemo, useState } from 'react';
+import { Button, Modal } from 'react-bootstrap';
 import StarRating from './StarRating';
 import ReviewBox from './ReviewBox';
-import { RatingModel } from '../models/ProductModels/RatingModel';
+import {
+  RatingCategories,
+  RatingModel,
+} from '../models/ProductModels/RatingModel';
 
 import './WriteReviewModal.css';
 
@@ -10,7 +14,11 @@ interface WriteReviewModalProps {
   show: boolean;
   onClose: () => void;
   currentUserRating: RatingModel;
-  updateRating: (rating: number, review: string | null) => void;
+  updateRating: (
+    rating: number,
+    review: string | null,
+    categoryRatings: RatingCategories
+  ) => Promise<void>;
 }
 
 const WriteReviewModal = ({
@@ -20,37 +28,64 @@ const WriteReviewModal = ({
   updateRating,
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 }: WriteReviewModalProps) => {
+  const { t } = useTranslation('products');
   const [reviewText, setReviewText] = useState<string>(
     currentUserRating.review
   );
   const [localRating, setLocalRating] = useState<number>(
     currentUserRating.rating
   );
+  const [categoryRatings, setCategoryRatings] = useState<RatingCategories>({
+    qualityRating: currentUserRating.qualityRating ?? 0,
+    valueRating: currentUserRating.valueRating ?? 0,
+    petSatisfactionRating: currentUserRating.petSatisfactionRating ?? 0,
+    ingredientsRating: currentUserRating.ingredientsRating ?? 0,
+  });
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
     setReviewText(currentUserRating.review);
     setLocalRating(currentUserRating.rating);
     setError('');
+    setCategoryRatings({
+      qualityRating: currentUserRating.qualityRating ?? 0,
+      valueRating: currentUserRating.valueRating ?? 0,
+      petSatisfactionRating: currentUserRating.petSatisfactionRating ?? 0,
+      ingredientsRating: currentUserRating.ingredientsRating ?? 0,
+    });
   }, [currentUserRating, show]);
+
+  const updateCategoryRating = (
+    category: keyof RatingCategories,
+    rating: number
+  ): void => {
+    setCategoryRatings(current => ({
+      ...current,
+      [category]: rating,
+    }));
+  };
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleSubmit = async () => {
     if (localRating === 0) {
-      setError('Please select a rating before submitting.');
+      setError('ratingRequired');
       return;
     }
     if (!reviewText.trim()) {
-      setError('Please write a review before submitting.');
+      setError('reviewRequired');
+      return;
+    }
+    if (reviewText.length > 10000) {
+      setError('reviewTooLong');
       return;
     }
 
     try {
-      await updateRating(localRating, reviewText);
+      await updateRating(localRating, reviewText, categoryRatings);
       setError('');
       onClose();
     } catch (err) {
-      setError('Failed to submit review. Please try again.');
+      setError('submitFailed');
       console.error('Failed to submit review:', err);
     }
   };
@@ -64,7 +99,7 @@ const WriteReviewModal = ({
     <Modal
       show={show}
       onHide={onClose}
-      centered
+      fullscreen
       dialogClassName="wrm-modal-dialog"
     >
       <div className="wrm-close-container">
@@ -74,16 +109,16 @@ const WriteReviewModal = ({
       </div>
 
       <Modal.Body className="wrm-body">
-        <p className="wrm-title">Write a Review</p>
-        <p className="wrm-subtitle">
-          Share your experience to help other users make better decisions.
-        </p>
+        <p className="wrm-title">{t('writeReview')}</p>
+        <p className="wrm-subtitle">{t('shareExperience')}</p>
 
-        {error && <div className="wrm-error">{error}</div>}
+        {error && <div className="wrm-error">{t(error)}</div>}
 
         {/* Rating Section */}
         <div className="wrm-section">
-          <label className="wrm-label">Your Rating *</label>
+          <label className="wrm-label">
+            {t('yourRating')} ({t('required')}) *
+          </label>
           <StarRating
             currentRating={localRating}
             viewOnly={false}
@@ -91,18 +126,69 @@ const WriteReviewModal = ({
           />
         </div>
 
+        {/* Rating Categories Section */}
+        <div className="wrm-section">
+          <label className="wrm-label">
+            {t('qualityOfProduct')} ({t('optional')})
+          </label>
+          <StarRating
+            currentRating={categoryRatings.qualityRating}
+            viewOnly={false}
+            updateRating={rating =>
+              updateCategoryRating('qualityRating', rating)
+            }
+          />
+        </div>
+
+        <div className="wrm-section">
+          <label className="wrm-label">
+            {t('valueOfProduct')} ({t('optional')})
+          </label>
+          <StarRating
+            currentRating={categoryRatings.valueRating}
+            viewOnly={false}
+            updateRating={rating => updateCategoryRating('valueRating', rating)}
+          />
+        </div>
+
+        <div className="wrm-section">
+          <label className="wrm-label">
+            {t('petSatisfaction')} ({t('optional')})
+          </label>
+          <StarRating
+            currentRating={categoryRatings.petSatisfactionRating}
+            viewOnly={false}
+            updateRating={rating =>
+              updateCategoryRating('petSatisfactionRating', rating)
+            }
+          />
+        </div>
+
+        <div className="wrm-section">
+          <label className="wrm-label">
+            {t('ingredients')} ({t('optional')})
+          </label>
+          <StarRating
+            currentRating={categoryRatings.ingredientsRating}
+            viewOnly={false}
+            updateRating={rating =>
+              updateCategoryRating('ingredientsRating', rating)
+            }
+          />
+        </div>
+
         {/* Review Section */}
         <div className="wrm-section">
-          <label className="wrm-label">Your Review *</label>
+          <label className="wrm-label">{t('yourReview')}</label>
           <ReviewBox updateFunc={setReviewText} rating={memoizedRating} />
         </div>
 
         {/* Buttons */}
         <div className="wrm-button-container">
           <Button className="cancel-btn" onClick={onClose}>
-            Cancel
+            {t('cancel')}
           </Button>
-          <Button onClick={handleSubmit}>Submit Review</Button>
+          <Button onClick={handleSubmit}>{t('submitReview')}</Button>
         </div>
       </Modal.Body>
     </Modal>

@@ -322,10 +322,12 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .bodyToMono(CartResponseDTO.class);
     }
 
-    public Mono<CartResponseDTO> checkoutCart(final String cartId) {
+    public Mono<CartResponseDTO> checkoutCart(final String cartId, BillingRequestDTO billing) {
         return webClientBuilder.build()
                 .post()
                 .uri(cartServiceUrl + "/" + cartId + "/checkout")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(billing)
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class);
     }
@@ -415,19 +417,44 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<CartProductResponseDTO>>() {});
     }
-    public Mono<CartResponseDTO> applyPromoToCart(String cartId, Double promoPercent) {
-        if (promoPercent == null) {
-            return Mono.error(new InvalidInputException("promoPercent must be provided"));
+    public Mono<CartResponseDTO> applyPromoCodeToCart(String cartId, String promoCode) {
+        if (promoCode == null || promoCode.isBlank()) {
+            return Mono.error(new InvalidInputException("Promo code must be provided"));
         }
+        return webClientBuilder.build().put()
+                .uri(cartServiceUrl + "/{cartId}/promo", cartId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(Map.of("promoCode", promoCode.trim()))
+                .retrieve()
+                .onStatus(status -> status.value() == 400 || status.value() == 422,
+                        response -> response.bodyToMono(CartResponseDTO.class)
+                                .map(body -> new InvalidInputException(body.getMessage() == null
+                                        ? "Promo code cannot be applied" : body.getMessage()))
+                                .defaultIfEmpty(new InvalidInputException("Promo code cannot be applied")))
+                .bodyToMono(CartResponseDTO.class);
+    }
 
-        ApplyPromoRequestDTO payload = new ApplyPromoRequestDTO(promoPercent);
+    public Mono<CartResponseDTO> updateShippingMethod(String cartId, String shippingMethod) {
+        CartShippingRequestDTO payload = new CartShippingRequestDTO(shippingMethod);
 
         return webClientBuilder.build()
                 .put()
-                .uri(cartServiceUrl + "/{cartId}/promo", cartId)
+                .uri(cartServiceUrl + "/{cartId}/shipping", cartId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(payload)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                    HttpStatusCode statusCode = error.statusCode();
+                    if (statusCode.equals(HttpStatus.NOT_FOUND)) {
+                        return Mono.error(new NotFoundException("Cart not found for cartId: " + cartId));
+                    }
+                    if (statusCode.equals(HttpStatus.BAD_REQUEST) || statusCode.equals(HttpStatus.UNPROCESSABLE_ENTITY)) {
+                        return error.bodyToMono(CartResponseDTO.class)
+                                .flatMap(body -> Mono.error(new InvalidInputException(body.getMessage())));
+                    }
+                    return Mono.error(new IllegalArgumentException("Client error"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Server error")))
                 .bodyToMono(CartResponseDTO.class);
     }
 
@@ -440,4 +467,21 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .then();
     }
 
+    public Flux<OrderResponseDTO> getOrdersByCustomerId(String customerId) {
+
+            String ordersServiceUrl = cartServiceUrl.replace(
+                    "/api/v1/carts",
+                    "/api/v1/orders"
+            );
+
+            return webClientBuilder.build()
+                    .get()
+                    .uri(
+                            ordersServiceUrl + "/customer/{customerId}",
+                            customerId
+                    )
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .bodyToFlux(OrderResponseDTO.class);
+        }
 }

@@ -1,0 +1,23 @@
+{
+  "followUp": {
+    "label": "Follow-up",
+    "confirm": "Confirm",
+    "reschedule": "Reschedule",
+    "rescheduleTitle": "Reschedule Follow-up Visit",
+    "confirmReschedule": "Confirm New Time",
+    "noSlots": "No available times for this date.",
+    "confirmed": "Your follow-up visit is confirmed.",
+    "rescheduled": "Your follow-up visit has been rescheduled.",
+    "error": "This visit could not be updated. Please try again.",
+    "tooLate": "This follow-up visit can no longer be confirmed or rescheduled because it starts in less than 24 hours.",
+    "confirmedNote": "You confirmed this follow-up visit. See you then!",
+    "pet": "Pet",
+    "veterinarian": "Veterinarian",
+    "date": "Date",
+    "time": "Available time",
+    "loadingSlots": "Loading times...",
+    "slotsError": "Unable to load the available times.",
+    "dateRequired": "Date is required",
+    "timeRequired": "Time is required"
+  }
+}

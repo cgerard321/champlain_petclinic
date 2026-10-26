@@ -17,8 +17,8 @@ public class Bill {
     private String id;
     private String billId;
     private String customerId;
-    private String ownerFirstName;
-    private String ownerLastName;
+    private String customerFirstName;
+    private String customerLastName;
     private String visitType;
     private String vetId;
     private String vetFirstName;

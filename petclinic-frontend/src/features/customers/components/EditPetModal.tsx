@@ -1,10 +1,8 @@
 import * as React from 'react';
 import { FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getPet } from '../api/getPet';
 import { updatePet } from '../api/updatePet';
 import { deletePet } from '../api/deletePet';
-import { getPetTypes } from '../api/getPetTypes';
 import { deletePetPhoto } from '../api/deletePetPhoto';
 import { addPetPhoto } from '../api/addPetPhoto';
 import { PetResponseModel } from '../models/PetResponseModel';
@@ -12,7 +10,6 @@ import { PetRequestModel } from '../models/PetRequestModel';
 import { PetTypeModel } from '../models/PetTypeModel';
 import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
-import axiosInstance from '@/shared/api/axiosInstance';
 import {
   MAX_PET_AGE,
   MAX_PET_NAME_LENGTH,
@@ -25,6 +22,9 @@ interface EditPetModalProps {
   onClose: () => void;
   petId: string;
   customerId: string;
+  pet: PetResponseModel | null;
+  petTypes: PetTypeModel[];
+  petPhotoUrl?: string;
   onPetUpdated?: (updatedPet?: PetResponseModel) => void;
   onPetDeleted?: () => void;
 }
@@ -34,13 +34,15 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
   onClose,
   petId,
   customerId,
+  pet: initialPet,
+  petTypes,
+  petPhotoUrl: initialPetPhotoUrl,
   onPetUpdated,
   onPetDeleted,
 }): JSX.Element => {
   const [pet, setPet] = useState<PetResponseModel | null>(null);
   const [dateInputValue, setDateInputValue] = useState<string>('');
   const [isDateInputFocused, setIsDateInputFocused] = useState<boolean>(false);
-  const [petTypes, setPetTypes] = useState<PetTypeModel[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [notFound, setNotFound] = useState<boolean>(false);
@@ -49,47 +51,6 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
   const [petPhotoUrl, setPetPhotoUrl] = useState<string>('');
   const { confirm, ConfirmModal } = useConfirmModal();
   const { t } = useTranslation('customers');
-
-  const fetchPetPhotoUrl = async (
-    petId: string,
-    petName: string
-  ): Promise<string> => {
-    try {
-      const response = await axiosInstance.get(`/pets/${petId}`, {
-        useV2: false,
-        params: { includePhoto: true },
-      });
-      const petData = response.data;
-
-      if (
-        petData.photo &&
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (petData.photo.data || (petData.photo as any).fileData)
-      ) {
-        const base64Data =
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          petData.photo.data || (petData.photo as any).fileData;
-        const contentType =
-          petData.photo.contentType ||
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (petData.photo as any).fileType ||
-          'image/png';
-        const byteCharacters = atob(base64Data);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: contentType });
-        return URL.createObjectURL(blob);
-      } else {
-        return defaultProfile;
-      }
-    } catch (error) {
-      console.error(`Error fetching photo for ${petName} (${petId}):`, error);
-      return defaultProfile;
-    }
-  };
 
   const handleDeletePetPhoto = async (): Promise<void> => {
     if (!pet) return;
@@ -131,51 +92,35 @@ const EditPetModal: React.FC<EditPetModalProps> = ({
   };
 
   useEffect(() => {
-    const fetchPetData = async (): Promise<void> => {
-      if (petId && isOpen) {
-        setSuccessMessage('');
-        setErrors({});
-        try {
-          const response = await getPet(petId, customerId);
-          const petData: PetResponseModel = response.data;
-          setPet({
-            ...petData,
-            birthDate: new Date(petData.birthDate),
-          });
-          setDateInputValue(
-            petData.birthDate
-              ? new Date(petData.birthDate).toISOString().split('T')[0]
-              : ''
-          );
+    if (!isOpen) return;
 
-          const photoUrl = await fetchPetPhotoUrl(petId, petData.name);
-          setPetPhotoUrl(photoUrl);
-        } catch (err) {
-          const error = err as { response?: { status: number } };
-          if (error.response && error.response.status === 404) {
-            setNotFound(true);
-          } else {
-            console.error('Error fetching pet data:', error);
-          }
-        }
-      }
-    };
+    setSuccessMessage('');
+    setErrors({});
+    setNotFound(false);
 
-    const fetchPetTypes = async (): Promise<void> => {
-      try {
-        const petTypesData = await getPetTypes();
-        setPetTypes(petTypesData);
-      } catch (error) {
-        console.error('Error fetching pet types:', error);
-        setPetTypes([]);
-      }
-    };
-
-    if (isOpen) {
-      fetchPetData();
-      fetchPetTypes();
+    if (!initialPet) {
+      setPet(null);
+      setPetPhotoUrl('');
+      return;
     }
-  }, [petId, customerId, isOpen]);
+
+    const normalizedPet: PetResponseModel = {
+      ...initialPet,
+      birthDate: initialPet.birthDate
+        ? new Date(initialPet.birthDate)
+        : new Date(),
+    };
+
+    setPet(normalizedPet);
+
+    setDateInputValue(
+      normalizedPet.birthDate
+        ? normalizedPet.birthDate.toISOString().split('T')[0]
+        : ''
+    );
+
+    setPetPhotoUrl(initialPetPhotoUrl || defaultProfile);
+  }, [isOpen, initialPet, initialPetPhotoUrl]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>

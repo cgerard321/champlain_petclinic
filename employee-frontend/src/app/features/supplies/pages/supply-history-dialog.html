@@ -1,0 +1,32 @@
+<h2 mat-dialog-title i18n="@@supply.history.title">Historique : {{ data.supplyName }}</h2>
+
+<mat-dialog-content>
+  @if (loading()) {
+    <p role="status" i18n="@@supply.history.loading">Chargement de l'historique…</p>
+  } @else if (error()) {
+    <p role="alert" i18n="@@supply.history.error">
+      Impossible de charger l'historique de l'article.
+    </p>
+  } @else if (entries().length === 0) {
+    <p i18n="@@supply.history.empty">Aucun historique disponible pour cet article.</p>
+  } @else {
+    <ol class="history-list">
+      @for (entry of entries(); track entry.id) {
+        <li>
+          <strong>{{ actionLabel(entry.action) }}</strong>
+          <span>
+            {{ entry.previousQuantity }} → {{ entry.newQuantity }} ({{
+              entry.quantityChange > 0 ? '+' : ''
+            }}{{ entry.quantityChange }})
+          </span>
+          <span>{{ entry.changedAt | date: 'medium' }}</span>
+          <span i18n="@@supply.history.by">Par {{ entry.changedBy }}</span>
+        </li>
+      }
+    </ol>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button type="button" (click)="close()" i18n="@@supply.history.close">Fermer</button>
+</mat-dialog-actions>

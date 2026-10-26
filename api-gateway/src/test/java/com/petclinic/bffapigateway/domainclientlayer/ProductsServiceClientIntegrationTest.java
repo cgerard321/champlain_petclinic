@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -38,7 +39,7 @@ class ProductsServiceClientIntegrationTest {
     @MockBean
     private ProductsServiceClient productsServiceClient;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     private static MockWebServer mockWebServer;
 
@@ -299,6 +300,7 @@ class ProductsServiceClientIntegrationTest {
                 false,
                 "586d0700-57db-4312-b6f1-413b79dd018c",
                 null,
+                LocalDate.of(2026,10,5),
                 ProductStatus.AVAILABLE,
                 DeliveryType.DELIVERY
         );
@@ -330,6 +332,7 @@ class ProductsServiceClientIntegrationTest {
                 false,
                 "586d0700-57db-4312-b6f1-413b79dd018c",
                 null,
+                LocalDate.of(2026,10,5),
                 ProductStatus.AVAILABLE,
                 DeliveryType.PICKUP
         );
@@ -343,7 +346,8 @@ class ProductsServiceClientIntegrationTest {
                 .updateProduct(productResponseDTO.getProductId(), new ProductRequestDTO());
 
         StepVerifier.create(productResponseDTOMono)
-                .expectNextMatches(product -> product.getProductId().equals("productId"))
+                .expectNextMatches(product -> product.getProductId().equals("productId")
+                        && LocalDate.of(2026, 10, 5).equals(product.getReleaseDate()))
                 .verifyComplete();
     }
 
@@ -361,6 +365,7 @@ class ProductsServiceClientIntegrationTest {
                 true,
                 "586d0700-57db-4312-b6f1-413b79dd018c",
                 null,
+                LocalDate.of(2026,10,5),
                 ProductStatus.AVAILABLE,
                 DeliveryType.DELIVERY_AND_PICKUP
         );
@@ -496,6 +501,41 @@ class ProductsServiceClientIntegrationTest {
 
         StepVerifier.create(resultMono)
                 .verifyComplete();
+    }
+
+    @Test
+    void whenDeleteProduct_thenSendCascadeBundlesParameter() throws InterruptedException {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) { }
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("{}")
+                .addHeader("Content-Type", "application/json"));
+
+        StepVerifier.create(productsServiceClient.deleteProduct("productId", false))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        assertEquals("/products/productId?cascadeBundles=false", mockWebServer.takeRequest().getPath());
+    }
+
+    @Test
+    void whenDeleteProductReturnsNotFound_thenMapToNotFoundException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(404));
+
+        StepVerifier.create(productsServiceClient.deleteProduct("productId", false))
+                .expectErrorMatches(error -> error instanceof GenericHttpException
+                        && ((GenericHttpException) error).getHttpStatus() == HttpStatus.NOT_FOUND)
+                .verify();
+    }
+
+    @Test
+    void whenDeleteProductReturnsConflict_thenMapToConflictException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(409));
+
+        StepVerifier.create(productsServiceClient.deleteProduct("productId", false))
+                .expectErrorMatches(error -> error instanceof GenericHttpException
+                        && ((GenericHttpException) error).getHttpStatus() == HttpStatus.CONFLICT)
+                .verify();
     }
 
 
@@ -822,4 +862,37 @@ class ProductsServiceClientIntegrationTest {
                 .verify();
     }
 
+
+    @Test
+    void catalogPreservesBothLanguagesInResponse() {
+        mockWebServer.enqueue(new MockResponse().setHeader("Content-Type", "text/event-stream")
+                .setBody("data:{\"productId\":\"sample\",\"productName\":\"Cat Litter\","
+                        + "\"productDescription\":\"Clumping litter\",\"productNameFr\":\"Litière\","
+                        + "\"productDescriptionFr\":\"Contrôle des odeurs\"}\n\n"));
+        StepVerifier.create(productsServiceClient.getAllProducts(null, null, null, null, null, null, null))
+                .assertNext(product -> {
+                    assertEquals("Cat Litter", product.getProductName());
+                    assertEquals("Litière", product.getProductNameFr());
+                    assertEquals("Contrôle des odeurs", product.getProductDescriptionFr());
+                }).verifyComplete();
+    }
+
+
+    @Test
+    void updateForwardsFrenchFieldsWithoutReplacingEnglish() throws Exception {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) { }
+        mockWebServer.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
+                .setBody("{\"productId\":\"sample\"}"));
+        ProductRequestDTO request = ProductRequestDTO.builder().productName("Cat Litter")
+                .productDescription("Clumping litter").productNameFr("Litière pour chats")
+                .productDescriptionFr("Litière agglomérante").build();
+        StepVerifier.create(productsServiceClient.updateProduct("sample", request))
+                .expectNextCount(1).verifyComplete();
+        RecordedRequest sent = mockWebServer.takeRequest(5, TimeUnit.SECONDS);
+        org.junit.jupiter.api.Assertions.assertNotNull(sent);
+        var json = objectMapper.readTree(sent.getBody().readUtf8());
+        assertEquals("Cat Litter", json.get("productName").asText());
+        assertEquals("Litière pour chats", json.get("productNameFr").asText());
+        assertEquals("Litière agglomérante", json.get("productDescriptionFr").asText());
+    }
 }

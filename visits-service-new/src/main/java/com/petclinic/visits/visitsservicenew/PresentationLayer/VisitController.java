@@ -326,4 +326,19 @@ public class VisitController {
         return visitService.cancelVisit(visitId, cancellationRequestDTO);
     }
 
+    @PatchMapping(value = "/{visitId}/note", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<VisitResponseDTO> addVetNote(@PathVariable String visitId, @RequestBody VetNoteRequestDTO vetNoteRequestDTO){
+        return visitService.addVetNote(visitId, vetNoteRequestDTO);
+    }
+
+    @PatchMapping(value = "/{visitId}/confirm", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<VisitResponseDTO> confirmFollowUpVisit(@PathVariable String visitId){
+        return visitService.confirmFollowUpVisit(visitId);
+    }
+
+    @PatchMapping(value = "/{visitId}/reschedule", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<VisitResponseDTO> rescheduleFollowUpVisit(@PathVariable String visitId, @RequestBody RescheduleRequestDTO rescheduleRequestDTO){
+        return visitService.rescheduleFollowUpVisit(visitId, rescheduleRequestDTO);
+    }
+
 }

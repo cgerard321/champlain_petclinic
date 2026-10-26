@@ -4,6 +4,7 @@ import BillsListTable from '@/features/bills/BillsListTable.tsx';
 import CurrentBalance from '@/features/bills/CurrentBalance';
 import { Currency } from '@/features/bills/utils/convertCurrency';
 import '@/features/bills/AdminBillsListTable.css';
+import './CustomerBills.css';
 
 export default function CustomerBillingPage(): JSX.Element {
   const [currency, setCurrency] = useState<Currency>('CAD');
@@ -13,35 +14,42 @@ export default function CustomerBillingPage(): JSX.Element {
     try {
       window.dispatchEvent(new CustomEvent(name));
     } catch (e) {
-      // ignore in non-browser envs
+      // Ignore in non-browser environments.
     }
   };
 
   return (
     <div className="customer-bills-page">
       <NavBar />
-      <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start' }}>
-        <aside className="modern-sidebar">
+
+      <div className="customer-bills-layout">
+        <aside className="modern-sidebar" aria-label="Billing options">
           <div className="sidebar-title">Options</div>
+
           <div className="sidebar-button-container">
             <button
+              type="button"
               onClick={() => dispatchSidebarEvent('customerToggleStatusFilter')}
             >
               Filter by Status
             </button>
+
             <button
+              type="button"
               onClick={() => dispatchSidebarEvent('customerToggleAmountFilter')}
             >
               Filter by Amount
             </button>
+
             <button
+              type="button"
               onClick={() => dispatchSidebarEvent('customerToggleDateFilter')}
             >
               Filter by Date
             </button>
           </div>
 
-          <div style={{ marginTop: '12px' }}>
+          <div className="customer-bills-currency">
             <div
               className="currency-dropdown"
               tabIndex={0}
@@ -76,6 +84,7 @@ export default function CustomerBillingPage(): JSX.Element {
                       CAD
                     </button>
                   </li>
+
                   <li>
                     <button
                       type="button"
@@ -94,19 +103,15 @@ export default function CustomerBillingPage(): JSX.Element {
           </div>
         </aside>
 
-        <main style={{ flex: 1 }}>
-          <div style={{ maxWidth: 820, marginLeft: '200px', width: '100%' }}>
-            <h1 style={{ textAlign: 'center' }}>Your Bills</h1>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                width: '100%',
-              }}
-            >
+        <main className="customer-bills-main">
+          <div className="customer-bills-content">
+            <h1 className="customer-bills-title">Your Bills</h1>
+
+            <div className="customer-bills-balance">
               <CurrentBalance currency={currency} />
             </div>
-            <div style={{ marginTop: 18 }}>
+
+            <div className="customer-bills-list">
               <BillsListTable currency={currency} setCurrency={setCurrency} />
             </div>
           </div>
