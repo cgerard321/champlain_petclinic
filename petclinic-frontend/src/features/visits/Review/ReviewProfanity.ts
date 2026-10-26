@@ -153,7 +153,6 @@ const getProfaneSourceRanges = (input: string): SourceRange[] => {
     }
     boundaries.push(tokenEnd);
 
-
     for (
       let startBoundary = 0;
       startBoundary < boundaries.length - 1;
