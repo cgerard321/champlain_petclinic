@@ -4,10 +4,11 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, switchMap } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
+import { environment } from '@environments/environment';
 import { ForgotPasswordRequest } from '@features/auth/models/forgotPasswordRequest';
 import { LoginRequest } from '@features/auth/models/loginRequest';
 
-const RESET_PASSWORD_PATH = '/login/reset-password/';
+const RESET_PASSWORD_PATH = '/users/reset-password/';
 
 @Injectable({ providedIn: 'root' })
 export class Auth {
@@ -24,7 +25,7 @@ export class Auth {
   sendPasswordResetEmail(email: string): Observable<void> {
     const body: ForgotPasswordRequest = {
       email,
-      url: `${this.document.location.origin}${RESET_PASSWORD_PATH}`,
+      url: `${environment.customerPortal}${RESET_PASSWORD_PATH}`,
     };
 
     return this.http.post<void>('/api/gateway/users/forgot_password', body);
