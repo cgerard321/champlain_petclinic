@@ -22,4 +22,8 @@ public class PromoCodeResponseDTO {
     private LocalDateTime expirationDate;
 
     private  boolean isActive;
+    private String scope;
+    private java.util.List<String> productIds;
+    private java.util.List<String> productTypes;
+
 }

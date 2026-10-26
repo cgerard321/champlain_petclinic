@@ -930,12 +930,12 @@ class CartControllerUnitTest {
                 .promoPercent(15.0)
                 .build();
 
-        when(cartService.applyPromoToCart(cartId, 15.0)).thenReturn(Mono.just(response));
+        when(cartService.applyPromoCodeToCart(cartId, "SAVE15")).thenReturn(Mono.just(response));
 
         webTestClient.put()
                 .uri("/api/v1/carts/" + cartId + "/promo")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new CartPromoRequestModel(15.0))
+                .bodyValue(new CartPromoRequestModel("SAVE15"))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(CartResponseModel.class)
@@ -944,7 +944,7 @@ class CartControllerUnitTest {
                     assertEquals(15.0, result.getPromoPercent());
                 });
 
-        verify(cartService).applyPromoToCart(cartId, 15.0);
+        verify(cartService).applyPromoCodeToCart(cartId, "SAVE15");
     }
 
     @Test
@@ -956,13 +956,13 @@ class CartControllerUnitTest {
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
 
-        verify(cartService, never()).applyPromoToCart(anyString(), any());
+        verify(cartService, never()).clearPromoFromCart(anyString());
     }
 
     @Test
     void clearPromoFromCart_success() {
         String cartId = VALID_CART_ID;
-        when(cartService.applyPromoToCart(cartId, null)).thenReturn(Mono.just(new CartResponseModel()));
+        when(cartService.clearPromoFromCart(cartId)).thenReturn(Mono.just(new CartResponseModel()));
 
         webTestClient.delete()
                 .uri("/api/v1/carts/" + cartId + "/promo")
@@ -970,7 +970,7 @@ class CartControllerUnitTest {
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
 
-        verify(cartService).applyPromoToCart(cartId, null);
+        verify(cartService).clearPromoFromCart(cartId);
     }
 
     @Test
@@ -1046,4 +1046,13 @@ class CartControllerUnitTest {
         verify(cartService, never()).getAllCarts(any());
     }
 
+
+    @Test
+    void customerCannotSubmitArbitraryPercentage() {
+        webTestClient.put().uri("/api/v1/carts/" + VALID_CART_ID + "/promo")
+                .contentType(MediaType.APPLICATION_JSON).bodyValue(java.util.Map.of("promoPercent", 100))
+                .exchange().expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        verify(cartService, never()).applyPromoCodeToCart(anyString(), any());
+        verify(cartService, never()).clearPromoFromCart(anyString());
+    }
 }

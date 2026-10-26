@@ -82,6 +82,22 @@ public class RatingServiceImpl implements RatingService {
                 .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be provided")))
                 .filter(req -> req.getRating() > 0 && req.getRating() <= 5)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be between 1 and 5")))
+                .filter(req ->
+                        (req.getQualityRating() == null
+                                || req.getQualityRating() >= 1
+                                && req.getQualityRating() <= 5)
+                                && (req.getValueRating() == null
+                                || req.getValueRating() >= 1
+                                && req.getValueRating() <= 5)
+                                && (req.getPetSatisfactionRating() == null
+                                || req.getPetSatisfactionRating() >= 1
+                                && req.getPetSatisfactionRating() <= 5)
+                                && (req.getIngredientsRating() == null
+                                || req.getIngredientsRating() >= 1
+                                && req.getIngredientsRating() <= 5)
+                )
+                .switchIfEmpty(Mono.error(new InvalidInputException(
+                        "Category ratings must be between 1 and 5")))
                 .filter(req -> req.getReview() == null || req.getReview().length() <= 10000)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Review cannot exceed 10000 characters")))
                 .flatMap(req ->
@@ -108,6 +124,22 @@ public class RatingServiceImpl implements RatingService {
                 .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be provided")))
                 .filter(req -> req.getRating() > 0 && req.getRating() <= 5)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Rating must be between 1 and 5")))
+                .filter(req ->
+                        (req.getQualityRating() == null
+                                || req.getQualityRating() >= 1
+                                && req.getQualityRating() <= 5)
+                                && (req.getValueRating() == null
+                                || req.getValueRating() >= 1
+                                && req.getValueRating() <= 5)
+                                && (req.getPetSatisfactionRating() == null
+                                || req.getPetSatisfactionRating() >= 1
+                                && req.getPetSatisfactionRating() <= 5)
+                                && (req.getIngredientsRating() == null
+                                || req.getIngredientsRating() >= 1
+                                && req.getIngredientsRating() <= 5)
+                )
+                .switchIfEmpty(Mono.error(new InvalidInputException(
+                        "Category ratings must be between 1 and 5")))
                 .filter(req -> req.getReview() == null || req.getReview().length() <= 10000)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Review cannot exceed 10000 characters")))
                 .flatMap(req ->
@@ -135,6 +167,14 @@ public class RatingServiceImpl implements RatingService {
                                                        }
                                                        existingRating.setRating(req.getRating());
                                                        existingRating.setReview(req.getReview() == null ? "" : req.getReview()
+                                                       );
+                                                       existingRating.setQualityRating(req.getQualityRating());
+                                                       existingRating.setValueRating(req.getValueRating());
+                                                       existingRating.setPetSatisfactionRating(
+                                                               req.getPetSatisfactionRating()
+                                                       );
+                                                       existingRating.setIngredientsRating(
+                                                               req.getIngredientsRating()
                                                        );
                                                        return ratingRepository.save(existingRating);
                                                    })
