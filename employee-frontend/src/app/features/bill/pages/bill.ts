@@ -20,8 +20,10 @@ import { ArchiveBillsDialog } from '@features/bill/components/archive-bills-dial
 import { BillDetails } from '@features/bill/components/bill-details/bill-details';
 import { BillUpdate } from '@features/bill/components/bill-update/bill-update';
 import { CreateBill } from '@features/bill/components/createBill/create-bill';
+import { CustomerBillLookup } from '@features/bill/components/customer-bill-lookup/customer-bill-lookup';
 import { BillRecord, PaymentRequest } from '@features/bill/models/bill.model';
 import { BillService } from '@features/bill/services/bill-service';
+import { ConfirmDialog } from '@shared/components/confirm-dialog/confirm-dialog';
 import { Roles } from '@shared/models/roles';
 
 interface BillFilters {
@@ -46,7 +48,7 @@ const emptyFilters: BillFilters = {
 
 @Component({
   selector: 'app-bill',
-  imports: [CurrencyPipe, FormsModule],
+  imports: [CurrencyPipe, FormsModule, CustomerBillLookup],
   styleUrl: './bill.css',
   templateUrl: './bill.html',
 })
@@ -71,6 +73,9 @@ export class Bill implements OnInit {
 
   protected readonly canViewOwnBills = computed(() => this.auth.hasRole(Roles.vet));
   protected readonly canPayBill = computed(() => this.auth.hasRole(Roles.receptionist));
+  protected readonly showCustomerBillLookup = computed(
+    () => this.canPayBill() && !this.canViewBills() && !this.canViewOwnBills(),
+  );
 
   protected readonly selectedBill = signal<BillRecord | null>(null);
   protected readonly paying = signal(false);
@@ -95,11 +100,39 @@ export class Bill implements OnInit {
   protected readonly billActionSuccess = signal<string | null>(null);
 
   protected toggleInterestExemption(bill: BillRecord): void {
-    if (!this.canViewBills() || this.updatingInterestId() !== null) {
+    if (
+      !this.canViewBills() ||
+      bill.billStatus !== 'OVERDUE' ||
+      this.updatingInterestId() !== null
+    ) {
       return;
     }
 
     const exempt = !bill.interestExempt;
+
+    this.dialog
+      .open(ConfirmDialog, {
+        data: {
+          title: 'Confirm Interest Exemption',
+          message: exempt
+            ? 'Exempt this overdue bill from interest? Interest will become $0.00.'
+            : 'Remove interest exemption and recalculate overdue interest?',
+          confirmLabel: 'Confirm',
+          cancelLabel: 'Cancel',
+        },
+      })
+      .afterClosed()
+      .pipe(take(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe((confirmed: boolean | undefined) => {
+        if (confirmed !== true) {
+          return;
+        }
+
+        this.applyInterestExemption(bill, exempt);
+      });
+  }
+
+  private applyInterestExemption(bill: BillRecord, exempt: boolean): void {
     let exemptionSaved = false;
 
     this.updatingInterestId.set(bill.billId);
@@ -114,10 +147,12 @@ export class Bill implements OnInit {
         }),
         switchMap(() => this.billService.getBillById(bill.billId)),
         takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.updatingInterestId.set(null)),
+        finalize(() => {
+          this.updatingInterestId.set(null);
+        }),
       )
       .subscribe({
-        next: (updatedBill) => {
+        next: (updatedBill: BillRecord) => {
           this.bills.update((currentBills) =>
             currentBills.map((item) => (item.billId === updatedBill.billId ? updatedBill : item)),
           );
@@ -126,6 +161,7 @@ export class Bill implements OnInit {
             exempt ? 'Interest exemption applied.' : 'Interest exemption removed.',
           );
         },
+
         error: () => {
           this.billActionError.set(
             exemptionSaved
@@ -295,12 +331,26 @@ export class Bill implements OnInit {
       .subscribe({
         next: (bill: BillRecord) => {
           this.isDetailsLoading.set(false);
-          this.dialog.open(BillDetails, {
-            data: bill,
-            width: '780px',
-            maxWidth: '95vw',
-            maxHeight: '90vh',
-          });
+          this.dialog
+            .open(BillDetails, {
+              data: bill,
+              width: '780px',
+              maxWidth: '95vw',
+              maxHeight: '90vh',
+            })
+            .afterClosed()
+            .pipe(take(1), takeUntilDestroyed(this.destroyRef))
+            .subscribe((updatedBill: BillRecord | undefined) => {
+              if (!updatedBill) {
+                return;
+              }
+
+              this.bills.update((currentBills) =>
+                currentBills.map((item) =>
+                  item.billId === updatedBill.billId ? updatedBill : item,
+                ),
+              );
+            });
         },
         error: (error: unknown) => {
           this.isDetailsLoading.set(false);
