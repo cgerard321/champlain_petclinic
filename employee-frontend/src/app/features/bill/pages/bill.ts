@@ -87,6 +87,19 @@ export class Bill implements OnInit {
     return this.billStatusTranslation[status] ?? status;
   }
 
+  protected readonly visitTypesTranslation: Record<string, string> = {
+    'Check-up': $localize`:@@bill.visitTypes:Examen vétérinaire`,
+    Vaccine: $localize`:@@bill.visitTypes:Vaccin`,
+    Surgery: $localize`:@@bill.visitTypes:Chirurgie`,
+    Dental: $localize`:@@bill.visitTypes:Dentaire`,
+    Emergency: $localize`:@@bill.visitTypes:Urgence`,
+    Regular: $localize`:@@bill.visitTypes:Régulier`,
+  };
+
+  protected translateVisit(type: string): string {
+    return this.visitTypesTranslation[type] ?? type;
+  }
+
   protected payment: PaymentRequest = {
     cardNumber: '',
     cvv: '',
@@ -141,8 +154,8 @@ export class Bill implements OnInit {
         error: () => {
           this.billActionError.set(
             exemptionSaved
-              ? $localize`:@@bill.interestOpt.savedErr:L'exonération a été enregistrée, mais la facture n’a pas pu être actualisée. Veuillez recharger la liste des factures`
-              : $localize`:@@bill.interestOpt.updateUnable:Impossible de modifier l’exonération des intérêts. Veuillez réessayer`,
+              ? $localize`:@@bill.interestOpt.savedErr:L'exonération a été enregistrée, mais la facture n'a pas pu être actualisée. Veuillez recharger la liste des factures`
+              : $localize`:@@bill.interestOpt.updateUnable:Impossible de modifier l'exonération des intérêts. Veuillez réessayer`,
           );
         },
       });

@@ -903,6 +903,17 @@
         "note":"Unpaid bills, overdue bills, and new bills will remain unchanged.",
         "prompt":"Do you want to continue?",
         "confirm":"Confirm Archive"
+      },
+
+      "visitTypes":{
+        "allTypes":"All visit types",
+        "dental":"Dental",
+        "surgery":"Surgery",
+        "checkup":"Check-up",
+        "vaccine":"Vaccine",
+        "regular":"Regular",
+        "emergency":"Emergency"
+
       }
 
 

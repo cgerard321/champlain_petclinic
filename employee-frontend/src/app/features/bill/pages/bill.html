@@ -170,7 +170,7 @@
             </label>
 
             <label>
-              <ng-container i18n="@@bill.vetName">Nom du vétérinairer</ng-container>
+              <ng-container i18n="@@bill.vetName">Nom du vétérinaire</ng-container>
               <input
                 type="text"
                 [ngModel]="filters().vetName"
@@ -179,14 +179,14 @@
             </label>
 
             <label>
-              <ng-container i18n="@@bill.vistType">Type de visiter</ng-container>
+              <ng-container i18n="@@bill.vistType">Type de visite</ng-container>
               <select
                 [ngModel]="filters().visitType"
                 (ngModelChange)="updateFilter('visitType', $event)"
               >
-                <option value="">All visit types</option>
+                <option value="" i18n="@@bill.visitTypes.allTypes">Tous les types de visite</option>
                 @for (visitType of visitTypes(); track visitType) {
-                  <option [value]="visitType">{{ visitType }}</option>
+                  <option [value]="visitType">{{ translateVisit(visitType) }}</option>
                 }
               </select>
             </label>

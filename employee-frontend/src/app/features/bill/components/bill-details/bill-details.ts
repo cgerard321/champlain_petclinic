@@ -21,8 +21,21 @@ export class BillDetails {
     OVERDUE: $localize`:@@bill.overdue:EN RETARD`,
   };
 
+  protected readonly visitTypesTranslation: Record<string, string> = {
+    'Check-up': $localize`:@@bill.visitTypes:Examen vétérinaire`,
+    Vaccine: $localize`:@@bill.visitTypes:Vaccin`,
+    Surgery: $localize`:@@bill.visitTypes:Chirurgie`,
+    Dental: $localize`:@@bill.visitTypes:Dentaire`,
+    Emergency: $localize`:@@bill.visitTypes:Urgence`,
+    Regular: $localize`:@@bill.visitTypes:Régulier`,
+  };
+
   protected translate(status: string): string {
     return this.billStatusTranslation[status] ?? status;
+  }
+
+  protected translateVisit(type: string): string {
+    return this.visitTypesTranslation[type] ?? type;
   }
 
   protected close(): void {
