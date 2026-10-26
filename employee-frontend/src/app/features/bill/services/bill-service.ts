@@ -1,7 +1,7 @@
 import { formatDate } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { EMPTY, filter, map, Observable, switchMap } from 'rxjs';
+import { EMPTY, map, Observable, switchMap } from 'rxjs';
 
 import { CurrentUserResponse } from '@core/models/current-user-response';
 import { AuthState } from '@core/services/auth-state';
@@ -55,8 +55,13 @@ export class BillService {
         keepAlive: false,
       })
       .pipe(
-        filter((event): event is MessageEvent<string> => event.type !== 'error'),
-        map((event) => JSON.parse(event.data) as Customer),
+        map((event) => {
+          if (event.type === 'error') {
+            throw new Error('Unable to load customers.');
+          }
+
+          return JSON.parse((event as MessageEvent<string>).data) as Customer;
+        }),
       );
   }
   getAllBills(): Observable<BillRecord> {
@@ -101,6 +106,23 @@ export class BillService {
     }
 
     return this.getBillsFromUrl(this.baseUrl);
+  }
+
+  getBillsByCustomerId(customerId: string): Observable<BillRecord> {
+    return this.sse
+      .stream(`${this.baseUrl}/customer/${encodeURIComponent(customerId)}`, {
+        keepAlive: false,
+      })
+      .pipe(
+        map((event) => {
+          if (event.type === 'error') {
+            throw new Error('Unable to load customer bills.');
+          }
+
+          const data = (event as MessageEvent<string>).data;
+          return this.toBillRecord(JSON.parse(data) as BillApiRecord);
+        }),
+      );
   }
 
   payBill(bill: BillRecord, payment: PaymentRequest): Observable<BillRecord> {
