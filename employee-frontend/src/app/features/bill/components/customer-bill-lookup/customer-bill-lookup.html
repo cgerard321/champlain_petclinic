@@ -1,0 +1,80 @@
+<section class="bill-card">
+  <div class="bill-card__header">
+    <div>
+      <h2>Bills by Customer</h2>
+      <p>Select a customer to view their bills.</p>
+    </div>
+  </div>
+
+  @if (customersLoading()) {
+    <p role="status">Loading customers...</p>
+  } @else if (customersFailed()) {
+    <p role="alert">Unable to load customers. Please try again.</p>
+    <button class="bill-secondary-action" type="button" (click)="loadCustomers()">Try again</button>
+  } @else if (customers().length === 0) {
+    <p role="status">No customers available.</p>
+  } @else {
+    <div class="bill-filters bill-lookup">
+      <label for="customer-bill-select">Customer</label>
+
+      <select
+        #customerSelect
+        id="customer-bill-select"
+        [value]="selectedCustomerId()"
+        (change)="selectCustomer(customerSelect.value)"
+      >
+        <option value="">Select a customer</option>
+
+        @for (customer of customers(); track customer.customerId) {
+          <option [value]="customer.customerId">
+            {{ customer.firstName }} {{ customer.lastName }} — {{ customer.customerId }}
+          </option>
+        }
+      </select>
+    </div>
+
+    @if (billsLoading()) {
+      <p role="status">Loading bills...</p>
+    } @else if (billsFailed()) {
+      <p role="alert">Unable to load bills. Please try again.</p>
+      <button
+        class="bill-secondary-action"
+        type="button"
+        (click)="selectCustomer(selectedCustomerId())"
+      >
+        Try again
+      </button>
+    } @else if (selectedCustomerId()) {
+      @if (bills().length === 0) {
+        <p role="status">This customer has no bills.</p>
+      } @else {
+        <div class="bill-table-wrapper">
+          <table class="bill-table">
+            <thead>
+              <tr>
+                <th scope="col">Bill ID</th>
+                <th scope="col">Date</th>
+                <th scope="col">Due Date</th>
+                <th scope="col">Total (CAD)</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (bill of bills(); track bill.billId) {
+                <tr>
+                  <td>{{ bill.billId }}</td>
+                  <td>{{ bill.date | date: 'mediumDate' }}</td>
+                  <td>{{ bill.dueDate | date: 'mediumDate' }}</td>
+                  <td>{{ bill.totalAmount ?? bill.amount | currency: 'CAD' }}</td>
+                  <td>{{ statusLabel(bill.billStatus) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    } @else {
+      <p role="status">Select a customer to display their bills.</p>
+    }
+  }
+</section>
