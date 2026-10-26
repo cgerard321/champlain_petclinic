@@ -22,9 +22,7 @@ export default function FAQ(): JSX.Element {
       <header className="faq-intro">
         <div className="faq-intro-inner">
           <h1 className="faq-title">{t('title')}</h1>
-          <p className="faq-sub">
-            {t('subtitle')}
-          </p>
+          <p className="faq-sub">{t('subtitle')}</p>
 
           <Form className="faq-search" onSubmit={e => e.preventDefault()}>
             <Form.Control
