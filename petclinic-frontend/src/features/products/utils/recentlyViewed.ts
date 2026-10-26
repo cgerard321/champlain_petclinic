@@ -6,11 +6,34 @@ import { getProduct } from '../api/getProduct';
 
 const MAX_RECENT = 5;
 
-export function getRecentlyViewed(userId?: string): ProductModel[] {
+interface RecentlyViewedEntry {
+  productId: string;
+}
+
+function isRecentlyViewedEntry(value: unknown): value is RecentlyViewedEntry {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'productId' in value &&
+    typeof value.productId === 'string' &&
+    value.productId.trim().length > 0
+  );
+}
+
+export function getRecentlyViewed(userId?: string): RecentlyViewedEntry[] {
   if (!userId) return [];
   try {
     const raw = localStorage.getItem(`recentlyClickedProducts_${userId}`);
-    return raw ? (JSON.parse(raw) as ProductModel[]) : [];
+    if (!raw) return [];
+
+    const saved: unknown = JSON.parse(raw);
+    if (!Array.isArray(saved)) return [];
+
+    // Older entries may contain the full product. Keeping only productId here
+    // makes that data compatible with the new, smaller storage format.
+    return saved
+      .filter(isRecentlyViewedEntry)
+      .map(({ productId }) => ({ productId }));
   } catch {
     return [];
   }
@@ -23,12 +46,10 @@ export function addProductToRecentlyViewed(
   if (!userId) return;
   try {
     const key = `recentlyClickedProducts_${userId}`;
-    const raw = localStorage.getItem(key);
-    const list: ProductModel[] = raw ? JSON.parse(raw) : [];
+    const list = getRecentlyViewed(userId);
     const updated = list.filter(p => p.productId !== product.productId);
-    updated.unshift(product);
-    if (updated.length > MAX_RECENT) updated.splice(MAX_RECENT);
-    localStorage.setItem(key, JSON.stringify(updated));
+    updated.unshift({ productId: product.productId });
+    localStorage.setItem(key, JSON.stringify(updated.slice(0, MAX_RECENT)));
   } catch (e) {
     console.error('Could not update recently viewed', e);
   }
@@ -40,19 +61,11 @@ export async function loadRecentlyViewed(
 ): Promise<ProductModel[]> {
   if (!userId) return [];
   try {
-    const saved: unknown = JSON.parse(
-      localStorage.getItem(`recentlyClickedProducts_${userId}`) || '[]'
+    const saved = getRecentlyViewed(userId);
+    const ids = [...new Set(saved.map(item => item.productId))].slice(
+      0,
+      MAX_RECENT
     );
-    if (!Array.isArray(saved)) return [];
-    const ids = [
-      ...new Set(
-        saved.flatMap(item =>
-          item && typeof item.productId === 'string' && item.productId.trim()
-            ? [item.productId as string]
-            : []
-        )
-      ),
-    ].slice(0, MAX_RECENT);
     const products = await Promise.all(
       ids.map(id => getProduct(id, true).catch(() => null))
     );
