@@ -9,9 +9,12 @@
     },
     "login": {
       "title": "Welcome",
+      "username": "Username or email",
+      "password": "Password",
       "usernamePlaceholder": "Enter your username or email",
       "passwordPlaceholder": "Enter your password",
       "forgotPassword": "Forgot Password?",
+      "togglePassword": "Show or hide password",
       "submit": "Login",
       "errors": {
         "usernameRequired": "Username or email is required.",
