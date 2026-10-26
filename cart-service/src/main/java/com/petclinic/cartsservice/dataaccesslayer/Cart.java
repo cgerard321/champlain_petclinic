@@ -37,6 +37,7 @@ public class Cart {
     private List<CartProduct> recommendationPurchase;
     private List<Order> orders;
 
+    private PromoCode appliedPromo;
     private Double promoPercent;
     public Double getPromoPercent() { return promoPercent; }
     public void setPromoPercent(Double promoPercent) { this.promoPercent = promoPercent; }

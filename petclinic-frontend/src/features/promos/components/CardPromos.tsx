@@ -2,16 +2,52 @@ import { useState, useEffect } from 'react';
 import './CardPromos.css';
 import { Promo } from '@/features/promos/models/PromoModel.tsx';
 import { PromoApi } from '@/features/promos/api/PromoApi.tsx';
+import { getProduct } from '@/features/products/api/getProduct';
 
 export default function CardPromos(): JSX.Element {
   const [promos, setPromos] = useState<Promo[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [productNames, setProductNames] = useState<Record<string, string>>({});
+
+  const eligibility = (promo: Promo): string => {
+    if (promo.scope === 'PRODUCT') {
+      return (
+        promo.productIds?.map(id => productNames[id] || id).join(', ') ||
+        'No eligible products specified'
+      );
+    }
+    if (promo.scope === 'PRODUCT_TYPE') {
+      return promo.productTypes?.length
+        ? `Product types: ${promo.productTypes.join(', ')}`
+        : 'No eligible product types specified';
+    }
+    return 'All items in your cart';
+  };
 
   const fetchPromos = async (): Promise<void> => {
     try {
       const data = await PromoApi.fetchActivePromos();
       setPromos(data);
+      const productIds = [
+        ...new Set(
+          data.flatMap(promo =>
+            promo.scope === 'PRODUCT' ? promo.productIds ?? [] : []
+          )
+        ),
+      ];
+      const products = await Promise.allSettled(
+        productIds.map(id => getProduct(id, true))
+      );
+      setProductNames(
+        Object.fromEntries(
+          products.flatMap(result =>
+            result.status === 'fulfilled' && result.value
+              ? [[result.value.productId, result.value.productName]]
+              : []
+          )
+        )
+      );
     } catch (err) {
       console.error('Error fetching promos:', err);
       setError('Failed to fetch promos');
@@ -44,6 +80,9 @@ export default function CardPromos(): JSX.Element {
               </p>
               <p>
                 <strong>Discount:</strong> {promo.discount}%
+              </p>
+              <p>
+                <strong>Applies to:</strong> {eligibility(promo)}
               </p>
               <p>
                 <strong>Expires on:</strong>{' '}
