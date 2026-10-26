@@ -343,7 +343,6 @@ public class VisitController {
     }
 
 
-}
     @PatchMapping(value = "/{visitId}/confirm", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<VisitResponseDTO> confirmFollowUpVisit(@PathVariable String visitId){
         return visitService.confirmFollowUpVisit(visitId);
