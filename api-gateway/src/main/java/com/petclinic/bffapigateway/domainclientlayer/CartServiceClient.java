@@ -330,6 +330,15 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .bodyToMono(CartResponseDTO.class);
     }
 
+    public Mono<StripeResponseDTO> createStripeCheckoutSession(String cartId, StripeProductRequestDTO requestDTO) {
+        return webClientBuilder.build()
+                .post()
+                .uri(cartServiceUrl + "/" + cartId + "/transaction")
+                .bodyValue(requestDTO)
+                .retrieve()
+                .bodyToMono(StripeResponseDTO.class);
+    }
+
 
     public Mono<CartResponseDTO> getCartByCustomerId(final String customerId) {
         return webClientBuilder.build()

@@ -286,6 +286,14 @@ public class CartControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.CUST})
+    @PostMapping("/{cartId}/transaction")
+    public Mono<ResponseEntity<StripeResponseDTO>> createStripeBill(@RequestBody StripeProductRequestDTO sessionRequestModel, @PathVariable String cartId) {
+        return cartServiceClient.createStripeCheckoutSession(cartId, sessionRequestModel)
+                .map(ResponseEntity::ok);
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PostMapping("/{cartId}/wishlist")
     public Mono<ResponseEntity<CartResponseDTO>> addProductToWishlist(
         @PathVariable String cartId,
