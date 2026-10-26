@@ -17,31 +17,33 @@
       <button type="button" (click)="load()" i18n="@@vets.actions.retry">Réessayer</button>
     </div>
   } @else {
-<div class="search-container">
-  <input
-    type="search"
-    [value]="searchQuery()"
-    (input)="onSearch($event)"
-    placeholder="Rechercher par nom"
-    i18n-placeholder="@@vets.list.search_placeholder"
-    aria-label="Rechercher un vétérinaire par nom"
-    i18n-aria-label="@@vets.list.search_label"
-  />
+    <div class="search-container">
+      <input
+        type="search"
+        [value]="searchQuery()"
+        (input)="onSearch($event)"
+        placeholder="Rechercher par nom"
+        i18n-placeholder="@@vets.list.search_placeholder"
+        aria-label="Rechercher un vétérinaire par nom"
+        i18n-aria-label="@@vets.list.search_label"
+      />
 
-  <select
-    [value]="selectedSpecialty()"
-    (change)="onSpecialtyChange($event)"
-    aria-label="Filtrer par spécialité"
-    i18n-aria-label="@@vets.list.specialty_label"
-  >
-    <option value="" i18n="@@vets.list.all_specialties">Toutes les spécialités</option>
-    @for (name of specialties(); track name) {
-      <option [value]="name" [selected]="name === selectedSpecialty()">{{ name }}</option>
-    }
-  </select>
+      <select
+        [value]="selectedSpecialty()"
+        (change)="onSpecialtyChange($event)"
+        aria-label="Filtrer par spécialité"
+        i18n-aria-label="@@vets.list.specialty_label"
+      >
+        <option value="" i18n="@@vets.list.all_specialties">Toutes les spécialités</option>
+        @for (name of specialties(); track name) {
+          <option [value]="name" [selected]="name === selectedSpecialty()">{{ name }}</option>
+        }
+      </select>
 
-  <button type="button" (click)="clearFilters()" i18n="@@vets.list.clear">Effacer les filtres</button>
-</div>
+      <button type="button" (click)="clearFilters()" i18n="@@vets.list.clear">
+        Effacer les filtres
+      </button>
+    </div>
     <ul
       class="profile-grid"
       aria-label="Profils vétérinaires"
@@ -64,7 +66,8 @@
           </li>
         } @else {
           <li class="empty-state" i18n="@@vets.list.empty">Aucun profil à afficher.</li>
-        }      }
+        }
+      }
     </ul>
   }
 </section>
