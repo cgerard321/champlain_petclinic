@@ -37,6 +37,7 @@ func main() {
 	host := util.Getenv("SMTP_SERVER")
 	user := util.Getenv("SMTP_USER")
 	pass := util.Getenv("SMTP_PASS")
+	from := util.Getenv("SMTP_EMAIL")
 
 	dialer := mailsvc.NewDialer(mailsvc.Config{
 		Host:               host,
@@ -47,7 +48,7 @@ func main() {
 	})
 
 	emailJobChannel := make(chan mailsvc.EmailJob, EMAIL_QUEUE_CAPACITY)
-	svc := mailsvc.NewService(dialer, user, emailJobChannel)
+	svc := mailsvc.NewService(dialer, from, emailJobChannel)
 
 	h := handlers.NewMailHandler(svc)
 	g := r.Group("/mail")

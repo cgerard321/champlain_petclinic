@@ -93,6 +93,7 @@ export class VisitService {
       practitionerId: completedVisit.practitionerId,
       status: Status.UPCOMING,
       isEmergency: false,
+      followUpOfVisitId: completedVisit.visitId,
     });
   }
 

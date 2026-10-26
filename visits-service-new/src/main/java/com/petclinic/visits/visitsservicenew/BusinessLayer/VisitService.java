@@ -3,6 +3,7 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.CancellationRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.RescheduleRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VetNoteRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
@@ -55,6 +56,9 @@ public interface VisitService {
 
     Mono<String> sendEmail(VetDTO vet, List<Visit> visits, LocalDate weekStart);
 
+    Mono<VisitResponseDTO> confirmFollowUpVisit(String visitId);
+
+    Mono<VisitResponseDTO> rescheduleFollowUpVisit(String visitId, RescheduleRequestDTO request);
 
 //    Mono<VetDTO> testingGetVetDTO(String vetId);
 //    Mono<PetResponseDTO> testingGetPetDTO(int petId);

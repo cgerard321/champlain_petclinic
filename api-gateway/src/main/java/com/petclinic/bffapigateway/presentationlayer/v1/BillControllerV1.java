@@ -50,10 +50,6 @@ public class BillControllerV1 {
 
         return billServiceClient.payBill(customerId, billId, paymentRequestDTO, jwtToken).map(ResponseEntity::ok);
     }
-
-
-
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "/{billId}")
     public Mono<ResponseEntity<BillResponseDTO>> getBillById(final @PathVariable String billId)
@@ -160,6 +156,15 @@ public class BillControllerV1 {
                 vetId,
                 vetFirstName,
                 vetLastName);
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PatchMapping("/{billId}/exempt-interest")
+    public Mono<ResponseEntity<Void>> setInterestExempt(
+            @PathVariable String billId,
+            @RequestParam boolean exempt) {
+
+        return billServiceClient.setInterestExempt(billId, exempt)
+                .thenReturn(ResponseEntity.noContent().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})

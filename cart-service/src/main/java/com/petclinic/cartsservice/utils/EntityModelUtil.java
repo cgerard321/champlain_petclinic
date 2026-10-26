@@ -4,6 +4,8 @@ import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.ShippingMethod;
 import com.petclinic.cartsservice.dataaccesslayer.Order;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReport;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportStatus;
 import com.petclinic.cartsservice.dataaccesslayer.PromoCode;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeRequestModel;
@@ -11,6 +13,8 @@ import com.petclinic.cartsservice.domainclientlayer.PromoCodeResponseModel;
 import com.petclinic.cartsservice.presentationlayer.BillingRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
+import com.petclinic.cartsservice.presentationlayer.CreateOrderReportRequestModel;
+import com.petclinic.cartsservice.presentationlayer.OrderReportResponseModel;
 import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatusCode;
@@ -29,21 +33,29 @@ public class EntityModelUtil {
         BeanUtils.copyProperties(cart, resp);
 
         //This prevents a crash if products is null
-        List<CartProduct> safeProducts = products == null ? List.of() : products;
+        List<CartProduct> safeProducts = products == null ? List.of() : copyCartProducts(products);
+        PromoCode appliedPromo = cart.getAppliedPromo();
+        Double promo = appliedPromo == null ? cart.getPromoPercent()
+                : (appliedPromo.isActive() && isPromoActive(appliedPromo.getExpirationDate())
+                    ? appliedPromo.getDiscount() : null);
+        resp.setPromoPercent(promo);
+        double discount = 0.0;
 
         double subtotal = 0.0;
         for (CartProduct p : safeProducts) {
             double price = p.getProductSalePrice() != null ? p.getProductSalePrice() : 0.0;
             int qty = p.getQuantityInCart() != null ? p.getQuantityInCart() : 0;
             subtotal += price * qty;
+            boolean eligible = appliedPromo == null || PromoEligibility.isEligible(appliedPromo, p);
+            double lineDiscount = eligible && promo != null && promo >= 0 && promo <= 100
+                    ? round2(price * qty * promo / 100.0) : 0.0;
+            p.setDiscountAmount(lineDiscount);
+            discount += lineDiscount;
         }
         subtotal = round2(subtotal);
 
-        Double promo = resp.getPromoPercent();
-        double discountedSubtotal = subtotal;
-        if (promo != null && promo >= 0.0 && promo <= 100.0) {
-            discountedSubtotal = round2(subtotal * (1.0 - (promo / 100.0)));
-        }
+        resp.setDiscountAmount(round2(discount));
+        double discountedSubtotal = round2(subtotal - discount);
 
         ShippingMethod shippingMethod = cart.getShippingMethod() == null
                 ? ShippingMethod.PICKUP
@@ -102,6 +114,7 @@ public class EntityModelUtil {
         if (promoCodeRequestModel.getActive() != null) {
             promoCode.setActive(promoCodeRequestModel.getActive());
         }
+        PromoEligibility.setScope(promoCode, promoCodeRequestModel);
         return promoCode;
     }
 
@@ -117,6 +130,9 @@ public class EntityModelUtil {
 
     public static PromoCodeResponseModel toPromoCodeResponseModel(PromoCode promoCode) {
         PromoCodeResponseModel responseModel = new PromoCodeResponseModel();
+        responseModel.setScope(PromoEligibility.scope(promoCode));
+        responseModel.setProductIds(promoCode.getProductIds());
+        responseModel.setProductTypes(promoCode.getProductTypes());
         responseModel.setId(promoCode.getId());
         responseModel.setName(promoCode.getName());
         responseModel.setCode(promoCode.getCode());
@@ -159,6 +175,53 @@ public class EntityModelUtil {
                 .build();
     }
 
+    public static OrderReport toOrderReport(
+            String orderId,
+            String customerId,
+            Order order,
+            CreateOrderReportRequestModel request,
+            List<OrderReport.AffectedItem> affectedItems
+    ) {
+        return OrderReport.builder()
+                .reportId("RPT-" + UUID.randomUUID().toString().toUpperCase(Locale.ROOT))
+                .orderId(orderId)
+                .customerId(customerId)
+                .customerName(order.getCustomerName())
+                .reason(request.getReason())
+                .affectedItems(affectedItems)
+                .description(request.getDescription().trim())
+                .status(OrderReportStatus.NEW)
+                .submittedAt(LocalDateTime.now())
+                .build();
+    }
+
+    public static OrderReportResponseModel toOrderReportResponseModel(
+            OrderReport report
+    ) {
+        List<OrderReportResponseModel.AffectedItemResponse> affectedItems =
+                report.getAffectedItems() == null
+                        ? List.of()
+                        : report.getAffectedItems().stream()
+                        .map(item -> OrderReportResponseModel.AffectedItemResponse
+                                .builder()
+                                .productId(item.getProductId())
+                                .productName(item.getProductName())
+                                .build())
+                        .toList();
+
+        return OrderReportResponseModel.builder()
+                .reportId(report.getReportId())
+                .orderId(report.getOrderId())
+                .customerId(report.getCustomerId())
+                .customerName(report.getCustomerName())
+                .reason(report.getReason())
+                .affectedItems(affectedItems)
+                .description(report.getDescription())
+                .status(report.getStatus())
+                .submittedAt(report.getSubmittedAt())
+                .build();
+    }
+
 
     private static List<CartProduct> copyCartProducts(
             List<CartProduct> products
@@ -183,6 +246,7 @@ public class EntityModelUtil {
         orderCart.setProducts(products);
         CartResponseModel calculatedCart =
                 toCartResponseModel(orderCart, products);
+        orderCart.setProducts(calculatedCart.getProducts());
         orderCart.setSubtotal(calculatedCart.getSubtotal());
         orderCart.setPromoPercent(calculatedCart.getPromoPercent());
         orderCart.setTvq(calculatedCart.getTvq());

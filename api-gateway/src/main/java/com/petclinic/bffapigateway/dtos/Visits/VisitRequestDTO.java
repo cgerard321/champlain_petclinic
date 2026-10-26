@@ -26,6 +26,7 @@ public class VisitRequestDTO {
     private Status status;
     private String visitId;
     private Boolean isEmergency;
+    private String followUpOfVisitId;
 
     public VisitRequestDTO(LocalDateTime visitDate, String description, String petId, String ownerId, String jwtToken, String practitionerId,  String visitId, Boolean isEmergency) {
         this.visitDate = visitDate;
