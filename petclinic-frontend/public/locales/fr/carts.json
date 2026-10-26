@@ -198,6 +198,39 @@
     "quantity": "Quantité :",
     "download": "Télécharger la facture"
   },
+  "reports": {
+    "openButton": "Signaler un problème",
+    "title": "Signaler un problème de commande",
+    "orderNumber": "Commande n° {{id}}",
+    "reason": "Raison",
+    "selectReason": "Sélectionner une raison",
+    "affectedProducts": "Produits concernés",
+    "orderedQuantity": "Quantité commandée : {{quantity}}",
+    "description": "Description",
+    "submit": "Soumettre le signalement",
+    "submitting": "Envoi en cours...",
+    "success": "Votre signalement a été soumis. Notre équipe l'examine.",
+    "banner": "Problème signalé - Statut : {{status}} - Référence : {{reportId}}",
+    "reasons": {
+      "DAMAGED_ITEM": "Article endommagé",
+      "MISSING_ITEM": "Article manquant",
+      "WRONG_ITEM": "Mauvais article",
+      "PACKAGE_NOT_RECEIVED": "Colis non reçu",
+      "OTHER": "Autre"
+    },
+    "status": {
+      "NEW": "Nouveau",
+      "IN_REVIEW": "En cours d'examen",
+      "RESOLVED": "Résolu",
+      "REJECTED": "Rejeté"
+    },
+    "errors": {
+      "reasonRequired": "Sélectionnez une raison.",
+      "productRequired": "Sélectionnez au moins un produit concerné.",
+      "descriptionLength": "La description doit contenir entre 15 et 500 caractères.",
+      "submitFailed": "Impossible de soumettre le signalement."
+    }
+  },
   "taxes": {
     "GST": "TPS",
     "PST": "TVP",
