@@ -20,4 +20,16 @@ public class PromoCodeRequestDTO {
 
     // active goes in request so we can toggle a promo
     private Boolean active;
+    public PromoCodeRequestDTO(String name, String code, double discount, String expirationDate, Boolean active) {
+        this.Name = name;
+        this.code = code;
+        this.discount = discount;
+        this.expirationDate = expirationDate;
+        this.active = active;
+    }
+
+    private String scope;
+    private java.util.List<String> productIds;
+    private java.util.List<String> productTypes;
+
 }

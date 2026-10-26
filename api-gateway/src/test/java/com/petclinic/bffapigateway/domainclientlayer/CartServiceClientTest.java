@@ -617,7 +617,7 @@ public class CartServiceClientTest {
                                 .setBody(responseBody)
                                 .setResponseCode(200));
 
-                Mono<CartResponseDTO> result = mockCartServiceClient.applyPromoToCart(cartId, 12.0);
+                Mono<CartResponseDTO> result = mockCartServiceClient.applyPromoCodeToCart(cartId, "SAVE12");
 
                 StepVerifier.create(result)
                                 .expectNextMatches(cart -> cart.getCartId().equals(cartId))
@@ -626,12 +626,12 @@ public class CartServiceClientTest {
 
         @Test
         void testApplyPromoToCart_NullPercent_ThrowsInvalidInput() {
-                Mono<CartResponseDTO> result = mockCartServiceClient.applyPromoToCart("cart-apply", null);
+                Mono<CartResponseDTO> result = mockCartServiceClient.applyPromoCodeToCart("cart-apply", null);
 
                 StepVerifier.create(result)
                                 .expectErrorSatisfies(throwable -> {
                                         assertThat(throwable).isInstanceOf(InvalidInputException.class);
-                                        assertThat(throwable.getMessage()).contains("promoPercent must be provided");
+                                        assertThat(throwable.getMessage()).contains("Promo code must be provided");
                                 })
                                 .verify();
         }
@@ -1802,4 +1802,49 @@ public class CartServiceClientTest {
     }
 
 
+    @Test
+    void scopedPromoAndPerItemDiscountSurviveGatewayRoundTrip() throws Exception {
+        prepareResponse(response -> response.setHeader("Content-Type", "application/json").setBody(
+                "{\"cartId\":\"cart\",\"promoPercent\":25,\"discountAmount\":10,\"products\":[{\"productId\":\"food\",\"discountAmount\":10},{\"productId\":\"toy\",\"discountAmount\":0,\"promoLookupFailed\":true}]}"));
+        StepVerifier.create(mockCartServiceClient.applyPromoCodeToCart("cart", " FOOD25 "))
+                .assertNext(cart -> {
+                    assertEquals(10, cart.getDiscountAmount());
+                    assertEquals(10, cart.getProducts().get(0).getDiscountAmount());
+                    assertEquals(0, cart.getProducts().get(1).getDiscountAmount());
+                    assertFalse(cart.getProducts().get(0).isPromoLookupFailed());
+                    assertTrue(cart.getProducts().get(1).isPromoLookupFailed());
+                }).verifyComplete();
+        var request = mockWebServer.takeRequest();
+        assertEquals("/api/v1/carts/cart/promo", request.getPath());
+        assertEquals("{\"promoCode\":\"FOOD25\"}", request.getBody().readUtf8());
+    }
+
+    @Test
+    void blankPromoCodeRejectedWithoutNetworkRequest() {
+        StepVerifier.create(mockCartServiceClient.applyPromoCodeToCart("cart", " "))
+                .expectError(InvalidInputException.class).verify();
+        assertEquals(0, mockWebServer.getRequestCount());
+    }
+
+    @Test
+    void targetedPromoCreationForwardsEligibility() throws Exception {
+        prepareResponse(response -> response.setHeader("Content-Type", "application/json").setBody(
+                "{\"scope\":\"PRODUCT_TYPE\",\"productTypes\":[\"FOOD\"]}"));
+        var promo = PromoCodeRequestDTO.builder().scope("PRODUCT_TYPE").productTypes(List.of("FOOD")).build();
+        StepVerifier.create(mockCartServiceClient.createPromoCode(promo)).assertNext(result -> {
+            assertEquals("PRODUCT_TYPE", result.getScope()); assertEquals(List.of("FOOD"), result.getProductTypes());
+        }).verifyComplete();
+        String body = mockWebServer.takeRequest().getBody().readUtf8();
+        assertTrue(body.contains("\"scope\":\"PRODUCT_TYPE\""));
+        assertTrue(body.contains("\"productTypes\":[\"FOOD\"]"));
+    }
+
+    @Test
+    void ineligiblePromoMessageReachesCustomer() {
+        prepareResponse(response -> response.setResponseCode(422).setHeader("Content-Type", "application/json")
+                .setBody("{\"message\":\"Promo code does not apply to any items in this cart\"}"));
+        StepVerifier.create(mockCartServiceClient.applyPromoCodeToCart("cart", "FOOD25"))
+                .expectErrorMatches(error -> error instanceof InvalidInputException
+                        && error.getMessage().contains("does not apply")).verify();
+    }
 }

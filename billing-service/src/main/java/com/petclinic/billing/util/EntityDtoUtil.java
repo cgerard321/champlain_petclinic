@@ -47,33 +47,38 @@ public class EntityDtoUtil {
         }
         billResponseDTO.setInterest(interest);
 
-        // Calculate final amount
-        if (bill.getAmount() != null) {
-            if(bill.getGstAmount() == null || bill.getQstAmount() == null || bill.getTaxedAmount() == null){
-                billResponseDTO.setTaxedAmount(BigDecimal.ZERO);
-                billResponseDTO.setGstAmount(BigDecimal.ZERO);
-                billResponseDTO.setQstAmount(BigDecimal.ZERO);
-            } else {
-                billResponseDTO.setTaxedAmount(bill.getTaxedAmount());
-                billResponseDTO.setGstAmount(bill.getGstAmount());
-                billResponseDTO.setQstAmount(bill.getQstAmount());
-            }
-            BigDecimal totalTaxes;
-            if (bill.getTaxedAmount() != null){
-                totalTaxes = bill.getTaxedAmount();
-            } else {
-                totalTaxes = BigDecimal.ZERO;
-            }
-            BigDecimal totalWithInterest = bill.getAmount().add(totalTaxes).add(interest);
-            billResponseDTO.setTotalAmount(totalWithInterest.setScale(2, java.math.RoundingMode.HALF_UP));
-        } else {
-            // If amount is null, set totalAmount to just the interest (or zero if no interest)
-            billResponseDTO.setAmount(BigDecimal.ZERO);
-            billResponseDTO.setGstAmount(BigDecimal.ZERO);
-            billResponseDTO.setQstAmount(BigDecimal.ZERO);
-            billResponseDTO.setTaxedAmount(BigDecimal.ZERO);
-            billResponseDTO.setTotalAmount(interest.setScale(2, java.math.RoundingMode.HALF_UP));
-        }
+        // Calculate final amount, including taxes and interest
+        BigDecimal amount = bill.getAmount() != null
+                ? bill.getAmount()
+                : BigDecimal.ZERO;
+
+        BigDecimal gst = bill.getGstAmount() != null
+                ? bill.getGstAmount()
+                : BigDecimal.ZERO;
+
+        BigDecimal qst = bill.getQstAmount() != null
+                ? bill.getQstAmount()
+                : BigDecimal.ZERO;
+
+        // Use stored total taxes when available.
+        // Otherwise, calculate the total from the available tax amounts.
+        BigDecimal totalTaxes = bill.getTaxedAmount() != null
+                ? bill.getTaxedAmount()
+                : gst.add(qst);
+
+        billResponseDTO.setAmount(amount);
+        billResponseDTO.setGstAmount(gst);
+        billResponseDTO.setQstAmount(qst);
+        billResponseDTO.setTaxedAmount(totalTaxes);
+
+        // Interest is already calculated above and respects exemption.
+        BigDecimal totalWithInterest = amount
+                .add(totalTaxes)
+                .add(interest)
+                .setScale(2, java.math.RoundingMode.HALF_UP);
+
+        billResponseDTO.setTotalAmount(totalWithInterest);
+
         billResponseDTO.setTimeRemaining(timeRemaining(bill));
         billResponseDTO.setArchive(bill.getArchive());
 

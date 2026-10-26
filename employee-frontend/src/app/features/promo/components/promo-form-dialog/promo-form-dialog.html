@@ -43,6 +43,43 @@
       </mat-form-field>
     </div>
 
+    <mat-form-field appearance="outline">
+      <mat-label>Applies to</mat-label>
+      <mat-select [value]="model().scope" (selectionChange)="setScope($event.value)">
+        <mat-option value="CART">Full cart</mat-option>
+        <mat-option value="PRODUCT">Selected products</mat-option>
+        <mat-option value="PRODUCT_TYPE">Selected product types</mat-option>
+      </mat-select>
+    </mat-form-field>
+    @if (model().scope === 'PRODUCT') {
+      <mat-form-field appearance="outline">
+        <mat-label>Eligible products</mat-label>
+        <mat-select
+          multiple
+          [value]="model().productIds"
+          (selectionChange)="setProducts($event.value)"
+        >
+          @for (product of products(); track product.productId) {
+            <mat-option [value]="product.productId">{{ product.productName }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+    @if (model().scope === 'PRODUCT_TYPE') {
+      <mat-form-field appearance="outline">
+        <mat-label>Eligible product types</mat-label>
+        <mat-select
+          multiple
+          [value]="model().productTypes"
+          (selectionChange)="setProductTypes($event.value)"
+        >
+          @for (type of productTypes(); track type.productTypeId) {
+            <mat-option [value]="type.typeName">{{ type.typeName }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    }
+
     <mat-slide-toggle [checked]="model().active" (change)="setActive($event.checked)">
       {{ model().active ? 'Active' : 'Inactive' }}
     </mat-slide-toggle>
