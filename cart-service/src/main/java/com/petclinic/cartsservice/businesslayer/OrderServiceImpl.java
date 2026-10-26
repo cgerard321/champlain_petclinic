@@ -178,6 +178,12 @@ public class OrderServiceImpl implements OrderService {
         });
     }
 
+    @Override
+    public Flux<OrderReportResponseModel> getAllReports() {
+        return orderReportRepository.findAllByOrderBySubmittedAtDesc()
+                .map(EntityModelUtil::toOrderReportResponseModel);
+    }
+
     private List<String> validateRequest(
             CreateOrderReportRequestModel request
     ) {

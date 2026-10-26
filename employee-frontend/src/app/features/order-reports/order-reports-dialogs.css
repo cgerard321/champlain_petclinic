@@ -1,0 +1,56 @@
+/*
+ * Global because dialog panes live in the CDK overlay, outside the components.
+ * When "View order" is clicked, the report dialog slides left and the order dialog
+ * pops in on the right. Closing either one centers the other again.
+ */
+.report-dialog-pane,
+.order-dialog-pane {
+  transition:
+    transform 450ms ease-in-out,
+    max-width 450ms ease-in-out;
+}
+
+.report-dialog-pane.dialog-shift-left,
+.order-dialog-pane.dialog-slide-right {
+  max-width: 46vw !important;
+}
+
+.report-dialog-pane.dialog-shift-left {
+  transform: translateX(calc(-50% - 12px));
+}
+
+.order-dialog-pane.dialog-slide-right {
+  transform: translateX(calc(50% + 12px));
+}
+
+.order-dialog-pane.dialog-slide-right .mat-mdc-dialog-surface {
+  animation: order-dialog-pop-in 450ms ease-in-out;
+}
+
+@keyframes order-dialog-pop-in {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+.order-dialog-backdrop {
+  transition:
+    opacity 400ms ease-in-out,
+    background-color 400ms ease-in-out;
+}
+
+/*
+ * While both dialogs are side by side, the report's backdrop already greys the page,
+ * so the order backdrop stays clear and lets clicks reach the report.
+ * Once the report closes, the order backdrop fades to grey on its own.
+ */
+.cdk-overlay-container:has(.dialogs-side-by-side) .order-dialog-backdrop {
+  background-color: transparent;
+  pointer-events: none;
+}

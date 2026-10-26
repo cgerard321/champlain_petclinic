@@ -1,0 +1,176 @@
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant, #e0e0e0);
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mat-sys-primary, #1565c0);
+}
+
+.dialog-header h2 {
+  margin: 0;
+  padding: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Material adds an empty spacer before the title, which we don't need here */
+.dialog-header h2::before {
+  display: none;
+}
+
+.report-id {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant, #666);
+  overflow-wrap: anywhere;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 75vh;
+  padding: 20px 24px;
+
+  /* Content can still scroll on small screens, but the scrollbar is hidden */
+  scrollbar-width: none;
+}
+
+mat-dialog-content::-webkit-scrollbar {
+  display: none;
+}
+
+mat-dialog-actions {
+  gap: 8px;
+  padding: 12px 24px 20px;
+}
+
+.card {
+  padding: 16px;
+  border: 1px solid var(--mat-sys-outline-variant, #e0e0e0);
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container-low, #fafafa);
+}
+
+.card h3 {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+  margin: 0;
+}
+
+.field dt {
+  margin-bottom: 4px;
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant, #666);
+}
+
+.field dd {
+  margin: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.description {
+  margin: 0;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.muted {
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant, #666);
+}
+
+.item-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item-list li {
+  padding: 4px 12px;
+  border: 1px solid var(--mat-sys-outline-variant, #e0e0e0);
+  border-radius: 16px;
+  background: var(--mat-sys-surface, #fff);
+  font-size: 0.85rem;
+}
+
+.link-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--mat-sys-primary, #1565c0);
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status-NEW {
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
+.status-IN_REVIEW {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.status-RESOLVED {
+  background: #d7f0dc;
+  color: #1b5e20;
+}
+
+.status-REJECTED {
+  background: #fde0e0;
+  color: #b71c1c;
+}
+
+@media (width <= 600px) {
+  .fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
