@@ -311,7 +311,7 @@ public class InventoryControllerV1 {
 
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
     @PatchMapping("/{inventoryId}/important")
     public Mono<ResponseEntity<Object>> updateImportantStatus(@PathVariable String inventoryId, @RequestBody Map<String, Boolean> request) {
         Boolean important = request.get("important");

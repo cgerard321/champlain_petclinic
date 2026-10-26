@@ -24,6 +24,7 @@ describe('InventoryList', () => {
   const inventoryService = {
     getInventories: vi.fn(),
     getQuantity: vi.fn(),
+    getInventoryTypes: vi.fn(),
     updateImportantStatus: vi.fn(),
   };
 
@@ -42,11 +43,14 @@ describe('InventoryList', () => {
     const input = checkbox();
     input.checked = checked;
     input.dispatchEvent(new Event('change'));
+    vi.advanceTimersByTime(300);
     fixture.detectChanges();
   };
 
   beforeEach(async () => {
-    vi.clearAllMocks();
+    vi.resetAllMocks();
+    vi.useFakeTimers();
+    inventoryService.getInventoryTypes.mockReturnValue(EMPTY);
     roles = ['ADMIN'];
 
     inventoryService.getInventories.mockReturnValue(of(mainInventory));
@@ -72,6 +76,11 @@ describe('InventoryList', () => {
     }).compileComponents();
   });
 
+  afterEach(() => {
+    fixture?.destroy();
+    vi.useRealTimers();
+  });
+
   it('should create', () => {
     // Act
     createComponent();
@@ -85,7 +94,11 @@ describe('InventoryList', () => {
     createComponent();
 
     // Assert
-    expect(inventoryService.getInventories).toHaveBeenCalledWith(false);
+    expect(inventoryService.getInventories).toHaveBeenCalledWith(
+      expect.objectContaining({ importantOnly: false }),
+      0,
+      8,
+    );
     expect(fixture.nativeElement.textContent).toContain('Main');
     expect(fixture.nativeElement.textContent).toContain('10 items in stock');
   });
@@ -96,7 +109,11 @@ describe('InventoryList', () => {
     setFavoritesOnly(true);
 
     // Assert
-    expect(inventoryService.getInventories).toHaveBeenLastCalledWith(true);
+    expect(inventoryService.getInventories).toHaveBeenLastCalledWith(
+      expect.objectContaining({ importantOnly: true }),
+      0,
+      8,
+    );
   });
 
   it('should drop the previous inventory and quantity requests when the filter changes', () => {
@@ -126,7 +143,7 @@ describe('InventoryList', () => {
     expect(quantityRequest.observed).toBe(false);
   });
 
-  it('should show the favorites-specific empty message when the filter returns nothing', () => {
+  it('should show the filtered empty state when the filter returns nothing', () => {
     // Arrange
     inventoryService.getInventories.mockReturnValue(EMPTY);
 
@@ -134,33 +151,44 @@ describe('InventoryList', () => {
     createComponent();
 
     // Assert
-    expect(fixture.nativeElement.textContent).toContain('No inventories found.');
+    expect(fixture.nativeElement.textContent).toContain(
+      'There are no inventories to display right now.',
+    );
 
     // Act
     setFavoritesOnly(true);
 
     // Assert
-    expect(fixture.nativeElement.textContent).toContain('No favorite inventories found.');
+    expect(fixture.nativeElement.textContent).toContain('No matching inventory');
   });
 
-  it('should mark an inventory as favorite and back again', () => {
-    // Act
-    createComponent();
-    stars()[0]?.click();
-    fixture.detectChanges();
+  it.each(['VET', 'ADMIN', 'INVENTORY_MANAGER'])(
+    'should let %s mark an inventory as favorite and back again',
+    (role) => {
+      roles = [role];
+      // Act
+      createComponent();
+      expect(stars()[0]?.disabled).toBe(false);
+      expect(stars()[0]?.getAttribute('aria-label')).toBe('Add favorite: Main');
+      stars()[0]?.click();
+      fixture.detectChanges();
 
-    // Assert
-    expect(inventoryService.updateImportantStatus).toHaveBeenCalledWith('inv-1', true);
-    expect(stars()[0]?.getAttribute('aria-pressed')).toBe('true');
+      // Assert
+      expect(inventoryService.updateImportantStatus).toHaveBeenCalledWith('inv-1', true);
+      expect(stars()[0]?.getAttribute('aria-pressed')).toBe('true');
+      expect(stars()[0]?.getAttribute('aria-label')).toBe('Remove favorite: Main');
+      expect(stars()[0]?.querySelector('mat-icon')?.textContent?.trim()).toBe('star');
 
-    // Act
-    stars()[0]?.click();
-    fixture.detectChanges();
+      // Act
+      stars()[0]?.click();
+      fixture.detectChanges();
 
-    // Assert
-    expect(inventoryService.updateImportantStatus).toHaveBeenLastCalledWith('inv-1', false);
-    expect(stars()[0]?.getAttribute('aria-pressed')).toBe('false');
-  });
+      // Assert
+      expect(inventoryService.updateImportantStatus).toHaveBeenLastCalledWith('inv-1', false);
+      expect(stars()[0]?.getAttribute('aria-pressed')).toBe('false');
+      expect(stars()[0]?.querySelector('mat-icon')?.textContent?.trim()).toBe('star_border');
+    },
+  );
 
   it('should keep the star unchanged and report a local error when the save fails', () => {
     // Arrange
@@ -219,22 +247,55 @@ describe('InventoryList', () => {
     // Act
     createComponent();
     setFavoritesOnly(true);
+    inventoryService.getInventories.mockReturnValue(EMPTY);
     stars()[0]?.click();
     fixture.detectChanges();
 
     // Assert
     expect(inventoryService.updateImportantStatus).toHaveBeenCalledWith('inv-1', false);
     expect(stars()).toHaveLength(0);
-    expect(fixture.nativeElement.textContent).toContain('No favorite inventories found.');
+    expect(fixture.nativeElement.textContent).toContain('No matching inventory');
   });
 
-  it('should not let users without the inventory roles change favorites', () => {
+  it.each(['VET', 'ADMIN', 'INVENTORY_MANAGER'])(
+    'should synchronize %s favorites with the favorites-only list',
+    (role) => {
+      roles = [role];
+      let important = false;
+      inventoryService.getInventories.mockImplementation((filters) =>
+        filters.importantOnly && !important ? EMPTY : of({ ...mainInventory, important }),
+      );
+      inventoryService.updateImportantStatus.mockImplementation((_id, value) => {
+        important = value;
+        return of(undefined);
+      });
+      createComponent();
+      stars()[0]?.click();
+      fixture.detectChanges();
+      expect(stars()[0]?.getAttribute('aria-pressed')).toBe('true');
+      setFavoritesOnly(true);
+      expect(stars()).toHaveLength(1);
+      expect(inventoryService.getInventories).toHaveBeenLastCalledWith(
+        expect.objectContaining({ importantOnly: true }),
+        0,
+        8,
+      );
+      stars()[0]?.click();
+      fixture.detectChanges();
+      expect(important).toBe(false);
+      expect(stars()).toHaveLength(0);
+      expect(fixture.nativeElement.textContent).toContain('No matching inventory');
+    },
+  );
+
+  it.each([['RECEPTIONIST'], ['OWNER'], []])('should block favorite changes for %j', (...role) => {
     // Arrange
-    roles = ['VET'];
+    roles = role;
 
     // Act
     createComponent();
     stars()[0]?.click();
+    fixture.componentInstance['toggleFavorite'](mainInventory);
 
     // Assert
     expect(stars()[0]?.disabled).toBe(true);

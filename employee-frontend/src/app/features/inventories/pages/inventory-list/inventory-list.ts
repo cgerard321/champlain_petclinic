@@ -54,7 +54,10 @@ export class InventoryList implements OnInit, OnDestroy {
   });
 
   protected readonly canManageFavorites = computed(
-    () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager),
+    () =>
+      this.auth.hasRole(Roles.admin) ||
+      this.auth.hasRole(Roles.inventoryManager) ||
+      this.auth.hasRole(Roles.vet),
   );
 
   protected readonly isSavingAnyFavorite = computed(() =>
