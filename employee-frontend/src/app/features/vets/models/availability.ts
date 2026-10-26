@@ -64,6 +64,23 @@ export function hourLabel(hour: string): string {
   return range ? `${range[0]}:00–${range[1]}:00` : hour;
 }
 
+/**
+ * Jackson serialises LocalDateTime either as an ISO string or, when
+ * WRITE_DATES_AS_TIMESTAMPS is on, as [year, month, day, hour, minute].
+ * `new Date()` cannot read the array form and yields an invalid date.
+ */
+export function toVisitDate(value: unknown): Date {
+  if (value instanceof Date) return value;
+  if (Array.isArray(value)) {
+    const parts = value.map(Number);
+    if (parts.length < 3 || parts.slice(0, 3).some(Number.isNaN)) return new Date(NaN);
+    const [y, mo, d] = parts as [number, number, number];
+    return new Date(y, mo - 1, d, parts[3] ?? 0, parts[4] ?? 0, parts[5] ?? 0);
+  }
+  if (typeof value === 'string' || typeof value === 'number') return new Date(value);
+  return new Date(NaN);
+}
+
 export function visitsAffectedBy(
   visits: readonly Visit[],
   removed: readonly RemovedSlot[],
@@ -72,9 +89,9 @@ export function visitsAffectedBy(
   if (!removed.length) return [];
   return visits.filter((visit) => {
     if (!ACTIVE_STATUSES.includes(visit.status)) return false;
-    const start = new Date(visit.visitDate);
+    const start = toVisitDate(visit.visitDate);
     if (Number.isNaN(start.getTime()) || start <= now) return false;
-    const end = new Date(visit.visitEndDate);
+    const end = toVisitDate(visit.visitEndDate);
     const spanMs = Number.isNaN(end.getTime()) ? 0 : end.getTime() - start.getTime();
     const duration = spanMs > 0 ? Math.min(spanMs / 3_600_000, 24) : 1;
     const startHour = start.getHours() + start.getMinutes() / 60;
