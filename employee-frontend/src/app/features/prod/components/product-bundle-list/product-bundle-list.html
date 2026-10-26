@@ -35,11 +35,13 @@
     @for (bundle of bundles(); track bundle.bundleId) {
       <mat-card class="bundle-card">
         <mat-card-header>
-          <mat-card-title>{{ bundle.bundleName }}</mat-card-title>
+          <mat-card-title [title]="bundle.bundleName">{{ bundle.bundleName }}</mat-card-title>
           <mat-card-subtitle>{{ bundle.productIds.length }} items</mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <p>{{ bundle.bundleDescription }}</p>
+          <p class="bundle-description" [title]="bundle.bundleDescription">
+            {{ bundle.bundleDescription }}
+          </p>
           <dl>
             <div>
               <dt>Original price</dt>

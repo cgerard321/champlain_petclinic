@@ -124,6 +124,13 @@ describe('ProductBundleUpdateDialog', () => {
     expect(component['errorMessage']()).toBe('Bundle price must be less than the original price.');
   });
 
+  it('rejects a bundle price that is not a number', () => {
+    component['model'].update((current) => ({ ...current, bundlePrice: NaN }));
+
+    expect(component['validateBusinessRules']()).toBe(false);
+    expect(component['errorMessage']()).toBe('Bundle price must be a valid number.');
+  });
+
   it('shows the backend message when the update fails', () => {
     updateBundle.mockReturnValue(throwError(() => ({ code: 404, message: 'Bundle not found' })));
 

@@ -127,6 +127,15 @@ describe('ProductBundleAddDialog', () => {
     expect(component['errorMessage']()).toBe('Bundle price must be less than the original price.');
   });
 
+  it('rejects a bundle price that is not a number', () => {
+    fillDetails();
+    selectProducts('product-1', 'product-2');
+    component['model'].update((current) => ({ ...current, bundlePrice: NaN }));
+
+    expect(component['validateBusinessRules']()).toBe(false);
+    expect(component['errorMessage']()).toBe('Bundle price must be a valid number.');
+  });
+
   it('does not submit without any products', () => {
     fillDetails();
 

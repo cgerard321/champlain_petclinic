@@ -150,6 +150,10 @@ export class ProductBundleAddDialog {
 
   private validateBusinessRules(): boolean {
     const current = this.model();
+    if (!Number.isFinite(current.bundlePrice)) {
+      this.errorMessage.set('Bundle price must be a valid number.');
+      return false;
+    }
     if (current.bundlePrice <= 0) {
       this.errorMessage.set('Bundle price must be greater than zero.');
       return false;
