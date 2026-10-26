@@ -571,7 +571,7 @@ public class InventoryServiceClient {
                 .onStatus(HttpStatusCode::is4xxClientError,
                         resp -> rethrower.rethrow(resp,
                                 ex -> new InvalidInputsInventoryException(
-                                        ex.getOrDefault("message", "Unable to restock supply.").toString(), BAD_REQUEST)))
+                                        (ex.containsKey("message") ? ex.get("message") : "Unable to restock supply.").toString(), BAD_REQUEST)))
                 .bodyToMono(ProductResponseDTO.class);
     }
 

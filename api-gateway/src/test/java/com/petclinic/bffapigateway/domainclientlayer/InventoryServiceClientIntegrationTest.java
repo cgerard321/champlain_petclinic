@@ -353,6 +353,29 @@ class InventoryServiceClientIntegrationTest {
     }
 
     @Test
+    void restockLowStockProduct_usesFallbackWhenMessageIsMissing() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{}"));
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", 5))
+                .expectErrorMatches(error -> error instanceof InvalidInputsInventoryException
+                        && error.getMessage().equals("Unable to restock supply."))
+                .verify();
+    }
+
+    @Test
+    void restockLowStockProduct_preservesExplicitNullMessageHandling() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":null}"));
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", 5))
+                .expectError(NullPointerException.class)
+                .verify();
+    }
+
+    @Test
     void restockLowStockProduct_preservesOverflowErrorInsteadOfReportingNotFound() {
         enqueueError(400, "The restock quantity would exceed the maximum stock quantity.");
         StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", Integer.MAX_VALUE))
