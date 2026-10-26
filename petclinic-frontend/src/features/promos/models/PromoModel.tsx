@@ -5,4 +5,7 @@ export interface Promo {
   discount: number;
   expirationDate: string;
   active: boolean;
+  scope?: 'CART' | 'PRODUCT' | 'PRODUCT_TYPE';
+  productIds?: string[];
+  productTypes?: string[];
 }

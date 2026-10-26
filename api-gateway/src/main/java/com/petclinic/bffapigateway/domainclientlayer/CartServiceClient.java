@@ -417,19 +417,20 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<CartProductResponseDTO>>() {});
     }
-    public Mono<CartResponseDTO> applyPromoToCart(String cartId, Double promoPercent) {
-        if (promoPercent == null) {
-            return Mono.error(new InvalidInputException("promoPercent must be provided"));
+    public Mono<CartResponseDTO> applyPromoCodeToCart(String cartId, String promoCode) {
+        if (promoCode == null || promoCode.isBlank()) {
+            return Mono.error(new InvalidInputException("Promo code must be provided"));
         }
-
-        ApplyPromoRequestDTO payload = new ApplyPromoRequestDTO(promoPercent);
-
-        return webClientBuilder.build()
-                .put()
+        return webClientBuilder.build().put()
                 .uri(cartServiceUrl + "/{cartId}/promo", cartId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
+                .bodyValue(Map.of("promoCode", promoCode.trim()))
                 .retrieve()
+                .onStatus(status -> status.value() == 400 || status.value() == 422,
+                        response -> response.bodyToMono(CartResponseDTO.class)
+                                .map(body -> new InvalidInputException(body.getMessage() == null
+                                        ? "Promo code cannot be applied" : body.getMessage()))
+                                .defaultIfEmpty(new InvalidInputException("Promo code cannot be applied")))
                 .bodyToMono(CartResponseDTO.class);
     }
 

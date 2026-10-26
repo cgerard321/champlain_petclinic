@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
@@ -6,9 +6,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { isApiError } from '@core/models/api-error';
+import { Product, ProductType } from '@features/prod/models/product.model';
+import { ProductService } from '@features/prod/services/product.service';
 import { Promo } from '@features/promo/models/promo.model';
 import { PromoService } from '@features/promo/services/promo.service';
 
@@ -22,6 +25,9 @@ interface PromoFormModel {
   discount: number;
   expirationDate: string;
   active: boolean;
+  scope: 'CART' | 'PRODUCT' | 'PRODUCT_TYPE';
+  productIds: string[];
+  productTypes: string[];
 }
 
 @Component({
@@ -35,11 +41,39 @@ interface PromoFormModel {
     MatInputModule,
     MatProgressSpinnerModule,
     MatSlideToggleModule,
+    MatSelectModule,
   ],
   templateUrl: './promo-form-dialog.html',
   styleUrl: './promo-form-dialog.css',
 })
-export class PromoFormDialog {
+export class PromoFormDialog implements OnInit {
+  private readonly productService = inject(ProductService);
+  protected readonly products = signal<Product[]>([]);
+  protected readonly productTypes = signal<ProductType[]>([]);
+
+  ngOnInit(): void {
+    this.productService.getProducts().subscribe({
+      next: (products) => this.products.set(products),
+      error: () => this.errorMessage.set('Could not load eligible products.'),
+    });
+    this.productService.getProductEnums().subscribe({
+      next: (enums) => this.productTypes.set(enums.productType),
+      error: () => this.errorMessage.set('Could not load product types.'),
+    });
+  }
+
+  protected setScope(scope: 'CART' | 'PRODUCT' | 'PRODUCT_TYPE'): void {
+    this.model.update((current) => ({ ...current, scope, productIds: [], productTypes: [] }));
+  }
+
+  protected setProducts(productIds: string[]): void {
+    this.model.update((current) => ({ ...current, productIds }));
+  }
+
+  protected setProductTypes(productTypes: string[]): void {
+    this.model.update((current) => ({ ...current, productTypes }));
+  }
+
   private readonly data = inject<PromoFormData>(MAT_DIALOG_DATA);
   private readonly dialogRef = inject(MatDialogRef<PromoFormDialog, Promo>);
   private readonly promoService = inject(PromoService);
@@ -54,6 +88,9 @@ export class PromoFormDialog {
     discount: this.promo?.discount ?? 0,
     expirationDate: this.promo?.expirationDate.slice(0, 10) ?? '',
     active: this.promo?.active ?? true,
+    scope: this.promo?.scope ?? 'CART',
+    productIds: this.promo?.productIds ?? [],
+    productTypes: this.promo?.productTypes ?? [],
   });
 
   protected readonly promoForm = form(this.model, (schemaPath) => {
@@ -76,6 +113,14 @@ export class PromoFormDialog {
       return;
     }
 
+    const { scope, productIds, productTypes } = this.model();
+    if (
+      (scope === 'PRODUCT' && productIds.length === 0) ||
+      (scope === 'PRODUCT_TYPE' && productTypes.length === 0)
+    ) {
+      this.errorMessage.set('Select at least one eligible product or product type.');
+      return;
+    }
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
     const request = { ...this.model(), expirationDate: `${this.model().expirationDate}T23:59:59` };
