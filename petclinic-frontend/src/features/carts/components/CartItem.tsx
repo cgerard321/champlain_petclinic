@@ -104,6 +104,14 @@ const CartItem = ({
 
         <p className="info-description">{localizedDescription(item)}</p>
 
+        {!isInWishlist && (item.discountAmount ?? 0) > 0 && (
+          <p className="promo-discount">
+            {t('item.promoDiscount', {
+              amount: formatPrice(item.discountAmount ?? 0),
+            })}
+          </p>
+        )}
+
         {/* Ligne panier normale */}
         {!isInWishlist && (
           <div className="cart-item-meta">
