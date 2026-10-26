@@ -13,8 +13,15 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
+import java.util.Set;
 
 public class Validator {
+    private static final Set<String> CANADIAN_PROVINCES = Set.of(
+            "Alberta", "British Columbia", "Manitoba", "New Brunswick",
+            "Newfoundland and Labrador", "Nova Scotia", "Ontario",
+            "Prince Edward Island", "Quebec", "Saskatchewan",
+            "Northwest Territories", "Nunavut", "Yukon");
+
     public static UnaryOperator<Mono<CustomerRequestDTO>> validateCustomer() {
         return customerRequest -> customerRequest
                 .filter(hasStringValue(CustomerRequestDTO::getFirstName))
@@ -27,6 +34,8 @@ public class Validator {
                 .switchIfEmpty(ApplicationExceptions.missingCustomerCity())
                 .filter(hasStringValue(CustomerRequestDTO::getProvince))
                 .switchIfEmpty(ApplicationExceptions.missingCustomerProvince())
+                .filter(validProvince())
+                .switchIfEmpty(ApplicationExceptions.invalidCustomerProvince())
                 .filter(validPhoneNumber())
                 .switchIfEmpty(ApplicationExceptions.invalidCustomerPhoneNumber());
     }
@@ -62,6 +71,10 @@ public class Validator {
 
     public static Predicate<CustomerRequestDTO> validPhoneNumber(){
         return customerRequestDTO -> Objects.nonNull(customerRequestDTO.getTelephone()) && customerRequestDTO.getTelephone().matches("^[0-9]{10}$");
+    }
+
+    public static Predicate<CustomerRequestDTO> validProvince() {
+        return customerRequestDTO -> CANADIAN_PROVINCES.contains(customerRequestDTO.getProvince().trim());
     }
 
     public static <T> Predicate<T> hasValidId(Function<T, String> getter) {
