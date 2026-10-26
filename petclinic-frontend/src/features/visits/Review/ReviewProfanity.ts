@@ -6,7 +6,7 @@ filter.addWords(...CUSTOM_BAD_WORDS);
 
 const FUZZY_BAD_WORDS = Array.from(
   new Set(filter.list.map(word => word.toLowerCase()))
-).filter(word => word.length >= 5 && /^[a-z]+$/.test(word));
+).filter(word => word.length >= 7 && /^[a-z]+$/.test(word));
 
 const normalizeCharacter = (character: string): string =>
   character
