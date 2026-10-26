@@ -71,7 +71,7 @@
                   <td>{{ bill.date | date: 'mediumDate' }}</td>
                   <td>{{ bill.dueDate | date: 'mediumDate' }}</td>
                   <td>{{ bill.totalAmount ?? bill.amount | currency: 'CAD' }}</td>
-                  <td>{{ statusLabel(bill.billStatus) }}</td>
+                  <td>{{ translateStatus(statusLabel(bill.billStatus)) }}</td>
                 </tr>
               }
             </tbody>
