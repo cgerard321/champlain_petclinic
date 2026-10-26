@@ -30,6 +30,11 @@ import {
   ModalFormField,
   ModalFormResult,
 } from '@shared/components/modal-form/modal-form-models';
+import {
+  SupplySummaryAction,
+  SupplySummaryDialog,
+  SupplySummaryDialogData,
+} from '@shared/components/supply-summary-dialog/supply-summary-dialog';
 import { Table, TableColumn } from '@shared/components/table/table';
 import { Roles } from '@shared/models/roles';
 
@@ -185,6 +190,49 @@ export class SupplyPage {
     });
   }
 
+  protected openSupplySummary(supply: Supply): void {
+    const canConsume = this.canConsumeSupplies();
+    const dialogRef = this.dialog.open<
+      SupplySummaryDialog,
+      SupplySummaryDialogData,
+      SupplySummaryAction
+    >(SupplySummaryDialog, {
+      data: {
+        supply,
+        displayName: this.localizedSupplyName(supply.productName),
+        displayDescription: this.localizedSupplyDescription(supply.productDescription),
+        statusLabel: this.formatStatus(this.effectiveStatus(supply)),
+        photoUrl: this.supplyPhotoUrl(supply),
+        canManage: this.canManageSupplies(),
+        canConsume,
+        consumeDisabled:
+          supply.productQuantity <= 0 ||
+          this.expirationState(supply) === 'expired' ||
+          this.consumingSupplyId() === supply.productId,
+      },
+      ariaLabel: $localize`:@@supply.summary.ariaLabel:Résumé de l'article ${this.localizedSupplyName(supply.productName)}:name:`,
+      width: '640px',
+      maxWidth: '95vw',
+    });
+
+    dialogRef.afterClosed().subscribe((action) => {
+      switch (action) {
+        case 'edit':
+          this.editSupply(supply);
+          break;
+        case 'delete':
+          this.deleteSupply(supply);
+          break;
+        case 'history':
+          this.openSupplyHistory(supply);
+          break;
+        case 'consume':
+          this.consumeSupply(supply);
+          break;
+      }
+    });
+  }
+
   protected setFilter(
     field: 'productName' | 'supplierName' | 'productDescription' | 'status',
     event: Event,
@@ -248,15 +296,11 @@ export class SupplyPage {
       header: $localize`:@@supply.fields.status:État`,
       template: this.statusCell(),
     },
-    ...(this.canManageSupplies() || this.canConsumeSupplies()
-      ? [
-          {
-            id: 'actions',
-            header: $localize`:@@supply.fields.actions:Actions`,
-            template: this.actionsCell(),
-          },
-        ]
-      : []),
+    {
+      id: 'actions',
+      header: $localize`:@@supply.fields.actions:Actions`,
+      template: this.actionsCell(),
+    },
   ]);
 
   protected localizedSupplyName(name: string): string {
