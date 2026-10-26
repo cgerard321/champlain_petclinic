@@ -729,9 +729,11 @@
 }
 
 .report-order-modal {
+  display: flex;
+  flex-direction: column;
   width: min(100%, 620px);
   max-height: 90vh;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 24px;
   border: 1px solid var(--cart-ring, #e5e7eb);
   border-radius: 8px;
@@ -753,6 +755,14 @@
   margin: 6px 0 0;
   color: var(--cart-muted, #475569);
   overflow-wrap: anywhere;
+}
+
+.report-order-modal > form {
+  min-height: 0;
+  padding-right: 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
 }
 
 .report-order-fieldset {

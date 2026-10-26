@@ -1,4 +1,4 @@
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, type MouseEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import getErrorMessage from '@/shared/api/getErrorMessage';
 import {
@@ -43,6 +43,32 @@ export default function ReportOrderModal({
   const [description, setDescription] = useState('');
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape' && !submitting) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onClose, submitting]);
+
+  const handleBackdropClick = (event: MouseEvent<HTMLDivElement>): void => {
+    if (event.target === event.currentTarget && !submitting) {
+      onClose();
+    }
+  };
 
   const toggleProduct = (productId: string): void => {
     setSelectedProductIds(current =>
@@ -99,7 +125,7 @@ export default function ReportOrderModal({
   };
 
   return (
-    <div className="report-order-backdrop">
+    <div className="report-order-backdrop" onClick={handleBackdropClick}>
       <section
         className="report-order-modal"
         role="dialog"
