@@ -315,7 +315,7 @@ public class BillController {
     @GetMapping("/bills/{billId}/total")
     public Mono<BigDecimal> getTotal(@PathVariable String billId) {
         return billService.getBillByBillId(billId)
-                .map(bill -> bill.getAmount().add(bill.getInterest()));
+                .map(BillResponseDTO::getTotalAmount);
     }
     @PatchMapping("/bills/archive")
     @ResponseStatus(HttpStatus.NO_CONTENT)

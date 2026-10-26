@@ -73,7 +73,7 @@ public interface UserService {
 
     void processResetPassword(UserResetPwdWithTokenRequestModel resetRequest);
     UserPasswordLessDTO updateUserRole(String userId, RolesChangeRequestDTO roles, String token);
-    public String updateUserUsername(String userId, String username, String token);
+    public User updateUserUsername(String userId, String username, String token);
 
     User getUserbyUsername(String username);
 
