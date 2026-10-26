@@ -1,4 +1,8 @@
 {
+  "title": "Questions fréquentes",
+  "subtitle": "Réponses rapides aux questions que nous recevons le plus souvent.",
+  "barPlaceholder": "Rechercher dans les FAQ...",
+  "contactPrompt": "Encore besoin d'aide ? Contactez-nous.",
   "items": {
     "hours": {
       "question": "Quelles sont vos heures d'ouverture ?",
