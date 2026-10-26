@@ -22,4 +22,8 @@ public class PromoCodeRequestModel {
 
     private Boolean active;
 
+    private String scope;
+    private java.util.List<String> productIds;
+    private java.util.List<String> productTypes;
+
 }

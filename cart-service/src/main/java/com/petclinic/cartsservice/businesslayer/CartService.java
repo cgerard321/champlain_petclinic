@@ -38,7 +38,9 @@ public interface CartService {
 
     Mono<List<CartProduct>> getRecommendationPurchasesByCustomerId(String customerId);
 
-    Mono<CartResponseModel> applyPromoToCart(String cartId, Double promoPercent);
+    Mono<CartResponseModel> applyPromoCodeToCart(String cartId, String promoCode);
+
+    Mono<CartResponseModel> clearPromoFromCart(String cartId);
 
     Mono<CartResponseModel> updateShippingMethod(String cartId, String shippingMethod);
 

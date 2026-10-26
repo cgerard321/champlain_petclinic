@@ -110,6 +110,10 @@
         <dt i18n="@@bill.tableBill.interest">Intérêts</dt>
         <dd>
           {{ bill().interest ?? 0 | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
+
+          @if (bill().interestExempt) {
+            <span> (Exempt)</span>
+          }
         </dd>
       </div>
 
@@ -143,6 +147,7 @@
         </dd>
       </div>
 
+      <!-- Interest Exemption Management -->
       <div class="bill-details-field">
         <dt i18n="@@bill.detail.interestExempt">Exonéré d'intérêts</dt>
         <dd>
@@ -150,6 +155,22 @@
             <ng-container i18n="@@bill.yes">Oui</ng-container>
           } @else {
             <ng-container i18n="@@bill.no">Non</ng-container>
+          
+          @if (canManageInterest()) {
+            <button
+              type="button"
+              class="bill-details-exemption-button"
+              [disabled]="updatingInterest()"
+              (click)="toggleInterestExemption()"
+            >
+              {{
+                updatingInterest()
+                  ? 'Saving...'
+                  : bill().interestExempt
+                    ? 'Remove Exemption'
+                    : 'Exempt Interest'
+              }}
+            </button>
           }
         </dd>
       </div>
@@ -168,10 +189,24 @@
       </div>
     </dl>
   </section>
+
+  <!-- Interest Exemption Error -->
+  @if (interestError(); as message) {
+    <p role="alert" class="bill-details-action-error">
+      {{ message }}
+    </p>
+  }
+
+  <!-- Interest Exemption Success -->
+  @if (interestSuccess(); as message) {
+    <p role="status" class="bill-details-action-success">
+      {{ message }}
+    </p>
+  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="bill-details-footer">
-  <button type="button" i18n="@@bill.cancel" class="bill-details-close-button" (click)="close()">
+  <button type="button" i18n="@@bill.cancel" class="bill-details-close-button" [disabled]="updatingInterest()" (click)="close()">
     Annuler
   </button>
 </mat-dialog-actions>

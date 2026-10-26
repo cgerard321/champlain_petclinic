@@ -1,3 +1,8 @@
+@if (showCustomerBillLookup()) {
+  <div class="bill-page">
+    <app-customer-bill-lookup />
+  </div>
+}
 <div class="bill-page">
   <header class="bill-header">
     <div class="bill-header__copy">
@@ -17,6 +22,7 @@
       </button>
     }
   </header>
+
   @if (paymentMessage()) {
     <p role="status">{{ paymentMessage() }}</p>
   }
@@ -133,7 +139,7 @@
       }
 
       @if (canViewBills()) {
-        <!-- The control is rendered only for admins. CSS shows it in phone portrait. -->
+        <!-- Mobile filter controls -->
         <div #filtersRegion class="bill-filters-region">
           <button
             type="button"
@@ -312,6 +318,7 @@
                       {{
                         convertAmount(bill.interest ?? 0) | currency: currency() : 'code' : '1.2-2'
                       }}
+
                       @if (bill.interestExempt) {
                         <span> (<ng-container i18n="@@bill.exempt">Exempte</ng-container>)</span>
                       }
@@ -344,6 +351,7 @@
                             Détails
                           </button>
                         }
+
                         <button
                           type="button"
                           class="bill-table-button bill-table-button--outline"
@@ -389,7 +397,27 @@
                               >
                             }
                           </button>
+
+                          <!-- CPC-2135: Interest exemption is overdue-only -->
+                          @if (bill.billStatus === 'OVERDUE') {
+                            <button
+                              type="button"
+                              class="bill-table-button bill-table-button--outline"
+                              [disabled]="updatingInterestId() !== null"
+                              [attr.aria-pressed]="bill.interestExempt === true"
+                              (click)="toggleInterestExemption(bill)"
+                            >
+                              {{
+                                updatingInterestId() === bill.billId
+                                  ? 'Saving...'
+                                  : bill.interestExempt
+                                    ? 'Remove Interest Exemption'
+                                    : 'Exempt Interest'
+                              }}
+                            </button>
+                          }
                         }
+
                         @if (canPayBill() && bill.billStatus === 'UNPAID' && !bill.archive) {
                           <button
                             type="button"
@@ -477,10 +505,15 @@
           {{ bill.customerFirstName }} {{ bill.customerLastName }} —
           {{ bill.totalAmount ?? bill.amount | currency: 'CAD' }}
         </p>
+
         @if (paymentError()) {
-          <p class="bill-details-error" role="alert">{{ paymentError() }}</p>
+          <p class="bill-details-error" role="alert">
+            {{ paymentError() }}
+          </p>
         }
+
         <form #paymentForm="ngForm" (ngSubmit)="payBill()">
+
           <label for="cardNumber" i18n="@@bill.payment.cardNumber">Numéro de la carte</label>
           <input
             id="cardNumber"

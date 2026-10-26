@@ -1,12 +1,12 @@
 import { Component, computed, DestroyRef, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { catchError, map, of, startWith, Subject, switchMap } from 'rxjs';
+import { catchError, concatMap, from, map, of, reduce, startWith, Subject, switchMap } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
 import { VetEditForm } from '@features/vets/components/vet-edit-form/vet-edit-form';
 import { VetProfileCard } from '@features/vets/components/vet-profile-card/vet-profile-card';
-import { VetResponse, VetUpdateRequest } from '@features/vets/models/vet-api.model';
+import { VetResponse, VetEditSubmission } from '@features/vets/models/vet-api.model';
 import { toVetProfile } from '@features/vets/models/vet-profile.mapper';
 import { VetService, vetErrorMessage } from '@features/vets/services/vet.service';
 import { Roles } from '@shared/models/roles';
@@ -24,6 +24,12 @@ export class VetDetail {
   private readonly destroyRef = inject(DestroyRef);
   private readonly reload = new Subject<void>();
   private readonly editForm = viewChild(VetEditForm);
+  protected readonly availableSpecialties: readonly string[] = [
+    'radiology',
+    'surgery',
+    'dentistry',
+    'general',
+  ];
   protected readonly vet = signal<VetResponse | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
@@ -106,14 +112,37 @@ export class VetDetail {
     );
   }
 
-  protected save(request: VetUpdateRequest): void {
+  protected save(submission: VetEditSubmission): void {
     const vet = this.vet();
     if (!vet || !this.canEdit() || this.saving()) return;
     this.saving.set(true);
     this.saveError.set('');
     this.service
-      .updateVet(vet.vetId, request)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .updateVet(vet.vetId, submission.request)
+      .pipe(
+        concatMap((updatedVet) => {
+          const existingNames = new Set(
+            (updatedVet.specialties ?? []).map((specialty) => specialty.name.trim().toLowerCase()),
+          );
+
+          const namesToAdd = submission.newSpecialtyNames
+            .map((name) => name.trim())
+            .filter((name) => {
+              const key = name.toLowerCase();
+
+              if (!key || existingNames.has(key)) return false;
+
+              existingNames.add(key);
+              return true;
+            });
+
+          return from(namesToAdd).pipe(
+            concatMap((name) => this.service.addSpecialty(vet.vetId, name)),
+            reduce((_previous: VetResponse, latest: VetResponse) => latest, updatedVet),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
         next: (updated) => {
           this.vet.set(updated);
