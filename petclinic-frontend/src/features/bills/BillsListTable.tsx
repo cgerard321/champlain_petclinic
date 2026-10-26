@@ -688,7 +688,8 @@ export default function BillsListTable({
                   : `USD $${convertCurrency(detailBill.totalAmount, 'CAD', 'USD').toFixed(2)}`}
               </p>
               <p>
-                <strong>{t('status')}</strong> {t(`statusType.${detailBill.billStatus.toLowerCase()}`)}
+                <strong>{t('status')}</strong>{' '}
+                {t(`statusType.${detailBill.billStatus.toLowerCase()}`)}
               </p>
               <p>
                 <strong>{t('billCard.detail.dueDate')}</strong>{' '}
