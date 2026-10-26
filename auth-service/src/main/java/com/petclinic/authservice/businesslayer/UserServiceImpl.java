@@ -498,7 +498,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String updateUserUsername(String userId, String username, String token) {
+    public User updateUserUsername(String userId, String username, String token) {
         User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
 
         if (existingUser == null) {
@@ -507,8 +507,8 @@ public class UserServiceImpl implements UserService {
         username = username.replace("{\"username\":\"", "");
         username = username.replace("\"}", "");
         existingUser.setUsername(username);
-        userRepo.save(existingUser);
-        return existingUser.getUsername();
+
+        return userRepo.save(existingUser);
     }
 
     @Override
