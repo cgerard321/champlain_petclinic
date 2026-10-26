@@ -499,7 +499,11 @@ public class AuthServiceClient {
                 .retrieve()
                 .bodyToMono(Role.class);
     }
-    public Mono<String> updateUsername (final String userId, String username, String jwToken) {
+    public Mono<ResponseEntity<String>> updateUsername(
+            final String userId,
+            String username,
+            String jwToken) {
+
         return webClientBuilder.build()
                 .patch()
                 .uri(authServiceUrl + "/users/{userId}/username", userId)
@@ -507,10 +511,13 @@ public class AuthServiceClient {
                 .cookie("Bearer", jwToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
-                        x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
-                .bodyToMono(String.class);
-
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        n -> rethrower.rethrow(
+                                n,
+                                x -> new GenericHttpException(
+                                        x.get("message").toString(),
+                                        (HttpStatus) n.statusCode())))
+                .toEntity(String.class);
     }
 
     public Mono<Boolean> checkUsernameAvailability(String username, String jwtToken) {
