@@ -21,7 +21,7 @@
       @if (vet().specialties.length) {
         <ul class="specialties">
           @for (specialty of vet().specialties; track $index) {
-            <li>{{ specialty }}</li>
+            <li>{{ specialtyLabel(specialty) }}</li>
           }
         </ul>
       } @else {
