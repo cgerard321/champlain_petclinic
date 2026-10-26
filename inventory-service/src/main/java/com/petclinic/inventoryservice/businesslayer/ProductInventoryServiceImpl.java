@@ -25,6 +25,12 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.aggregation.AggregationUpdate;
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
+import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import javax.security.auth.callback.TextInputCallback;
 import java.time.Instant;
@@ -809,45 +815,50 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                     "The restock quantity must be greater than 0."));
         }
 
-        return productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
-                .switchIfEmpty(Mono.error(new NotFoundException(
-                        "Product with id: " + productId + " not found in inventory " + inventoryId)))
-                .flatMap(product -> {
-                    Status status = product.getStatus();
+        Query eligible = Query.query(Criteria.where("inventoryId").is(inventoryId)
+                .and("productId").is(productId)
+                .and("status").in(Status.RE_ORDER, Status.OUT_OF_STOCK)
+                .and("productQuantity").gte(0)
+                .lte(Integer.MAX_VALUE - productQuantity));
 
-                    if (status != Status.RE_ORDER && status != Status.OUT_OF_STOCK) {
-                        return Mono.error(new InvalidInputException(
-                                "Only RE ORDER or OUT OF STOCK supplies can be restocked."));
-                    }
+        AggregationUpdate update = AggregationUpdate.update()
+                .set("productQuantity")
+                .toValue(ArithmeticOperators.valueOf("productQuantity").add(productQuantity))
+                .set("status")
+                .toValue(ConditionalOperators.when(
+                        Criteria.where("productQuantity").lt(EntityDTOUtil.REORDER_THRESHOLD))
+                        .then(Status.RE_ORDER.name())
+                        .otherwise(Status.AVAILABLE.name()))
+                .set("lastUpdatedAt").toValue(LocalDateTime.now());
 
-                    int previousQuantity = product.getProductQuantity();
-                    if (previousQuantity > Integer.MAX_VALUE - productQuantity) {
-                        return Mono.error(new InvalidInputException(
-                                "The restock quantity would exceed the maximum stock quantity."));
-                    }
-
-                    int newQuantity = previousQuantity + productQuantity;
-                    product.setProductQuantity(newQuantity);
-                    product.setLastUpdatedAt(LocalDateTime.now());
-                    product.setStatus(
-                            newQuantity == 0 ? Status.OUT_OF_STOCK :
-                                    newQuantity < 20 ? Status.RE_ORDER : Status.AVAILABLE
-                    );
-
-                    return productRepository.save(product)
-                            .flatMap(saved ->
-                                    recordSupplyChange(
-                                            inventoryId,
-                                            saved.getProductId(),
-                                            saved.getProductName(),
-                                            previousQuantity,
-                                            saved.getProductQuantity(),
-                                            SupplyAuditAction.QUANTITY_UPDATED,
-                                            changedBy)
-                                            .thenReturn(EntityDTOUtil.toProductResponseDTO(saved)));
-                });
+        return mongoTemplate.findAndModify(
+                        eligible,
+                        update,
+                        FindAndModifyOptions.options().returnNew(true),
+                        Product.class)
+                .switchIfEmpty(Mono.defer(() ->
+                        productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
+                                .switchIfEmpty(Mono.error(new NotFoundException(
+                                        "Product with id: " + productId
+                                                + " not found in inventory " + inventoryId)))
+                                .flatMap(product -> Mono.error(new InvalidInputException(
+                                        (product.getStatus() == Status.RE_ORDER
+                                                || product.getStatus() == Status.OUT_OF_STOCK)
+                                                ? "The restock quantity would exceed the maximum stock quantity."
+                                                : "Only RE ORDER or OUT OF STOCK supplies can be restocked. Refresh and try again.")))))
+                // Audit history is written after the stock update without a transaction.
+                // Propagate audit failures; the stock addition has already been applied.
+                .flatMap(updated ->
+                        recordSupplyChange(
+                                inventoryId,
+                                updated.getProductId(),
+                                updated.getProductName(),
+                                updated.getProductQuantity() - productQuantity,
+                                updated.getProductQuantity(),
+                                SupplyAuditAction.QUANTITY_UPDATED,
+                                changedBy)
+                                .thenReturn(EntityDTOUtil.toProductResponseDTO(updated)));
     }
-
 
     @Override
     public Flux<SupplyAuditEntry> getSupplyHistory(String inventoryId, String productId) {
