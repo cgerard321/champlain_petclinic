@@ -26,6 +26,7 @@
   "include": [
     "tests/**/*",
     "e2e/**/*",
+    "src/features/visits/Review/ReviewProfanity.ts",
     "playwright.config.ts"
   ],
   "exclude": [
