@@ -5,6 +5,7 @@ import com.petclinic.cartsservice.dataaccesslayer.PromoRepository;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
+import com.petclinic.cartsservice.utils.PromoEligibility;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -81,6 +82,7 @@ public class PromoCodeServiceImpl implements PromoCodeService {
         promoCode.setActive(!Boolean.FALSE.equals(promoCodeRequestModel.getActive()));
         promoCode.setExpirationDate(EntityModelUtil.validateExpirationDate(promoCodeRequestModel.getExpirationDate()));
 
+        PromoEligibility.setScope(promoCode, promoCodeRequestModel);
         return promoRepository.save(promoCode)
                 .map(EntityModelUtil::toPromoCodeResponseModel);
     }
