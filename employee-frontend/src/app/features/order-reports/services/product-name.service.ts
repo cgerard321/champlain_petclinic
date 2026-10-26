@@ -2,8 +2,7 @@ import { inject, Injectable, LOCALE_ID, signal } from '@angular/core';
 
 import { ProductService } from '@features/prod/services/product.service';
 
-// Orders and reports only store the English product name, so the French name is pulled
-// from the products API, the same way the customer cart does it.
+// french product names from products api
 @Injectable({ providedIn: 'root' })
 export class ProductNameService {
   private readonly productService = inject(ProductService);
@@ -11,7 +10,7 @@ export class ProductNameService {
 
   private readonly frenchNames = signal<Record<string, string>>({});
 
-  // Product ids we already asked the API for
+  // already requested
   private readonly requestedIds = new Set<string>();
 
   load(productIds: string[]): void {
@@ -33,14 +32,14 @@ export class ProductNameService {
           }
         },
         error: () => {
-          // Let it try again next time
+          // retry later
           this.requestedIds.delete(productId);
         },
       });
     }
   }
 
-  // Falls back to the name stored on the order
+  // fallback: order name
   name(productId: string, fallbackName: string): string {
     const frenchName = this.frenchNames()[productId];
     if (frenchName) {

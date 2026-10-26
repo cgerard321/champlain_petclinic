@@ -19,7 +19,7 @@ import {
 } from '@features/order-reports/models/order-report.model';
 import { OrderReportService } from '@features/order-reports/services/order-report.service';
 
-// Material only ships the paginator text in English, so it is translated here.
+// paginator i18n
 function orderReportsPaginatorIntl(): MatPaginatorIntl {
   const intl = new MatPaginatorIntl();
   intl.itemsPerPageLabel = $localize`:@@orderReports.paginator.itemsPerPage:Éléments par page :`;
@@ -111,7 +111,7 @@ export class OrderReportList implements OnInit {
   }
 
   protected openReport(report: OrderReport): void {
-    // autoFocus 'dialog' keeps focus off the close button, so the dialog doesn't open scrolled to the right.
+    // no scroll to close button
     this.dialog.open(ReportDetailsDialog, {
       data: { report },
       width: '820px',
@@ -122,7 +122,7 @@ export class OrderReportList implements OnInit {
   }
 
   protected openOrder(event: Event, orderId: string): void {
-    // Stops the row click from also opening the report.
+    // skip row click
     event.stopPropagation();
     this.dialog.open(OrderDetailsDialog, {
       data: { orderId },

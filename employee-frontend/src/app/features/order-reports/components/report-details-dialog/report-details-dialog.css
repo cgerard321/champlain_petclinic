@@ -28,7 +28,7 @@
   overflow-wrap: anywhere;
 }
 
-/* Material adds an empty spacer before the title, which we don't need here */
+/* hide material title spacer */
 .dialog-header h2::before {
   display: none;
 }
@@ -54,7 +54,7 @@ mat-dialog-content {
   max-height: 75vh;
   padding: 20px 24px;
 
-  /* Content can still scroll on small screens, but the scrollbar is hidden */
+  /* hidden scrollbar */
   scrollbar-width: none;
 }
 

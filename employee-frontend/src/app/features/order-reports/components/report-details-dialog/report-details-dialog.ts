@@ -43,8 +43,7 @@ export class ReportDetailsDialog {
   constructor() {
     this.productNames.load(this.report.affectedItems.map((item) => item.productId));
 
-    // If the report closes while the order is still open, center the order again
-    // and give the order its own grey background right away.
+    // report closed: re-center order
     this.dialogRef
       .beforeClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -61,7 +60,7 @@ export class ReportDetailsDialog {
       return;
     }
 
-    // Slide this dialog to the left and open the order on the right, instead of stacking them.
+    // side by side, no stacking
     this.dialogRef.addPanelClass(['dialog-shift-left', 'dialogs-side-by-side']);
     this.orderDialogRef = this.dialog.open(OrderDetailsDialog, {
       data: { orderId: this.report.orderId },
@@ -69,11 +68,11 @@ export class ReportDetailsDialog {
       maxWidth: '95vw',
       autoFocus: 'dialog',
       panelClass: ['order-dialog-pane', 'dialog-slide-right'],
-      // Setting backdropClass replaces Material's default, so the dark backdrop is listed again.
+      // keep default dark backdrop
       backdropClass: ['cdk-overlay-dark-backdrop', 'order-dialog-backdrop'],
     });
 
-    // When the order closes, center this dialog again.
+    // order closed: re-center report
     this.orderDialogRef
       .afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
