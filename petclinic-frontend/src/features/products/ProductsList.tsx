@@ -17,7 +17,10 @@ import ProductBundle from './components/ProductBundle';
 import './components/Image.css';
 //import ProductSearch from './components/ProductSearch';
 import Reveal from '@/shared/components/animations/Reveal';
-import { loadRecentlyViewed } from './utils/recentlyViewed';
+import {
+  addProductToRecentlyViewed,
+  loadRecentlyViewed,
+} from './utils/recentlyViewed';
 
 const CATALOG_PAGE_SIZE = 8;
 
@@ -161,15 +164,12 @@ const ProductList = function Productlist({
   }, [totalPages]);
 
   const handleProductClick = (product: ProductModel): void => {
+    addProductToRecentlyViewed(product, user.userId);
+
     setRecentlyClickedProducts(prev => {
       const updated = prev.filter(p => p.productId !== product.productId);
       updated.unshift(product);
-      if (updated.length > 5) updated.pop();
-      localStorage.setItem(
-        `recentlyClickedProducts_${user.userId}`,
-        JSON.stringify(updated)
-      );
-      return updated;
+      return updated.slice(0, 5);
     });
   };
 

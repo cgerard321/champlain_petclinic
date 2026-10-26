@@ -4,10 +4,12 @@ import axiosInstance from '@/shared/api/axiosInstance';
 export type ShippingMethod = 'PICKUP' | 'STANDARD' | 'EXPRESS';
 
 export interface CartProductModel {
+  promoLookupFailed?: boolean;
   productId: string;
   productName: string;
   productSalePrice: number;
   quantityInCart: number;
+  discountAmount?: number;
 }
 export interface CartDetailsModel {
   cartId: string;
@@ -20,6 +22,7 @@ export interface CartDetailsModel {
   tvc: number;
   total: number;
   promoPercent?: number | null;
+  discountAmount?: number;
   shippingMethod?: ShippingMethod | null;
   shippingCost?: number;
   message?: string | null;
@@ -27,11 +30,11 @@ export interface CartDetailsModel {
 
 export async function applyPromo(
   cartId: string,
-  promoPercent: number
+  promoCode: string
 ): Promise<CartDetailsModel | null> {
   const res = await axiosInstance.put(
     `/carts/${cartId}/promo`,
-    { promoPercent },
+    { promoCode },
     {
       handleLocally: true,
       useV2: false,

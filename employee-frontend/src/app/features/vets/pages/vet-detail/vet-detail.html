@@ -13,6 +13,7 @@
     @if (editing() && canEdit()) {
       <app-vet-edit-form
         [vet]="veterinarian"
+        [availableSpecialties]="availableSpecialties"
         [saving]="saving()"
         [error]="saveError()"
         (submitted)="save($event)"

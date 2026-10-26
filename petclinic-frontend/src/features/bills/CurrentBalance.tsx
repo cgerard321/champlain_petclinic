@@ -3,6 +3,7 @@ import { useUser } from '@/context/UserContext';
 import CountUp from 'react-countup';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { Currency, convertCurrency } from './utils/convertCurrency';
+import { useTranslation } from 'react-i18next';
 
 interface CurrentBalanceProps {
   currency: Currency;
@@ -11,6 +12,7 @@ interface CurrentBalanceProps {
 export default function CurrentBalance(
   props: CurrentBalanceProps
 ): JSX.Element {
+  const { t } = useTranslation('bills');
   const { currency } = props;
   const { user } = useUser();
   const [currentBalance, setCurrentBalance] = useState<number | null>(null);
@@ -37,7 +39,7 @@ export default function CurrentBalance(
         setCurrentBalance(balance);
       } catch (err) {
         console.error('Error fetching current balance:', err);
-        setError('Failed to fetch current balance');
+        setError(t('errors.fetchBalance'));
       }
     };
 
@@ -54,7 +56,7 @@ export default function CurrentBalance(
     return () => {
       window.removeEventListener('paymentSuccess', handlePaymentSuccess);
     };
-  }, [user.userId]);
+  }, [user.userId, t]);
 
   const displayBalance =
     currentBalance !== null
@@ -73,7 +75,7 @@ export default function CurrentBalance(
         backgroundColor: '#f7f7f7',
       }}
     >
-      <h3>Current Balance</h3>
+      <h3>{t('balance.title')}</h3>
       {error ? (
         <p>{error}</p>
       ) : (

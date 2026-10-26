@@ -10,7 +10,7 @@ import StarRating from '../../products/components/StarRating';
 import { CustomerResponseModel } from '../../customers/models/CustomerResponseModel.ts';
 import { getCustomer } from '../../customers/api/getCustomer.ts';
 
-import { cleanLite, isProfaneLite } from './ReviewProfanity';
+import { cleanReviewText, isReviewProfane } from './ReviewProfanity';
 
 interface ApiError {
   message: string;
@@ -95,8 +95,8 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
     // Validate form inputs
     if (!validate()) return;
 
-    if (isProfaneLite(review.review || '')) {
-      setMaskedPreview(cleanLite(review.review || ''));
+    if (isReviewProfane(review.review || '')) {
+      setMaskedPreview(cleanReviewText(review.review || ''));
       setShowProfanityModal(true);
       return;
     }
