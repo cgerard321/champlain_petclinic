@@ -376,6 +376,8 @@
                           >
                             Mettre à jour
                           </button>
+                          <!-- CPC-2135: Interest exemption is overdue-only -->
+                          @if (bill.billStatus === 'OVERDUE') {
                           <button
                             type="button"
                             class="bill-table-button bill-table-button--outline"
@@ -396,26 +398,7 @@
                                 Exempter les intérêts</ng-container
                               >
                             }
-                          </button>
-
-                          <!-- CPC-2135: Interest exemption is overdue-only -->
-                          @if (bill.billStatus === 'OVERDUE') {
-                            <button
-                              type="button"
-                              class="bill-table-button bill-table-button--outline"
-                              [disabled]="updatingInterestId() !== null"
-                              [attr.aria-pressed]="bill.interestExempt === true"
-                              (click)="toggleInterestExemption(bill)"
-                            >
-                              {{
-                                updatingInterestId() === bill.billId
-                                  ? 'Saving...'
-                                  : bill.interestExempt
-                                    ? 'Remove Interest Exemption'
-                                    : 'Exempt Interest'
-                              }}
-                            </button>
-                          }
+                          </button>}
                         }
 
                         @if (canPayBill() && bill.billStatus === 'UNPAID' && !bill.archive) {
@@ -513,7 +496,6 @@
         }
 
         <form #paymentForm="ngForm" (ngSubmit)="payBill()">
-
           <label for="cardNumber" i18n="@@bill.payment.cardNumber">Numéro de la carte</label>
           <input
             id="cardNumber"

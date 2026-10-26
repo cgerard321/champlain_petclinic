@@ -155,7 +155,8 @@
             <ng-container i18n="@@bill.yes">Oui</ng-container>
           } @else {
             <ng-container i18n="@@bill.no">Non</ng-container>
-          
+          }
+
           @if (canManageInterest()) {
             <button
               type="button"
@@ -206,7 +207,13 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="bill-details-footer">
-  <button type="button" i18n="@@bill.cancel" class="bill-details-close-button" [disabled]="updatingInterest()" (click)="close()">
+  <button
+    type="button"
+    i18n="@@bill.cancel"
+    class="bill-details-close-button"
+    [disabled]="updatingInterest()"
+    (click)="close()"
+  >
     Annuler
   </button>
 </mat-dialog-actions>

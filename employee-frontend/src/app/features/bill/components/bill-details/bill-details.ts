@@ -51,6 +51,7 @@ export class BillDetails {
 
   protected translateVisit(type: string): string {
     return this.visitTypesTranslation[type] ?? type;
+  }
   protected readonly updatingInterest = signal(false);
   protected readonly interestError = signal<string | null>(null);
   protected readonly interestSuccess = signal<string | null>(null);
