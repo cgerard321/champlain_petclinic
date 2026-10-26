@@ -42,3 +42,8 @@ export interface VetUpdateRequest {
   specialties: VetSpecialty[];
   photoDefault: boolean;
 }
+
+export interface VetEditSubmission {
+  request: VetUpdateRequest;
+  newSpecialtyNames: string[];
+}
