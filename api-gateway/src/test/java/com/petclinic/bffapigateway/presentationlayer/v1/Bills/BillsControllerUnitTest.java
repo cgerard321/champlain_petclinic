@@ -160,6 +160,39 @@ public class BillsControllerUnitTest {
         verify(billServiceClient).getAllBillsStream(
                 "bill-1", null, null, null, null, null, null, null);
     }
+    @Test
+    void setInterestExempt_ShouldUseV1Endpoint() {
+        String billId = "BILL-123";
+
+        when(billServiceClient.setInterestExempt(billId, true))
+                .thenReturn(Mono.empty());
+
+        webTestClient.patch()
+                .uri(baseBillURL + "/" + billId
+                        + "/exempt-interest?exempt=true")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(billServiceClient)
+                .setInterestExempt(billId, true);
+    }
+
+    @Test
+    void removeInterestExemption_ShouldUseV1Endpoint() {
+        String billId = "BILL-123";
+
+        when(billServiceClient.setInterestExempt(billId, false))
+                .thenReturn(Mono.empty());
+
+        webTestClient.patch()
+                .uri(baseBillURL + "/" + billId
+                        + "/exempt-interest?exempt=false")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(billServiceClient)
+                .setInterestExempt(billId, false);
+    }
 
     @Test
     void shouldGetAllPaidBills() {

@@ -1826,93 +1826,130 @@ public void testGenerateBillPdf_BillNotFound() {
             .verifyComplete();
     }
 
+
     @Test
     void test_setInterestExempt_SetToTrue_ShouldUpdateBillAndClearInterest() {
-
         String billId = "test-bill-id";
-        BigDecimal originalInterest = new BigDecimal("15.00");
-        
+
         Bill bill = Bill.builder()
-            .billId(billId)
-            .amount(new BigDecimal("100.00"))
-            .interest(originalInterest)
-            .interestExempt(false)
-            .build();
+                .billId(billId)
+                .amount(new BigDecimal("100.00"))
+                .gstAmount(new BigDecimal("5.00"))
+                .qstAmount(new BigDecimal("9.98"))
+                .taxedAmount(new BigDecimal("14.98"))
+                .interest(new BigDecimal("15.00"))
+                .interestExempt(false)
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(LocalDate.now().minusMonths(3))
+                .build();
 
-        Bill savedBill = Bill.builder()
-            .billId(billId)
-            .amount(new BigDecimal("100.00"))
-            .interest(BigDecimal.ZERO)
-            .interestExempt(true)
-            .build();
+        when(repo.findByBillId(billId))
+                .thenReturn(Mono.just(bill));
 
-        when(repo.findByBillId(billId)).thenReturn(Mono.just(bill));
-        when(repo.save(any(Bill.class))).thenReturn(Mono.just(savedBill));
+        when(repo.save(any(Bill.class)))
+                .thenAnswer(invocation ->
+                        Mono.just(invocation.getArgument(0)));
 
+        StepVerifier.create(
+                billService.setInterestExempt(billId, true)
+        ).verifyComplete();
 
-        Mono<Void> result = billService.setInterestExempt(billId, true);
+        assertTrue(bill.isInterestExempt());
 
+        assertEquals(
+                0,
+                bill.getInterest().compareTo(BigDecimal.ZERO)
+        );
 
-        StepVerifier.create(result)
-            .verifyComplete();
+        assertEquals(
+                0,
+                bill.getTotalAmount().compareTo(new BigDecimal("114.98"))
+        );
 
-        verify(repo, times(1)).save(argThat(savedBillArg -> {
-            assertEquals(true, savedBillArg.isInterestExempt());
-            assertEquals(BigDecimal.ZERO, savedBillArg.getInterest());
-            return true;
-        }));
+        assertEquals(BillStatus.OVERDUE, bill.getBillStatus());
+
+        verify(repo, times(1)).save(bill);
     }
+
+
 
     @Test
     void test_setInterestExempt_SetToFalse_ShouldUpdateBillOnly() {
-
         String billId = "test-bill-id";
-        
+        LocalDate dueDate = LocalDate.now().minusMonths(3);
+
         Bill bill = Bill.builder()
-            .billId(billId)
-            .amount(new BigDecimal("100.00"))
-            .interest(BigDecimal.ZERO)
-            .interestExempt(true)
-            .build();
+                .billId(billId)
+                .amount(new BigDecimal("100.00"))
+                .gstAmount(new BigDecimal("5.00"))
+                .qstAmount(new BigDecimal("9.98"))
+                .taxedAmount(new BigDecimal("14.98"))
+                .interest(BigDecimal.ZERO)
+                .interestExempt(true)
+                .billStatus(BillStatus.OVERDUE)
+                .dueDate(dueDate)
+                .build();
 
-        Bill savedBill = Bill.builder()
-            .billId(billId)
-            .amount(new BigDecimal("100.00"))
-            .interest(BigDecimal.ZERO)
-            .interestExempt(false) 
-            .build();
+        when(repo.findByBillId(billId))
+                .thenReturn(Mono.just(bill));
 
-        when(repo.findByBillId(billId)).thenReturn(Mono.just(bill));
-        when(repo.save(any(Bill.class))).thenReturn(Mono.just(savedBill));
+        when(repo.save(any(Bill.class)))
+                .thenAnswer(invocation ->
+                        Mono.just(invocation.getArgument(0)));
 
+        StepVerifier.create(
+                billService.setInterestExempt(billId, false)
+        ).verifyComplete();
 
-        Mono<Void> result = billService.setInterestExempt(billId, false);
+        BigDecimal expectedInterest =
+                InterestCalculationUtil.calculateCompoundInterest(
+                        new BigDecimal("100.00"),
+                        dueDate,
+                        LocalDate.now()
+                );
 
+        BigDecimal expectedTotal = new BigDecimal("114.98")
+                .add(expectedInterest);
 
-        StepVerifier.create(result)
-            .verifyComplete();
+        assertFalse(bill.isInterestExempt());
 
+        assertTrue(bill.getInterest().compareTo(BigDecimal.ZERO) > 0);
 
-        verify(repo, times(1)).save(argThat(savedBillArg -> {
-            assertEquals(false, savedBillArg.isInterestExempt());
-            return true;
-        }));
+        assertEquals(
+                0,
+                bill.getInterest().compareTo(expectedInterest)
+        );
+
+        assertEquals(
+                0,
+                bill.getTotalAmount().compareTo(expectedTotal)
+        );
+
+        assertEquals(BillStatus.OVERDUE, bill.getBillStatus());
+
+        verify(repo, times(1)).save(bill);
     }
 
-    @Test
-    void test_setInterestExempt_BillNotFound_ShouldCompleteWithoutError() {
 
+    @Test
+    void test_setInterestExempt_BillNotFound_ShouldReturnNotFound() {
         String billId = "non-existent-bill-id";
 
-        when(repo.findByBillId(billId)).thenReturn(Mono.empty());
+        when(repo.findByBillId(billId))
+                .thenReturn(Mono.empty());
 
+        StepVerifier.create(
+                        billService.setInterestExempt(billId, true)
+                )
+                .expectErrorSatisfies(error -> {
+                    assertTrue(error instanceof ResponseStatusException);
 
-        Mono<Void> result = billService.setInterestExempt(billId, true);
+                    ResponseStatusException exception =
+                            (ResponseStatusException) error;
 
-
-        StepVerifier.create(result)
-            .verifyComplete();
-
+                    assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+                })
+                .verify();
 
         verify(repo, never()).save(any(Bill.class));
     }

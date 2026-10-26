@@ -36,6 +36,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -217,8 +218,26 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}/username")
-    public ResponseEntity<String> updateUserUsername (@PathVariable String userId, @RequestBody String username, @CookieValue("Bearer") String token) {
-        return ResponseEntity.ok().body(userService.updateUserUsername(userId, username, token));
+    public ResponseEntity<String> updateUserUsername(@PathVariable String userId, @RequestBody String username, @CookieValue("Bearer") String token, HttpServletResponse response) {
+        User updatedUser =
+                userService.updateUserUsername(userId, username, token);
+
+        String newToken = jwtService.generateToken(updatedUser);
+
+        ResponseCookie newCookie = ResponseCookie
+                .from(securityConst.getTOKEN_PREFIX(), newToken)
+                .httpOnly(true)
+                .secure(true)
+                .maxAge(Duration.ofHours(1))
+                .path("/")
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader(
+                HttpHeaders.SET_COOKIE,
+                newCookie.toString()
+        );
+        return ResponseEntity.ok(updatedUser.getUsername());
     }
 
 }
