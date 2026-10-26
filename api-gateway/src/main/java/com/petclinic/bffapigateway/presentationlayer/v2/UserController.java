@@ -137,14 +137,29 @@ public class UserController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @PatchMapping(value = "/users/{userId}/username", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PatchMapping(
+            value = "/users/{userId}/username",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
     @IsUserSpecific(idToMatch = {"userId"})
-    public Mono<ResponseEntity<String>> updateUsername(@PathVariable final String userId,
-                                                       @RequestBody final String username,
-                                                       @CookieValue("Bearer") String jwtToken
-    ) {
-        return authServiceClient.updateUsername(userId,username,jwtToken)
-                .map(usernameChangeRequestDTO -> ResponseEntity.ok().body(usernameChangeRequestDTO))
+    public Mono<ResponseEntity<String>> updateUsername(
+            @PathVariable final String userId,
+            @RequestBody final String username,
+            @CookieValue("Bearer") String jwtToken) {
+
+        return authServiceClient.updateUsername(userId, username, jwtToken)
+                .map(authResponse -> {
+                    ResponseEntity.BodyBuilder response =
+                            ResponseEntity.status(authResponse.getStatusCode());
+
+                    authResponse.getHeaders()
+                            .getOrEmpty(HttpHeaders.SET_COOKIE)
+                            .forEach(cookie ->
+                                    response.header(HttpHeaders.SET_COOKIE, cookie));
+
+                    return response.body(authResponse.getBody());
+                })
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
