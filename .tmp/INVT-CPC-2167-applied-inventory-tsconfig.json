@@ -1,0 +1,13 @@
+{
+  "extends": "../employee-frontend/tsconfig.spec.json",
+  "include": [
+    "../employee-frontend/src/**/*.d.ts",
+    "../employee-frontend/src/app/features/inventories/**/*.spec.ts"
+  ],
+  "compilerOptions": {
+    "typeRoots": [
+      "../employee-frontend/node_modules/@types",
+      "../employee-frontend/node_modules"
+    ]
+  }
+}

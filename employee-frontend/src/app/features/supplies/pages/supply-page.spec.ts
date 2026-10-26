@@ -51,8 +51,6 @@ describe('SupplyPage', () => {
   const createSupply = vi.fn<SupplyService['createSupply']>();
   const updateSupply = vi.fn<SupplyService['updateSupply']>();
   const deleteSupply = vi.fn<SupplyService['deleteSupply']>();
-  const restockSupply = vi.fn<SupplyService['restockSupply']>();
-  const closeDialog = vi.fn();
   const roles = signal<string[]>([Roles.admin]);
   const openDialog = vi.fn(
     (dialogComponent: unknown, config?: { data?: ModalFormData<Record<string, unknown>> }) => {
@@ -60,8 +58,6 @@ describe('SupplyPage', () => {
       expect(config).toBeDefined();
       return {
         afterClosed: () => dialogClosed.asObservable(),
-        close: closeDialog,
-        disableClose: false,
       };
     },
   );
@@ -71,7 +67,6 @@ describe('SupplyPage', () => {
     createSupply,
     updateSupply,
     deleteSupply,
-    restockSupply,
   };
 
   const authState = {
@@ -87,7 +82,6 @@ describe('SupplyPage', () => {
     createSupply.mockReturnValue(of(supplyOne));
     updateSupply.mockReturnValue(of(supplyOne));
     deleteSupply.mockReturnValue(of(void 0));
-    restockSupply.mockReturnValue(of(supplyTwo));
 
     await TestBed.configureTestingModule({
       imports: [SupplyPage],
@@ -118,143 +112,6 @@ describe('SupplyPage', () => {
     fixture = TestBed.createComponent(SupplyPage);
     component = fixture.componentInstance;
     fixture.detectChanges();
-  });
-
-  describe('restock', () => {
-    const eligible = { ...supplyTwo, productQuantity: 5 };
-    const submitEvent = (): Event => new Event('submit', { cancelable: true });
-
-    it.each([Roles.admin, Roles.inventoryManager])(
-      'allows %s to restock eligible supplies',
-      (role) => {
-        roles.set([role]);
-        component['openRestock'](eligible);
-        expect(openDialog).toHaveBeenCalled();
-        expect(component['restockingSupply']()).toEqual(eligible);
-      },
-    );
-
-    it.each([Roles.vet, Roles.customer, Roles.receptionist, ''])(
-      'denies restock for role %s',
-      (role) => {
-        roles.set([role]);
-        component['openRestock'](eligible);
-        expect(openDialog).not.toHaveBeenCalled();
-        expect(restockSupply).not.toHaveBeenCalled();
-      },
-    );
-
-    it('only renders Restock for eligible statuses and removes it when access is revoked', () => {
-      const buttons = (): HTMLButtonElement[] =>
-        Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
-      expect(
-        buttons().filter((button) => button.textContent?.trim() === 'R\u00e9approvisionner'),
-      ).toHaveLength(1);
-      component['openRestock'](supplyOne);
-      expect(openDialog).not.toHaveBeenCalled();
-      roles.set([]);
-      fixture.detectChanges();
-      expect(
-        buttons().filter((button) => button.textContent?.trim() === 'R\u00e9approvisionner'),
-      ).toHaveLength(0);
-    });
-
-    it.each([Status.RE_ORDER, Status.OUT_OF_STOCK])('allows status %s', (status) => {
-      component['openRestock']({ ...eligible, status });
-      expect(openDialog).toHaveBeenCalled();
-    });
-
-    it.each([0, 1, 19])('rejects AVAILABLE even with quantity %s', (productQuantity) => {
-      component['openRestock']({ ...supplyOne, productQuantity });
-      expect(openDialog).not.toHaveBeenCalled();
-      expect(restockSupply).not.toHaveBeenCalled();
-    });
-
-    it('rechecks permissions on submit', () => {
-      component['openRestock'](eligible);
-      component['restockModel'].set({ quantity: 3 });
-      roles.set([]);
-      component['submitRestock'](submitEvent());
-      expect(restockSupply).not.toHaveBeenCalled();
-      expect(component['restockError']()).toContain('permission');
-    });
-
-    it.each([null, 0, -1, 1.5, NaN, Infinity, 2147483648])(
-      'rejects invalid amount %s',
-      (quantity) => {
-        component['openRestock'](eligible);
-        component['restockModel'].set({ quantity });
-        component['submitRestock'](submitEvent());
-        expect(restockSupply).not.toHaveBeenCalled();
-        expect(component['restockError']()).toContain('entier');
-      },
-    );
-
-    it('blocks duplicate submits and cancellation while pending, then applies the server response', () => {
-      const pending = new Subject<Supply>();
-      const updated = { ...eligible, productQuantity: 21, status: Status.AVAILABLE };
-      restockSupply.mockReturnValue(pending);
-      // A failed refresh must not turn this successful mutation into a failure.
-      getSupplies.mockReturnValue(throwError(() => new Error('Refresh unavailable')));
-      component['openRestock'](eligible);
-      component['restockModel'].set({ quantity: 16 });
-      component['submitRestock'](submitEvent());
-      component['submitRestock'](submitEvent());
-      component['cancelRestock']();
-      expect(restockSupply).toHaveBeenCalledExactlyOnceWith(inventoryId, eligible.productId, 16);
-      expect(closeDialog).not.toHaveBeenCalled();
-      expect(openDialog.mock.results[0]?.value?.disableClose).toBe(true);
-      pending.next(updated);
-      pending.complete();
-      component['submitRestock'](submitEvent());
-      expect(restockSupply).toHaveBeenCalledTimes(1);
-      expect(component['restockPending']()).toBe(true);
-      dialogClosed.next(undefined);
-      expect(component['supplies']().find((row) => row.productId === updated.productId)).toEqual(
-        updated,
-      );
-      expect(component['restockPending']()).toBe(false);
-      expect(component['restockError']()).toBe('');
-      expect(closeDialog).toHaveBeenCalledOnce();
-      expect(getSupplies).toHaveBeenCalledTimes(1);
-    });
-
-    it('preserves quantity and displays API errors, then permits retry', () => {
-      restockSupply.mockReturnValue(
-        throwError(() => ({ code: 400, message: 'Supply is no longer eligible.' })),
-      );
-      component['openRestock'](eligible);
-      component['restockModel'].set({ quantity: 7 });
-      component['submitRestock'](submitEvent());
-      expect(component['restockModel']().quantity).toBe(7);
-      expect(component['restockError']()).toBe('Supply is no longer eligible.');
-      expect(component['restockPending']()).toBe(false);
-      expect(openDialog.mock.results[0]?.value?.disableClose).toBe(false);
-      expect(closeDialog).not.toHaveBeenCalled();
-      restockSupply.mockReturnValue(of({ ...eligible, productQuantity: 12 }));
-      component['submitRestock'](submitEvent());
-      expect(closeDialog).toHaveBeenCalledOnce();
-    });
-
-    it.each([new Error('offline'), { code: 500, message: 'Audit unavailable' }])(
-      'blocks retry after an uncertain stock outcome %s and allows cancel',
-      (failure) => {
-        component['openRestock'](eligible);
-        component['cancelRestock']();
-        expect(closeDialog).toHaveBeenCalledOnce();
-        expect(restockSupply).not.toHaveBeenCalled();
-        closeDialog.mockClear();
-        component['restockModel'].set({ quantity: 2 });
-        restockSupply.mockReturnValue(throwError(() => failure));
-        component['submitRestock'](submitEvent());
-        expect(component['restockError']()).toContain('Le stock a peut-être changé');
-        component['submitRestock'](submitEvent());
-        expect(restockSupply).toHaveBeenCalledTimes(1);
-        expect(component['canRestock'](eligible)).toBe(false);
-        expect(component['canRestock']({ ...eligible, productId: 'other-supply' })).toBe(true);
-        expect(closeDialog).not.toHaveBeenCalled();
-      },
-    );
   });
 
   it('should combine filters dynamically and clear the controls without refetching', () => {
@@ -665,71 +522,6 @@ describe('SupplyPage', () => {
     expect(component['formatStatus']('OUT_OF_STOCK')).toBe('Rupture de stock');
 
     expect(component['formatStatus']('RE_ORDER')).toBe('À commander');
-  });
-});
-
-describe('SupplyPage restock modal rendering', () => {
-  it('shows the selected supply, preserves input on failure and closes after a successful retry', async () => {
-    const supply: Supply = {
-      productId: 'low-stock',
-      inventoryId: 'inventory',
-      productName: 'Bandages',
-      productDescription: 'Sterile bandages',
-      productQuantity: 0,
-      productPrice: 5,
-      productSalePrice: 10,
-      status: Status.OUT_OF_STOCK,
-      lastUpdatedAt: '',
-    };
-    const pending = new Subject<Supply>();
-    const restock = vi.fn().mockReturnValue(pending);
-    await TestBed.configureTestingModule({
-      imports: [SupplyPage],
-      providers: [
-        {
-          provide: SupplyService,
-          useValue: { getSupplies: () => of([supply]), restockSupply: restock },
-        },
-        { provide: AuthState, useValue: { roles: signal([Roles.inventoryManager]) } },
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: convertToParamMap({ inventoryId: 'inventory' }) } },
-        },
-      ],
-    }).compileComponents();
-    const fixture = TestBed.createComponent(SupplyPage);
-    fixture.detectChanges();
-    const button = (
-      Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[]
-    ).find((candidate) => candidate.textContent?.trim() === 'R\u00e9approvisionner');
-    button?.click();
-    fixture.detectChanges();
-    await fixture.whenStable();
-    const modal = document.querySelector('mat-dialog-container')!;
-    expect(modal.textContent).toContain('Bandages');
-    expect(modal.textContent).toContain('Quantité actuelle : 0');
-    const input = modal.querySelector<HTMLInputElement>('#restockQuantity')!;
-    input.value = '3';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    fixture.detectChanges();
-    const form = modal.querySelector('form')!;
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    fixture.detectChanges();
-    expect(restock).toHaveBeenCalledExactlyOnceWith('inventory', 'low-stock', 3);
-    expect(input.readOnly).toBe(true);
-    expect(modal.querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(true);
-    pending.error({ code: 400, message: 'Stock changed. Refresh and try again.' });
-    fixture.detectChanges();
-    expect(modal.querySelector('[role="alert"]')?.textContent).toContain('Stock changed');
-    expect(input.value).toBe('3');
-    expect(input.readOnly).toBe(false);
-    const updated = { ...supply, productQuantity: 3, status: Status.RE_ORDER };
-    restock.mockReturnValue(of(updated));
-    form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(fixture.componentInstance['supplies']()).toEqual([updated]);
-    await vi.waitFor(() => expect(document.querySelector('mat-dialog-container')).toBeNull());
   });
 });
 

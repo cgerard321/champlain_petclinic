@@ -815,10 +815,10 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                     "The restock quantity must be greater than 0."));
         }
 
+        // Match the quantity-derived status exposed by EntityDTOUtil; stored status can be absent or stale.
         Query eligible = Query.query(Criteria.where("inventoryId").is(inventoryId)
                 .and("productId").is(productId)
-                .and("status").in(Status.RE_ORDER, Status.OUT_OF_STOCK)
-                .and("productQuantity").gte(0)
+                .and("productQuantity").gte(0).lt(EntityDTOUtil.REORDER_THRESHOLD)
                 .lte(Integer.MAX_VALUE - productQuantity));
 
         AggregationUpdate update = AggregationUpdate.update()
@@ -841,11 +841,17 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                 .switchIfEmpty(Mono.error(new NotFoundException(
                                         "Product with id: " + productId
                                                 + " not found in inventory " + inventoryId)))
-                                .flatMap(product -> Mono.error(new InvalidInputException(
-                                        (product.getStatus() == Status.RE_ORDER
-                                                || product.getStatus() == Status.OUT_OF_STOCK)
-                                                ? "The restock quantity would exceed the maximum stock quantity."
-                                                : "Only RE ORDER or OUT OF STOCK supplies can be restocked. Refresh and try again.")))))
+                                .flatMap(product -> {
+                                    Integer quantity = product.getProductQuantity();
+                                    if (quantity == null || quantity < 0) {
+                                        return Mono.error(new InvalidInputException(
+                                                "The stored stock quantity is missing or negative. Correct it before restocking."));
+                                    }
+                                    return Mono.error(new InvalidInputException(
+                                            quantity < EntityDTOUtil.REORDER_THRESHOLD
+                                                    ? "The restock quantity would exceed the maximum stock quantity."
+                                                    : "Only RE ORDER or OUT OF STOCK supplies can be restocked. Refresh and try again."));
+                                })))
                 // Audit history is written after the stock update without a transaction.
                 // Propagate audit failures; the stock addition has already been applied.
                 .flatMap(updated ->

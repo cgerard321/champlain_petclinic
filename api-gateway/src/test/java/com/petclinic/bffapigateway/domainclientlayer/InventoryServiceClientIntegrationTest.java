@@ -376,6 +376,17 @@ class InventoryServiceClientIntegrationTest {
     }
 
     @Test
+    void restockLowStockProduct_preservesServerFailureAsUncertainOutcome() {
+        enqueueError(500, "Audit unavailable");
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", 5))
+                .expectErrorMatches(error -> error instanceof
+                        org.springframework.web.reactive.function.client.WebClientResponseException response
+                        && response.getStatusCode().value() == 500
+                        && response.getResponseBodyAsString().contains("Audit unavailable"))
+                .verify();
+    }
+
+    @Test
     void restockLowStockProduct_preservesOverflowErrorInsteadOfReportingNotFound() {
         enqueueError(400, "The restock quantity would exceed the maximum stock quantity.");
         StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", Integer.MAX_VALUE))

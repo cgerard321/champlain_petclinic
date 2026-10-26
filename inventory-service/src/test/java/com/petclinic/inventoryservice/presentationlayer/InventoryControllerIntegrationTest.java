@@ -1,5 +1,12 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Update;
+import org.bson.Document;
+import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditEntry;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
@@ -20,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Signal;
 import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
 import com.petclinic.inventoryservice.datalayer.Product.Status;
@@ -46,7 +54,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 class InventoryControllerIntegrationTest {
     @Autowired
     ProductInventoryService productInventoryService;
-    @Autowired
+    @SpyBean
     com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditRepository supplyAuditRepository;
 
     private Product setRestockQuantity(Integer quantity) {
@@ -62,9 +70,55 @@ class InventoryControllerIntegrationTest {
         return productRepository.save(product).block();
     }
 
+    @Autowired
+    ReactiveMongoTemplate mongoTemplate;
+
+    @Test
+    void restock_acceptsExplicitNullStoredStatus() {
+        Product product = setRestockQuantity(0);
+        mongoTemplate.updateFirst(
+                Query.query(
+                        Criteria.where("id").is(product.getId())),
+                new Update().set("status", null), Product.class).block();
+        Document stored = mongoTemplate.findById(product.getId(), Document.class, "product").block();
+        assertNotNull(stored);
+        assertTrue(stored.containsKey("status") && stored.get("status") == null);
+        webTestClient.put().uri("/inventory/1/products/123F567C9/restockProduct?productQuantity=1")
+                .exchange().expectStatus().isOk().expectBody().jsonPath("$.productQuantity").isEqualTo(1);
+    }
+
+    @Test
+    void restock_auditFailureReturnsServerErrorAfterExactlyOneStockAddition() {
+        setRestockQuantity(10);
+        RuntimeException auditFailure = new RuntimeException("Audit unavailable");
+        Mockito.doReturn(Mono.error(auditFailure)).when(supplyAuditRepository).insert(
+                Mockito.any(SupplyAuditEntry.class));
+        webTestClient.put().uri("/inventory/1/products/123F567C9/restockProduct?productQuantity=5")
+                .exchange().expectStatus().is5xxServerError();
+        Product saved = productRepository.findProductByInventoryIdAndProductId("1", "123F567C9").block();
+        assertNotNull(saved);
+        assertEquals(15, saved.getProductQuantity());
+        assertEquals(Status.RE_ORDER, saved.getStatus());
+        Mockito.verify(supplyAuditRepository).insert(
+                Mockito.any(SupplyAuditEntry.class));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"10,NULL", "0,NULL", "19,AVAILABLE"}, nullValues = "NULL")
+    void restock_usesTheQuantityDerivedStatusShownOnTheSupplyPage(int quantity, Status storedStatus) {
+        setRestockProduct(quantity, storedStatus);
+        webTestClient.get().uri("/inventory/1/products/123F567C9")
+                .exchange().expectStatus().isOk().expectBody()
+                .jsonPath("$.status").isEqualTo(quantity == 0 ? "OUT_OF_STOCK" : "RE_ORDER");
+        webTestClient.put()
+                .uri("/inventory/1/products/123F567C9/restockProduct?productQuantity=1")
+                .exchange().expectStatus().isOk().expectBody(ProductResponseDTO.class)
+                .value(response -> assertEquals(quantity + 1, response.getProductQuantity()));
+    }
+
     @ParameterizedTest
     @CsvSource({"0,1,1,RE_ORDER", "1,5,6,RE_ORDER", "19,1,20,AVAILABLE",
-            "25,5,30,AVAILABLE", "0,2147483647,2147483647,AVAILABLE"})
+            "0,2147483647,2147483647,AVAILABLE"})
     void restock_addsQuantityAndRecalculatesStatus(int initial, int amount, int total, Status status) {
         Product before = setRestockQuantity(initial);
         String actor = "restock-test-" + UUID.randomUUID();
@@ -96,9 +150,10 @@ class InventoryControllerIntegrationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(ints = {0, 1, 19, 20, 100})
-    void restock_rejectsAvailableRegardlessOfQuantity(int quantity) {
-        setRestockProduct(quantity, Status.AVAILABLE);
+    @CsvSource(value = {"20,AVAILABLE", "100,AVAILABLE", "20,NULL", "20,RE_ORDER", "20,OUT_OF_STOCK"},
+            nullValues = "NULL")
+    void restock_rejectsAvailableQuantityRegardlessOfStoredStatus(int quantity, Status storedStatus) {
+        setRestockProduct(quantity, storedStatus);
         webTestClient.put().uri("/inventory/1/products/123F567C9/restockProduct?productQuantity=1")
                 .exchange().expectStatus().isBadRequest().expectBody()
                 .jsonPath("$.message").value(message -> assertTrue(message.toString().contains("Only RE ORDER")));
@@ -108,12 +163,24 @@ class InventoryControllerIntegrationTest {
 
     @Test
     void restock_rejectsOverflowWithoutChangingStock() {
-        setRestockQuantity(com.petclinic.inventoryservice.utils.EntityDTOUtil.REORDER_THRESHOLD + 1);
+        setRestockQuantity(1);
         webTestClient.put().uri("/inventory/1/products/123F567C9/restockProduct?productQuantity=2147483647")
                 .exchange().expectStatus().isBadRequest().expectBody()
                 .jsonPath("$.message").value(message -> assertTrue(message.toString().contains("maximum stock")));
-        assertEquals(com.petclinic.inventoryservice.utils.EntityDTOUtil.REORDER_THRESHOLD + 1,
+        assertEquals(1,
                 productRepository.findProductByInventoryIdAndProductId("1", "123F567C9")
+                .block().getProductQuantity());
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"NULL", "-1"}, nullValues = "NULL")
+    void restock_rejectsMalformedStoredQuantityWithoutChangingStock(Integer quantity) {
+        setRestockProduct(quantity, Status.RE_ORDER);
+        webTestClient.put().uri("/inventory/1/products/123F567C9/restockProduct?productQuantity=1")
+                .exchange().expectStatus().isBadRequest().expectBody()
+                .jsonPath("$.message").isEqualTo(
+                        "The stored stock quantity is missing or negative. Correct it before restocking.");
+        assertEquals(quantity, productRepository.findProductByInventoryIdAndProductId("1", "123F567C9")
                 .block().getProductQuantity());
     }
 
