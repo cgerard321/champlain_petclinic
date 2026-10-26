@@ -3,10 +3,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   catchError,
+  concatMap,
   forkJoin,
+  from,
   map,
   Observable,
   of,
+  reduce,
   startWith,
   Subject,
   switchMap,
@@ -37,6 +40,12 @@ export class VetDetail {
   private readonly destroyRef = inject(DestroyRef);
   private readonly reload = new Subject<void>();
   private readonly editForm = viewChild(VetEditForm);
+  protected readonly availableSpecialties: readonly string[] = [
+    'radiology',
+    'surgery',
+    'dentistry',
+    'general',
+  ];
   protected readonly vet = signal<VetResponse | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
@@ -155,6 +164,27 @@ export class VetDetail {
     this.service
       .updateVet(vet.vetId, payload.request)
       .pipe(
+        concatMap((updatedVet) => {
+          const existingNames = new Set(
+            (updatedVet.specialties ?? []).map((specialty) => specialty.name.trim().toLowerCase()),
+          );
+
+          const namesToAdd = payload.newSpecialtyNames
+            .map((name) => name.trim())
+            .filter((name) => {
+              const key = name.toLowerCase();
+
+              if (!key || existingNames.has(key)) return false;
+
+              existingNames.add(key);
+              return true;
+            });
+
+          return from(namesToAdd).pipe(
+            concatMap((name) => this.service.addSpecialty(vet.vetId, name)),
+            reduce((_previous: VetResponse, latest: VetResponse) => latest, updatedVet),
+          );
+        }),
         switchMap((updated) =>
           this.cancelVisits(payload.visitsToCancel).pipe(map((failed) => ({ updated, failed }))),
         ),

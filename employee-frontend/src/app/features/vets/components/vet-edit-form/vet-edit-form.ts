@@ -12,7 +12,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 
 import {
@@ -24,13 +24,17 @@ import {
   Schedule,
   visitsAffectedBy,
 } from '@features/vets/models/availability';
-import { VetResponse, VetUpdateRequest, Workday } from '@features/vets/models/vet-api.model';
-import { workdayLabels } from '@features/vets/models/vet-profile.mapper';
+import {
+  VetEditSubmission,
+  VetResponse,
+  VetSpecialty,
+  Workday,
+} from '@features/vets/models/vet-api.model';
+import { specialtyLabel, workdayLabels } from '@features/vets/models/vet-profile.mapper';
 import { Visit } from '@features/vist/models/Visit';
 import { ConfirmDialog } from '@shared/components/confirm-dialog/confirm-dialog';
 
-export interface VetSavePayload {
-  readonly request: VetUpdateRequest;
+export interface VetSavePayload extends VetEditSubmission {
   readonly visitsToCancel: readonly Visit[];
 }
 
@@ -42,12 +46,17 @@ export interface VetSavePayload {
 })
 export class VetEditForm {
   readonly vet = input.required<VetResponse>();
+  readonly availableSpecialties = input.required<readonly string[]>();
   readonly saving = input(false);
   readonly error = input('');
   readonly visits = input<readonly Visit[]>([]);
   readonly visitsChecked = input(false);
   readonly submitted = output<VetSavePayload>();
   readonly cancelled = output<void>();
+  protected readonly customSpecialty = new FormControl('', {
+    nonNullable: true,
+  });
+  protected readonly specialtyLabel = specialtyLabel;
   private readonly fb = inject(FormBuilder);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
@@ -59,6 +68,7 @@ export class VetEditForm {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly injector = inject(Injector);
   protected readonly announcement = signal('');
+  protected readonly pendingSpecialtyNames = signal<string[]>([]);
   protected readonly form = this.fb.nonNullable.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
@@ -76,6 +86,7 @@ export class VetEditForm {
       ],
     ],
     resume: ['', [Validators.required, Validators.minLength(10)]],
+    specialties: this.fb.nonNullable.control<VetSpecialty[]>([]),
   });
   protected readonly fields = [
     {
@@ -144,6 +155,78 @@ export class VetEditForm {
     });
   });
 
+  protected addSpecialtyByName(value: string): void {
+    if (this.saving()) return;
+
+    const name = value.trim();
+    if (!name) return;
+
+    const selectedNames = [
+      ...this.form.controls.specialties.value.map((specialty) => specialty.name),
+      ...this.pendingSpecialtyNames(),
+    ];
+
+    const alreadySelected = selectedNames.some(
+      (selected) => selected.trim().toLowerCase() === name.toLowerCase(),
+    );
+
+    if (alreadySelected) return;
+
+    this.pendingSpecialtyNames.update((names) => [...names, name]);
+    this.form.controls.specialties.markAsDirty();
+  }
+
+  protected removePendingSpecialty(name: string): void {
+    if (this.saving()) return;
+
+    this.pendingSpecialtyNames.update((names) => names.filter((item) => item !== name));
+    this.form.controls.specialties.markAsDirty();
+  }
+
+  protected isSpecialtySelected(specialtyId: string): boolean {
+    return this.form.controls.specialties.value.some(
+      (specialty) => specialty.specialtyId === specialtyId,
+    );
+  }
+
+  protected toggleSpecialty(specialty: VetSpecialty, checked: boolean): void {
+    if (this.saving()) return;
+
+    const control = this.form.controls.specialties;
+    const current = control.value;
+
+    const updated = checked
+      ? current.some((item) => item.specialtyId === specialty.specialtyId)
+        ? current
+        : [...current, specialty]
+      : current.filter((item) => item.specialtyId !== specialty.specialtyId);
+
+    control.setValue(updated);
+    control.markAsDirty();
+    control.markAsTouched();
+  }
+
+  protected remainingSpecialties(): readonly string[] {
+    const selectedNames = new Set(
+      [
+        ...this.form.controls.specialties.value.map((specialty) => specialty.name),
+        ...this.pendingSpecialtyNames(),
+      ].map((name) => name.trim().toLowerCase()),
+    );
+
+    return this.availableSpecialties().filter(
+      (name) => !selectedNames.has(name.trim().toLowerCase()),
+    );
+  }
+
+  protected addCustomSpecialty(): void {
+    this.addSpecialtyByName(this.customSpecialty.value);
+
+    if (!this.saving()) {
+      this.customSpecialty.reset();
+    }
+  }
+
   constructor() {
     effect(() => {
       const vet = this.vet();
@@ -153,6 +236,7 @@ export class VetEditForm {
         email: vet.email ?? '',
         phoneNumber: vet.phoneNumber ?? '',
         resume: vet.resume ?? '',
+        specialties: [...(vet.specialties ?? [])],
       });
       const workday = vet.workday ?? [];
       const days = DAYS.filter((day) => workday.includes(day));
@@ -162,6 +246,8 @@ export class VetEditForm {
       this.days.set(days);
       this.schedule.set(schedule);
       this.announcement.set('');
+      this.pendingSpecialtyNames.set([]);
+      this.customSpecialty.reset();
     });
   }
 
@@ -220,6 +306,7 @@ export class VetEditForm {
       email: values.email.trim(),
       phoneNumber: values.phoneNumber.trim(),
       resume: values.resume.trim(),
+      specialties: values.specialties,
     });
     this.form.markAllAsTouched();
     if (this.form.invalid) return;
@@ -288,9 +375,9 @@ export class VetEditForm {
           : DAYS.filter((day) => days.includes(day) || schedule[day].length > 0),
         workHoursJson: untouched ? vet.workHoursJson : JSON.stringify(workHours),
         active: vet.active,
-        specialties: vet.specialties ?? [],
         photoDefault: false,
       },
+      newSpecialtyNames: [...this.pendingSpecialtyNames()],
     });
   }
 }

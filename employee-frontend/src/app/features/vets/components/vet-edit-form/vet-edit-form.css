@@ -184,6 +184,114 @@ h3:focus-visible {
   line-height: 1;
 }
 
+.specialty-section {
+  margin-bottom: 24px;
+}
+
+.specialty-section h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.specialty-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.specialty-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px 6px 14px;
+  border-radius: 16px;
+  background: #f0f2ec;
+  color: #214b3e;
+}
+
+.remove-specialty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.remove-specialty:hover:not(:disabled) {
+  background: rgb(33 75 62 / 10%);
+}
+
+.empty-specialties,
+.specialty-section > p {
+  margin: 0;
+  font-size: 13px;
+  color: #596c62;
+}
+
+.specialty-section > p {
+  margin-top: 8px;
+}
+
+.available-specialty-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.available-specialty-list > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.available-specialty-list > li > span {
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.available-specialty-list button {
+  padding: 8px 14px;
+  flex-shrink: 0;
+}
+
+.custom-specialty {
+  margin-top: 20px;
+}
+
+.custom-specialty > button {
+  margin-top: 12px;
+}
+
+.specialty-chip {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.specialty-chip > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.remove-specialty {
+  flex-shrink: 0;
+}
+
 @media (width <= 600px) {
   form {
     padding: 16px;
@@ -253,5 +361,20 @@ h3:focus-visible {
     background-color: var(--mat-sys-surface-container-highest) !important;
     border-color: #ff9c9c !important;
     color: #ff9c9c !important;
+  }
+
+  .specialty-chip {
+    background: var(--mat-sys-surface-container-highest);
+    color: #a3b8ac;
+  }
+
+  .remove-specialty:hover:not(:disabled) {
+    background: rgb(255 255 255 / 12%);
+  }
+
+
+  .empty-specialties,
+  .specialty-section > p {
+    color: #a3b8ac;
   }
 }
