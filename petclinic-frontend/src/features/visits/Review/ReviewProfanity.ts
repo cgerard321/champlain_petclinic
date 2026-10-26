@@ -121,7 +121,7 @@ const isProfaneWord = (word: string): boolean => {
   return FUZZY_BAD_WORDS.some(candidate => {
     if (candidate.length === 5) return hasOneExtraLetter(word, candidate);
 
-    const maxDistance = candidate.length >= 8 ? 2 : 1;
+    const maxDistance = candidate.length >= 8 ? 2 : 0;
     return (
       Math.abs(word.length - candidate.length) <= maxDistance &&
       isWithinEditDistance(word, candidate, maxDistance)
