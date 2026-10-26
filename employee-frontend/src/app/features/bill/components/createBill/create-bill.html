@@ -1,20 +1,27 @@
 <form (submit)="onSubmit($event)" novalidate>
   <mat-card class="bill-create-form" appearance="outlined">
     <mat-card-header>
-      <h1>Welcome, {{ vets()[0]?.firstName + ' ' + vets()[0]?.lastName }}</h1>
+      <h1>
+        <ng-container i18n="@@bill.createBill.welcome">Bienvenue</ng-container>,
+        {{ vets()[0]?.firstName + ' ' + vets()[0]?.lastName }}
+      </h1>
     </mat-card-header>
 
     <mat-divider />
 
     <div class="form-row">
-      <mat-checkbox [checked]="sendEmail()" (change)="sendEmail.set($event.checked)">
-        Email this bill to the customer
+      <mat-checkbox
+        [checked]="sendEmail()"
+        i18n="@@bill.createBill.emailBill"
+        (change)="sendEmail.set($event.checked)"
+      >
+        Envoyer cette facture par courriel au client
       </mat-checkbox>
     </div>
 
     <mat-card-content>
       <div class="form-row">
-        <label for="vetId" class="label-size">Veterinarian Name:</label>
+        <label for="vetId" i18n="@@bill.vetName" class="label-size">Nom du vétérinaire:</label>
         <mat-form-field appearance="outline">
           <input matInput disabled [value]="vets()[0]?.firstName + ' ' + vets()[0]?.lastName" />
           <input id="vetId" type="hidden" [formField]="billRequestForm.vetId" />
@@ -24,7 +31,7 @@
       <mat-divider />
 
       <div class="form-row">
-        <label for="customerId" class="label-size">Customer Name:</label>
+        <label for="customerId" i18n="@@bill.custName" class="label-size">Nom du client(e):</label>
         <mat-form-field appearance="outline">
           <mat-select id="customerId" [formField]="billRequestForm.customerId">
             @for (customer of customers(); track customer.customerId) {
@@ -48,7 +55,7 @@
       <mat-divider />
 
       <div class="form-row">
-        <label for="visitType" class="label-size">Visit Type:</label>
+        <label for="visitType" i18n="@@bill.vistType" class="label-size">Type de visite:</label>
         <mat-form-field appearance="outline">
           <mat-select
             id="visitType"
@@ -75,7 +82,7 @@
       <mat-divider />
 
       <div class="form-row">
-        <label for="amount" class="label-size">Amount:</label>
+        <label for="amount" i18n="@@bill.tableBill.amount" class="label-size">Montant:</label>
         <mat-form-field appearance="outline">
           <input
             id="amount"
@@ -143,7 +150,7 @@
             [matDatepicker]="picker"
             [formField]="billRequestForm.date"
           />
-          <mat-hint>DD/MM/YYYY</mat-hint>
+          <mat-hint>YYYY/MM/DD</mat-hint>
           <mat-datepicker-toggle matIconSuffix [for]="picker" />
           <mat-datepicker #picker />
         </mat-form-field>
@@ -153,10 +160,16 @@
     </mat-card-content>
 
     <mat-card-actions class="center-buttons">
-      <button matButton="outlined" type="button" class="red" (click)="closeCreateBill()">
-        Cancel
+      <button
+        matButton="outlined"
+        i18n="@@bill.cancel"
+        type="button"
+        class="red"
+        (click)="closeCreateBill()"
+      >
+        Annuler
       </button>
-      <button matButton="filled" type="submit">Submit</button>
+      <button matButton="filled" i18n="@@bill.submit" type="submit">Soumettre</button>
     </mat-card-actions>
   </mat-card>
 </form>

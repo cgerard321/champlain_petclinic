@@ -1,15 +1,23 @@
-<h2 mat-dialog-title>Archive Eligible Bills</h2>
+<h2 mat-dialog-title i18n="@@bill.archiveDialog.title">Archivage des factures admissibles</h2>
 
 <mat-dialog-content>
-  <p>This action will archive all eligible paid bills created more than one year ago.</p>
+  <p i18n="@@bill.archiveDialog.content">
+    Cette action permettra d'archiver toutes les factures payées admissibles créées il y a plus d’un
+    an.
+  </p>
 
-  <p class="archive-note">Unpaid bills, overdue bills, and newer bills will remain unchanged.</p>
+  <p class="archive-note" i18n="@@bill.archiveDialog.note">
+    Les factures impayées, les factures en retard et les factures plus récentes ne seront pas
+    modifiées.
+  </p>
 
-  <p>Do you want to continue?</p>
+  <p i18n="@@bill.archiveDialog.prompt">Voulez-vous continuer?</p>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-button type="button" i18n="@@bill.cancel" (click)="cancel()">Annuler</button>
 
-  <button mat-flat-button type="button" (click)="confirm()">Confirm Archive</button>
+  <button mat-flat-button type="button" i18n="@@bill.archiveDialog.confirm" (click)="confirm()">
+    Confirmer l'archivage
+  </button>
 </mat-dialog-actions>

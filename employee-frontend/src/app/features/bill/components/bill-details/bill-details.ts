@@ -15,6 +15,16 @@ export class BillDetails {
 
   protected readonly bill = signal(inject<BillRecord>(MAT_DIALOG_DATA));
 
+  protected readonly billStatusTranslation: Record<string, string> = {
+    PAID: $localize`:@@bill.paid:PAYÉE`,
+    UNPAID: $localize`:@@bill.unpaid:IMPAYÉE`,
+    OVERDUE: $localize`:@@bill.overdue:EN RETARD`,
+  };
+
+  protected translate(status: string): string {
+    return this.billStatusTranslation[status] ?? status;
+  }
+
   protected close(): void {
     this.dialogRef.close(this.bill());
   }

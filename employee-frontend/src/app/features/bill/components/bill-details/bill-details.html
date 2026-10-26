@@ -1,7 +1,9 @@
 <div class="bill-details-header">
   <div>
-    <h2 mat-dialog-title>Bill Details</h2>
-    <p class="bill-details-subtitle">Billing information and payment details</p>
+    <h2 mat-dialog-title i18n="@@bill.detail.details">Détails de la facture</h2>
+    <p class="bill-details-subtitle" i18n="@@bill.detail.desc">
+      Information de la facture et détails du paiement
+    </p>
   </div>
 
   <span
@@ -9,45 +11,45 @@
     [class.bill-status--paid]="bill().billStatus === 'PAID'"
     [class.bill-status--overdue]="bill().billStatus === 'OVERDUE'"
   >
-    {{ bill().billStatus }}
+    {{ translate(bill().billStatus) }}
   </span>
 </div>
 
 <mat-dialog-content class="bill-details-content">
   <!-- Bill Information -->
   <section class="bill-details-section">
-    <h3>Bill Information</h3>
+    <h3 i18n="@@bill.detail.info">Information de la facture</h3>
 
     <dl class="bill-details-grid">
       <div class="bill-details-field">
-        <dt>Bill ID</dt>
+        <dt i18n="@@bill.tableBill.billId">ID de la facture</dt>
         <dd>{{ bill().billId }}</dd>
       </div>
 
       <div class="bill-details-field">
-        <dt>Visit Type</dt>
+        <dt i18n="@@bill.vistType">Type de visite</dt>
         <dd>{{ bill().visitType }}</dd>
       </div>
 
       <div class="bill-details-field">
-        <dt>Customer Name</dt>
+        <dt i18n="@@bill.custName">Nom du client(e)</dt>
         <dd>
           @if (bill().customerFirstName || bill().customerLastName) {
             {{ bill().customerFirstName }}
             {{ bill().customerLastName }}
           } @else {
-            Not available
+            <ng-container i18n="@@bill.detail.notAvail">Non disponible</ng-container>
           }
         </dd>
       </div>
 
       <div class="bill-details-field">
-        <dt>Customer ID</dt>
+        <dt i18n="@@bill.tableBill.custId">ID du client(e)</dt>
         <dd>{{ bill().customerId }}</dd>
       </div>
 
       <div class="bill-details-field">
-        <dt>Veterinarian</dt>
+        <dt i18n="@@bill.tableBill.vet">Vétérinaire</dt>
         <dd>
           {{ bill().vetFirstName }}
           {{ bill().vetLastName }}
@@ -55,17 +57,17 @@
       </div>
 
       <div class="bill-details-field">
-        <dt>Veterinarian ID</dt>
+        <dt i18n="@@bill.tableBill.vetId">ID du vétérinaire</dt>
         <dd>{{ bill().vetId }}</dd>
       </div>
 
       <div class="bill-details-field">
-        <dt>Creation Date</dt>
+        <dt i18n="@@bill.creationDate">Date de création</dt>
         <dd>{{ bill().date }}</dd>
       </div>
 
       <div class="bill-details-field">
-        <dt>Due Date</dt>
+        <dt i18n="@@bill.tableBill.dueDate">Date d'échéance</dt>
         <dd>{{ bill().dueDate }}</dd>
       </div>
     </dl>
@@ -73,46 +75,46 @@
 
   <!-- Payment Summary -->
   <section class="bill-details-section">
-    <h3>Payment Summary</h3>
+    <h3 i18n="@@bill.detail.paySummary">Sommaire du paiement</h3>
 
     <dl class="bill-details-grid">
       <div class="bill-details-field">
-        <dt>Original Amount</dt>
+        <dt i18n="@@bill.detail.ogAmount">Montant original</dt>
         <dd>
           {{ bill().amount | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
         </dd>
       </div>
 
       <div class="bill-details-field">
-        <dt>GST (5%)</dt>
+        <dt><ng-container i18n="@@bill.detail.GST">TPS</ng-container> (5%)</dt>
         <dd>
           {{ bill().gstAmount ?? 0 | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
         </dd>
       </div>
 
       <div class="bill-details-field">
-        <dt>QST (9.975%)</dt>
+        <dt><ng-container i18n="@@bill.detail.QST">TVQ</ng-container> (9.975%)</dt>
         <dd>
           {{ bill().qstAmount ?? 0 | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
         </dd>
       </div>
 
       <div class="bill-details-field">
-        <dt>Total Taxes</dt>
+        <dt i18n="@@bill.detail.taxes">Total des taxes</dt>
         <dd>
           {{ bill().taxedAmount ?? 0 | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
         </dd>
       </div>
 
       <div class="bill-details-field">
-        <dt>Interest</dt>
+        <dt i18n="@@bill.tableBill.interest">Intérêts</dt>
         <dd>
           {{ bill().interest ?? 0 | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
         </dd>
       </div>
 
       <div class="bill-details-field bill-details-total">
-        <dt>Total Amount</dt>
+        <dt i18n="@@bill.detail.totalAmt">Montant total</dt>
         <dd>
           {{ bill().totalAmount ?? 0 | currency: 'CAD' : 'symbol-narrow' : '1.2-2' }}
         </dd>
@@ -122,35 +124,45 @@
 
   <!-- Additional Information -->
   <section class="bill-details-section">
-    <h3>Additional Information</h3>
+    <h3 i18n="@@bill.detail.infoAdd">Informations supplémentaires</h3>
 
     <dl class="bill-details-grid">
       <div class="bill-details-field">
-        <dt>Payment Status</dt>
-        <dd>{{ bill().billStatus }}</dd>
+        <dt i18n="@@bill.detail.payStat">Statut du paiement</dt>
+        <dd>{{ translate(bill().billStatus) }}</dd>
       </div>
 
       <div class="bill-details-field">
-        <dt>Archived</dt>
-        <dd>{{ bill().archive ? 'Yes' : 'No' }}</dd>
-      </div>
-
-      <div class="bill-details-field">
-        <dt>Interest Exempt</dt>
+        <dt i18n="@@bill.tableBill.archived">Archivée</dt>
         <dd>
-          {{ bill().interestExempt ? 'Yes' : 'No' }}
+          @if (bill().archive) {
+            <ng-container i18n="@@bill.yes">Oui</ng-container>
+          } @else {
+            <ng-container i18n="@@bill.no">Non</ng-container>
+          }
         </dd>
       </div>
 
       <div class="bill-details-field">
-        <dt>Time Remaining</dt>
+        <dt i18n="@@bill.detail.interestExempt">Exonéré d'intérêts</dt>
+        <dd>
+          @if (bill().interestExempt) {
+            <ng-container i18n="@@bill.yes">Oui</ng-container>
+          } @else {
+            <ng-container i18n="@@bill.no">Non</ng-container>
+          }
+        </dd>
+      </div>
+
+      <div class="bill-details-field">
+        <dt i18n="@@bill.detail.timeRem">Temps restant</dt>
         <dd>
           @if (bill().billStatus === 'PAID') {
-            Bill paid
+            <ng-container i18n="@@bill.detail.paid">Facture payée</ng-container>
           } @else if (bill().timeRemaining !== null && bill().timeRemaining !== undefined) {
-            {{ bill().timeRemaining }} days
+            {{ bill().timeRemaining }} <ng-container i18n="@@bill.detail.days">jours</ng-container>
           } @else {
-            Not available
+            <ng-container i18n="@@bill.detail.notAvail">Non disponible</ng-container>
           }
         </dd>
       </div>
@@ -159,5 +171,7 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end" class="bill-details-footer">
-  <button type="button" class="bill-details-close-button" (click)="close()">Close</button>
+  <button type="button" i18n="@@bill.cancel" class="bill-details-close-button" (click)="close()">
+    Annuler
+  </button>
 </mat-dialog-actions>

@@ -1,4 +1,4 @@
-import { formatDate } from '@angular/common';
+import { formatDate, DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { form, FormField, required } from '@angular/forms/signals';
@@ -20,6 +20,7 @@ import { BillService } from '@features/bill/services/bill-service';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    DatePipe,
   ],
   templateUrl: './bill-update.html',
   styleUrl: './bill-update.css',
@@ -45,10 +46,26 @@ export class BillUpdate {
   protected readonly visitTypes = ['Check-Up', 'Vaccine', 'Surgery', 'Dental'];
 
   protected readonly billForm = form(this.model, (schemaPath) => {
-    required(schemaPath.visitType, { message: 'Visit type is required' });
-    required(schemaPath.amount, { message: 'Amount is required' });
-    required(schemaPath.dueDate, { message: 'Due date is required' });
+    required(schemaPath.visitType, {
+      message: $localize`:@@bill.message.vistReq:Type de visite est requis`,
+    });
+    required(schemaPath.amount, {
+      message: $localize`:@@bill.message.amtReq:Le montant est requis`,
+    });
+    required(schemaPath.dueDate, {
+      message: $localize`:@@bill.message.dueDateReq:La date d'échéance est requise`,
+    });
   });
+
+  protected readonly billStatusTranslation: Record<string, string> = {
+    PAID: $localize`:@@bill.paid:PAYÉE`,
+    UNPAID: $localize`:@@bill.unpaid:IMPAYÉE`,
+    OVERDUE: $localize`:@@bill.overdue:EN RETARD`,
+  };
+
+  protected translate(status: string): string {
+    return this.billStatusTranslation[status] ?? status;
+  }
 
   protected submit(event: Event): void {
     event.preventDefault();
@@ -65,22 +82,30 @@ export class BillUpdate {
     );
 
     if (!validVisitType) {
-      this.errorMessage.set('Please select a valid visit type.');
+      this.errorMessage.set(
+        $localize`:@@bill.message.selectVist:Veuillez sélectionner un type de visite valide.`,
+      );
       return;
     }
 
     if (this.billForm().invalid()) {
-      this.errorMessage.set('Please complete the required fields.');
+      this.errorMessage.set(
+        $localize`:@@bill.message.completeForm:Veuillez remplir tous les champs obligatoires`,
+      );
       return;
     }
 
     if (!Number.isFinite(request.amount) || request.amount <= 0) {
-      this.errorMessage.set('Amount must be greater than zero.');
+      this.errorMessage.set(
+        $localize`:@@bill.message.greatAmtReq:Le montant doit être supérieur à 0`,
+      );
       return;
     }
 
     if (request.dueDate < request.date) {
-      this.errorMessage.set('Due date cannot be before the creation date.');
+      this.errorMessage.set(
+        $localize`:@@bill.message.dueDateInvariant:La date d'échéance ne peut pas être antérieure à la date de création`,
+      );
       return;
     }
 
@@ -96,13 +121,19 @@ export class BillUpdate {
         this.isSaving.set(false);
 
         if (error instanceof HttpErrorResponse && error.status === 403) {
-          this.errorMessage.set('You do not have permission to update this bill.');
+          this.errorMessage.set(
+            $localize`:@@bill.updateBill.noPerm:Vous n'avez pas la permission de modifier cette facture`,
+          );
         } else if (error instanceof HttpErrorResponse && error.status === 404) {
-          this.errorMessage.set('Bill not found.');
+          this.errorMessage.set($localize`:@@bill.updateBill.notFound:Facture introuvable`);
         } else if (error instanceof HttpErrorResponse && error.status === 400) {
-          this.errorMessage.set('The update was rejected. Check the bill information.');
+          this.errorMessage.set(
+            $localize`:@@bill.updateBill.reject:La modification a été refusée. Veuillez vérifier les informations de la facture`,
+          );
         } else {
-          this.errorMessage.set('Unable to update the bill. Please try again.');
+          this.errorMessage.set(
+            $localize`:@@bill.updateBill.unable:Impossible de modifier la facture. Veuillez réessayer`,
+          );
         }
       },
     });

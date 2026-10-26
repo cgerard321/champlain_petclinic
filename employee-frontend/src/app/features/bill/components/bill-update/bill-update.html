@@ -3,21 +3,23 @@
 <form class="bill-update-form" (submit)="submit($event)">
   <mat-dialog-content class="bill-update-content">
     <div class="bill-update-summary">
-      <p><strong>Bill ID:</strong> {{ bill.billId }}</p>
+      <p><strong i18n="@@bill.tableBill.billId">ID de la facture:</strong> {{ bill.billId }}</p>
       <p>
-        <strong>Customer:</strong>
+        <strong i18n="@@bill.tableBill.cust">Client(e):</strong>
         {{ bill.customerFirstName }} {{ bill.customerLastName }}
       </p>
       <p>
-        <strong>Veterinarian:</strong>
+        <strong i18n="@@bill.tableBill.cust">Vétérinaire:</strong>
         {{ bill.vetFirstName }} {{ bill.vetLastName }}
       </p>
-      <p><strong>Creation Date:</strong> {{ bill.date }}</p>
+      <p>
+        <strong i18n="@@bill.creationDate">Date de création:</strong>
+        {{ bill.date | date: 'dd/MM/yyyy' : '' : 'fr-CA' }}
+      </p>
     </div>
 
     <mat-form-field appearance="outline">
-      <mat-label>Visit Type</mat-label>
-
+      <mat-label i18n="@@bill.vistType">Type de visite</mat-label>
       <mat-select [formField]="billForm.visitType">
         @for (type of visitTypes; track type) {
           <mat-option [value]="type">{{ type }}</mat-option>
@@ -26,23 +28,25 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Amount (CAD)</mat-label>
+      <mat-label
+        ><ng-container i18n="@@bill.tableBill.amount">Montant</ng-container> (CAD)</mat-label
+      >
       <input matInput type="number" step="0.01" [formField]="billForm.amount" />
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Due Date</mat-label>
+      <mat-label i18n="@@bill.tableBill.dueDate">Date d'échéance</mat-label>
       <input matInput type="date" [min]="model().date" [formField]="billForm.dueDate" />
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-      <mat-label>Bill Status</mat-label>
+      <mat-label i18n="@@bill.tableBill.status">Statut</mat-label>
       <mat-select [formField]="billForm.billStatus">
-        <mat-option value="UNPAID">Unpaid</mat-option>
-        <mat-option value="PAID">Paid</mat-option>
+        <mat-option value="UNPAID" i18n="@@bill.unpaid">IMPAYÉE</mat-option>
+        <mat-option value="PAID" i18n="@@bill.paid">PAYÉE</mat-option>
 
         @if (bill.billStatus === 'OVERDUE') {
-          <mat-option value="OVERDUE">Overdue</mat-option>
+          <mat-option value="OVERDUE" i18n="@@bill.overdue">EN RETARD</mat-option>
         }
       </mat-select>
     </mat-form-field>
@@ -55,10 +59,22 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button type="button" [disabled]="isSaving()" (click)="cancel()">Cancel</button>
+    <button
+      mat-button
+      type="button"
+      i18n="@@bill.cancel"
+      [disabled]="isSaving()"
+      (click)="cancel()"
+    >
+      Annuler
+    </button>
 
     <button mat-flat-button type="submit" [disabled]="isSaving()">
-      {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+      @if (isSaving()) {
+        <ng-container i18n="@@bill.message.saving">Enregistrement en cours...</ng-container>'
+      } @else {
+        <ng-container i18n="@@bill.update">Sauvegarder</ng-container>
+      }
     </button>
   </mat-dialog-actions>
 </form>

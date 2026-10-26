@@ -738,17 +738,21 @@
       "activeButton":"Active Bills",
       "archivedButton":"Archived Bills",
       "hideFilter":"Hide Filters",
+      "showFilter":"Show Filters",
+
       "custId":"Customer ID",
       "custName":"Customer Name",
       "vetName":"Veterinarian Name",
       "vistType":"Visit Type",
       "status":"Status",
       "allStatus":"All statuses",
+
       "paid":"PAID",
       "unpaid":"UNPAID",
       "overdue":"OVERDUE",
       "creationYear":"Creation Year",
       "creationMonth":"Creation Month",
+      "creationDate":"Creation Date",
       "currency":"Currency",
       "clearFilter":"Clear Filters",
       "notAvailable":"Not Available",
@@ -766,6 +770,41 @@
       "noVetBills":"There are no bills associated with your veterinarian account",
       "notPermitted":"You do not have permission to access billing records",
       "detailLoading":"Loading bill details...",
+
+      "update":"Save Changes",
+      "submit":"Submit",
+      "cancel":"Cancel",
+
+      "detail":{
+        "details":"Bill Details",
+        "desc":"Billing information and payment details",
+        "info":"Bill Information",
+        "paySummary":"Payment Summary",
+        "ogAmount":"Original Amount",
+        "GST":"GST",
+        "QST":"QST",
+        "taxes":"Total Taxes",
+        "totalAmt":"Total Amount",
+        "infoAdd":"Additional Information",
+        "payStat":"Payment Status",
+        "interestExempt":"Interest Exempt",
+        "timeRem":"Time Remaining",
+        "paid":"Bill Paid",
+        "days":"days",
+        "notAvail":"Not available"
+      },
+
+      "detailErr":{
+        "noPerm":"You do not have permission to view this bill",
+        "unable":"Unable to load bill details. Please try again",
+        "enterBillId":"Please enter a Bill Id"
+      },
+
+      "archiveErr":{
+        "completed":"Archive check completed. All eligible bills have been processed",
+        "unable":"Unable to archive bills. Please try again",
+        "listErr":"The archive request succeeded, but the bill list could not be refreshed. Reload the page to check the results"
+      },
 
 
       "month":{
@@ -786,20 +825,27 @@
 
       "tableBill":{
         "billId":"Bill ID",
+        "custId":"Customer ID",
         "cust":"Customer",
+        "vetId":"Veterinarian ID",
         "vet":"Veterinarian",
         "amount":"Amount",
         "interest":"Interest",
         "status":"Status",
         "archived":"Archived",
         "actions":"Actions",
-        "active":"Active"
+        "active":"Active",
+        "dueDate":"Due Date"
       },
 
       "interestOpt":{
         "saving":"Saving...",
         "remove":"Remove Interest Exemption",
-        "exempt":"Exempt Interest"
+        "exempt":"Exempt Interest",
+        "applied":"Interest exemption applied",
+        "removed":"Interest exemption removed",
+        "savedErr":"The exemption was saved, but the bill could not be refreshed. Reload the bill list.",
+        "updateUnable":"Unable to update interest exemption. Please try again"
       },
 
       "payment":{
@@ -809,8 +855,57 @@
         "expDate":"Expiration Date (MM/YY)",
         "process":"Processing...",
         "confirm":"Confirm Payment",
-        "cancel":"Cancel"
+
+        "success":"Payment successful. The bill is now PAID",
+        "fail":"Payment failed. Please try again"
+      },
+
+      "createBill":{
+        "welcome":"Welcome",
+        "success":"Bill created successfully",
+        "emailBill":"Email this bill to the customer"
+      },
+
+      "message":{
+        "custReq":"Customer is required",
+        "vistReq":"Visit Type is required",
+        "vetReq":"Vet is required",
+        "dateReq":"Date is required",
+        "amtReq":"Amount is required",
+        "greatAmtReq":"Amount must be greater than 0",
+        "dueDateReq":"Due date is required",
+        "saving":"Saving...",
+        "selectVist":"Please select a valid visit type",
+        "completeForm":"Please complete the required fields",
+        "dueDateInvariant":"Due date cannot be before the creation date",
+        "startDownload":"Bill PDF download started",
+        "downloadErr":"Unable to download PDF. Please try again"
+      },
+
+      "loading":{
+        "unableCust":"Unable to load customers. Please try again later",
+        "unableVet":"Unable to load veterinarians. Please try again later"
+      },
+
+      "updateBill":{
+        "noPerm":"You do not have permission to update this bill",
+        "notFound":"Bill not found",
+        "reject":"The update was rejected. Cjeck the bill information",
+        "unable":"Unable to update the bill. Please try again"
+      },
+
+      "yes":"Yes",
+      "no":"No",
+
+      "archiveDialog":{
+        "title":"Archive Eligible Bills",
+        "content":"This action will archive all eligible paid bills created more than one year ago.",
+        "note":"Unpaid bills, overdue bills, and new bills will remain unchanged.",
+        "prompt":"Do you want to continue?",
+        "confirm":"Confirm Archive"
       }
+
+
 
     }
   }
