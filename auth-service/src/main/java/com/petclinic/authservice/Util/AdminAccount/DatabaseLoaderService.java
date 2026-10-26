@@ -92,7 +92,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .username("Owner1")
                 .userIdentifier(new UserIdentifier("f470653d-05c5-4c45-b7a0-7d70f003d2ac"))
                 .roles(owners)
-                .email("ionascueric0@gmail.com")
+                .email("george@email.com")
                 .password(passwordEncoder.encode("pwd"))
                 .verified(true)
                 .build();
@@ -184,7 +184,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .username("Vet1")
                 .userIdentifier(new UserIdentifier("69f852ca-625b-11ee-8c99-0242ac120002"))
                 .roles(roles2)
-                .email("carterjames@email.com")
+                .email("ionascueric0@gmail.com")
                 .password(passwordEncoder.encode("pwd"))
                 .verified(true)
                 .build();
