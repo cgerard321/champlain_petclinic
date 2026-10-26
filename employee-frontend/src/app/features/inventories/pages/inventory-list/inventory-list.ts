@@ -107,10 +107,6 @@ export class InventoryList implements OnInit, OnDestroy {
 
   protected readonly can = computed(() => getInventoryPermissions(this.auth.roles()));
 
-  protected readonly canManageFavorites = computed(
-    () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager),
-  );
-
   protected readonly currentPage = signal(0);
   protected readonly pageSize = 8;
   protected readonly inventories = signal<Inventory[]>([]);

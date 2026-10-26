@@ -70,7 +70,7 @@ class InventoryFavoriteAuthorizationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"RECEPTIONIST", "OWNER"})
+    @ValueSource(strings = {"RECEPTIONIST", "CUST"})
     void unauthorizedRolesCannotChangeFavorites(String role) {
         authenticate(role);
         client.patch().uri(URL)
