@@ -1,6 +1,8 @@
 package com.petclinic.bffapigateway.presentationlayer.v1.Cart;
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
+import com.petclinic.bffapigateway.dtos.Cart.OrderReportRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.OrderReportResponseDTO;
 import com.petclinic.bffapigateway.dtos.Cart.OrderResponseDTO;
 
 import com.petclinic.bffapigateway.presentationlayer.v1.OrderControllerV1;
@@ -11,8 +13,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -155,5 +159,92 @@ class OrderControllerV1UnitTest {
 
             verify(cartServiceClient, times(1))
                     .getOrdersByCustomerId(customerId);
+        }
+
+        @Test
+        void createOrderReport_successReturnsCreatedReport() {
+            OrderReportRequestDTO request = OrderReportRequestDTO.builder()
+                    .reason("DAMAGED_ITEM")
+                    .productIds(List.of("product-123"))
+                    .description("The product arrived damaged.")
+                    .build();
+            OrderReportResponseDTO response = sampleReport("RPT-123");
+
+            when(cartServiceClient.createOrderReport(
+                    CUSTOMER_ID,
+                    "order-123",
+                    request
+            )).thenReturn(Mono.just(response));
+
+            client.post()
+                    .uri(
+                            "/api/gateway/orders/customer/{customerId}/{orderId}/reports",
+                            CUSTOMER_ID,
+                            "order-123"
+                    )
+                    .bodyValue(request)
+                    .exchange()
+                    .expectStatus().isCreated()
+                    .expectBody(OrderReportResponseDTO.class)
+                    .value(report -> {
+                        assertThat(report.getReportId())
+                                .isEqualTo("RPT-123");
+                        assertThat(report.getStatus()).isEqualTo("NEW");
+                    });
+
+            verify(cartServiceClient).createOrderReport(
+                    CUSTOMER_ID,
+                    "order-123",
+                    request
+            );
+        }
+
+        @Test
+        void getCustomerOrderReports_successReturnsReports() {
+            when(cartServiceClient.getCustomerOrderReports(CUSTOMER_ID))
+                    .thenReturn(Flux.just(
+                            sampleReport("RPT-123"),
+                            sampleReport("RPT-456")
+                    ));
+
+            client.get()
+                    .uri(
+                            "/api/gateway/orders/customer/{customerId}/reports",
+                            CUSTOMER_ID
+                    )
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBodyList(OrderReportResponseDTO.class)
+                    .value(reports -> {
+                        assertThat(reports).hasSize(2);
+                        assertThat(reports.get(0).getReportId())
+                                .isEqualTo("RPT-123");
+                        assertThat(reports.get(1).getReportId())
+                                .isEqualTo("RPT-456");
+                    });
+
+            verify(cartServiceClient)
+                    .getCustomerOrderReports(CUSTOMER_ID);
+        }
+
+        private OrderReportResponseDTO sampleReport(String reportId) {
+            return OrderReportResponseDTO.builder()
+                    .reportId(reportId)
+                    .orderId("order-123")
+                    .customerId(CUSTOMER_ID)
+                    .customerName("Test Customer")
+                    .reason("DAMAGED_ITEM")
+                    .affectedItems(List.of(
+                            OrderReportResponseDTO.AffectedItemDTO.builder()
+                                    .productId("product-123")
+                                    .productName("Dog Food")
+                                    .build()
+                    ))
+                    .description("The product arrived damaged.")
+                    .status("NEW")
+                    .submittedAt(LocalDateTime.of(
+                            2026, 10, 25, 10, 0
+                    ))
+                    .build();
         }
     }
