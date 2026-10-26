@@ -76,6 +76,8 @@ describe('Bill page', () => {
             getBillById,
             getReceptionistBills,
             payBill,
+            getCustomers: vi.fn(() => of()),
+            getBillsByCustomerId: vi.fn(() => of()),
           },
         },
         {
@@ -110,6 +112,7 @@ describe('Bill page', () => {
 
     expect(host.querySelector('tbody')?.textContent).toContain('BILL-123');
     expect(host.querySelector('tbody')?.textContent).toContain('Jane');
+    expect(host.querySelector('app-customer-bill-lookup')).toBeNull();
     expect(host.textContent).toContain('Bill Overview');
   });
 
@@ -122,6 +125,7 @@ describe('Bill page', () => {
     expect(host.textContent).toContain('My Bills');
     expect(host.querySelector('tbody')?.textContent).toContain('BILL-123');
     expect(host.querySelector('tbody')?.textContent).toContain('Jane');
+    expect(host.querySelector('app-customer-bill-lookup')).toBeNull();
     expect(host.textContent).toContain('Create Bill');
   });
 
@@ -197,6 +201,7 @@ describe('Bill page', () => {
     expect(host.querySelector('.bill-row-actions')?.textContent).toContain('Pay Bill');
     expect(host.querySelector('.bill-row-actions')?.textContent).not.toContain('Update');
     expect(host.querySelector('.bill-archive-action')).toBeNull();
+    expect(host.querySelector('app-customer-bill-lookup')).not.toBeNull();
   });
 
   it('allows administrators to open bill details in a dialog', async () => {
