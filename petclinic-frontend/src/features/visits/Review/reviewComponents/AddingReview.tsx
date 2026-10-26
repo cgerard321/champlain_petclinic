@@ -8,7 +8,7 @@ import StarRating from '../../../products/components/StarRating';
 import { CustomerResponseModel } from '../../../customers/models/CustomerResponseModel.ts';
 import { getCustomer } from '../../../customers/api/getCustomer.ts';
 
-import { cleanLite, isProfaneLite } from '../ReviewProfanity';
+import { cleanReviewText, isReviewProfane } from '../ReviewProfanity';
 import BasicModal from '@/shared/components/BasicModal';
 
 interface ApiError {
@@ -73,8 +73,8 @@ const AddingReview: React.FC = (): JSX.Element => {
     if ((review.review || '').length > MAX_REVIEW_LEN)
       newErrors.review = `Max ${MAX_REVIEW_LEN} characters`;
 
-    if (isProfaneLite(review.review || '')) {
-      setMaskedPreview(cleanLite(review.review || ''));
+    if (isReviewProfane(review.review || '')) {
+      setMaskedPreview(cleanReviewText(review.review || ''));
       setShowProfanityModal(true);
       newErrors.profanity = 'No profanities!';
     }

@@ -598,17 +598,27 @@ class BillControllerUnitTest {
         Mockito.verify(billService, times(1)).getBillByBillId(nonExistentBillId);
     }
 
+
     @Test
-    void getTotal_WithValidBillId_ShouldReturnAmountPlusInterest() {
+    void getTotal_WithValidBillId_ShouldReturnTotalIncludingTaxesAndInterest() {
         BigDecimal amount = new BigDecimal("100.00");
+        BigDecimal gst = new BigDecimal("5.00");
+        BigDecimal qst = new BigDecimal("9.98");
         BigDecimal interest = new BigDecimal("5.50");
-        BigDecimal expectedTotal = amount.add(interest); // 105.50
+
+        BigDecimal taxes = gst.add(qst);
+        BigDecimal expectedTotal = amount.add(taxes).add(interest);
 
         BillResponseDTO billWithInterest = buildBillResponseDTO();
         billWithInterest.setAmount(amount);
+        billWithInterest.setGstAmount(gst);
+        billWithInterest.setQstAmount(qst);
+        billWithInterest.setTaxedAmount(taxes);
         billWithInterest.setInterest(interest);
+        billWithInterest.setTotalAmount(expectedTotal);
 
-        when(billService.getBillByBillId(BILL_ID_OK)).thenReturn(Mono.just(billWithInterest));
+        when(billService.getBillByBillId(BILL_ID_OK))
+                .thenReturn(Mono.just(billWithInterest));
 
         client.get()
                 .uri("/bills/" + BILL_ID_OK + "/total")
@@ -619,20 +629,31 @@ class BillControllerUnitTest {
                 .expectBody(BigDecimal.class)
                 .isEqualTo(expectedTotal);
 
-        Mockito.verify(billService, times(1)).getBillByBillId(BILL_ID_OK);
+        verify(billService, times(1)).getBillByBillId(BILL_ID_OK);
     }
 
+
+
     @Test
-    void getTotal_WithZeroInterest_ShouldReturnOnlyAmount() {
+    void getTotal_WithZeroInterest_ShouldReturnAmountIncludingTaxes() {
         BigDecimal amount = new BigDecimal("100.00");
+        BigDecimal gst = new BigDecimal("5.00");
+        BigDecimal qst = new BigDecimal("9.98");
         BigDecimal interest = BigDecimal.ZERO;
-        BigDecimal expectedTotal = amount; // 100.00
+
+        BigDecimal taxes = gst.add(qst);
+        BigDecimal expectedTotal = amount.add(taxes);
 
         BillResponseDTO billWithZeroInterest = buildBillResponseDTO();
         billWithZeroInterest.setAmount(amount);
+        billWithZeroInterest.setGstAmount(gst);
+        billWithZeroInterest.setQstAmount(qst);
+        billWithZeroInterest.setTaxedAmount(taxes);
         billWithZeroInterest.setInterest(interest);
+        billWithZeroInterest.setTotalAmount(expectedTotal);
 
-        when(billService.getBillByBillId(BILL_ID_OK)).thenReturn(Mono.just(billWithZeroInterest));
+        when(billService.getBillByBillId(BILL_ID_OK))
+                .thenReturn(Mono.just(billWithZeroInterest));
 
         client.get()
                 .uri("/bills/" + BILL_ID_OK + "/total")
@@ -643,8 +664,9 @@ class BillControllerUnitTest {
                 .expectBody(BigDecimal.class)
                 .isEqualTo(expectedTotal);
 
-        Mockito.verify(billService, times(1)).getBillByBillId(BILL_ID_OK);
+        verify(billService, times(1)).getBillByBillId(BILL_ID_OK);
     }
+
 
     @Test
     void getTotal_WithNonExistentBillId_ShouldReturnError() {
@@ -662,19 +684,39 @@ class BillControllerUnitTest {
         Mockito.verify(billService, times(1)).getBillByBillId(nonExistentBillId);
     }
 
+
     @Test
-    void getTotal_WithOverdueBill_ShouldReturnAmountPlusCompoundInterest() {
-        // Create an overdue bill with compound interest
+    void getTotal_WithOverdueBill_ShouldReturnTotalIncludingTaxesAndCompoundInterest() {
         LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
+
         BigDecimal amount = new BigDecimal("100.00");
-        BigDecimal expectedInterest = InterestCalculationUtil.calculateCompoundInterest(amount, dueDate, LocalDate.now());
-        BigDecimal expectedTotal = amount.add(expectedInterest);
+        BigDecimal gst = new BigDecimal("5.00");
+        BigDecimal qst = new BigDecimal("9.98");
+
+        BigDecimal taxes = gst.add(qst);
+
+        BigDecimal expectedInterest =
+                InterestCalculationUtil.calculateCompoundInterest(
+                        amount,
+                        dueDate,
+                        LocalDate.now()
+                );
+
+        BigDecimal expectedTotal = amount
+                .add(taxes)
+                .add(expectedInterest);
 
         BillResponseDTO overdueBill = buildBillOverdueResponseDTO();
         overdueBill.setAmount(amount);
+        overdueBill.setDueDate(dueDate);
+        overdueBill.setGstAmount(gst);
+        overdueBill.setQstAmount(qst);
+        overdueBill.setTaxedAmount(taxes);
         overdueBill.setInterest(expectedInterest);
+        overdueBill.setTotalAmount(expectedTotal);
 
-        when(billService.getBillByBillId(BILL_ID_OK)).thenReturn(Mono.just(overdueBill));
+        when(billService.getBillByBillId(BILL_ID_OK))
+                .thenReturn(Mono.just(overdueBill));
 
         client.get()
                 .uri("/bills/" + BILL_ID_OK + "/total")
@@ -685,9 +727,8 @@ class BillControllerUnitTest {
                 .expectBody(BigDecimal.class)
                 .isEqualTo(expectedTotal);
 
-        Mockito.verify(billService, times(1)).getBillByBillId(BILL_ID_OK);
+        verify(billService, times(1)).getBillByBillId(BILL_ID_OK);
     }
-
 
     @Test
     void whenPostingBillWithNoCustomerId_shouldThrowResponseStatusException() {
