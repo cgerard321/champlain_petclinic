@@ -301,7 +301,13 @@
         "profiles_label": "Sample veterinarian profiles",
         "empty": "No profiles to display.",
         "loading": "Loading veterinarians…",
-        "live_profiles_label": "Veterinarian profiles"
+        "live_profiles_label": "Veterinarian profiles",
+        "search_placeholder": "Search by name",
+        "search_label": "Search for a veterinarian by name",
+        "specialty_label": "Filter by specialty",
+        "all_specialties": "All specialties",
+        "clear": "Clear filters",
+        "no_results": "No veterinarians found"
       },
       "profile": {
         "role": "Veterinarian",

@@ -9,6 +9,7 @@
   padding: 24px;
 }
 
+
 .back-link {
   display: inline-block;
   margin-bottom: 28px;
@@ -127,6 +128,62 @@ app-vet-profile-card {
   }
 }
 
+.search-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding: 20px 24px;
+  border: 1px solid rgb(36 75 63 / 14%);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #fff, #fffdf8);
+  box-shadow: 0 2px 6px rgb(28 61 51 / 6%);
+}
+
+.search-container input,
+.search-container select {
+  min-height: 46px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid rgb(36 75 63 / 22%);
+  border-radius: 11px;
+  background: #fff;
+  color: #263832;
+  font: inherit;
+}
+
+.search-container input {
+  flex: 2 1 240px;
+}
+
+.search-container select {
+  flex: 1 1 200px;
+}
+
+.search-container input:focus-visible,
+.search-container select:focus-visible {
+  border-color: #244b3f;
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(36 75 63 / 14%);
+}
+
+.search-container button {
+  min-height: 46px;
+  padding: 0 18px;
+  border: 1px solid #244b3f;
+  border-radius: 10px;
+  background: #244b3f;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.search-container button:hover {
+  background: #1c3d33;
+}
+
+
 :host-context(.dark-mode) {
   color: white !important;
 }
@@ -147,4 +204,16 @@ app-vet-profile-card {
 
 :host-context(.dark-mode) .preview-notice p {
   color:#a3b8ac;
+}
+
+:host-context(.dark-mode) .search-container {
+  background: var(--mat-sys-surface-container-highest);
+  border-color: rgb(255 255 255 / 12%);
+}
+
+:host-context(.dark-mode) .search-container input,
+:host-context(.dark-mode) .search-container select {
+  background: var(--mat-sys-surface-container-lowest);
+  border-color: rgb(255 255 255 / 20%);
+  color: #e0e0e0;
 }
