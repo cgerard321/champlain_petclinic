@@ -1,12 +1,18 @@
 package com.petclinic.cartsservice.utils;
 
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
+import com.petclinic.cartsservice.dataaccesslayer.Order;
 import com.petclinic.cartsservice.dataaccesslayer.PromoCode;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReport;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportReason;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportStatus;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
+import com.petclinic.cartsservice.presentationlayer.CreateOrderReportRequestModel;
+import com.petclinic.cartsservice.presentationlayer.OrderReportResponseModel;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -131,5 +137,78 @@ class EntityModelUtilTest {
     void testValidateExpirationDate_throwsWhenFormatInvalid() {
         // Act & Assert
         assertThrows(ResponseStatusException.class, () -> EntityModelUtil.validateExpirationDate("2024-12-31"));
+    }
+
+    @Test
+    void toOrderReport_mapsRequestAndOrderData() {
+        Order order = Order.builder()
+                .customerName("Test Customer")
+                .build();
+        CreateOrderReportRequestModel request =
+                CreateOrderReportRequestModel.builder()
+                        .reason(OrderReportReason.DAMAGED_ITEM)
+                        .description("  The product arrived damaged.  ")
+                        .build();
+        List<OrderReport.AffectedItem> affectedItems = List.of(
+                OrderReport.AffectedItem.builder()
+                        .productId("product-123")
+                        .productName("Dog Food")
+                        .build()
+        );
+
+        OrderReport report = EntityModelUtil.toOrderReport(
+                "order-123",
+                "customer-123",
+                order,
+                request,
+                affectedItems
+        );
+
+        assertTrue(report.getReportId().startsWith("RPT-"));
+        assertEquals("order-123", report.getOrderId());
+        assertEquals("customer-123", report.getCustomerId());
+        assertEquals("Test Customer", report.getCustomerName());
+        assertEquals(OrderReportReason.DAMAGED_ITEM, report.getReason());
+        assertEquals("The product arrived damaged.", report.getDescription());
+        assertEquals(OrderReportStatus.NEW, report.getStatus());
+        assertEquals(affectedItems, report.getAffectedItems());
+        assertNotNull(report.getSubmittedAt());
+    }
+
+    @Test
+    void toOrderReportResponseModel_mapsEntityData() {
+        LocalDateTime submittedAt = LocalDateTime.now();
+        OrderReport report = OrderReport.builder()
+                .reportId("RPT-123")
+                .orderId("order-123")
+                .customerId("customer-123")
+                .customerName("Test Customer")
+                .reason(OrderReportReason.OTHER)
+                .affectedItems(List.of(
+                        OrderReport.AffectedItem.builder()
+                                .productId("product-123")
+                                .productName("Dog Food")
+                                .build()
+                ))
+                .description("There is another problem with this order.")
+                .status(OrderReportStatus.IN_REVIEW)
+                .submittedAt(submittedAt)
+                .build();
+
+        OrderReportResponseModel response =
+                EntityModelUtil.toOrderReportResponseModel(report);
+
+        assertEquals("RPT-123", response.getReportId());
+        assertEquals("order-123", response.getOrderId());
+        assertEquals("customer-123", response.getCustomerId());
+        assertEquals("Test Customer", response.getCustomerName());
+        assertEquals(OrderReportReason.OTHER, response.getReason());
+        assertEquals(OrderReportStatus.IN_REVIEW, response.getStatus());
+        assertEquals(submittedAt, response.getSubmittedAt());
+        assertEquals(1, response.getAffectedItems().size());
+        assertEquals(
+                "product-123",
+                response.getAffectedItems().get(0).getProductId()
+        );
     }
 }

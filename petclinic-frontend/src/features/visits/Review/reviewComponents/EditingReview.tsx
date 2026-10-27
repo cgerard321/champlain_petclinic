@@ -9,13 +9,10 @@ import { useUser } from '@/context/UserContext';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import StarRating from '../../../products/components/StarRating';
 
-import { Filter } from 'bad-words';
 import BasicModal from '@/shared/components/BasicModal';
 import { ReviewResponseDTO } from '../Model/ReviewResponseDTO';
 import SvgIcon from '@/shared/components/SvgIcon';
-
-const filter = new Filter();
-filter.addWords('badWord', 'anotherBadWord'); // Custom bad words for demo purposes
+import { cleanReviewText, isReviewProfane } from '../ReviewProfanity';
 
 interface ApiError {
   message: string;
@@ -79,8 +76,8 @@ const EditingReview: React.FC<EditingReviewProps> = ({
     if (!review.rating || review.rating < 1 || review.rating > 5)
       newErrors.rating = 'Rating must be between 1 and 5';
 
-    if (filter.isProfane(review.review || '')) {
-      setMaskedPreview(filter.clean(review.review || ''));
+    if (isReviewProfane(review.review || '')) {
+      setMaskedPreview(cleanReviewText(review.review || ''));
       setShowProfanityModal(true);
       newErrors.profanity = 'No profanities!';
     }
