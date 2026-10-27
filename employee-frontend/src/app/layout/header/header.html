@@ -2,7 +2,7 @@
   <span class="title">Petclinic</span>
 
   <ul class="horizontal-list">
-    @for (navbarItem of navBarItems; track navbarItem.route) {
+    @for (navbarItem of navBarItems(); track navbarItem.route) {
       <li>
         <a mat-list-item [routerLink]="navbarItem.route" routerLinkActive="active-link">
           <span matListItemTitle>{{ navbarItem.label }}</span>

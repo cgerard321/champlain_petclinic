@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { filter, map, Observable, toArray } from 'rxjs';
+import { filter, map, Observable } from 'rxjs';
 
 import { SseClient } from '@core/services/sse-client';
 import { Supply, SupplyAuditEntry, SupplyRequest } from '@features/supplies/models/supply';
@@ -11,8 +11,7 @@ export class SupplyService {
   private readonly sse = inject(SseClient);
   private readonly baseUrl = '/api/gateway/inventories';
 
-  getSupplies(inventoryId: string): Observable<Supply[]> {
-    // This endpoint returns a finite SSE snapshot; collect it before giving the page one Supply[] to display.
+  getSupplies(inventoryId: string): Observable<Supply> {
     return this.sse
       .stream(
         `/api/gateway/inventories/${inventoryId}/products`,
@@ -23,7 +22,6 @@ export class SupplyService {
       .pipe(
         filter((event): event is MessageEvent => event.type !== 'error'),
         map((event) => JSON.parse(event.data) as Supply),
-        toArray(),
       );
   }
 
