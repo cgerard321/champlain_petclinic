@@ -55,7 +55,7 @@ export default function FAQ(): JSX.Element {
               ))}
               {results.length === 0 && (
                 <div className="text-center text-muted py-4">
-                  {t ("noResults")}
+                  {t ('noResults')}
                 </div>
               )}
             </Accordion>
