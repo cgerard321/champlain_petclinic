@@ -37,6 +37,7 @@ import java.time.LocalDateTime;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -1365,6 +1366,10 @@ class VisitsServiceClientIntegrationTest {
     }
     @Test
     void sendWeeklyScheduleEmail_postsToPractitionerScheduleEndpoint() throws Exception {
+        while (server.takeRequest(10, TimeUnit.MILLISECONDS) != null) {
+            // Discard request records left behind by earlier tests using this shared server.
+        }
+
         server.enqueue(new MockResponse()
                 .setResponseCode(200)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
