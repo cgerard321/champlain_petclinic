@@ -2,7 +2,7 @@
   <div class="bill-card__header">
     <div>
       <h2 i18n="@@bill.lookup.billByCust">Facture par client(e)</h2>
-      <p i18n="@@bill.lookup.select">Selectionez un(e) client(e) pour afficher leur factures</p>
+      <p i18n="@@bill.lookup.select">Sélectionez un(e) client(e) pour afficher leur factures</p>
     </div>
   </div>
 
@@ -51,17 +51,17 @@
       </button>
     } @else if (selectedCustomerId()) {
       @if (bills().length === 0) {
-        <p role="status" i18n="@@bill.lookup.custNoBills">Cet(te) client(e) n'a aucun facture</p>
+        <p role="status" i18n="@@bill.lookup.custNoBills">Cet(te) client(e) n'a aucune facture</p>
       } @else {
         <div class="bill-table-wrapper">
           <table class="bill-table">
             <thead>
               <tr>
-                <th scope="col" i18n="@@bill.tableBill.billId">No de facture</th>
+                <th scope="col" i18n="@@bill.tableBill.billId">N° de facture</th>
                 <th scope="col">Date</th>
                 <th scope="col" i18n="@@bill.tableBill.dueDate">Date d'échéance</th>
                 <th scope="col">Total (CAD)</th>
-                <th scope="col" i18n="@bill.status">Status</th>
+                <th scope="col" i18n="@@bill.status">Statut</th>
               </tr>
             </thead>
             <tbody>
@@ -80,7 +80,7 @@
       }
     } @else {
       <p role="status" i18n="@@bill.lookup.select">
-        Selectionez un(e) client(e) to display their billspour afficher leur factures
+        Sélectionez un(e) client(e) pour afficher leur factures
       </p>
     }
   }

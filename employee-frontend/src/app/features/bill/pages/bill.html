@@ -36,7 +36,7 @@
           #billIdSearch
           id="bill-id-lookup"
           type="text"
-          placeholder="Entrez l'ID de la facture"
+          placeholder="Saisissez le numéro de la facture"
           i18n-placeholder="@@bill.searchPlaceholder"
           [value]="billIdInput()"
           (input)="billIdInput.set(billIdSearch.value)"
@@ -158,7 +158,7 @@
 
           <div id="bill-filter-panel" class="bill-filters">
             <label>
-              <ng-container i18n="@@bill.custId">N° du client(e)r</ng-container>
+              <ng-container i18n="@@bill.custId">N° du client(e)</ng-container>
               <input
                 type="text"
                 [ngModel]="filters().customerId"

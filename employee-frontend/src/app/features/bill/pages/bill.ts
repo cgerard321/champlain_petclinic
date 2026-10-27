@@ -216,7 +216,7 @@ export class Bill implements OnInit {
         },
         error: () => {
           this.billActionError.set(
-            $localize`:@@bill.message:Impossible de télécharger le PDF. Veuillez réessayer`,
+            $localize`:@@bill.message.downloadErr:Impossible de télécharger le PDF. Veuillez réessayer`,
           );
         },
       });

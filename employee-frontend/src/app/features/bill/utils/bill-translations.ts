@@ -1,5 +1,5 @@
 export const VISIT_TYPES_TRANSLATION: Record<string, string> = {
-  'Check-up': $localize`:@@bill.visitTypes.checkup:Examen vétérinaire`,
+  'Check-Up': $localize`:@@bill.visitTypes.checkup:Examen vétérinaire`,
   Vaccine: $localize`:@@bill.visitTypes.vaccine:Vaccin`,
   Surgery: $localize`:@@bill.visitTypes.surgery:Chirurgie`,
   Dental: $localize`:@@bill.visitTypes.dental:Dentaire`,
