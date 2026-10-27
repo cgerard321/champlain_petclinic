@@ -90,6 +90,7 @@
 .delete-button:hover {
   background: #8e0000;
 }
+
 .summary-button {
   background: var(--sage-400);
   color: var(--text-primary);
