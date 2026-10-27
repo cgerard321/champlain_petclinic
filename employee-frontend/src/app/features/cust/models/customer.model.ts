@@ -35,13 +35,12 @@ export interface PetRequest {
   petTypeId: string;
   weight: string;
 }
-export interface PetTypeFilters {
-  id: string;
+export interface PetFilters {
+  petType: string;
   name: string;
-  description: string;
 }
 
-export function petTypeMatchesFilters(petType: PetType, filters: PetTypeFilters): boolean {
+export function petMatchesFilters(pet: Pet, petTypeNames: string[], filters: PetFilters): boolean {
   const matches = (value: string | null | undefined, filter: string): boolean => {
     const query = filter.trim().toLowerCase();
     return (
@@ -51,9 +50,9 @@ export function petTypeMatchesFilters(petType: PetType, filters: PetTypeFilters)
         .includes(query)
     );
   };
+
   return (
-    matches(petType.petTypeId, filters.id) &&
-    matches(petType.name, filters.name) &&
-    matches(petType.petTypeDescription, filters.description)
+    petTypeNames.some((typeName) => matches(typeName, filters.petType)) &&
+    matches(pet.name, filters.name)
   );
 }

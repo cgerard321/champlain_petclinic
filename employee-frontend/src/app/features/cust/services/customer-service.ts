@@ -43,6 +43,13 @@ export class CustomerService {
     );
   }
 
+  getAllPets(): Observable<Pet> {
+    return this.sse.stream(`${this.apiUrl}/pets`, { keepAlive: false }).pipe(
+      filter((event): event is MessageEvent<string> => event.type !== 'error'),
+      map((event) => JSON.parse(event.data) as Pet),
+    );
+  }
+
   addCustomer(customer: CustomerRequest): Observable<Customer> {
     return this.http.post<Customer>(`${this.apiUrl}/customers`, customer);
   }
