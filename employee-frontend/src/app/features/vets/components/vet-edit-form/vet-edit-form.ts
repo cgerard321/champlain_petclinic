@@ -69,6 +69,12 @@ export class VetEditForm {
   private readonly injector = inject(Injector);
   protected readonly announcement = signal('');
   protected readonly pendingSpecialtyNames = signal<string[]>([]);
+  protected readonly showAllAvailabilities = signal(false);
+
+  protected toggleShowAllAvailabilities(): void {
+    this.showAllAvailabilities.update((value) => !value);
+  }
+
   protected readonly form = this.fb.nonNullable.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
@@ -178,13 +184,12 @@ export class VetEditForm {
   }
 
   protected readonly availability = computed(() => {
-    const days = this.days();
-    const schedule = this.schedule();
-    return DAYS.filter((day) => days.includes(day) || schedule[day].length > 0).map((day) => ({
-      day,
-      label: this.labels[day],
-      hours: schedule[day].map((hour) => ({ value: hour, label: hourLabel(hour) })),
-    }));
+    return this.allAvailabilities()
+      .filter((entry) => entry.selected && entry.hours.some((h) => h.selected))
+      .map((entry) => ({
+        ...entry,
+        hours: entry.hours.filter((h) => h.selected),
+      }));
   });
   protected readonly removedSlots = computed<readonly RemovedSlot[]>(() => {
     const initialSchedule = this.initialSchedule();

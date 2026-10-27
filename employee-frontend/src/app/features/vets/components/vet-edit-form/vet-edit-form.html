@@ -45,10 +45,23 @@
       <p class="hint" i18n="@@vets.availability.description">
         Ajoutez ou retirez des plages horaires. Les modifications prennent effet à l’enregistrement.
       </p>
+      <div class="availability-toggle-container">
+        <button
+          type="button"
+          class="secondary toggle-button"
+          (click)="toggleShowAllAvailabilities()"
+        >
+          @if (showAllAvailabilities()) {
+            <span i18n="@@vets.availability.show_active_only">Afficher uniquement les créneaux actifs</span>
+          } @else {
+            <span i18n="@@vets.availability.show_all">Afficher tous les créneaux</span>
+          }
+        </button>
+      </div>
       <p class="visually-hidden" role="status" aria-live="polite">{{ announcement() }}</p>
 
       <ul class="day-list">
-        @for (entry of allAvailabilities(); track entry.day) {
+        @for (entry of (showAllAvailabilities() ? allAvailabilities() : availability()); track entry.day) {
           <li class="day" [class.inactive]="!entry.selected && !entry.hours.some(h => h.selected)">
             <div class="day-header">
               <span class="day-label">{{ entry.label }}</span>
