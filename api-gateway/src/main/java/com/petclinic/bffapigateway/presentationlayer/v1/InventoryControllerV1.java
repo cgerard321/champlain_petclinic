@@ -391,7 +391,7 @@ public class InventoryControllerV1 {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
     @PatchMapping("/{inventoryId}/important")
     public Mono<ResponseEntity<Object>> updateImportantStatus(
             @PathVariable String inventoryId,
