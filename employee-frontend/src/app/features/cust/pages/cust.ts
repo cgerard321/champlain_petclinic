@@ -3,9 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { RouterLink } from '@angular/router';
-
-import { Router } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 
 import { AuthState } from '@core/services/auth-state';
 import { AddCustomer } from '@features/cust/components/customer-add/customer-add';
