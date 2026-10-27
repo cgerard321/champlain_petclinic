@@ -1501,8 +1501,7 @@ class ProductInventoryServiceUnitTest {
         Pageable page = PageRequest.of(0, 5);
         String description = "NonExistingDescription";
 
-        when(inventoryRepository.findByInventoryDescriptionRegex(anyString()))
-                .thenReturn(Flux.empty());  // No inventory found
+        when(inventoryRepository.findAll()).thenReturn(Flux.empty());
 
         Flux<InventoryResponseDTO> result =productInventoryService.searchInventories(page, null,null, null, description, false);
 
