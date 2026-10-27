@@ -98,21 +98,27 @@ th {
   font-weight: 600;
 }
 
-.filter-field input {
+.filter-field input[type='search'] {
   min-height: 42px;
   box-sizing: border-box;
+  margin: 0;
   padding: 0.6rem 0.8rem;
-  border: 1px solid var(--mat-sys-outline-variant);
+  border: 1px solid var(--mat-sys-outline);
   border-radius: 10px;
   color: var(--mat-sys-on-surface);
   background: var(--mat-sys-surface-container-highest);
   font: inherit;
 }
 
-.filter-field input:focus-visible {
+.filter-field input[type='search']:hover {
+  border-color: var(--brand);
+}
+
+.filter-field input[type='search']:focus-visible {
   border-color: var(--brand);
   outline: 3px solid rgb(36 75 63 / 22%);
 }
+
 
 .no-results {
   padding: 2rem;
