@@ -85,13 +85,15 @@ body,
 .catalog-grid .card .avgrating-container {
   transform: scale(0.85);
   transform-origin: left center;
-  margin: -2px 0;
+  margin: -2px 0 4px;
 }
 
 .catalog-grid .card button.add-to-cart-btn {
-  width: 100%;
+  align-self: flex-start;
+  width: auto;
+  max-width: 100%;
   min-height: 34px;
-  margin-top: auto;
+  margin-top: 8px;
   padding: 6px 10px;
   font-size: 0.82rem;
 }
