@@ -8,6 +8,14 @@
     <button type="button" (click)="changeWeek(-1)">{{ labels.previous }}</button>
     <button type="button" (click)="currentWeek()">{{ labels.current }}</button>
     <button type="button" (click)="changeWeek(1)">{{ labels.next }}</button>
+    @if (canSendWeeklyEmail()) {
+      <button type="button" (click)="sendWeeklyScheduleEmail()" [disabled]="isSendingEmail()">
+        {{ isSendingEmail() ? 'Sending...' : 'Email me this week’s schedule' }}
+      </button>
+      @if (emailMessage()) {
+        <p role="status">{{ emailMessage() }}</p>
+      }
+    }
   </nav>
 
   <p class="calendar__range" aria-live="polite">
