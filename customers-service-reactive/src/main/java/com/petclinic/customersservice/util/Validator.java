@@ -9,14 +9,15 @@ import reactor.core.publisher.Mono;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
-import java.util.Set;
 
 public class Validator {
-    private static final Set<String> CANADIAN_PROVINCES = Set.of(
+    private static final List<String> CANADIAN_PROVINCES = Arrays.asList(
             "Alberta", "British Columbia", "Manitoba", "New Brunswick",
             "Newfoundland and Labrador", "Nova Scotia", "Ontario",
             "Prince Edward Island", "Quebec", "Saskatchewan",
