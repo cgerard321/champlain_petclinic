@@ -11,7 +11,6 @@ import { CustomerService } from '@features/cust/services/customer-service';
   styleUrl: './pet-type-list.css',
   templateUrl: './pet-type-list.html',
 })
-
 export class PetTypeList implements OnInit {
   private readonly customerService = inject(CustomerService);
   private readonly untilDestroyed = takeUntilDestroyed<PetType>();

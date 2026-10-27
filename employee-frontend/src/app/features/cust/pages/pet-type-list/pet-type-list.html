@@ -3,7 +3,11 @@
 
   @if (isLoading()) {
     <div class="state-container" role="status">
-      <mat-spinner diameter="40" aria-label="Chargement" i18n-aria-label="@@petTypes.list.loadingLabel" />
+      <mat-spinner
+        diameter="40"
+        aria-label="Chargement"
+        i18n-aria-label="@@petTypes.list.loadingLabel"
+      />
       <p i18n="@@petTypes.list.loading">Chargement des types d'animaux...</p>
     </div>
   } @else if (errorMessage()) {
@@ -13,13 +17,15 @@
   } @else {
     <div class="table-container">
       <table>
-        <caption i18n="@@petTypes.list.caption">Types d'animaux enregistrés</caption>
+        <caption i18n="@@petTypes.list.caption">
+          Types d'animaux enregistrés
+        </caption>
         <thead>
-        <tr>
-          <th scope="col" i18n="@@petTypes.list.id">Identifiant</th>
-          <th scope="col" i18n="@@petTypes.list.name">Nom</th>
-          <th scope="col" i18n="@@petTypes.list.description">Description</th>
-        </tr>
+          <tr>
+            <th scope="col" i18n="@@petTypes.list.id">Identifiant</th>
+            <th scope="col" i18n="@@petTypes.list.name">Nom</th>
+            <th scope="col" i18n="@@petTypes.list.description">Description</th>
+          </tr>
         </thead>
         <tbody>
           @for (petType of petTypes(); track petType.petTypeId) {
