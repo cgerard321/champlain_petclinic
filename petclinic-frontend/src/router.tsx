@@ -294,7 +294,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      
 
       {
         path: AppRoutePaths.AddPet,
