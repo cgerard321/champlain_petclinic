@@ -55,7 +55,7 @@ interface SupplyFormValue {
 @Component({
   imports: [CurrencyPipe, MatIconModule, MatMenuModule, Table, MatTooltipModule],
   selector: 'app-supply',
-  styleUrl: './supply-page.css',
+  styleUrls: ['./inventories.css', './supply-page.css'],
   templateUrl: './supply-page.html',
 })
 export class SupplyPage {
