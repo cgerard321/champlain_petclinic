@@ -154,10 +154,7 @@ export default function ProductDetails(): JSX.Element {
             ) : (
               <>
                 <div className="productimage-container">
-                  <ImageContainer
-                    image={currentProduct.image}
-                    imageId={currentProduct.imageId}
-                  />
+                  <ImageContainer image={currentProduct.image} />
                 </div>
                 <div className="productdetails-container">
                   <div

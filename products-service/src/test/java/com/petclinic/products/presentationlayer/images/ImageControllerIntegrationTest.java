@@ -2,6 +2,13 @@ package com.petclinic.products.presentationlayer.images;
 
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
+import com.petclinic.products.domainclientlayer.FilesServiceClient;
+import com.petclinic.products.domainclientlayer.FileResponseDTO;
+import com.petclinic.products.utils.exceptions.FileNotFoundInFilesServiceException;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import reactor.core.publisher.Mono;
+import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
 import com.petclinic.products.utils.PostgresTestContainerBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,8 +41,9 @@ class ImageControllerIntegrationTest extends PostgresTestContainerBase {
     @Autowired
     private WebTestClient webTestClient;
 
-    @Autowired
-    private ImageRepository imageRepository;
+
+    @MockBean
+    private FilesServiceClient filesServiceClient;
 
     private String baseURI = "/images";
 
@@ -66,14 +74,30 @@ class ImageControllerIntegrationTest extends PostgresTestContainerBase {
 
     @BeforeEach
     public void setupDB() {
-        Publisher<Image> setupDB = imageRepository.deleteAll()
-                .thenMany(Flux.just(image1, image2)
-                        .flatMap(imageRepository::save));
+        when(filesServiceClient.getFile(anyString())).thenReturn(
+                Mono.error(new FileNotFoundInFilesServiceException("Missing file")));
+        when(filesServiceClient.getFile(image1.getImageId())).thenReturn(Mono.just(FileResponseDTO.builder()
+                .fileId(image1.getImageId()).fileName(image1.getImageName()).fileType(image1.getImageType())
+                .fileData(image1.getImageData()).build()));
+        when(filesServiceClient.addFile(org.mockito.ArgumentMatchers.any())).thenAnswer(call -> {
+            com.petclinic.products.domainclientlayer.FileRequestDTO request = call.getArgument(0);
+            return Mono.just(FileResponseDTO.builder().fileId(UUID.randomUUID().toString())
+                    .fileName(request.getFileName()).fileType(request.getFileType())
+                    .fileData(request.getFileData()).build());
+        });
+    }
 
-        StepVerifier
-                .create(setupDB)
-                .expectNextCount(2)
-                .verifyComplete();
+    @Test
+    void migratedImageKeepsFrontendResponseContract() {
+        when(filesServiceClient.getFile("7ee36f6e-6a01-4a69-a4a7-a02364edbf13")).thenReturn(Mono.just(FileResponseDTO.builder()
+                .fileId("7ee36f6e-6a01-4a69-a4a7-a02364edbf13").fileName("dog food").fileType("image/png").fileData(imageBytes).build()));
+        webTestClient.get().uri(baseURI + "/7ee36f6e-6a01-4a69-a4a7-a02364edbf13").exchange()
+                .expectStatus().isOk().expectBody(ImageResponseModel.class)
+                .value(image -> {
+                    assertEquals("7ee36f6e-6a01-4a69-a4a7-a02364edbf13", image.getImageId());
+                    assertEquals("image/png", image.getImageType());
+                    assertArrayEquals(imageBytes, image.getImageData());
+                });
     }
 
     @Test

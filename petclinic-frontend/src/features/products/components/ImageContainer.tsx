@@ -2,7 +2,6 @@ import { useTranslation } from 'react-i18next';
 import { useEffect, useRef, useState } from 'react';
 import defaultProductImage from '@/assets/Products/defaultProductImage.svg';
 import { FileDetails } from '@/shared/models/FileDetails';
-import { getImage } from '../api/getImage';
 import { getProduct } from '../api/getProduct';
 import './Image.css';
 import { ProductModel } from '../models/ProductModels/ProductModel';
@@ -11,6 +10,7 @@ type ImageLoadState = 'loading' | 'loaded' | 'error';
 
 interface ImageContainerProps {
   image?: FileDetails | null;
+  // Retained for CART callers; images are resolved through productId, not the legacy endpoint.
   imageId?: string;
   productId?: string;
   imageUrl?: string;
@@ -19,7 +19,6 @@ interface ImageContainerProps {
 
 export default function ImageContainer({
   image,
-  imageId,
   productId,
   imageUrl,
 }: ImageContainerProps): JSX.Element {
@@ -90,33 +89,7 @@ export default function ImageContainer({
         return;
       }
 
-      if (!imageId) {
-        if (!cancelled) {
-          setImageName(null);
-          setImageType(null);
-          setImageData(null);
-          setLoadState('error');
-        }
-        return;
-      }
-
-      try {
-        const loadedImage = await getImage(imageId);
-        if (!cancelled) {
-          setImageName(loadedImage.imageName);
-          setImageType(loadedImage.imageType);
-          setImageData(loadedImage.imageData);
-          if (!loadedImage.imageData) setLoadState('error');
-        }
-      } catch (error) {
-        console.error('Error loading image:', error);
-        if (!cancelled) {
-          setImageName(null);
-          setImageType(null);
-          setImageData(null);
-          setLoadState('error');
-        }
-      }
+      if (!cancelled) setLoadState('error');
     }
 
     loadImage();
@@ -124,14 +97,7 @@ export default function ImageContainer({
     return () => {
       cancelled = true;
     };
-  }, [
-    image?.fileData,
-    image?.fileType,
-    image?.fileName,
-    imageId,
-    imageUrl,
-    productId,
-  ]);
+  }, [image?.fileData, image?.fileType, image?.fileName, imageUrl, productId]);
 
   const imageSource = imageUrl
     ? imageUrl
@@ -142,7 +108,7 @@ export default function ImageContainer({
     loadState === 'loading' &&
     !imageUrl &&
     !image?.fileData &&
-    Boolean(productId || imageId);
+    Boolean(productId);
   const showingFallback =
     isFallback || loadState === 'error' || (!imageSource && !isFetching);
 

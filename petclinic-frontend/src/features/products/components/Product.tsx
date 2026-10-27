@@ -186,10 +186,7 @@ export default function Product({
       )}
 
       <div onClick={handleProductClick} className="product-title">
-        <ImageContainer
-          image={currentProduct.image}
-          imageId={currentProduct.imageId}
-        />
+        <ImageContainer image={currentProduct.image} />
         <h2 className="product-title">
           {localizedProduct(currentProduct, language).name}
         </h2>
