@@ -52,6 +52,19 @@
       "settings": "Settings",
       "logout": "Logout"
     },
+    "bills": {
+      "smartSearch": {
+        "label": "Search by customer or veterinarian name",
+        "placeholder": "Type at least 3 characters",
+        "clearLabel": "Clear bill search",
+        "clear": "Clear",
+        "customerSuggestion": "Customer",
+        "veterinarianSuggestion": "Veterinarian",
+        "submit": "Search Bills",
+        "noResultsTitle": "No matching bills",
+        "noResultsMessage": "No bills match « {$INTERPOLATION} ». Try another customer or veterinarian name."
+      }
+    },
     "home": {
       "loadError": "Failed to load user information. Please try again later.",
       "welcomeBack": "Welcome back, {$INTERPOLATION}!",
