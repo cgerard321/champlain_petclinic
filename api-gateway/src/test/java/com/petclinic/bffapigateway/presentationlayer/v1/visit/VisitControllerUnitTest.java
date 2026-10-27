@@ -1413,4 +1413,28 @@ public class VisitControllerUnitTest {
 
         verify(visitsServiceClient, never()).rescheduleFollowUpVisit(any(), any());
     }
+    @Test
+    void sendMyWeeklyScheduleEmail_whenVetTokenExists_returnsQueuedMessage() {
+        when(visitsServiceClient.sendWeeklyScheduleEmail("vet-1")).thenReturn(Mono.just("Message queued"));
+
+        StepVerifier.create(visitsControllerV1.sendMyWeeklyScheduleEmail(exchangeForVet("vet-1")))
+                .assertNext(response -> {
+                    assertEquals(HttpStatus.OK, response.getStatusCode());
+                    assertEquals("Message queued", response.getBody());
+                })
+                .verifyComplete();
+
+        verify(visitsServiceClient).sendWeeklyScheduleEmail("vet-1");
+    }
+
+    @Test
+    void sendMyWeeklyScheduleEmail_whenTokenIsMissing_returnsUnauthorized() {
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(BASE_VISIT_URL));
+
+        StepVerifier.create(visitsControllerV1.sendMyWeeklyScheduleEmail(exchange))
+                .assertNext(response -> assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode()))
+                .verifyComplete();
+
+        verify(visitsServiceClient, never()).sendWeeklyScheduleEmail(anyString());
+    }
 }
