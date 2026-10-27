@@ -1,11 +1,43 @@
 {
   "locale": "en",
   "translations": {
+    "auth": {
+      "errors": {
+        "unreachable": "Could not reach the server.",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
     "login": {
-      "title": "Login",
+      "title": "Welcome",
       "username": "Username or email",
       "password": "Password",
-      "submit": "Sign in"
+      "usernamePlaceholder": "Enter your username or email",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot Password?",
+      "togglePassword": "Show or hide password",
+      "submit": "Login",
+      "errors": {
+        "usernameRequired": "Username or email is required.",
+        "passwordRequired": "Password is required.",
+        "incorrectCredentials": "Incorrect username or password for user: {$username}",
+        "userNotFound": "User not found.",
+        "accountDisabled": "Your account has been disabled. Please contact support.",
+        "accountNotVerified": "Your account is not verified. A verification link has been sent to your email."
+      }
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "message": "Enter your email and we'll send you a reset link.",
+      "email": "Email",
+      "submit": "Send reset link",
+      "cancel": "Cancel",
+      "sent": "If an account exists for this address, a recovery email has just been sent.",
+      "errors": {
+        "emailRequired": "Email is required.",
+        "emailInvalid": "Enter a valid email.",
+        "notFound": "No account is associated with {$email}.",
+        "sendFailed": "Unable to send the reset email. Please try again later."
+      }
     },
     "navbar": {
       "home": "Home",
