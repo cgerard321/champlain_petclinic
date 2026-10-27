@@ -18,6 +18,7 @@ export interface Pet {
 export interface PetType {
   petTypeId: string;
   name: string;
+  petTypeDescription: string;
 }
 
 export interface CustomerRequest {

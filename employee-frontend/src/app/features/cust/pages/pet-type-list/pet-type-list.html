@@ -1,0 +1,36 @@
+<section class="pet-type-page" [attr.aria-busy]="isLoading()">
+  <h1 i18n="@@petTypes.list.title">Types d'animaux</h1>
+
+  @if (isLoading()) {
+    <div class="state-container" role="status">
+      <mat-spinner diameter="40" aria-label="Chargement" i18n-aria-label="@@petTypes.list.loadingLabel" />
+      <p i18n="@@petTypes.list.loading">Chargement des types d'animaux...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <p role="alert">{{ errorMessage() }}</p>
+  } @else if (petTypes().length === 0) {
+    <p role="status" i18n="@@petTypes.list.empty">Aucun type d'animal enregistré.</p>
+  } @else {
+    <div class="table-container">
+      <table>
+        <caption i18n="@@petTypes.list.caption">Types d'animaux enregistrés</caption>
+        <thead>
+        <tr>
+          <th scope="col" i18n="@@petTypes.list.id">Identifiant</th>
+          <th scope="col" i18n="@@petTypes.list.name">Nom</th>
+          <th scope="col" i18n="@@petTypes.list.description">Description</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (petType of petTypes(); track petType.petTypeId) {
+            <tr>
+              <td>{{ petType.petTypeId }}</td>
+              <td>{{ petType.name }}</td>
+              <td>{{ petType.petTypeDescription }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
