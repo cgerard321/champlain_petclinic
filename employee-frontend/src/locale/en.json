@@ -1,11 +1,43 @@
 {
   "locale": "en",
   "translations": {
+    "auth": {
+      "errors": {
+        "unreachable": "Could not reach the server.",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
     "login": {
-      "title": "Login",
+      "title": "Welcome",
       "username": "Username or email",
       "password": "Password",
-      "submit": "Sign in"
+      "usernamePlaceholder": "Enter your username or email",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot Password?",
+      "togglePassword": "Show or hide password",
+      "submit": "Login",
+      "errors": {
+        "usernameRequired": "Username or email is required.",
+        "passwordRequired": "Password is required.",
+        "incorrectCredentials": "Incorrect username or password for user: {$username}",
+        "userNotFound": "User not found.",
+        "accountDisabled": "Your account has been disabled. Please contact support.",
+        "accountNotVerified": "Your account is not verified. A verification link has been sent to your email."
+      }
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "message": "Enter your email and we'll send you a reset link.",
+      "email": "Email",
+      "submit": "Send reset link",
+      "cancel": "Cancel",
+      "sent": "If an account exists for this address, a recovery email has just been sent.",
+      "errors": {
+        "emailRequired": "Email is required.",
+        "emailInvalid": "Enter a valid email.",
+        "notFound": "No account is associated with {$email}.",
+        "sendFailed": "Unable to send the reset email. Please try again later."
+      }
     },
     "navbar": {
       "home": "Home",
@@ -16,8 +48,22 @@
       "inventory": "Inventory",
       "products": "Products",
       "promos": "Promos",
+      "users": "Users",
       "settings": "Settings",
       "logout": "Logout"
+    },
+    "bills": {
+      "smartSearch": {
+        "label": "Search by customer or veterinarian name",
+        "placeholder": "Type at least 3 characters",
+        "clearLabel": "Clear bill search",
+        "clear": "Clear",
+        "customerSuggestion": "Customer",
+        "veterinarianSuggestion": "Veterinarian",
+        "submit": "Search Bills",
+        "noResultsTitle": "No matching bills",
+        "noResultsMessage": "No bills match « {$INTERPOLATION} ». Try another customer or veterinarian name."
+      }
     },
     "home": {
       "loadError": "Failed to load user information. Please try again later.",
@@ -104,7 +150,8 @@
       "vet": "Veterinarian",
       "receptionist": "Receptionist",
       "inventoryManager": "Inventory Manager",
-      "unknown": "Employee"
+      "unknown": "Employee",
+      "customer": "Customer"
     },
     "notFound": {
       "title": "Page Not Found",
@@ -759,6 +806,63 @@
         "nameRequired": "Inventory name is required.",
         "typeRequired": "Inventory type is required.",
         "descriptionRequired": "Description is required."
+      }
+    },
+
+    "users": {
+      "title": "Users",
+      "description": "View and manage user accounts for inventory managers, vets, receptionists and customers.",
+      "table": {
+        "label": "User accounts"
+      },
+      "fields": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "actions": "Actions",
+        "password": "Password",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "phone": "Phone number",
+        "resume": "Résumé",
+        "address": "Address",
+        "city": "City",
+        "province": "Province"
+      },
+      "actions": {
+        "add": "Add user",
+        "addRole": "Add user: {$role}",
+        "next": "Next",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "editAria": "Edit {$name}",
+        "editTitle": "Edit user",
+        "saveChanges": "Save changes",
+        "delete": "Delete",
+        "deleteAria": "Delete {$name}",
+        "deleteTitle": "Delete user",
+        "deleteConfirm": "Are you sure you want to delete {$name}? This cannot be undone."
+      },
+      "loading": "Loading users…",
+      "error": "Unable to load the users.",
+      "empty": "No users found.",
+      "success": {
+        "created": "User created successfully.",
+        "updated": "User updated successfully.",
+        "deleted": "User deleted successfully."
+      },
+      "errors": {
+        "save": "The user could not be saved. Please try again.",
+        "delete": "The user could not be deleted. Please try again."
+      },
+      "validation": {
+        "email": "Enter a valid email address.",
+        "emailLength": "The email must have at least 6 characters.",
+        "password": "Use at least 8 characters with a number, an uppercase letter, a lowercase letter and a special character. No spaces.",
+        "nameLength": "Use 2 to 30 characters.",
+        "vetPhone": "The phone number must have exactly 20 characters, for example (514) 555-0123 #1234.",
+        "resumeLength": "The résumé must have at least 10 characters.",
+        "customerPhone": "Enter 10 digits, without spaces or dashes."
       }
     }
   }
