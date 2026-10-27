@@ -33,6 +33,15 @@
               />
             }
 
+            @case ('password') {
+              <input
+                [id]="field.key"
+                type="password"
+                autocomplete="new-password"
+                [formControlName]="field.key"
+                [placeholder]="field.placeholder ?? ''"
+              />
+            }
             @case ('number') {
               <input
                 [id]="field.key"
