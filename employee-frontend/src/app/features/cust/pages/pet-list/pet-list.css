@@ -45,9 +45,9 @@
 
 .table-container {
   overflow-x: auto;
-  border: 1px solid var(--mat-sys-outline-variant);
+  border: 1px solid var(--mat-sys-outline-variant, #dce8d2);
+  background: var(--mat-sys-surface-container-highest, #fff);
   border-radius: 12px;
-  background: var(--mat-sys-surface-container-highest);
   box-shadow: 0 4px 20px rgb(27 56 43 / 5%);
 }
 
@@ -65,7 +65,7 @@ caption {
 th,
 td {
   padding: 0.9rem 1.25rem;
-  border-top: 1px solid var(--mat-sys-outline-variant);
+  border-top: 1px solid var(--mat-sys-outline-variant, #dce8d2);
   text-align: left;
 }
 
@@ -103,10 +103,9 @@ th {
   box-sizing: border-box;
   margin: 0;
   padding: 0.6rem 0.8rem;
-  border: 1px solid var(--mat-sys-outline);
-  border-radius: 10px;
+  border: 1px solid var(--mat-sys-outline, #b8cbbf);
+  background: var(--mat-sys-surface-container-highest, #fff);  border-radius: 10px;
   color: var(--mat-sys-on-surface);
-  background: var(--mat-sys-surface-container-highest);
   font: inherit;
 }
 
