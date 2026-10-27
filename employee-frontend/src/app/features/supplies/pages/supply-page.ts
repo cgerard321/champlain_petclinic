@@ -3,18 +3,20 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   computed,
+  DestroyRef,
   inject,
   LOCALE_ID,
   signal,
   TemplateRef,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
 import { Supply, SupplyRequest } from '@features/supplies/models/supply';
@@ -53,12 +55,14 @@ interface SupplyFormValue {
 @Component({
   imports: [CurrencyPipe, MatIconModule, MatMenuModule, Table, MatTooltipModule],
   selector: 'app-supply',
-  styleUrl: './supply-page.css',
+  styleUrls: ['./inventories.css', './supply-page.css'],
   templateUrl: './supply-page.html',
 })
 export class SupplyPage {
   private readonly route = inject(ActivatedRoute);
   private readonly supplyService = inject(SupplyService);
+  private readonly destroyRef = inject(DestroyRef);
+  private supplyLoadSubscription?: Subscription;
   private readonly auth = inject(AuthState);
   private readonly dialog = inject(MatDialog);
   private readonly locale = inject(LOCALE_ID);
@@ -330,24 +334,38 @@ export class SupplyPage {
   }
 
   private loadSupplies(): void {
+    this.supplyLoadSubscription?.unsubscribe();
+    this.supplies.set([]);
+    this.loading.set(true);
+    this.error.set(false);
+
     if (!this.inventoryId) {
       this.loading.set(false);
       this.error.set(true);
       return;
     }
 
-    this.error.set(false);
+    this.supplyLoadSubscription = this.supplyService
+      .getSupplies(this.inventoryId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (supply) => {
+          this.supplies.update((current) => {
+            const index = current.findIndex((item) => item.productId === supply.productId);
+            if (index === -1) return [...current, supply];
 
-    this.supplyService.getSupplies(this.inventoryId).subscribe({
-      next: (supplies) => {
-        this.supplies.set(supplies);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set(true);
-        this.loading.set(false);
-      },
-    });
+            const updated = [...current];
+            updated[index] = supply;
+            return updated;
+          });
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set(true);
+          this.loading.set(false);
+        },
+        complete: () => this.loading.set(false),
+      });
   }
 
   protected openAddDialog(): void {
