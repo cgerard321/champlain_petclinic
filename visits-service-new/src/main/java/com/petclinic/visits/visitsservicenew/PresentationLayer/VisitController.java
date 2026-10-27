@@ -22,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 
 
@@ -336,7 +337,7 @@ public class VisitController {
 
     @PostMapping("practitioner/{practitionerId}/weekly-email")
     public Mono<String> sendWeeklyScheduleEmail(@PathVariable String practitionerId) {
-        LocalDate weekStart = LocalDate.now()
+        LocalDate weekStart = LocalDate.now(ZoneId.of("America/Toronto"))
                 .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
         return visitService.sendSchedule(practitionerId, weekStart);

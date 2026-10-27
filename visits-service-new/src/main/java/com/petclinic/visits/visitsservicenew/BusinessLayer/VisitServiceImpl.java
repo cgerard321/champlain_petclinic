@@ -41,6 +41,7 @@ import java.io.PrintWriter;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Comparator;
@@ -731,7 +732,7 @@ public class VisitServiceImpl implements VisitService {
             cron = "${app.weekly-schedule-email.cron:0 0 7 * * MON}",
             zone = "America/Toronto")
     public void sendWeeklySchedulesAutomatically() {
-        LocalDate weekStart = LocalDate.now()
+        LocalDate weekStart = LocalDate.now(ZoneId.of("America/Toronto"))
                 .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 
         vetsClient.getAllVets()
