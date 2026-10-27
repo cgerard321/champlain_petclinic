@@ -58,46 +58,6 @@ body,
   min-height: 2.4em;
 }
 
-.catalog-grid .card p {
-  margin: 2px 0;
-  font-size: 0.82rem;
-  line-height: 1.2;
-  flex-grow: 0;
-}
-
-.catalog-grid .card .deliveryType-container {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  min-height: 22px;
-  margin-top: 1px;
-  padding: 2px 7px;
-  color: #52627a;
-  background: #f1f5f9;
-  border-radius: 999px;
-  font-size: 0.76rem;
-}
-
-.catalog-grid .card .deliveryType-container p {
-  margin: 0;
-}
-
-.catalog-grid .card .avgrating-container {
-  transform: scale(0.85);
-  transform-origin: left center;
-  margin: -2px 0 4px;
-}
-
-.catalog-grid .card button.add-to-cart-btn {
-  align-self: flex-start;
-  width: auto;
-  max-width: 100%;
-  min-height: 34px;
-  margin-top: 8px;
-  padding: 6px 10px;
-  font-size: 0.82rem;
-}
-
 .products-loading-grid {
   pointer-events: none;
 }
