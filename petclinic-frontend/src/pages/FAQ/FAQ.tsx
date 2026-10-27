@@ -55,14 +55,14 @@ export default function FAQ(): JSX.Element {
               ))}
               {results.length === 0 && (
                 <div className="text-center text-muted py-4">
-                  {t ('noResults')}
+                  {t('noResults')}
                 </div>
               )}
             </Accordion>
 
             <div className="text-center mt-3">
               <Button variant="outline-secondary" href="/contact">
-                {t ('contactPrompt')}
+                {t('contactPrompt')}
               </Button>
             </div>
           </Col>
