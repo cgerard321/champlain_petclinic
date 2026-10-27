@@ -32,6 +32,12 @@ export class VetService {
   updateVet(vetId: string, request: VetUpdateRequest): Observable<VetResponse> {
     return this.http.put<VetResponse>(`${this.baseUrl}/${encodeURIComponent(vetId)}`, request);
   }
+
+  addSpecialty(vetId: string, name: string): Observable<VetResponse> {
+    return this.http.post<VetResponse>(`${this.baseUrl}/${encodeURIComponent(vetId)}/specialties`, {
+      name,
+    });
+  }
 }
 
 export function vetErrorMessage(error: unknown): string {

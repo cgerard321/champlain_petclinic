@@ -161,12 +161,11 @@ const NewUpdateCustomerForm = ({
 
       if (username !== userDetails.username) {
         await updateUsername(user.userId, username);
-
         await checkSession();
       }
 
       showToast(t('customerForm.updateSuccess'), 'success');
-
+      window.location.reload();
       onBackButtonClick();
     } catch (error) {
       console.error('Error updating customer:', error);

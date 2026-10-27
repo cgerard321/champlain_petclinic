@@ -105,7 +105,7 @@ rectangle "Home Network" as network #line.dashed {
                 }
 
                 Deployment_Node(visits_svc_node, "visits-service-new container", "Spring Boot (WebFlux/Netty)") {
-                    Container(visits_svc, "Visits Service", "Java + Spring Boot", "Visits domain & mail triggers. Profile: docker.")
+                    Container(visits_svc, "Visits Service", "Java + Spring Boot", "Visits domain; manual and scheduled weekly schedule emails. Scheduled Monday at 07:00 America/Toronto. Profile: docker.")
                 }
 
                 Deployment_Node(products_svc_node, "products-service container", "Spring Boot (WebFlux/Netty)") {
@@ -219,12 +219,14 @@ Rel(caddy,   dev_tools_frontend, "HTTP", "petclinic-management-ui.benmusicgeek.s
 ' Frontend -> API Gateway & Internal Tools
 Rel_D(petclinic_fe,       api_gateway,   "HTTPS/HTTP calls", "REST/JSON", $tags="http")
 Rel_D(employee_fe,        api_gateway,   "HTTPS/HTTP calls", "REST/JSON", $tags="http")
+Rel_D(employee_fe,        api_gateway,   "VET requests weekly schedule email", "POST /api/gateway/visits/weekly-email", $tags="http")
 Rel_D(dev_tools_frontend, dev_tools_api, "HTTP", "REST/JSON & GraphQL", $tags="http")
 
 ' API Gateway -> Services
 Rel_D(api_gateway, customers_svc, "Routes requests to", "HTTP", $tags="http")
 Rel_D(api_gateway, vet_svc,       "Routes requests to", "HTTP", $tags="http")
 Rel_D(api_gateway, visits_svc,    "Routes requests to", "HTTP", $tags="http")
+Rel_D(api_gateway, visits_svc,    "Forwards weekly email request with practitioner ID", "POST /visits/practitioner/{practitionerId}/weekly-email", $tags="http")
 Rel_D(api_gateway, products_svc,  "Routes requests to", "HTTP", $tags="http")
 Rel_D(api_gateway, cart_svc,      "Routes requests to", "HTTP", $tags="http")
 Rel_D(api_gateway, inventory_svc, "Routes requests to", "HTTP", $tags="http")
@@ -232,7 +234,7 @@ Rel_D(api_gateway, billing_svc,   "Routes requests to", "HTTP", $tags="http")
 Rel_D(api_gateway, auth_svc,      "Routes requests to", "HTTP", $tags="http")
 
 ' Service -> Service Communication
-Rel_U(visits_svc,  mailer_svc, "Send email request", "HTTP/REST", $tags="http")
+Rel_U(visits_svc,  mailer_svc, "Submit manual and scheduled weekly schedule emails", "HTTP/REST", $tags="http")
 Rel_U(auth_svc,    mailer_svc, "Send email request", "HTTP/REST", $tags="http")
 Rel_U(billing_svc, mailer_svc, "Send email request", "HTTP/REST", $tags="http")
 
@@ -240,6 +242,7 @@ Rel(customers_svc, files_svc, "Store/Fetch profile pictures", "HTTP/REST", $tags
 Rel(visits_svc,    files_svc, "Store/Fetch prescription PDFs", "HTTP/REST", $tags="http")
 
 Rel(visits_svc,  auth_svc, "Validate tokens", "HTTP/REST", $tags="http")
+Rel(visits_svc,  vet_svc, "Look up vet profile, email and active recipients", "HTTP/REST", $tags="http")
 Rel(billing_svc, auth_svc, "Validate tokens", "HTTP/REST", $tags="http")
 
 ' Services -> Databases & Storage
@@ -250,7 +253,7 @@ Rel_D(vet_svc, pg_vet, "R2DBC", "", $tags="r2dbc")
 
 Rel_D(vet_svc,       mongo_vet,       "Reactive MongoDB driver", "", $tags="mongo")
 Rel_D(billing_svc,   mongo_billing,   "Reactive MongoDB driver", "", $tags="mongo")
-Rel_D(visits_svc,    mongo_visits,    "Reactive MongoDB driver", "", $tags="mongo")
+Rel_D(visits_svc,    mongo_visits,    "Reads UPCOMING and CONFIRMED visits for weekly schedules", "Reactive MongoDB driver", $tags="mongo")
 Rel_D(customers_svc, mongo_customers, "Reactive MongoDB driver", "", $tags="mongo")
 Rel_D(inventory_svc, mongo_inventory, "Reactive MongoDB driver", "", $tags="mongo")
 Rel_D(products_svc,  mongo_products,  "Reactive MongoDB driver", "", $tags="mongo")
