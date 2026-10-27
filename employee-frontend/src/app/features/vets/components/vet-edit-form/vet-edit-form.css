@@ -196,6 +196,14 @@ h3:focus-visible {
   cursor: pointer;
 }
 
+.availability-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
 .remove-day {
   padding: 8px 14px;
   border-color: #a12020;

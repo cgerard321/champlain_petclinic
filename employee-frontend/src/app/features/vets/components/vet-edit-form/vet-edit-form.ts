@@ -191,6 +191,28 @@ export class VetEditForm {
         hours: entry.hours.filter((h) => h.selected),
       }));
   });
+
+  protected resetSchedule(): void {
+    this.dialog
+      .open(ConfirmDialog, {
+        data: {
+          title: $localize`:@@vets.availability.reset_title:Réinitialiser les modifications ?`,
+          message: $localize`:@@vets.availability.reset_message:Voulez-vous restaurer les disponibilités initiales ? Cela annulera les modifications en cours, mais ne replanifiera pas les rendez-vous annulés.`,
+          confirmLabel: $localize`:@@vets.availability.reset_confirm:Réinitialiser`,
+          cancelLabel: $localize`:@@vets.actions.cancel:Annuler`,
+        },
+      })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.days.set([...this.initialDays()]);
+          this.schedule.set(JSON.parse(JSON.stringify(this.initialSchedule())));
+          this.announcement.set($localize`:@@vets.availability.reset:Disponibilités réinitialisées.`);
+          this.restoreFocus('#availability-title');
+        }
+      });
+  }
   protected readonly removedSlots = computed<readonly RemovedSlot[]>(() => {
     const initialSchedule = this.initialSchedule();
     const schedule = this.schedule();
@@ -314,7 +336,16 @@ export class VetEditForm {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.form.dirty || this.removed().length > 0;
+    const days = this.days();
+    const schedule = this.schedule();
+    const initialDays = this.initialDays();
+    const initialSchedule = this.initialSchedule();
+    const hasScheduleChanges = DAYS.some(
+      (day) =>
+        initialDays.includes(day) !== days.includes(day) ||
+        JSON.stringify(initialSchedule[day]) !== JSON.stringify(schedule[day])
+    );
+    return this.form.dirty || hasScheduleChanges;
   }
 
   protected removeHour(day: Workday, hour: string): void {
@@ -412,7 +443,7 @@ export class VetEditForm {
       );
     }
     parts.push(
-      $localize`:@@vets.availability.confirm_final:Cette action est définitive une fois enregistrée.`,
+      $localize`:@@vets.availability.confirm_visits_cancel:--- AVIS : Cela annulera toutes les visites réservées pendant cette disponibilité.`
     );
     return parts.join(' ');
   }
@@ -421,21 +452,30 @@ export class VetEditForm {
     const vet = this.vet();
     const days = this.days();
     const schedule = this.schedule();
-    const untouched = !this.removed().length;
+    const initialDays = this.initialDays();
+    const initialSchedule = this.initialSchedule();
+
+    const hasScheduleChanges = DAYS.some(
+      (day) =>
+        initialDays.includes(day) !== days.includes(day) ||
+        JSON.stringify(initialSchedule[day]) !== JSON.stringify(schedule[day])
+    );
+
     const workHours: Record<string, readonly string[]> = {};
     for (const day of DAYS) {
       if (schedule[day].length) workHours[day] = schedule[day];
     }
+
     this.submitted.emit({
       visitsToCancel: this.affectedVisits(),
       request: {
         ...this.form.getRawValue(),
         vetId: vet.vetId,
         vetBillId: vet.vetBillId,
-        workday: untouched
+        workday: !hasScheduleChanges
           ? (vet.workday ?? [])
           : DAYS.filter((day) => days.includes(day) || schedule[day].length > 0),
-        workHoursJson: untouched ? vet.workHoursJson : JSON.stringify(workHours),
+        workHoursJson: !hasScheduleChanges ? vet.workHoursJson : JSON.stringify(workHours),
         active: vet.active,
         photoDefault: false,
       },

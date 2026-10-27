@@ -45,7 +45,7 @@
       <p class="hint" i18n="@@vets.availability.description">
         Ajoutez ou retirez des plages horaires. Les modifications prennent effet à l’enregistrement.
       </p>
-      <div class="availability-toggle-container">
+      <div class="availability-actions">
         <button
           type="button"
           class="secondary toggle-button"
@@ -56,6 +56,15 @@
           } @else {
             <span i18n="@@vets.availability.show_all">Afficher tous les créneaux</span>
           }
+        </button>
+        <button
+          type="button"
+          class="secondary reset-button"
+          (click)="resetSchedule()"
+          [disabled]="saving()"
+          i18n="@@vets.availability.reset_button"
+        >
+          Réinitialiser l'horaire
         </button>
       </div>
       <p class="visually-hidden" role="status" aria-live="polite">{{ announcement() }}</p>
