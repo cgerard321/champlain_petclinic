@@ -31,7 +31,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
     public void run(String... args) {
         legacyCustomerRoleMigration.migrate();
 
-       // if items in the database, do not run this
+        // if items in the database, do not run this
         if (userRepo.count() > 0 || roleRepo.count() > 0)
             return;
         
