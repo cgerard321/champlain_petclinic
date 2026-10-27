@@ -47,31 +47,25 @@
 }
 
 /* --- Action buttons --- */
-.history-button{
+.history-button,
+.consume-button,
+.summary-button {
+  background: var(--sage-400);
+  color: var(--text-primary);
   padding: 7px 8px;
   font-size: 0.75rem;
   white-space: nowrap;
 }
 
-.consume-button {
-  padding: 10px 18px;
-  font-size: 0.875rem;
-}
-
-/* Every other action button */
-.history-button,
-.consume-button {
-  background: var(--sage-400);
-  color: var(--text-primary);
-}
-
 .history-button:hover:not(:disabled),
-.consume-button:hover:not(:disabled) {
+.consume-button:hover:not(:disabled),
+.summary-button:hover:not(:disabled) {
   background: color-mix(in srgb, var(--sage-400) 85%, black);
 }
 
 .history-button:focus-visible,
-.consume-button:focus-visible {
+.consume-button:focus-visible,
+.summary-button:focus-visible {
   outline: 3px solid var(--sage-400);
   outline-offset: 3px;
 }
