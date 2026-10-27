@@ -10,11 +10,13 @@ import {
   PetRequest,
   PetType,
 } from '@features/cust/models/customer.model';
+import { CustomerRequestModel } from '@features/cust/models/customerRequestModel';
+import { CustomerResponseModel } from '@features/cust/models/customerResponseModel';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
-  private readonly sse = inject(SseClient);
   private readonly http = inject(HttpClient);
+  private readonly sse = inject(SseClient);
 
   private readonly apiUrl = '/api/gateway';
 
@@ -22,6 +24,26 @@ export class CustomerService {
     return this.sse.stream(`${this.apiUrl}/customers`, { keepAlive: false }).pipe(
       filter((event): event is MessageEvent<string> => event.type !== 'error'),
       map((event) => JSON.parse(event.data) as Customer),
+    );
+  }
+  getCustomer(customerId: string, includePhoto = false): Observable<CustomerResponseModel> {
+    return this.http.get<CustomerResponseModel>(
+      `/api/gateway/customers/detail/${encodeURIComponent(customerId)}`,
+      { params: { includePhoto } },
+    );
+  }
+  getPetWithPhoto(petId: string): Observable<Pet> {
+    return this.http.get<Pet>(`/api/gateway/pets/${encodeURIComponent(petId)}`, {
+      params: { includePhoto: true },
+    });
+  }
+  updateCustomer(
+    customerId: string,
+    customer: CustomerRequestModel,
+  ): Observable<CustomerResponseModel> {
+    return this.http.put<CustomerResponseModel>(
+      `/api/gateway/customers/${encodeURIComponent(customerId)}`,
+      customer,
     );
   }
 

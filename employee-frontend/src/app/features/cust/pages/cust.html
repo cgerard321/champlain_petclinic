@@ -37,7 +37,17 @@
         <tbody>
           @for (customer of filteredCustomers(); track customer.customerId) {
             <tr>
-              <td>{{ customer.firstName }} {{ customer.lastName }}</td>
+              <td>
+                <div class="customer-name">
+                  @if (canViewCustomerDetails()) {
+                    <button type="button" (click)="checkCustomerDetails(customer.customerId)">
+                      {{ customer.firstName }} {{ customer.lastName }}
+                    </button>
+                  } @else {
+                    <span>{{ customer.firstName }} {{ customer.lastName }}</span>
+                  }
+                </div>
+              </td>
               <td>{{ customer.address || notAvailable }}</td>
               <td>{{ customer.city || notAvailable }}</td>
               <td>{{ customer.telephone || notAvailable }}</td>
