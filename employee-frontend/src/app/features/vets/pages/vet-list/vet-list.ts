@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
@@ -19,9 +19,42 @@ export class VetList {
   protected readonly vets = signal<VetProfile[]>([]);
   protected readonly loading = signal(false);
   protected readonly error = signal('');
+  protected readonly searchQuery = signal('');
+  protected readonly selectedSpecialty = signal('');
+
+  protected readonly specialties = computed(() => {
+    return Array.from(new Set(this.vets().flatMap((vet) => vet.specialties))).sort();
+  });
+
+  protected readonly filteredVets = computed(() => {
+    const query = this.searchQuery().toLowerCase().trim();
+    const specialty = this.selectedSpecialty();
+    return this.vets().filter((vet) => {
+      const matchesName = `${vet.firstName} ${vet.lastName}`.toLowerCase().includes(query);
+      const matchesSpecialty = !specialty || vet.specialties.includes(specialty);
+      return matchesName && matchesSpecialty;
+    });
+  });
+
+  protected readonly hasActiveFilters = computed(
+    () => this.searchQuery() !== '' || this.selectedSpecialty() !== '',
+  );
 
   constructor() {
     this.load();
+  }
+
+  protected onSearch(event: Event): void {
+    this.searchQuery.set((event.target as HTMLInputElement).value);
+  }
+
+  protected onSpecialtyChange(event: Event): void {
+    this.selectedSpecialty.set((event.target as HTMLSelectElement).value);
+  }
+
+  protected clearFilters(): void {
+    this.searchQuery.set('');
+    this.selectedSpecialty.set('');
   }
 
   protected load(): void {

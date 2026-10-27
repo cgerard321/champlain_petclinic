@@ -19,22 +19,38 @@ import {
   addWeeks,
   subWeeks,
 } from 'date-fns';
+import { Modal } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Visit } from '../models/Visit';
 import { getAllOwnerVisits } from '../api/getAllOwnerVisits';
 import { useUser } from '@/context/UserContext';
 import './CalendarView.css';
+import './CustomerCalendarView.css';
 import { FaChevronLeft, FaChevronRight, FaCalendarAlt } from 'react-icons/fa';
 
 type ViewMode = 'year' | 'month' | 'week';
 
+const LEGEND_STATUSES = [
+  'UPCOMING',
+  'CONFIRMED',
+  'COMPLETED',
+  'CANCELLED',
+  'ARCHIVED',
+];
+
 export default function CustomerCalendarView(): JSX.Element {
   const { user } = useUser();
   const userId = user?.userId;
+  const navigate = useNavigate();
+  const { t, i18n } = useTranslation('visits');
+  const locale = i18n.language.startsWith('fr') ? 'fr-CA' : 'en-CA';
 
   const [visits, setVisits] = useState<Visit[]>([]);
   const [filteredVisits, setFilteredVisits] = useState<Visit[]>([]);
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>('month');
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
 
@@ -43,7 +59,7 @@ export default function CustomerCalendarView(): JSX.Element {
 
     const fetchVisits = async (): Promise<void> => {
       if (!userId) {
-        setError('User not found. Please log in.');
+        setError(t('calendar.userNotFound'));
         setIsLoading(false);
         return;
       }
@@ -66,7 +82,7 @@ export default function CustomerCalendarView(): JSX.Element {
         if (controller.signal.aborted) return;
 
         console.error('Error fetching visits:', err);
-        setError('Failed to load your visits. Please try again.');
+        setError(t('calendar.loadError'));
       } finally {
         setIsLoading(false);
       }
@@ -75,7 +91,7 @@ export default function CustomerCalendarView(): JSX.Element {
     fetchVisits();
 
     return () => controller.abort();
-  }, [userId]);
+  }, [userId, t]);
 
   useEffect(() => {
     if (!visits.length) {
@@ -147,6 +163,46 @@ export default function CustomerCalendarView(): JSX.Element {
     );
   };
 
+  const getStatusLabel = (status: string): string =>
+    t(`calendar.status.${status}`, { defaultValue: status });
+
+  const formatTime = (date: string): string => format(new Date(date), 'HH:mm');
+
+  const renderEmergencyBadge = (): JSX.Element => (
+    <span className="calendar-emergency-badge">{t('calendar.emergency')}</span>
+  );
+
+  const renderVisitCard = (visit: Visit): JSX.Element => (
+    <div
+      key={visit.visitId}
+      className={`week-visit-item status-${visit.status.toLowerCase()}`}
+      onClick={(): void => navigate(`/visits/${visit.visitId}`)}
+    >
+      <div className="visit-time">
+        {formatTime(visit.visitDate)} - {formatTime(visit.visitEndDate)}
+        {visit.isEmergency && renderEmergencyBadge()}
+      </div>
+      <div className="visit-details">
+        <div className="visit-pet">
+          {visit.petName || t('calendar.unknownPet')}
+        </div>
+        <div className="visit-status">{getStatusLabel(visit.status)}</div>
+        <div className="visit-vet">
+          {t('calendar.vetName', {
+            firstName: visit.vetFirstName,
+            lastName: visit.vetLastName,
+          })}
+        </div>
+        <div className="visit-description">{visit.description}</div>
+        {visit.status === 'COMPLETED' && visit.vetNote && (
+          <div className="visit-description">
+            {t('calendar.vetNote')} {visit.vetNote}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
   const renderYearView = (): JSX.Element => {
     const months = eachMonthOfInterval({
       start: startOfYear(currentDate),
@@ -154,7 +210,7 @@ export default function CustomerCalendarView(): JSX.Element {
     });
 
     return (
-      <div className="customer-calendar-year-view">
+      <div className="calendar-year-view">
         <div className="year-grid">
           {months.map((month, index) => {
             const monthVisits = filteredVisits.filter(visit =>
@@ -170,10 +226,11 @@ export default function CustomerCalendarView(): JSX.Element {
                   setViewMode('month');
                 }}
               >
-                <div className="month-name">{format(month, 'MMMM')}</div>
+                <div className="month-name">
+                  {month.toLocaleDateString(locale, { month: 'long' })}
+                </div>
                 <div className="month-visit-count">
-                  {monthVisits.length} visit
-                  {monthVisits.length !== 1 ? 's' : ''}
+                  {t('calendar.visitCount', { count: monthVisits.length })}
                 </div>
               </div>
             );
@@ -197,11 +254,11 @@ export default function CustomerCalendarView(): JSX.Element {
     }
 
     return (
-      <div className="customer-calendar-month-view">
+      <div className="calendar-month-view">
         <div className="calendar-weekdays">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-            <div key={day} className="calendar-weekday">
-              {day}
+          {days.slice(0, 7).map(day => (
+            <div key={day.toISOString()} className="calendar-weekday">
+              {day.toLocaleDateString(locale, { weekday: 'short' })}
             </div>
           ))}
         </div>
@@ -218,26 +275,32 @@ export default function CustomerCalendarView(): JSX.Element {
                   <div
                     key={dayIndex}
                     className={`calendar-day-cell ${!isCurrentMonth ? 'other-month' : ''} ${isTodayDate ? 'today' : ''}`}
+                    onClick={(): void => setSelectedDay(day)}
                   >
                     <div className="day-number">{format(day, 'd')}</div>
 
                     <div className="day-visits">
-                      {dayVisits.slice(0, 3).map((visit, idx) => (
+                      {dayVisits.slice(0, 3).map(visit => (
                         <div
-                          key={idx}
-                          className={`visit-item status-${visit.status.toLowerCase()}`}
-                          title={`${visit.petName || 'Pet'} - ${visit.description}`}
+                          key={visit.visitId}
+                          className={`visit-item customer-visit-label status-${visit.status.toLowerCase()}`}
                         >
                           <span className="visit-time">
-                            {format(new Date(visit.visitDate), 'HH:mm')}
+                            {formatTime(visit.visitDate)}
                           </span>
-                          <span className="visit-pet">{visit.petName}</span>
+                          <span className="visit-pet">
+                            {visit.petName || t('calendar.unknownPet')}
+                          </span>
+                          <span className="visit-status">
+                            {getStatusLabel(visit.status)}
+                            {visit.isEmergency && renderEmergencyBadge()}
+                          </span>
                         </div>
                       ))}
 
                       {dayVisits.length > 3 && (
                         <div className="visit-item-more">
-                          +{dayVisits.length - 3} more
+                          {t('calendar.more', { count: dayVisits.length - 3 })}
                         </div>
                       )}
                     </div>
@@ -257,7 +320,7 @@ export default function CustomerCalendarView(): JSX.Element {
     const days = eachDayOfInterval({ start: weekStart, end: weekEnd });
 
     return (
-      <div className="customer-calendar-week-view">
+      <div className="calendar-week-view">
         <div className="week-grid">
           {days.map((day, index) => {
             const dayVisits = getVisitsForDate(day);
@@ -266,39 +329,24 @@ export default function CustomerCalendarView(): JSX.Element {
             return (
               <div
                 key={index}
-                className={`week-day-column ${isTodayDate ? 'today' : ''}`}
+                className={`week-day-column customer-week-day ${isTodayDate ? 'today' : ''}`}
+                onClick={(): void => setSelectedDay(day)}
               >
                 {/* Day header */}
                 <div className="week-day-header">
-                  <div className="week-day-name">{format(day, 'EEE')}</div>
+                  <div className="week-day-name">
+                    {day.toLocaleDateString(locale, { weekday: 'short' })}
+                  </div>
                   <div className="week-day-number">{format(day, 'd')}</div>
                 </div>
 
                 <div className="week-day-visits">
                   {dayVisits.length > 0 ? (
-                    dayVisits.map((visit, idx) => (
-                      <div
-                        key={idx}
-                        className={`week-visit-item status-${visit.status.toLowerCase()}`}
-                      >
-                        <div className="visit-time">
-                          {format(new Date(visit.visitDate), 'HH:mm')}
-                        </div>
-                        <div className="visit-details">
-                          <div className="visit-pet">
-                            {visit.petName || 'Unknown Pet'}
-                          </div>
-                          <div className="visit-vet">
-                            Dr. {visit.vetFirstName} {visit.vetLastName}
-                          </div>
-                          <div className="visit-description">
-                            {visit.description}
-                          </div>
-                        </div>
-                      </div>
-                    ))
+                    dayVisits.map(visit => renderVisitCard(visit))
                   ) : (
-                    <div className="no-visits">No appointments</div>
+                    <div className="no-visits">
+                      {t('calendar.noAppointments')}
+                    </div>
                   )}
                 </div>
               </div>
@@ -309,43 +357,83 @@ export default function CustomerCalendarView(): JSX.Element {
     );
   };
 
+  const renderDayModal = (): JSX.Element => {
+    const dayVisits = selectedDay ? getVisitsForDate(selectedDay) : [];
+
+    return (
+      <Modal
+        show={selectedDay !== null}
+        onHide={(): void => setSelectedDay(null)}
+        size="lg"
+        centered
+        className="customer-day-modal customer-theme"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {selectedDay &&
+              selectedDay.toLocaleDateString(locale, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {dayVisits.length === 0 ? (
+            <p className="no-visits">{t('calendar.noAppointments')}</p>
+          ) : (
+            <div className="week-day-visits">
+              {dayVisits.map(visit => renderVisitCard(visit))}
+            </div>
+          )}
+        </Modal.Body>
+      </Modal>
+    );
+  };
+
   const getViewTitle = (): string => {
     switch (viewMode) {
       case 'year':
         return format(currentDate, 'yyyy');
       case 'month':
-        return format(currentDate, 'MMMM yyyy');
+        return currentDate.toLocaleDateString(locale, {
+          month: 'long',
+          year: 'numeric',
+        });
       case 'week':
         const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
         const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
-        return `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
+        return `${weekStart.toLocaleDateString(locale, { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })}`;
     }
   };
 
   if (isLoading) {
     return (
-      <div className="customer-calendar-loading">
+      <div className="calendar-loading">
         <div className="spinner"></div>
-        <p>Loading your appointments...</p>
+        <p>{t('calendar.loading')}</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="customer-calendar-error">
+      <div className="calendar-error">
         <p>{error}</p>
-        <button onClick={(): void => window.location.reload()}>Retry</button>
+        <button onClick={(): void => window.location.reload()}>
+          {t('calendar.retry')}
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="customer-calendar-view-container">
-      <div className="customer-calendar-header">
+    <div className="calendar-view-container customer-theme">
+      <div className="calendar-header">
         <div className="calendar-title">
           <FaCalendarAlt />
-          <h2>My Appointments</h2>
+          <h2>{t('calendar.title')}</h2>
         </div>
 
         <div className="calendar-controls">
@@ -354,19 +442,19 @@ export default function CustomerCalendarView(): JSX.Element {
               className={viewMode === 'year' ? 'active' : ''}
               onClick={(): void => setViewMode('year')}
             >
-              Year
+              {t('calendar.year')}
             </button>
             <button
               className={viewMode === 'month' ? 'active' : ''}
               onClick={(): void => setViewMode('month')}
             >
-              Month
+              {t('calendar.month')}
             </button>
             <button
               className={viewMode === 'week' ? 'active' : ''}
               onClick={(): void => setViewMode('week')}
             >
-              Week
+              {t('calendar.week')}
             </button>
           </div>
 
@@ -375,7 +463,7 @@ export default function CustomerCalendarView(): JSX.Element {
               <FaChevronLeft />
             </button>
             <button onClick={handleToday} className="today-button">
-              Today
+              {t('calendar.today')}
             </button>
             <button onClick={handleNext} className="nav-button">
               <FaChevronRight />
@@ -388,30 +476,30 @@ export default function CustomerCalendarView(): JSX.Element {
         </div>
       </div>
 
-      <div className="customer-calendar-content">
-        {viewMode === 'year' && renderYearView()}
-        {viewMode === 'month' && renderMonthView()}
-        {viewMode === 'week' && renderWeekView()}
+      <div className="customer-calendar-body">
+        <div className="calendar-content">
+          {viewMode === 'year' && renderYearView()}
+          {viewMode === 'month' && renderMonthView()}
+          {viewMode === 'week' && renderWeekView()}
+        </div>
+
+        <div className="calendar-legend">
+          {LEGEND_STATUSES.map(status => (
+            <div key={status} className="legend-item">
+              <span
+                className={`legend-dot status-${status.toLowerCase()}`}
+              ></span>
+              <span>{getStatusLabel(status)}</span>
+            </div>
+          ))}
+          <div className="legend-item">
+            <span className="legend-dot legend-emergency"></span>
+            <span>{t('calendar.emergency')}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="customer-calendar-legend">
-        <div className="legend-item">
-          <span className="legend-dot status-upcoming"></span>
-          <span>Upcoming</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-dot status-confirmed"></span>
-          <span>Confirmed</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-dot status-completed"></span>
-          <span>Completed</span>
-        </div>
-        <div className="legend-item">
-          <span className="legend-dot status-cancelled"></span>
-          <span>Cancelled</span>
-        </div>
-      </div>
+      {renderDayModal()}
     </div>
   );
 }
