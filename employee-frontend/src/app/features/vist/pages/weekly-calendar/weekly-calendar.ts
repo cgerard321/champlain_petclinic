@@ -38,6 +38,7 @@ export class WeeklyCalendar implements OnInit {
   private readonly customerRequests = new Map<string, Observable<Customer | null>>();
 
   protected readonly statusLabel = visitStatusLabel;
+  protected readonly canSendWeeklyEmail = computed(() => this.auth.hasRole(Roles.vet));
   protected readonly weekStart = signal(startOfWeek(new Date()));
   protected readonly isLoading = signal(true);
   protected readonly hasError = signal(false);
