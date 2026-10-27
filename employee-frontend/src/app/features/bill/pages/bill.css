@@ -90,6 +90,7 @@
   font-size: 1.25rem;
 }
 
+/* Bill filter */
 .bill-filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -137,6 +138,7 @@
   min-height: 42px;
 }
 
+/* Bill lookup */
 .bill-lookup {
   display: grid;
   gap: 10px;

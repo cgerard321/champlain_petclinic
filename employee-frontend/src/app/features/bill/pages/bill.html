@@ -138,6 +138,80 @@
         </div>
       }
 
+      <form class="bill-smart-search" (submit)="submitBillSearch($event)">
+        <label for="bill-smart-search-input" i18n="@@bills.smartSearch.label">
+          Rechercher par nom de client ou de vétérinaire
+        </label>
+
+        <div class="bill-smart-search__controls">
+          <div class="bill-smart-search__input-wrap">
+            <input
+              #billSearch
+              id="bill-smart-search-input"
+              type="search"
+              autocomplete="off"
+              placeholder="Saisir au moins 3 caractères"
+              i18n-placeholder="@@bills.smartSearch.placeholder"
+              [value]="billSearchInput()"
+              (input)="updateBillSearch(billSearch.value)"
+              (focus)="showBillSearchSuggestions.set(true)"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-controls="bill-search-suggestions"
+              [attr.aria-expanded]="
+                showBillSearchSuggestions() && billSearchSuggestions().length > 0
+              "
+            />
+
+            @if (billSearchInput()) {
+              <button
+                type="button"
+                class="bill-smart-search__clear"
+                aria-label="Effacer la recherche de factures"
+                i18n-aria-label="@@bills.smartSearch.clearLabel"
+                (click)="clearBillSearch()"
+              >
+                <span i18n="@@bills.smartSearch.clear">Effacer</span>
+              </button>
+            }
+
+            @if (showBillSearchSuggestions() && billSearchSuggestions().length > 0) {
+              <ul id="bill-search-suggestions" class="bill-search-suggestions" role="listbox">
+                @for (
+                  suggestion of billSearchSuggestions();
+                  track suggestion.type + suggestion.label
+                ) {
+                  <li role="option" aria-selected="false">
+                    <button
+                      type="button"
+                      class="bill-search-suggestion"
+                      (click)="selectBillSearchSuggestion(suggestion)"
+                    >
+                      <span>{{ suggestion.label }}</span>
+                      @if (suggestion.type === 'customer') {
+                        <small i18n="@@bills.smartSearch.customerSuggestion">Client</small>
+                      } @else {
+                        <small i18n="@@bills.smartSearch.veterinarianSuggestion">
+                          Vétérinaire
+                        </small>
+                      }
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+
+          <button
+            class="bill-secondary-action"
+            type="submit"
+            [disabled]="!billSearchInput().trim()"
+          >
+            <span i18n="@@bills.smartSearch.submit">Rechercher des factures</span>
+          </button>
+        </div>
+      </form>
+
       @if (canViewBills()) {
         <!-- Mobile filter controls -->
         <div #filtersRegion class="bill-filters-region">
@@ -426,7 +500,13 @@
           <div class="bill-empty-state" role="status">Loading bills...</div>
         } @else if (displayedBills().length === 0) {
           <div class="bill-empty-state" role="status">
-            @if (canViewBills()) {
+            @if (billSearchQuery()) {
+              <h3 i18n="@@bills.smartSearch.noResultsTitle">Aucune facture correspondante</h3>
+              <p i18n="@@bills.smartSearch.noResultsMessage">
+                Aucune facture ne correspond à « {{ billSearchQuery() }} ». Essayez un autre nom de
+                client ou de vétérinaire.
+              </p>
+            } @else if (canViewBills()) {
               <h3>
                 @if (showArchivedBills()) {
                   <ng-container i18n="@@bill.noArchive">Aucune facture archivée</ng-container>
