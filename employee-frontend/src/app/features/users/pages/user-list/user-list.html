@@ -1,0 +1,65 @@
+<section class="user-page">
+  <div class="page-header">
+    <div>
+      <h1 i18n="@@users.title">Utilisateurs</h1>
+      <p class="page-description" i18n="@@users.description">
+        Consultez et gérez les comptes des gestionnaires d'inventaire, vétérinaires, réceptionnistes
+        et clients.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="add-user-button"
+      (click)="openAddDialog()"
+      i18n="@@users.actions.add"
+    >
+      Ajouter un utilisateur
+    </button>
+  </div>
+
+  @if (successMessage()) {
+    <p class="success-message" role="status">{{ successMessage() }}</p>
+  }
+
+  @if (saveError()) {
+    <p class="field-error" role="alert">{{ saveError() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="state-message" i18n="@@users.loading">Chargement des utilisateurs…</p>
+  } @else if (error()) {
+    <p class="state-message error-message" role="alert" i18n="@@users.error">
+      Impossible de charger les utilisateurs.
+    </p>
+  } @else if (users().length === 0) {
+    <p class="state-message" i18n="@@users.empty">Aucun utilisateur trouvé.</p>
+  } @else {
+    <app-table [label]="tableLabel" [rows]="users()" [columns]="columns()" [rowId]="userRowId" />
+  }
+</section>
+
+<ng-template #actionsCell let-user>
+  <div class="action-buttons">
+    @if (canEdit(user)) {
+      <button
+        type="button"
+        class="edit-button"
+        [attr.aria-label]="editLabel(user)"
+        (click)="openEditDialog(user)"
+        i18n="@@users.actions.edit"
+      >
+        Modifier
+      </button>
+      <button
+        type="button"
+        class="delete-button"
+        [attr.aria-label]="deleteLabel(user)"
+        (click)="openDeleteDialog(user)"
+        i18n="@@users.actions.delete"
+      >
+        Supprimer
+      </button>
+    }
+  </div>
+</ng-template>

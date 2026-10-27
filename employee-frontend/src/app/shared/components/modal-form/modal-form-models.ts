@@ -1,6 +1,6 @@
 import { ValidatorFn } from '@angular/forms';
 
-export type ModalFormFieldType = 'string' | 'number' | 'enum' | 'image' | 'date';
+export type ModalFormFieldType = 'string' | 'number' | 'enum' | 'image' | 'date' | 'password';
 
 export interface ModalFormOption<T = string> {
   value: T;

@@ -1,7 +1,7 @@
 import { VetResponse, Workday } from '@features/vets/models/vet-api.model';
 import { VetProfile } from '@features/vets/models/vet-profile.model';
 
-function workdayLabels(): Record<Workday, string> {
+export function workdayLabels(): Record<Workday, string> {
   return {
     Monday: $localize`:@@vets.days.monday:Lundi`,
     Tuesday: $localize`:@@vets.days.tuesday:Mardi`,
@@ -38,13 +38,29 @@ function displayHours(vet: VetResponse): string[] {
   });
 }
 
+export function specialtyLabels(): Readonly<Record<string, string | undefined>> {
+  return {
+    radiology: $localize`:@@vets.specialty.radiology:Radiologie`,
+    surgery: $localize`:@@vets.specialty.surgery:Chirurgie`,
+    dentistry: $localize`:@@vets.specialty.dentistry:Dentisterie`,
+    general: $localize`:@@vets.specialty.general:Médecine générale`,
+  };
+}
+
+export function specialtyLabel(name: string): string {
+  const labels = specialtyLabels();
+  const key = name.trim().toLowerCase();
+
+  return Object.hasOwn(labels, key) ? (labels[key] ?? name) : name;
+}
+
 export function toVetProfile(vet: VetResponse): VetProfile {
   return {
     vetId: vet.vetId,
     firstName: vet.firstName,
     lastName: vet.lastName,
     active: vet.active,
-    specialties: (vet.specialties ?? []).map((specialty) => specialty.name),
+    specialties: (vet.specialties ?? []).map((specialty) => specialtyLabel(specialty.name)),
     email: vet.email || undefined,
     phoneNumber: vet.phoneNumber || undefined,
     biography: vet.resume || undefined,

@@ -49,7 +49,15 @@ import {
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import { getCustomerOrders } from '../api/getCustomerOrders';
 import type { OrderModel } from '../models/OrderModel';
+import ReportOrderModal from './ReportOrderModal';
+import {
+  getCustomerOrderReports,
+  isOpenOrderReport,
+  type OrderReportSummary,
+} from '../api/orderReports';
 interface ProductAPIResponse {
+  promoLookupFailed?: boolean;
+  discountAmount?: number;
   productId: string;
   imageId?: string;
   productName: string;
@@ -106,6 +114,10 @@ const UserCart: React.FC = () => {
   const [orders, setOrders] = useState<OrderModel[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState<string | null>(null);
+  const [reportsByOrderId, setReportsByOrderId] = useState<
+    Record<string, OrderReportSummary>
+  >({});
+  const [reportingOrder, setReportingOrder] = useState<OrderModel | null>(null);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
   const [shippingMethod, setShippingMethod] =
@@ -115,6 +127,8 @@ const UserCart: React.FC = () => {
   const fetchOrders = useCallback(async (): Promise<void> => {
     if (!customerId) {
       setOrders([]);
+      setReportsByOrderId({});
+      setReportingOrder(null);
       setOrdersLoading(false);
       return;
     }
@@ -122,15 +136,43 @@ const UserCart: React.FC = () => {
     setOrdersLoading(true);
     setOrdersError(null);
 
-    try {
-      const data = await getCustomerOrders(customerId);
-      setOrders(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Failed to fetch orders:', error);
-      setOrdersError(t('orders.loadFailed'));
-    } finally {
-      setOrdersLoading(false);
-    }
+    const ordersRequest = getCustomerOrders(customerId)
+      .then(orderData => {
+        setOrders(Array.isArray(orderData) ? orderData : []);
+      })
+      .catch(error => {
+        console.error('Failed to fetch orders:', error);
+        setOrders([]);
+        setOrdersError(t('orders.loadFailed'));
+      })
+      .finally(() => setOrdersLoading(false));
+
+    const reportsRequest = getCustomerOrderReports(customerId)
+      .then(reportData => {
+        const latestReports = (
+          Array.isArray(reportData) ? reportData : []
+        ).reduce<Record<string, OrderReportSummary>>((reports, report) => {
+          const currentReport = reports[report.orderId];
+
+          if (
+            !currentReport ||
+            new Date(report.submittedAt).getTime() >
+              new Date(currentReport.submittedAt).getTime()
+          ) {
+            reports[report.orderId] = report;
+          }
+
+          return reports;
+        }, {});
+
+        setReportsByOrderId(latestReports);
+      })
+      .catch(error => {
+        console.error('Failed to fetch order reports:', error);
+        setReportsByOrderId({});
+      });
+
+    await Promise.all([ordersRequest, reportsRequest]);
   }, [customerId, t]);
 
   useEffect(() => {
@@ -139,6 +181,8 @@ const UserCart: React.FC = () => {
 
   const toProductModel = useCallback(
     (product: ProductAPIResponse): ProductModel => ({
+      promoLookupFailed: product.promoLookupFailed ?? false,
+      discountAmount: product.discountAmount ?? 0,
       productId: String(product.productId ?? ''),
       imageId: product.imageId ?? '',
       productName: product.productName,
@@ -430,8 +474,10 @@ const UserCart: React.FC = () => {
     0
   );
 
-  const promoDiscount =
-    promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
+  const promoDiscount = cartItems.reduce(
+    (sum, item) => sum + (item.discountAmount ?? 0),
+    0
+  );
   const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
   const effectiveShippingCost = cartItems.length > 0 ? shippingCost : 0;
   const taxableSubtotal = roundToCents(
@@ -548,27 +594,18 @@ const UserCart: React.FC = () => {
     }
 
     try {
-      const { data } = await axiosInstance.get(
-        `/carts/promos/validate/${encodeURIComponent(voucherCode.trim())}`,
-        { useV2: false, handleLocally: true }
-      );
-
-      const percent: number = Number(data?.discount);
-      if (Number.isNaN(percent) || percent < 0 || percent > 100) {
-        setVoucherError('errors.invalidDiscount');
-        return;
-      }
-
-      const updated = await applyPromo(existingCartId, percent);
+      const updated = await applyPromo(existingCartId, voucherCode.trim());
 
       setVoucherError(null);
       const appliedMessage = t('toasts.promoApplied', {
-        percent: updated?.promoPercent ?? percent,
+        percent: updated?.promoPercent ?? 0,
       });
       syncCartState(updated, appliedMessage);
     } catch (err) {
       console.error('Error validating promo code:', err);
-      setVoucherError('errors.promoInvalid');
+      const message = apiErrorMessage(err, t('errors.promoInvalid'));
+      setVoucherError(message);
+      showToast(message, 'error');
     }
   };
 
@@ -660,6 +697,9 @@ const UserCart: React.FC = () => {
     try {
       await clearPromo(existingCartId);
       setPromoPercent(null);
+      setCartItems(items =>
+        items.map(item => ({ ...item, discountAmount: 0 }))
+      );
       showToast(t('toasts.promoRemoved'), 'success');
     } catch (err: unknown) {
       showToast(apiErrorMessage(err, t('errors.removePromoFailed')), 'error');
@@ -1325,6 +1365,22 @@ const UserCart: React.FC = () => {
                 )}
               </div>
 
+              {promoPercent != null &&
+                cartItems.some(item => item.promoLookupFailed) && (
+                  <div className="alert alert-warning" role="status">
+                    <p>{t('cart.promoLookupWarning')}</p>
+                    <ul>
+                      {cartItems
+                        .filter(item => item.promoLookupFailed)
+                        .map(item => (
+                          <li key={item.productId}>
+                            {item.productName || item.productId}
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                )}
+
               {cartItems.length > 0 && (
                 <div className="voucher-code-section" style={{ marginTop: 12 }}>
                   <label htmlFor="shipping-method">{t('shipping.label')}</label>
@@ -1447,6 +1503,17 @@ const UserCart: React.FC = () => {
                     </p>
                   </div>
 
+                  {reportsByOrderId[order.orderId] && (
+                    <div className="order-report-banner" role="status">
+                      {t('reports.banner', {
+                        status: t(
+                          `reports.status.${reportsByOrderId[order.orderId].status}`
+                        ),
+                        reportId: reportsByOrderId[order.orderId].reportId,
+                      })}
+                    </div>
+                  )}
+
                   <div className="order-products">
                     {order.products.map(item => (
                       <div key={item.productId} className="order-product">
@@ -1480,6 +1547,20 @@ const UserCart: React.FC = () => {
                   </div>
 
                   <div className="order-footer">
+                    {!isStaff &&
+                      (!reportsByOrderId[order.orderId] ||
+                        !isOpenOrderReport(
+                          reportsByOrderId[order.orderId]
+                        )) && (
+                        <button
+                          type="button"
+                          className="cart-button cart-button--outline"
+                          onClick={() => setReportingOrder(order)}
+                        >
+                          {t('reports.openButton')}
+                        </button>
+                      )}
+
                     <button
                       type="button"
                       className="view-receipt-btn cart-button cart-button--brand cart-button--block"
@@ -1782,6 +1863,23 @@ const UserCart: React.FC = () => {
             )}
           </div>
         </div>
+
+        {reportingOrder && customerId && (
+          <ReportOrderModal
+            customerId={customerId}
+            order={reportingOrder}
+            onClose={() => setReportingOrder(null)}
+            onSubmitted={report => {
+              setReportsByOrderId(current => ({
+                ...current,
+                [report.orderId]: report,
+              }));
+
+              setReportingOrder(null);
+              showToast(t('reports.success'), 'success');
+            }}
+          />
+        )}
 
         {showBillingForm && (
           <CartBillingForm

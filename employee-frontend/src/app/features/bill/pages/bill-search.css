@@ -1,0 +1,122 @@
+.bill-smart-search {
+  display: grid;
+  gap: 10px;
+  margin: 0 24px 24px;
+  padding: 16px;
+  border: 1px solid #d6e5d8;
+  border-radius: 12px;
+  background: #f3f8f3;
+}
+
+.bill-smart-search > label {
+  color: #315842;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.bill-smart-search__controls {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.bill-smart-search__input-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+
+.bill-smart-search input {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 70px 10px 12px;
+  border: 1px solid #aebfb1;
+  border-radius: 8px;
+  background: #fff;
+  color: #1b382b;
+  font: inherit;
+}
+
+.bill-smart-search input:focus-visible {
+  outline: 3px solid #8dbb8f;
+  outline-offset: 2px;
+}
+
+.bill-smart-search__clear {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  color: #315842;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transform: translateY(-50%);
+}
+
+.bill-smart-search__clear:hover {
+  color: #1b382b;
+  text-decoration: underline;
+}
+
+.bill-smart-search__clear:focus-visible,
+.bill-search-suggestion:focus-visible {
+  outline: 3px solid #8dbb8f;
+  outline-offset: 2px;
+}
+
+.bill-search-suggestions {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  border: 1px solid #aebfb1;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 18px rgb(27 56 43 / 12%);
+  list-style: none;
+}
+
+.bill-search-suggestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #1b382b;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.bill-search-suggestion:hover {
+  background: #edf4ed;
+}
+
+.bill-search-suggestion small {
+  color: #4a6353;
+  font-size: 0.75rem;
+  text-transform: capitalize;
+}
+
+@media (width <= 640px) {
+  .bill-smart-search__controls {
+    flex-direction: column;
+  }
+
+  .bill-smart-search__controls .bill-secondary-action {
+    width: 100%;
+  }
+}
