@@ -66,7 +66,7 @@ interface SupplyFormValue {
     MatTooltipModule,
   ],
   selector: 'app-supply',
-  styleUrl: './supply-page.css',
+  styleUrls: ['./inventories.css', './supply-page.css'],
   templateUrl: './supply-page.html',
 })
 export class SupplyPage {
