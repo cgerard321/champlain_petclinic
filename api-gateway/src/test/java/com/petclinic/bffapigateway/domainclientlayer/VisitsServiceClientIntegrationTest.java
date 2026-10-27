@@ -1363,4 +1363,19 @@ class VisitsServiceClientIntegrationTest {
                         && ex.getMessage().contains("not available"))
                 .verify();
     }
+    @Test
+    void sendWeeklyScheduleEmail_postsToPractitionerScheduleEndpoint() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("\"Message queued\""));
+
+        StepVerifier.create(visitsServiceClient.sendWeeklyScheduleEmail("vet-1"))
+                .expectNext("\"Message queued\"")
+                .verifyComplete();
+
+        okhttp3.mockwebserver.RecordedRequest request = server.takeRequest();
+        assertEquals("POST", request.getMethod());
+        assertEquals("/visits/practitioner/vet-1/weekly-email", request.getPath());
+    }
 }

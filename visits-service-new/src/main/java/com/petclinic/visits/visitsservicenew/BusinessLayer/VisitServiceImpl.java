@@ -685,7 +685,8 @@ public class VisitServiceImpl implements VisitService {
                     }
 
                     return repo.findByPractitionerIdAndVisitDateBetween(vetId, start, end)
-                            .filter(visit -> visit.getStatus() == Status.UPCOMING)
+                            .filter(visit -> visit.getStatus() == Status.UPCOMING
+                                    || visit.getStatus() == Status.CONFIRMED)
                             .sort(Comparator.comparing(Visit::getVisitDate))
                             .collectList()
                             .flatMap(visits -> sendEmail(vet, visits, weekStart));
