@@ -32,7 +32,7 @@ public class PaymentServiceImpl implements PaymentService {
 
 
     @Override
-    public Mono<StripeResponseModel> createStripeBill(StripeProductRequestModel sessionRequestModel, String cartId) {
+    public Mono<StripeResponseModel> createStripeCheckoutSession(StripeProductRequestModel sessionRequestModel, String cartId) {
 
         return Mono.just(sessionRequestModel)
                 .filter(request -> cartId.equals(request.getCartId()))
@@ -83,7 +83,7 @@ public class PaymentServiceImpl implements PaymentService {
                     SessionCreateParams params =
                             SessionCreateParams.builder()
                                     .setMode(SessionCreateParams.Mode.PAYMENT)
-                                    .setSuccessUrl("http://localhost:3000/transaction")
+                                    .setSuccessUrl("http://localhost:3000/checkout")
                                     .setCancelUrl("http://localhost:3000/checkout")
                                     .addAllLineItem(lineItems)
                                     .putMetadata("cartId", cart.getCartId())

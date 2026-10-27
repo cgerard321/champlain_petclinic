@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StripeResponseModel {
 
-    private String transactionId;
-    private String transactionUrl;
+    private String sessionId;
+    private String sessionUrl;
 }

@@ -545,6 +545,46 @@ public class CartControllerV1UnitTest {
         verify(cartServiceClient, times(1)).checkoutCart(cartId);
     }
 
+    //Tests for Stripe checkout sessions
+    @Test
+    @DisplayName("POST /api/gateway/carts/{cartId}/checkout/sessions - Should create a session successfully")
+    void createStripCheckoutSession_withValidId_shouldCreateSession() {
+        String cartId = "cart-123";
+        StripeProductRequestDTO request = StripeProductRequestDTO.builder().cartId("cart-123").build();
+        StripeResponseDTO response = StripeResponseDTO.builder().build();
+
+        when(cartServiceClient.createStripeCheckoutSession(cartId,request))
+                .thenReturn(Mono.just(response));
+
+        webTestClient.post()
+                .uri(baseCartURL + "/" + cartId + "/checkout/sessions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(StripeResponseDTO.class)
+                .isEqualTo(response);
+        verify(cartServiceClient, times(1)).createStripeCheckoutSession(cartId, request);
+
+    }
+
+    @Test
+    @DisplayName("POST /api/gateway/carts/{cartId}/checkout/sessions - Should return 404 when cart not found")
+    void checkoutStripCheckoutSession_withNonExistingCartId_shouldReturnNotFound() {
+        String cartId = "non-existent-cart";
+        StripeProductRequestDTO request = StripeProductRequestDTO.builder().cartId(cartId).build();
+        when(cartServiceClient.createStripeCheckoutSession(cartId,request))
+                .thenReturn(Mono.error(new NotFoundException("Cart not found")));
+
+        webTestClient.post()
+                .uri(baseCartURL + "/" + cartId + "/checkout/sessions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isNotFound();
+        verify(cartServiceClient).createStripeCheckoutSession(cartId, request);
+    }
+
     // Tests for wishlist operations
     @Test
     @DisplayName("POST /api/gateway/carts/{cartId}/wishlist - Should add product to wishlist")

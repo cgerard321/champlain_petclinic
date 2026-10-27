@@ -286,10 +286,23 @@ public class CartControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.CUST})
-    @PostMapping("/{cartId}/transaction")
-    public Mono<ResponseEntity<StripeResponseDTO>> createStripeBill(@RequestBody StripeProductRequestDTO sessionRequestModel, @PathVariable String cartId) {
+    @PostMapping("/{cartId}/checkout/sessions")
+    public Mono<ResponseEntity<StripeResponseDTO>> createStripeCheckoutSession(@RequestBody StripeProductRequestDTO sessionRequestModel, @PathVariable String cartId) {
+        if(sessionRequestModel == null || cartId == null) {
+            return Mono.just(ResponseEntity.badRequest().build());
+        }
+
+        if (!cartId.equals(sessionRequestModel.getCartId())) {
+            return  Mono.just(ResponseEntity.badRequest().build());
+        }
+
         return cartServiceClient.createStripeCheckoutSession(cartId, sessionRequestModel)
-                .map(ResponseEntity::ok);
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()))
+                .onErrorResume(e -> this.mapCartError(
+                        e,
+                        ErrorOptions.builder().build()
+                ));
     }
 
 

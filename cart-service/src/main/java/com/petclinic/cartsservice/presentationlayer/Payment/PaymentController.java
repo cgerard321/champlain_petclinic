@@ -19,12 +19,10 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
-    @PostMapping("/{cartId}/transaction")
-    public Mono<ResponseEntity<StripeResponseModel>> createStripeBill(@RequestBody StripeProductRequestModel sessionRequestModel, @PathVariable String cartId) {
+    @PostMapping("/{cartId}/checkout/sessions")
+    public Mono<ResponseEntity<StripeResponseModel>> createStripeCheckoutSession(@RequestBody StripeProductRequestModel sessionRequestModel, @PathVariable String cartId) {
 
-        System.out.println("CARTS PAYMENT CONTROLLER REACHED");
-
-        return paymentService.createStripeBill(sessionRequestModel, cartId)
+        return paymentService.createStripeCheckoutSession(sessionRequestModel, cartId)
                 .map(ResponseEntity::ok)
                 .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()))
                 .onErrorResume(InvalidInputException.class, e -> Mono.just(ResponseEntity.badRequest().build()));

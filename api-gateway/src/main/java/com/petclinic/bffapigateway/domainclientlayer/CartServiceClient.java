@@ -333,7 +333,7 @@ public Mono<Void> deleteCartByCartId(String cartId) {
     public Mono<StripeResponseDTO> createStripeCheckoutSession(String cartId, StripeProductRequestDTO requestDTO) {
         return webClientBuilder.build()
                 .post()
-                .uri(cartServiceUrl + "/" + cartId + "/transaction")
+                .uri(cartServiceUrl + "/" + cartId + "/checkout/sessions")
                 .bodyValue(requestDTO)
                 .retrieve()
                 .bodyToMono(StripeResponseDTO.class);

@@ -6,5 +6,5 @@ import reactor.core.publisher.Mono;
 
 public interface PaymentService {
 
-    public Mono<StripeResponseModel> createStripeBill(StripeProductRequestModel sessionRequestModel, String cartId);
+    public Mono<StripeResponseModel> createStripeCheckoutSession(StripeProductRequestModel sessionRequestModel, String cartId);
 }
