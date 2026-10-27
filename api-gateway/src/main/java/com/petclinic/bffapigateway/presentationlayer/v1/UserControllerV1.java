@@ -124,6 +124,13 @@ public class UserControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(value = "/receptionist", consumes = "application/json", produces = "application/json")
+    public Mono<ResponseEntity<UserPasswordLessDTO>> createReceptionist(@RequestBody @Valid Mono<RegisterReceptionist> model) {
+        return authServiceClient.createReceptionistUser(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
     @Operation()
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/login", produces = "application/json;charset=utf-8;", consumes = "application/json")

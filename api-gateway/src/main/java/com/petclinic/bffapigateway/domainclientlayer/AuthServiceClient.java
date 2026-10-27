@@ -179,6 +179,24 @@ public class AuthServiceClient {
     }
 
 
+    public Mono<UserPasswordLessDTO> createReceptionistUser(Mono<RegisterReceptionist> registerReceptionistMono) {
+        String uuid = UUID.randomUUID().toString();
+        return registerReceptionistMono.flatMap(registerReceptionist -> {
+            registerReceptionist.setUserId(uuid);
+            return webClientBuilder.build().post()
+                    .uri(authServiceUrl + "/users")
+                    .body(Mono.just(registerReceptionist), RegisterReceptionist.class)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError,
+                            n -> rethrower.rethrow(n,
+                                    x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                    )
+                    .bodyToMono(UserPasswordLessDTO.class);
+        });
+    }
+
+
     public Mono<VetResponseDTO> createVetUser(Mono<RegisterVet> model) {
 
         String uuid = UUID.randomUUID().toString();
