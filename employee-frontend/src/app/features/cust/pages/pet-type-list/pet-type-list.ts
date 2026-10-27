@@ -1,8 +1,8 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import { PetType } from '@features/cust/models/customer.model';
+import { PetType, petTypeMatchesFilters } from '@features/cust/models/customer.model';
 import { CustomerService } from '@features/cust/services/customer-service';
 
 @Component({
@@ -18,6 +18,19 @@ export class PetTypeList implements OnInit {
   protected readonly petTypes = signal<PetType[]>([]);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly idFilter = signal('');
+  protected readonly nameFilter = signal('');
+  protected readonly descriptionFilter = signal('');
+
+  protected readonly filteredPetTypes = computed(() => {
+    const filters = {
+      id: this.idFilter(),
+      name: this.nameFilter(),
+      description: this.descriptionFilter(),
+    };
+
+    return this.petTypes().filter((petType) => petTypeMatchesFilters(petType, filters));
+  });
 
   ngOnInit(): void {
     this.customerService

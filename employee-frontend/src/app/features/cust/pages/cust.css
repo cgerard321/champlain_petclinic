@@ -445,6 +445,7 @@ td button:focus-visible {
 .pet-types-link {
   display: inline-flex;
   align-items: center;
+  box-sizing: border-box;
   margin-left: 0.75rem;
   color: #244b3f;
   background: transparent;

@@ -15,6 +15,38 @@
   } @else if (petTypes().length === 0) {
     <p role="status" i18n="@@petTypes.list.empty">Aucun type d'animal enregistré.</p>
   } @else {
+    <div class="filters-container">
+      <div class="filter-field">
+        <label for="filter-id" i18n="@@petTypes.filters.id">Identifiant</label>
+        <input
+          id="filter-id"
+          type="search"
+          [value]="idFilter()"
+          (input)="idFilter.set($any($event.target).value)"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label for="filter-name" i18n="@@petTypes.filters.name">Nom</label>
+        <input
+          id="filter-name"
+          type="search"
+          [value]="nameFilter()"
+          (input)="nameFilter.set($any($event.target).value)"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label for="filter-description" i18n="@@petTypes.filters.description">Description</label>
+        <input
+          id="filter-description"
+          type="search"
+          [value]="descriptionFilter()"
+          (input)="descriptionFilter.set($any($event.target).value)"
+        />
+      </div>
+    </div>
+
     <div class="table-container">
       <table>
         <caption i18n="@@petTypes.list.caption">
@@ -28,11 +60,17 @@
           </tr>
         </thead>
         <tbody>
-          @for (petType of petTypes(); track petType.petTypeId) {
+          @for (petType of filteredPetTypes(); track petType.petTypeId) {
             <tr>
               <td>{{ petType.petTypeId }}</td>
               <td>{{ petType.name }}</td>
               <td>{{ petType.petTypeDescription }}</td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="3" class="no-results" role="status" i18n="@@petTypes.list.noResults">
+                Aucun type d'animal ne correspond aux filtres.
+              </td>
             </tr>
           }
         </tbody>

@@ -78,3 +78,44 @@ th {
 :host-context(.dark-mode) {
   --brand: #fff;
 }
+
+.filters-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.filter-field label {
+  color: var(--brand);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.filter-field input {
+  min-height: 42px;
+  box-sizing: border-box;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 10px;
+  color: var(--mat-sys-on-surface);
+  background: var(--mat-sys-surface-container-highest);
+  font: inherit;
+}
+
+.filter-field input:focus-visible {
+  border-color: var(--brand);
+  outline: 3px solid rgb(36 75 63 / 22%);
+}
+
+.no-results {
+  padding: 2rem;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+}
