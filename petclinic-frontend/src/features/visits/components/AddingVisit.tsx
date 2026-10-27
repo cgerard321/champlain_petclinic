@@ -10,8 +10,9 @@ import {
 } from '@/features/visits/api/getAvailableSlots';
 import { VisitRequestModel } from '@/features/visits/models/VisitRequestModel';
 import BasicModal from '@/shared/components/BasicModal';
-import { getAllPets } from '@/features/visits/api/getAllPets';
 import { PetResponseModel } from '@/features/customers/models/PetResponseModel';
+import axiosInstance from '@/shared/api/axiosInstance';
+import { useUser } from '@/context/UserContext';
 
 interface ApiError {
   message: string;
@@ -51,7 +52,6 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
     status: 'UPCOMING' as Status,
     isEmergency: false,
   });
-
   const [pets, setPets] = useState<PetResponseModel[]>([]);
   const [loadingPets, setLoadingPets] = useState<boolean>(true);
   const [vets, setVets] = useState<
@@ -65,17 +65,50 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showNotification, setShowNotification] = useState<boolean>(false);
+  const { userId, isLoading } = useUser();
+
+  useEffect(() => {
+    if (!isLoading && userId) {
+      console.warn('Current user ID:', userId);
+    }
+  }, [userId, isLoading]);
 
   //Fetch pets
   useEffect(() => {
+    if (isLoading || !userId) return;
+
     const fetchPets = async (): Promise<void> => {
       try {
         setLoadingPets(true);
-        const petsData = await getAllPets();
+        const petsResponse = await axiosInstance.get(
+          `/pets/customers/${userId}/pets`,
+          { useV2: false }
+        );
 
-        // Filter only active pets
-        const activePets = petsData.filter(pet => pet.isActive === 'true');
-        setPets(activePets);
+        let petsData: PetResponseModel[] = [];
+
+        if (typeof petsResponse.data === 'string') {
+          const pieces = petsResponse.data.split('\n').filter(Boolean);
+
+          for (const piece of pieces) {
+            if (piece.startsWith('data:')) {
+              try {
+                const pet = JSON.parse(
+                  piece.slice(5).trim()
+                ) as PetResponseModel;
+
+                petsData.push(pet);
+              } catch (error) {
+                console.warn('Error parsing pet data:', error);
+              }
+            }
+          }
+        } else if (Array.isArray(petsResponse.data)) {
+          petsData = petsResponse.data;
+        }
+        const petsDataActive = petsData.filter(pet => pet.isActive === 'true');
+        console.warn(petsDataActive);
+        setPets(petsDataActive);
       } catch (error) {
         console.error('Error fetching pets:', error);
         setErrorMessage('Failed to load pets. Please try again.');
@@ -85,7 +118,12 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
     };
 
     fetchPets();
-  }, []);
+  }, [userId, isLoading]);
+
+  useEffect(() => {
+    console.warn('Pets state updated:', pets);
+  }, [pets]);
+
   //fetch vets
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
@@ -333,6 +371,8 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
 
   const morningSlots = getMorningSlots();
   const afternoonSlots = getAfternoonSlots();
+  const allInactivePets = pets.every(p => p.isActive === 'false');
+  const noPetsAssigned = pets.length === 0;
 
   return (
     <BasicModal
@@ -355,6 +395,10 @@ const AddingVisit: React.FC<AddingVisitProps> = ({
           </label>
           {loadingPets ? (
             <p>Loading pets...</p>
+          ) : allInactivePets ? (
+            <p style={{ color: 'red' }}>You have no active pets </p>
+          ) : noPetsAssigned ? (
+            <p style={{ color: 'red' }}>No pet is assigned to you </p>
           ) : (
             <select
               id="petId"

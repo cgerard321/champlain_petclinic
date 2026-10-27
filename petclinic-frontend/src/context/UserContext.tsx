@@ -62,6 +62,7 @@ export const UserProvider = ({
       );
 
       const data = response.data;
+
       setUser({
         username: data.username,
         email: data.email,

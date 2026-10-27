@@ -24,6 +24,7 @@
     "emptyMessage": "Votre panier est vide! Pourquoi ne pas y ajouter quelque chose?",
     "voucherPlaceholder": "Entrez le code promo",
     "currentPromo": "Promo actuelle : {{percent}} %",
+    "promoLookupWarning": "Aucun rabais n’a été appliqué aux articles suivants, car nous n’avons pas pu vérifier leur admissibilité. Appliquez de nouveau la promotion pour réessayer :",
     "receiptLabel": "Voir votre dernier reçu"
   },
   "summary": {
@@ -145,7 +146,8 @@
     "addToWishlist": "Ajouter à la liste de souhaits",
     "addToCartLabel": "Ajouter {{name}} au panier",
     "removeFromWishlistLabel": "Retirer {{name}} de la liste de souhaits",
-    "lowStockOne": "Il ne reste que 1 article en stock."
+    "lowStockOne": "Il ne reste que 1 article en stock.",
+    "promoDiscount": "Réduction promo : -{{amount}}"
   },
   "billing": {
     "close": "Fermer le formulaire de facturation",
@@ -195,6 +197,39 @@
     "price": "Prix :",
     "quantity": "Quantité :",
     "download": "Télécharger la facture"
+  },
+  "reports": {
+    "openButton": "Signaler un problème",
+    "title": "Signaler un problème de commande",
+    "orderNumber": "Commande n° {{id}}",
+    "reason": "Raison",
+    "selectReason": "Sélectionner une raison",
+    "affectedProducts": "Produits concernés",
+    "orderedQuantity": "Quantité commandée : {{quantity}}",
+    "description": "Description",
+    "submit": "Soumettre le signalement",
+    "submitting": "Envoi en cours...",
+    "success": "Votre signalement a été soumis. Notre équipe l'examine.",
+    "banner": "Problème signalé - Statut : {{status}} - Référence : {{reportId}}",
+    "reasons": {
+      "DAMAGED_ITEM": "Article endommagé",
+      "MISSING_ITEM": "Article manquant",
+      "WRONG_ITEM": "Mauvais article",
+      "PACKAGE_NOT_RECEIVED": "Colis non reçu",
+      "OTHER": "Autre"
+    },
+    "status": {
+      "NEW": "Nouveau",
+      "IN_REVIEW": "En cours d'examen",
+      "RESOLVED": "Résolu",
+      "REJECTED": "Rejeté"
+    },
+    "errors": {
+      "reasonRequired": "Sélectionnez une raison.",
+      "productRequired": "Sélectionnez au moins un produit concerné.",
+      "descriptionLength": "La description doit contenir entre 15 et 500 caractères.",
+      "submitFailed": "Impossible de soumettre le signalement."
+    }
   },
   "taxes": {
     "GST": "TPS",

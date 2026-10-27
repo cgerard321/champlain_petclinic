@@ -3,17 +3,20 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   computed,
+  DestroyRef,
   inject,
   LOCALE_ID,
   signal,
   TemplateRef,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
 import { Supply, SupplyRequest } from '@features/supplies/models/supply';
@@ -29,6 +32,11 @@ import {
   ModalFormField,
   ModalFormResult,
 } from '@shared/components/modal-form/modal-form-models';
+import {
+  SupplySummaryAction,
+  SupplySummaryDialog,
+  SupplySummaryDialogData,
+} from '@shared/components/supply-summary-dialog/supply-summary-dialog';
 import { Table, TableColumn } from '@shared/components/table/table';
 import { Roles } from '@shared/models/roles';
 
@@ -45,7 +53,7 @@ interface SupplyFormValue {
 }
 
 @Component({
-  imports: [CurrencyPipe, MatIconModule, MatMenuModule, Table],
+  imports: [CurrencyPipe, MatIconModule, MatMenuModule, Table, MatTooltipModule],
   selector: 'app-supply',
   styleUrl: './supply-page.css',
   templateUrl: './supply-page.html',
@@ -53,6 +61,8 @@ interface SupplyFormValue {
 export class SupplyPage {
   private readonly route = inject(ActivatedRoute);
   private readonly supplyService = inject(SupplyService);
+  private readonly destroyRef = inject(DestroyRef);
+  private supplyLoadSubscription?: Subscription;
   private readonly auth = inject(AuthState);
   private readonly dialog = inject(MatDialog);
   private readonly locale = inject(LOCALE_ID);
@@ -184,6 +194,49 @@ export class SupplyPage {
     });
   }
 
+  protected openSupplySummary(supply: Supply): void {
+    const canConsume = this.canConsumeSupplies();
+    const dialogRef = this.dialog.open<
+      SupplySummaryDialog,
+      SupplySummaryDialogData,
+      SupplySummaryAction
+    >(SupplySummaryDialog, {
+      data: {
+        supply,
+        displayName: this.localizedSupplyName(supply.productName),
+        displayDescription: this.localizedSupplyDescription(supply.productDescription),
+        statusLabel: this.formatStatus(this.effectiveStatus(supply)),
+        photoUrl: this.supplyPhotoUrl(supply),
+        canManage: this.canManageSupplies(),
+        canConsume,
+        consumeDisabled:
+          supply.productQuantity <= 0 ||
+          this.expirationState(supply) === 'expired' ||
+          this.consumingSupplyId() === supply.productId,
+      },
+      ariaLabel: $localize`:@@supply.summary.ariaLabel:Résumé de l'article ${this.localizedSupplyName(supply.productName)}:name:`,
+      width: '640px',
+      maxWidth: '95vw',
+    });
+
+    dialogRef.afterClosed().subscribe((action) => {
+      switch (action) {
+        case 'edit':
+          this.editSupply(supply);
+          break;
+        case 'delete':
+          this.deleteSupply(supply);
+          break;
+        case 'history':
+          this.openSupplyHistory(supply);
+          break;
+        case 'consume':
+          this.consumeSupply(supply);
+          break;
+      }
+    });
+  }
+
   protected setFilter(
     field: 'productName' | 'supplierName' | 'productDescription' | 'status',
     event: Event,
@@ -247,15 +300,11 @@ export class SupplyPage {
       header: $localize`:@@supply.fields.status:État`,
       template: this.statusCell(),
     },
-    ...(this.canManageSupplies() || this.canConsumeSupplies()
-      ? [
-          {
-            id: 'actions',
-            header: $localize`:@@supply.fields.actions:Actions`,
-            template: this.actionsCell(),
-          },
-        ]
-      : []),
+    {
+      id: 'actions',
+      header: $localize`:@@supply.fields.actions:Actions`,
+      template: this.actionsCell(),
+    },
   ]);
 
   protected localizedSupplyName(name: string): string {
@@ -285,24 +334,38 @@ export class SupplyPage {
   }
 
   private loadSupplies(): void {
+    this.supplyLoadSubscription?.unsubscribe();
+    this.supplies.set([]);
+    this.loading.set(true);
+    this.error.set(false);
+
     if (!this.inventoryId) {
       this.loading.set(false);
       this.error.set(true);
       return;
     }
 
-    this.error.set(false);
+    this.supplyLoadSubscription = this.supplyService
+      .getSupplies(this.inventoryId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (supply) => {
+          this.supplies.update((current) => {
+            const index = current.findIndex((item) => item.productId === supply.productId);
+            if (index === -1) return [...current, supply];
 
-    this.supplyService.getSupplies(this.inventoryId).subscribe({
-      next: (supplies) => {
-        this.supplies.set(supplies);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set(true);
-        this.loading.set(false);
-      },
-    });
+            const updated = [...current];
+            updated[index] = supply;
+            return updated;
+          });
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set(true);
+          this.loading.set(false);
+        },
+        complete: () => this.loading.set(false),
+      });
   }
 
   protected openAddDialog(): void {

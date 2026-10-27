@@ -1,13 +1,17 @@
-export type RatingCategory =
-  | 'quality'
-  | 'value'
-  | 'petSatisfaction'
-  | 'ingredients';
+export interface RatingCategories {
+  qualityRating: number;
+  valueRating: number;
+  petSatisfactionRating: number;
+  ingredientsRating: number;
+}
 
 export interface RatingModel {
   rating: number;
-  categoryRatings?: Partial<Record<RatingCategory, number | null>>;
   review: string;
+  qualityRating?: number;
+  valueRating?: number;
+  petSatisfactionRating?: number;
+  ingredientsRating?: number;
   customerId?: string;
   reviewerUsername?: string;
   reviewerPhoto?: string | null;

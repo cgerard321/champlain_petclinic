@@ -503,7 +503,9 @@ The Mailer Service is built with Go and uses:
 - **Port**: 8080
 
 ### Environment Variables Required
+
 The Mailer Service requires the following environment variables:
-- `SMTP_SERVER`: SMTP server hostname
-- `SMTP_USER`: SMTP username
-- `SMTP_PASS`: SMTP password
+- `SMTP_SERVER`: MailerSend SMTP server.
+- `SMTP_USER`: SMTP username used for authentication.
+- `SMTP_PASS`: SMTP password used for authentication.
+- `SMTP_EMAIL`: Sender email address from a verified MailerSend domain.

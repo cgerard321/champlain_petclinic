@@ -1,6 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { JSX, useEffect, useState } from 'react';
-import { RatingModel } from '@/features/products/models/ProductModels/RatingModel.ts';
+import {
+  RatingCategories,
+  RatingModel,
+} from '@/features/products/models/ProductModels/RatingModel.ts';
 import { getUserRatingsForProduct } from '@/features/products/api/getUserRatingsForProduct.ts';
 import { getUserRating } from '@/features/products/api/getUserRating.ts';
 import { deleteUserRating } from '@/features/products/api/deleteUserRating.ts';
@@ -114,7 +117,8 @@ export function ReviewsList({
 
   const updateReview = async (
     newRating: number,
-    newReview: string | null
+    newReview: string | null,
+    categoryRatings: RatingCategories
   ): Promise<void> => {
     if (!productId) return;
     if (newRating === 0) {
@@ -124,7 +128,8 @@ export function ReviewsList({
         const resUpdate = await updateUserRating(
           productId,
           newRating,
-          newReview
+          newReview,
+          categoryRatings
         );
         setCurrentUserReview(resUpdate);
         await onReviewModification();

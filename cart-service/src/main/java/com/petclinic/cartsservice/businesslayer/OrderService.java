@@ -12,4 +12,12 @@ public interface OrderService {
     Mono<OrderResponseModel> getOrderByOrderId(String orderId);
     Flux<OrderResponseModel> getAllOrders();
     Flux<OrderResponseModel>  findOrdersByCustomerId(String customerId);
+
+    Mono<OrderReportResponseModel> createOrderReport(
+            String customerId,
+            String orderId,
+            CreateOrderReportRequestModel request
+    );
+
+    Flux<OrderReportResponseModel> findReportsByCustomerId(String customerId);
 }
