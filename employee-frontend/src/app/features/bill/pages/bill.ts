@@ -548,10 +548,6 @@ export class Bill implements OnInit {
         matchesText(bill.customerId, filters.customerId) &&
         matchesText(customerName, filters.customerName) &&
         matchesText(vetName, filters.vetName) &&
-        // (!filters.visitType.length || bill.visitType === filters.visitType) &&
-        // (!filters.status.length || bill.billStatus === filters.status) &&
-        // (!filters.year.length || bill.date.getFullYear() === Number(filters.year)) &&
-        // (!filters.month.length || bill.date.getMonth() + 1 === Number(filters.month))
         (filters.visitType.length === 0 || filters.visitType.includes(bill.visitType)) &&
         (filters.status.length === 0 || filters.status.includes(bill.billStatus)) &&
         (filters.year.length === 0 || filters.year.includes(String(bill.date.getFullYear()))) &&
