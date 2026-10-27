@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from '@core/guards/auth/auth-guard';
 import { customerRedirectGuard } from '@core/guards/customers/customer-redirect';
 import { employeeGuard } from '@core/guards/employee/employee-guard';
+import { Roles } from '@shared/models/roles';
 
 export const routes: Routes = [
   {
@@ -52,6 +53,12 @@ export const routes: Routes = [
       {
         path: 'invt',
         loadChildren: () => import('@features/inventories/routes'),
+      },
+
+      {
+        path: 'users',
+        canActivate: [authGuard([Roles.admin])],
+        loadChildren: () => import('@features/users/routes'),
       },
 
       {

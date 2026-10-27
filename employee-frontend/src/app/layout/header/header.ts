@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -33,17 +33,29 @@ export class Header {
 
   protected readonly username = this.authState.username;
 
-  protected readonly navBarItems: NavBarItem[] = [
-    { label: $localize`:@@navbar.home:Accueil`, route: '/home' },
-    { label: $localize`:@@navbar.veterinarians:Vétérinaires`, route: '/vets' },
-    { label: $localize`:@@navbar.customers:Clients`, route: '/cust' },
-    { label: $localize`:@@navbar.bills:Factures`, route: '/bill' },
-    { label: $localize`:@@navbar.visits:Visites`, route: '/vist' },
-    { label: $localize`:@@navbar.inventory:Inventaire`, route: '/invt' },
-    { label: $localize`:@@navbar.products:Produits`, route: '/prod' },
-    { label: $localize`:@@navbar.promos:Promotions`, route: '/promo' },
-    { label: $localize`:@@navbar.orderReports:Signalements`, route: '/order-reports' },
-  ];
+  // Check if the current user has the ADMIN role
+  protected readonly isAdmin = computed(() => this.authState.hasRole('ADMIN'));
+
+  // Dynamically include "Users" only if the user is an admin
+  protected readonly navBarItems = computed(() => {
+    const items: NavBarItem[] = [
+      { label: $localize`:@@navbar.home:Accueil`, route: '/home' },
+      { label: $localize`:@@navbar.veterinarians:Vétérinaires`, route: '/vets' },
+      { label: $localize`:@@navbar.customers:Clients`, route: '/cust' },
+      { label: $localize`:@@navbar.bills:Factures`, route: '/bill' },
+      { label: $localize`:@@navbar.visits:Visites`, route: '/vist' },
+      { label: $localize`:@@navbar.inventory:Inventaire`, route: '/invt' },
+      { label: $localize`:@@navbar.products:Produits`, route: '/prod' },
+      { label: $localize`:@@navbar.promos:Promotions`, route: '/promo' },
+      { label: $localize`:@@navbar.orderReports:Signalements`, route: '/order-reports' },
+    ];
+
+    if (this.isAdmin()) {
+      items.push({ label: $localize`:@@navbar.users:Utilisateurs`, route: '/users' });
+    }
+
+    return items;
+  });
 
   protected setting(): void {
     this.router.navigateByUrl('/settings');
