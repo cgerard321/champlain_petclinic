@@ -16,8 +16,10 @@ import { FormControl, FormBuilder, ReactiveFormsModule, Validators } from '@angu
 import { MatDialog } from '@angular/material/dialog';
 
 import {
+  ALL_WORK_HOURS,
   DAYS,
   emptySchedule,
+  hourRange,
   hourLabel,
   readSchedule,
   RemovedSlot,
@@ -133,8 +135,12 @@ export class VetEditForm {
     const initialSchedule = this.initialSchedule();
 
     const allHours = Array.from(
-      new Set(DAYS.flatMap((day) => initialSchedule[day] || []))
-    ).sort();
+      new Set([...ALL_WORK_HOURS, ...DAYS.flatMap((day) => initialSchedule[day] || [])])
+    ).sort((a, b) => {
+      const rangeA = hourRange(a)?.[0] ?? 0;
+      const rangeB = hourRange(b)?.[0] ?? 0;
+      return rangeA - rangeB;
+    });
 
     return DAYS.map((day) => {
       const isDaySelected = days.includes(day);
@@ -155,12 +161,23 @@ export class VetEditForm {
 
   protected addDay(day: Workday): void {
     this.days.update((current) => (current.includes(day) ? current : [...current, day]));
+
+    const STANDARD_SHIFT_HOURS = [
+      'Hour_9_10',
+      'Hour_10_11',
+      'Hour_11_12',
+      'Hour_12_13',
+      'Hour_13_14',
+      'Hour_14_15',
+      'Hour_15_16',
+      'Hour_16_17',
+    ];
+
     const initialSchedule = this.initialSchedule();
-    const allHours = Array.from(
-      new Set(DAYS.flatMap((d) => initialSchedule[d] || []))
-    ).sort();
+    const defaultHours = initialSchedule[day]?.length ? initialSchedule[day] : STANDARD_SHIFT_HOURS;
+
     if (!this.schedule()[day]?.length) {
-      this.schedule.update((current) => ({ ...current, [day]: allHours }));
+      this.schedule.update((current) => ({ ...current, [day]: defaultHours }));
     }
     this.announcement.set(
       $localize`:@@vets.availability.added_day:Journée ${this.labels[day]}:day: ajoutée.`,
@@ -384,7 +401,7 @@ export class VetEditForm {
           (preferred && root.querySelector<HTMLElement>(preferred)) ||
           root.querySelector<HTMLElement>('.remove-day') ||
           root.querySelector<HTMLElement>('#availability-title');
-        target?.focus();
+        target?.focus({ preventScroll: true });
       },
       { injector: this.injector },
     );

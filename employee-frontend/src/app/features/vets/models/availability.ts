@@ -12,6 +12,21 @@ export const DAYS = [
   'Sunday',
 ] as const satisfies readonly Workday[];
 
+export const ALL_WORK_HOURS = [
+  'Hour_8_9',
+  'Hour_9_10',
+  'Hour_10_11',
+  'Hour_11_12',
+  'Hour_12_13',
+  'Hour_13_14',
+  'Hour_14_15',
+  'Hour_15_16',
+  'Hour_16_17',
+  'Hour_17_18',
+  'Hour_18_19',
+  'Hour_19_20',
+] as const;
+
 export type Schedule = Record<Workday, readonly string[]>;
 
 export interface RemovedSlot {
