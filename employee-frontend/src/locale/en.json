@@ -549,8 +549,8 @@
         "quebec": "Quebec",
         "saskatchewan": "Saskatchewan",
         "yukon": "Yukon"
-      }
-
+      },
+      "allPetsButton": "All pets"
     },
     "pet": {
       "petAddTitle" : "Add a new Pet",
@@ -588,6 +588,23 @@
         "date": "Date of Birth is required",
         "weightR": "Weight is required",
         "weightP": "Weight should be a valid number"
+      }
+    },
+    "petList": {
+      "title": "Pets",
+      "loadingLabel": "Loading",
+      "loading": "Loading pets...",
+      "loadError": "Unable to load pets. Please try again later.",
+      "empty": "No pets registered.",
+      "caption": "Pets registered at the clinic",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "noResults": "No pets match the filters.",
+      "filters": {
+        "petType": "Pet type",
+        "petTypePlaceholder": "e.g. dog",
+        "name": "Pet name"
       }
     },
     "modal": {

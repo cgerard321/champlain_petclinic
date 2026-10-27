@@ -1,0 +1,78 @@
+<section class="pet-type-page" [attr.aria-busy]="isLoading()">
+  <h1 i18n="@@petList.title">Animaux</h1>
+
+  @if (isLoading()) {
+    <div class="state-container" role="status">
+      <mat-spinner diameter="40" aria-label="Chargement" i18n-aria-label="@@petList.loadingLabel" />
+      <p i18n="@@petList.loading">Chargement des animaux...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <p role="alert">{{ errorMessage() }}</p>
+  } @else if (pets().length === 0) {
+    <p role="status" i18n="@@petList.empty">Aucun animal enregistré.</p>
+  } @else {
+    <div class="filters-container">
+      <div class="filter-field">
+        <label for="filter-pet-type" i18n="@@petList.filters.petType">Type d'animal</label>
+        <input
+          id="filter-pet-type"
+          type="search"
+          placeholder="ex. chien"
+          i18n-placeholder="@@petList.filters.petTypePlaceholder"
+          [value]="petTypeFilter()"
+          (input)="petTypeFilter.set($any($event.target).value)"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label for="filter-name" i18n="@@petList.filters.name">Nom de l'animal</label>
+        <input
+          id="filter-name"
+          type="search"
+          [value]="nameFilter()"
+          (input)="nameFilter.set($any($event.target).value)"
+        />
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table>
+        <caption i18n="@@petList.caption">
+          Animaux enregistrés dans la clinique
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col" i18n="@@pet.petDetails.name">Nom</th>
+            <th scope="col" i18n="@@pet.petDetails.species">Espèce</th>
+            <th scope="col" i18n="@@pet.petDetails.date">Date de naissance</th>
+            <th scope="col" i18n="@@pet.petDetails.weight">Poids</th>
+            <th scope="col" i18n="@@petList.status">Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (pet of filteredPets(); track pet.petId) {
+            <tr>
+              <td>{{ pet.name }}</td>
+              <td>{{ getPetTypeLabel(pet.petTypeId) }}</td>
+              <td>{{ pet.birthDate | date: 'mediumDate' }}</td>
+              <td>{{ pet.weight }}</td>
+              <td>
+                @if (pet.isActive === 'true') {
+                  <ng-container i18n="@@petList.active">Actif</ng-container>
+                } @else {
+                  <ng-container i18n="@@petList.inactive">Inactif</ng-container>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="no-results" role="status" i18n="@@petList.noResults">
+                Aucun animal ne correspond aux filtres.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

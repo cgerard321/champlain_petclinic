@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Router } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 
 import { AuthState } from '@core/services/auth-state';
 import { AddCustomer } from '@features/cust/components/customer-add/customer-add';
@@ -13,7 +13,7 @@ import { CustomerService } from '@features/cust/services/customer-service';
 import { Roles } from '@shared/models/roles';
 
 @Component({
-  imports: [MatProgressSpinnerModule, MatCardModule, MatDialogModule],
+  imports: [MatProgressSpinnerModule, MatCardModule, MatDialogModule, RouterLink],
   selector: 'app-cust',
   styleUrl: './cust.css',
   templateUrl: './cust.html',
