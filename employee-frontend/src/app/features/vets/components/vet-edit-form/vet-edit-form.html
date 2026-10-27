@@ -43,16 +43,16 @@
     <section class="availability" aria-labelledby="availability-title">
       <h3 id="availability-title" tabindex="-1" i18n="@@vets.availability.title">Disponibilités</h3>
       <p class="hint" i18n="@@vets.availability.description">
-        Retirez une plage horaire ou une journée entière. Les retraits prennent effet à
-        l’enregistrement.
+        Ajoutez ou retirez des plages horaires. Les modifications prennent effet à l’enregistrement.
       </p>
       <p class="visually-hidden" role="status" aria-live="polite">{{ announcement() }}</p>
-      @if (availability().length) {
-        <ul class="day-list">
-          @for (entry of availability(); track entry.day) {
-            <li class="day">
-              <div class="day-header">
-                <span class="day-label">{{ entry.label }}</span>
+
+      <ul class="day-list">
+        @for (entry of allAvailabilities(); track entry.day) {
+          <li class="day" [class.inactive]="!entry.selected && !entry.hours.some(h => h.selected)">
+            <div class="day-header">
+              <span class="day-label">{{ entry.label }}</span>
+              @if (entry.selected) {
                 <button
                   class="remove-day"
                   type="button"
@@ -62,36 +62,53 @@
                   <span i18n="@@vets.availability.remove_day">Retirer la journée</span>
                   <span class="visually-hidden">{{ entry.label }}</span>
                 </button>
-              </div>
-              @if (entry.hours.length) {
-                <ul class="hour-list">
-                  @for (hour of entry.hours; track hour.value) {
-                    <li class="hour">
-                      <span>{{ hour.label }}</span>
-                      <button
-                        class="remove-hour"
-                        type="button"
-                        [id]="'remove-hour-' + entry.day + '-' + hour.value"
-                        (click)="removeHour(entry.day, hour.value)"
-                      >
-                        <span aria-hidden="true">×</span>
-                        <span class="visually-hidden" i18n="@@vets.availability.remove_hour"
-                          >Retirer</span
-                        >
-                        <span class="visually-hidden">{{ entry.label }} {{ hour.label }}</span>
-                      </button>
-                    </li>
-                  }
-                </ul>
               } @else {
-                <p class="hint" i18n="@@vets.availability.no_hours">Aucune heure précisée.</p>
+                <button
+                  class="add-day"
+                  type="button"
+                  [id]="'add-day-' + entry.day"
+                  (click)="addDay(entry.day)"
+                >
+                  <span aria-hidden="true"></span>
+                  <span i18n="@@vets.availability.add_day">Ajouter la journée</span>
+                  <span class="visually-hidden">{{ entry.label }}</span>
+                </button>
               }
-            </li>
-          }
-        </ul>
-      } @else {
-        <p role="status" i18n="@@vets.availability.empty">Aucune disponibilité au profil.</p>
-      }
+            </div>
+
+            <ul class="hour-list">
+              @for (hour of entry.hours; track hour.value) {
+                <li class="hour" [class.unselected]="!hour.selected">
+                  <span>{{ hour.label }}</span>
+                  @if (hour.selected) {
+                    <button
+                      class="remove-hour"
+                      type="button"
+                      [id]="'remove-hour-' + entry.day + '-' + hour.value"
+                      (click)="removeHour(entry.day, hour.value)"
+                    >
+                      <span aria-hidden="true">×</span>
+                      <span class="visually-hidden" i18n="@@vets.availability.remove_hour">Retirer</span>
+                      <span class="visually-hidden">{{ entry.label }} {{ hour.label }}</span>
+                    </button>
+                  } @else {
+                    <button
+                      class="add-hour"
+                      type="button"
+                      [id]="'add-hour-' + entry.day + '-' + hour.value"
+                      (click)="addHour(entry.day, hour.value)"
+                    >
+                      <span aria-hidden="true">+ </span>
+                      <span class="visually-hidden" i18n="@@vets.availability.add_hour">Ajouter</span>
+                      <span class="visually-hidden">{{ entry.label }} {{ hour.label }}</span>
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          </li>
+        }
+      </ul>
     </section>
 
     <div class="specialty-section">

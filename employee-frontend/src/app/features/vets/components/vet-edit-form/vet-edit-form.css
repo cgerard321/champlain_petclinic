@@ -162,6 +162,40 @@ h3:focus-visible {
   background: #f4f7f2;
 }
 
+.hour.unselected {
+  opacity: 0.75;
+  background-color: #f5f5f5;
+  border-color: #b0c2b8;
+}
+
+.hour.unselected span {
+  color: #555;
+}
+
+.add-day {
+  padding: 8px 14px;
+  border-color: #254e3e;
+  background: #254e3e;
+  color: #fff;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+.add-hour {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #10b981;
+  border-radius: 50%;
+  background: #10b981;
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .remove-day {
   padding: 8px 14px;
   border-color: #a12020;

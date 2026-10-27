@@ -120,6 +120,63 @@ export class VetEditForm {
       hint: $localize`:@@vets.edit.biography_hint:Au moins 10 caractères.`,
     },
   ] as const;
+
+  protected readonly allAvailabilities = computed(() => {
+    const days = this.days();
+    const schedule = this.schedule();
+    const initialSchedule = this.initialSchedule();
+
+    const allHours = Array.from(
+      new Set(DAYS.flatMap((day) => initialSchedule[day] || []))
+    ).sort();
+
+    return DAYS.map((day) => {
+      const isDaySelected = days.includes(day);
+      const activeHours = schedule[day] || [];
+
+      return {
+        day,
+        label: this.labels[day],
+        selected: isDaySelected,
+        hours: allHours.map((hour) => ({
+          value: hour,
+          label: hourLabel(hour),
+          selected: activeHours.includes(hour),
+        })),
+      };
+    });
+  });
+
+  protected addDay(day: Workday): void {
+    this.days.update((current) => (current.includes(day) ? current : [...current, day]));
+    const initialSchedule = this.initialSchedule();
+    const allHours = Array.from(
+      new Set(DAYS.flatMap((d) => initialSchedule[d] || []))
+    ).sort();
+    if (!this.schedule()[day]?.length) {
+      this.schedule.update((current) => ({ ...current, [day]: allHours }));
+    }
+    this.announcement.set(
+      $localize`:@@vets.availability.added_day:Journée ${this.labels[day]}:day: ajoutée.`,
+    );
+    this.restoreFocus(`#add-day-${day}`);
+  }
+
+  protected addHour(day: Workday, hour: string): void {
+    const currentHours = this.schedule()[day] || [];
+    if (!currentHours.includes(hour)) {
+      const updatedHours = [...currentHours, hour].sort();
+      this.schedule.update((current) => ({ ...current, [day]: updatedHours }));
+    }
+    if (!this.days().includes(day)) {
+      this.days.update((current) => [...current, day]);
+    }
+    this.announcement.set(
+      $localize`:@@vets.availability.added_hour:${this.labels[day]}:day: ${hourLabel(hour)}:hour: ajouté.`,
+    );
+    this.restoreFocus(`#add-hour-${day}-${hour}`);
+  }
+
   protected readonly availability = computed(() => {
     const days = this.days();
     const schedule = this.schedule();
