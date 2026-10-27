@@ -8,5 +8,11 @@
   "include": [
     "src/**/*.d.ts",
     "src/**/*.spec.ts",
+    "tests/visitsTest/nextAppointment.spec.ts",
+    "tests/visitsTest/visitListVetVisits.spec.ts",
+    "tests/visitsTest/visitListAdmin.spec.ts",
+    "tests/visitsTest/scheduleFollowUpVisit.spec.ts",
+    "tests/visitsTest/weeklyEmail.spec.ts",
+    "tests/visitsTest/visit-serviceEmail.spec.ts"
   ]
 }
