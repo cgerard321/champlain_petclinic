@@ -895,4 +895,220 @@ class ProductsServiceClientIntegrationTest {
         assertEquals("Litière pour chats", json.get("productNameFr").asText());
         assertEquals("Litière agglomérante", json.get("productDescriptionFr").asText());
     }
+
+    @Test
+    void getAllProducts_withIncludeImage_sendsIncludeImageQueryParameter() throws InterruptedException {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) { }
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("data:{\"productId\":\"1\",\"productName\":\"Alpha\",\"averageRating\":0.0}\n\n")
+                .setHeader("Content-Type", "text/event-stream")
+        );
+
+        StepVerifier.create(productsServiceClient.getAllProducts(
+                        null, null, null, null, null, null, null, true))
+                .expectNextMatches(product -> product.getProductId().equals("1"))
+                .verifyComplete();
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/products?includeImage=true", request.getPath());
+    }
+
+    @Test
+    void getAllProducts_withAllFilters_sendsAllQueryParameters() throws InterruptedException {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) { }
+
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("")
+                .setHeader("Content-Type", "text/event-stream")
+        );
+
+        StepVerifier.create(productsServiceClient.getAllProducts(
+                        1.0, 100.0, 1.0, 5.0, "asc", "PICKUP", "FOOD", "collar", false))
+                .verifyComplete();
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/products?minPrice=1.0&maxPrice=100.0&minRating=1.0&maxRating=5.0"
+                + "&sort=asc&deliveryType=PICKUP&productType=FOOD&productName=collar&includeImage=false",
+                request.getPath());
+    }
+
+    @Test
+    void getAllProducts_withMaxRatingOnly_thenFilterOutHigherRatedProducts() {
+        mockWebServer.enqueue(new MockResponse()
+                .setBody("data:{\"productId\":\"1\",\"productName\":\"Alpha\",\"averageRating\":4.5}\n\n" +
+                        "data:{\"productId\":\"2\",\"productName\":\"Bravo\",\"averageRating\":2.0}\n\n"
+                ).setHeader("Content-Type", "text/event-stream")
+        );
+
+        StepVerifier.create(productsServiceClient.getAllProducts(null, null, null, 3.0, null, null, null))
+                .expectNextMatches(product -> product.getProductId().equals("2"))
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllProducts_whenImageDependencyFails_thenThrowProductImageDependencyException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(424));
+
+        StepVerifier.create(productsServiceClient.getAllProducts(
+                        null, null, null, null, null, null, null, true))
+                .expectError(ProductImageDependencyException.class)
+                .verify();
+    }
+
+    @Test
+    void getProductByProductId_withoutIncludeImage_thenReturnProduct() throws Exception {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) { }
+
+        ProductResponseDTO product = ProductResponseDTO.builder()
+                .productId("product-id")
+                .productName("Dog Food")
+                .build();
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(product)));
+
+        StepVerifier.create(productsServiceClient.getProductByProductId("product-id"))
+                .expectNextMatches(result -> result.getProductId().equals("product-id")
+                        && result.getProductName().equals("Dog Food"))
+                .verifyComplete();
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/products/product-id?includeImage=false", request.getPath());
+    }
+
+    @Test
+    void getProductImageDependencyFailureUsesTypedException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(424));
+
+        StepVerifier.create(productsServiceClient.getProductByProductId("product-id", true))
+                .expectError(ProductImageDependencyException.class)
+                .verify();
+    }
+
+    @Test
+    void deleteProductImage_thenReturnProduct() throws Exception {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) { }
+
+        ProductResponseDTO product = ProductResponseDTO.builder()
+                .productId("product-id")
+                .productName("Dog Food")
+                .build();
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(product)));
+
+        StepVerifier.create(productsServiceClient.deleteProductImage("product-id"))
+                .expectNextMatches(result -> result.getProductId().equals("product-id"))
+                .verifyComplete();
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("DELETE", request.getMethod());
+        assertEquals("/products/product-id/image", request.getPath());
+    }
+
+    @Test
+    void deleteProductImageBadRequestUsesTypedException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(400));
+
+        StepVerifier.create(productsServiceClient.deleteProductImage("product-id"))
+                .expectError(BadRequestException.class)
+                .verify();
+    }
+
+    @Test
+    void deleteProductImageNotFoundUsesTypedException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(404));
+
+        StepVerifier.create(productsServiceClient.deleteProductImage("product-id"))
+                .expectError(ProductNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void deleteProductImageInvalidInputUsesTypedException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(422));
+
+        StepVerifier.create(productsServiceClient.deleteProductImage("product-id"))
+                .expectError(InvalidInputException.class)
+                .verify();
+    }
+
+    @Test
+    void deleteProductImageDependencyFailureUsesTypedException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(424));
+
+        StepVerifier.create(productsServiceClient.deleteProductImage("product-id"))
+                .expectError(ProductImageDependencyException.class)
+                .verify();
+    }
+
+    @Test
+    void updateProductImage_thenReturnProduct() throws Exception {
+        ProductResponseDTO product = ProductResponseDTO.builder()
+                .productId("product-id")
+                .productName("Dog Food")
+                .build();
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(product)));
+
+        StepVerifier.create(productsServiceClient.updateProductImage(
+                        "product-id", FileDetails.builder().build()))
+                .expectNextMatches(result -> result.getProductId().equals("product-id"))
+                .verifyComplete();
+    }
+
+    @Test
+    void updateProductImageBadRequestUsesTypedException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(400));
+
+        StepVerifier.create(productsServiceClient.updateProductImage(
+                        "product-id", FileDetails.builder().build()))
+                .expectError(BadRequestException.class)
+                .verify();
+    }
+
+    @Test
+    void updateProductImageNotFoundUsesTypedException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(404));
+
+        StepVerifier.create(productsServiceClient.updateProductImage(
+                        "product-id", FileDetails.builder().build()))
+                .expectError(ProductNotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void getProductsByType_thenReturnProducts() throws Exception {
+        while (mockWebServer.takeRequest(0, TimeUnit.MILLISECONDS) != null) { }
+
+        List<ProductResponseDTO> products = List.of(
+                ProductResponseDTO.builder().productId("1").productName("Alpha").build(),
+                ProductResponseDTO.builder().productId("2").productName("Bravo").build());
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(products)));
+
+        StepVerifier.create(productsServiceClient.getProductsByType("FOOD"))
+                .expectNextMatches(product -> product.getProductId().equals("1"))
+                .expectNextMatches(product -> product.getProductId().equals("2"))
+                .verifyComplete();
+
+        RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/products/filter/FOOD?includeImage=false", request.getPath());
+    }
+
+    @Test
+    void getProductsByTypeImageDependencyFailureUsesTypedException() {
+        mockWebServer.enqueue(new MockResponse().setResponseCode(424));
+
+        StepVerifier.create(productsServiceClient.getProductsByType("FOOD", true))
+                .expectError(ProductImageDependencyException.class)
+                .verify();
+    }
 }
