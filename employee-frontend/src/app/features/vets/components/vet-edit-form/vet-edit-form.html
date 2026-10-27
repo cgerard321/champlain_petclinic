@@ -40,6 +40,48 @@
         </p>
       </div>
     }
+
+    <div class="specialty-section">
+      <h3 i18n="@@vets.edit.available_specialties">Spécialités disponibles</h3>
+
+      <ul class="available-specialty-list">
+        @for (name of remainingSpecialties(); track name) {
+          <li>
+            <span>{{ specialtyLabel(name) }}</span>
+
+            <button type="button" [disabled]="saving()" (click)="addSpecialtyByName(name)">
+              <span i18n="@@vets.edit.add">Ajouter</span>
+              <span class="visually-hidden">: {{ specialtyLabel(name) }}</span>
+            </button>
+          </li>
+        } @empty {
+          <li i18n="@@vets.edit.all_specialties_selected">
+            Toutes les spécialités disponibles ont été ajoutées.
+          </li>
+        }
+      </ul>
+
+      <div class="custom-specialty">
+        <label for="custom-specialty" i18n="@@vets.edit.custom_specialty">Autre spécialité</label>
+
+        <input
+          id="custom-specialty"
+          type="text"
+          [formControl]="customSpecialty"
+          (keydown.enter)="$event.preventDefault(); addCustomSpecialty()"
+        />
+
+        <button
+          type="button"
+          [disabled]="saving() || !customSpecialty.value.trim()"
+          (click)="addCustomSpecialty()"
+          i18n="@@vets.edit.add_custom_specialty"
+        >
+          Ajouter la spécialité
+        </button>
+      </div>
+    </div>
+
     <div class="actions">
       <button type="submit" [disabled]="saving()">
         @if (saving()) {
