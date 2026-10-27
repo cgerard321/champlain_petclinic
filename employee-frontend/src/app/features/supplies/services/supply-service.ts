@@ -50,6 +50,14 @@ export class SupplyService {
     );
   }
 
+  restockSupply(inventoryId: string, productId: string, quantity: number): Observable<Supply> {
+    return this.http.put<Supply>(
+      `/api/gateway/inventories/${inventoryId}/products/${productId}/restockProduct`,
+      null,
+      { params: { productQuantity: quantity } },
+    );
+  }
+
   downloadSupplyPdf(inventoryId: string): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/${inventoryId}/products/download`, {
       responseType: 'blob',

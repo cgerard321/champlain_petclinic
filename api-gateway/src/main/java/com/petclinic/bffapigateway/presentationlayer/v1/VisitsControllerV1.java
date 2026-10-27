@@ -384,6 +384,21 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.VET})
+    @PostMapping("/weekly-email")
+    public Mono<ResponseEntity<String>> sendMyWeeklyScheduleEmail(
+            ServerWebExchange exchange) {
+
+        TokenResponseDTO user = exchange.getAttribute("tokenValues");
+
+        if (user == null) {
+            return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+        }
+
+        return visitsServiceClient
+                .sendWeeklyScheduleEmail(user.getUserId())
+                .map(ResponseEntity::ok);
+    }
     @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PatchMapping(value = "/{visitId}/confirm", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> confirmFollowUpVisit(@PathVariable String visitId, ServerWebExchange exchange) {

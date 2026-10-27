@@ -37,6 +37,7 @@ import java.time.LocalDateTime;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -1362,5 +1363,24 @@ class VisitsServiceClientIntegrationTest {
                 .expectErrorMatches(ex -> ex instanceof BadRequestException
                         && ex.getMessage().contains("not available"))
                 .verify();
+    }
+    @Test
+    void sendWeeklyScheduleEmail_postsToPractitionerScheduleEndpoint() throws Exception {
+        while (server.takeRequest(10, TimeUnit.MILLISECONDS) != null) {
+            // Discard request records left behind by earlier tests using this shared server.
+        }
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("\"Message queued\""));
+
+        StepVerifier.create(visitsServiceClient.sendWeeklyScheduleEmail("vet-1"))
+                .expectNext("\"Message queued\"")
+                .verifyComplete();
+
+        okhttp3.mockwebserver.RecordedRequest request = server.takeRequest();
+        assertEquals("POST", request.getMethod());
+        assertEquals("/visits/practitioner/vet-1/weekly-email", request.getPath());
     }
 }
