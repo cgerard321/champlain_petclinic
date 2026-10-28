@@ -24,6 +24,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.aggregation.AggregationUpdate;
+import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
+import org.springframework.data.mongodb.core.aggregation.ConditionalOperators;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 
 import javax.security.auth.callback.TextInputCallback;
 import java.time.Instant;
@@ -46,6 +53,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     private final ProductRepository productRepository;
     private final InventoryTypeRepository inventoryTypeRepository;
     private final InventoryValidator validator;
+    private final ReactiveMongoTemplate mongoTemplate;
+
     private final SupplyAuditRepository supplyAuditRepository;
 
     @Override
@@ -364,7 +373,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     @Override
     public Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryCode, String inventoryName, String inventoryType, String inventoryDescription, Boolean importantOnly) {
-
         Comparator<Inventory> byCode = (a, b) -> {
             String c1 = a.getInventoryCode();
             String c2 = b.getInventoryCode();
@@ -395,123 +403,21 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Code: " + inventoryCode)));
         }
 
+        String nameFilter = normalizeSearchFilter(inventoryName);
+        String typeFilter = normalizeSearchFilter(inventoryType);
+        String descriptionFilter = normalizeSearchFilter(inventoryDescription);
+        boolean filterFavorites = Boolean.TRUE.equals(importantOnly);
+        boolean hasFilters = nameFilter != null || typeFilter != null
+                || descriptionFilter != null || filterFavorites;
 
-        if (inventoryName != null && inventoryType != null && inventoryDescription != null) {
-            return inventoryRepository
-                    .findAllByInventoryNameAndInventoryTypeAndInventoryDescription(inventoryName, inventoryType, inventoryDescription)
-                    .sort(byCode)
-                    .concatMap(inventory ->
-                            getRecentUpdateMessage(inventory.getInventoryId())
-                                    .defaultIfEmpty("-")
-                                    .map(message -> {
-                                        InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
-                                        dto.setRecentUpdateMessage(message);
-                                        return dto;
-                                    })
-                    )
-                    .skip(page.getPageNumber() * page.getPageSize())
-                    .take(page.getPageSize())
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name: " + inventoryName +
-                            ", Type: " + inventoryType + ", Description: " + inventoryDescription)));
-        }
+        Flux<Inventory> matchingInventories = inventoryRepository.findAll()
+                .filter(inventory ->
+                        matchesPrefix(inventory.getInventoryName(), nameFilter)
+                                && (typeFilter == null || typeFilter.equals(inventory.getInventoryType()))
+                                && matchesPrefix(inventory.getInventoryDescription(), descriptionFilter)
+                                && (!filterFavorites || Boolean.TRUE.equals(inventory.getImportant())));
 
-        if (inventoryType != null && inventoryDescription != null) {
-            return inventoryRepository
-                    .findAllByInventoryTypeAndInventoryDescription(inventoryType, inventoryDescription)
-                    .sort(byCode)
-                    .concatMap(inventory ->
-                            getRecentUpdateMessage(inventory.getInventoryId())
-                                    .defaultIfEmpty("-")
-                                    .map(message -> {
-                                        InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
-                                        dto.setRecentUpdateMessage(message);
-                                        return dto;
-                                    })
-                    )
-                    .skip(page.getPageNumber() * page.getPageSize())
-                    .take(page.getPageSize())
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType +
-                            " and Description: " + inventoryDescription)));
-        }
-        if (inventoryName != null) {
-
-            String escapedInventoryName = Pattern.quote(inventoryName);
-            String regexPattern = "(?i)^" + escapedInventoryName + ".*";
-
-            Flux<Inventory> base = inventoryRepository.findByInventoryNameRegex(regexPattern);
-
-            return base
-                    .sort(byCode)
-                    .concatMap(inv ->
-                            getRecentUpdateMessage(inv.getInventoryId())
-                                    .defaultIfEmpty("—")
-                                    .map(msg -> {
-                                        InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inv);
-                                        dto.setRecentUpdateMessage(msg);
-                                        return dto;
-                                    })
-                    )
-                    .skip(page.getPageNumber() * page.getPageSize())
-                    .take(page.getPageSize())
-                    .switchIfEmpty(Mono.error(new NotFoundException(
-                            (inventoryName.length() == 1)
-                                    ? "Inventory not found starting with: " + inventoryName
-                                    : "Inventory not found with Name starting with or matching: " + inventoryName
-                    )));        }
-
-        if (inventoryType != null /* … */) {
-            return inventoryRepository
-                    .findAllByInventoryType(inventoryType)
-                    .sort(byCode)
-                    .concatMap(inventory ->
-                            getRecentUpdateMessage(inventory.getInventoryId())
-                                    .defaultIfEmpty("-")
-                                    .map(message -> {
-                                        InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inventory);
-                                        dto.setRecentUpdateMessage(message);
-                                        return dto;
-                                    })
-                    )
-                    .skip(page.getPageNumber() * page.getPageSize())
-                    .take(page.getPageSize())
-                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType)));
-        }
-
-        if (inventoryDescription != null) {
-            String escapedInventoryDescription = Pattern.quote(inventoryDescription);
-            String regexPattern = "(?i)^" + escapedInventoryDescription + ".*";
-
-            Flux<Inventory> base = inventoryRepository.findByInventoryDescriptionRegex(regexPattern);
-
-            return base
-                    .sort(byCode)
-                    .concatMap(inv ->
-                            getRecentUpdateMessage(inv.getInventoryId())
-                                    .defaultIfEmpty("—")
-                                    .map(msg -> {
-                                        InventoryResponseDTO dto = EntityDTOUtil.toInventoryResponseDTO(inv);
-                                        dto.setRecentUpdateMessage(msg);
-                                        return dto;
-                                    })
-                    )
-                    .skip(page.getPageNumber() * page.getPageSize())
-                    .take(page.getPageSize())
-                    .switchIfEmpty(Mono.error(new NotFoundException(
-                            (inventoryDescription.length() == 1)
-                                    ? "Inventory not found with Description: " + inventoryDescription
-                                    : "Inventory not found with Name starting with or matching: " + inventoryName
-                    )));
-        }
-
-        // Default - fetch all if no criteria provided.
-        Flux<Inventory> inventoryFlux = inventoryRepository.findAll();
-
-        if (importantOnly != null && importantOnly) {
-            inventoryFlux = inventoryFlux.filter(inventory ->
-                    inventory.getImportant() != null && inventory.getImportant());
-        }
-
-        return inventoryFlux
+        Flux<InventoryResponseDTO> results = matchingInventories
                 .sort(byCode)
                 .concatMap(inv ->
                         getRecentUpdateMessage(inv.getInventoryId())
@@ -524,6 +430,18 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 )
                 .skip(page.getPageNumber() * page.getPageSize())
                 .take(page.getPageSize());
+
+        return hasFilters
+                ? results.switchIfEmpty(Mono.error(new NotFoundException("No inventories match the supplied filters.")))
+                : results;
+    }
+
+    private String normalizeSearchFilter(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private boolean matchesPrefix(String value, String filter) {
+        return filter == null || (value != null && value.regionMatches(true, 0, filter, 0, filter.length()));
     }
 
 
@@ -806,26 +724,55 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                     "The restock quantity must be greater than 0."));
         }
 
-        return productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
-                .switchIfEmpty(Mono.error(new NotFoundException(
-                        "Product with id: " + productId + " not found in inventory " + inventoryId)))
-                .flatMap(product -> {
-                    int previousQuantity = product.getProductQuantity();
-                    product.setProductQuantity(previousQuantity + productQuantity);
-                    product.setLastUpdatedAt(LocalDateTime.now());
+        // Match the quantity-derived status exposed by EntityDTOUtil; stored status can be absent or stale.
+        Query eligible = Query.query(Criteria.where("inventoryId").is(inventoryId)
+                .and("productId").is(productId)
+                .and("productQuantity").gte(0).lt(EntityDTOUtil.REORDER_THRESHOLD)
+                .lte(Integer.MAX_VALUE - productQuantity));
 
-                    return productRepository.save(product)
-                            .flatMap(saved ->
-                                    recordSupplyChange(
-                                            inventoryId,
-                                            saved.getProductId(),
-                                            saved.getProductName(),
-                                            previousQuantity,
-                                            saved.getProductQuantity(),
-                                            SupplyAuditAction.QUANTITY_UPDATED,
-                                            changedBy)
-                                            .thenReturn(EntityDTOUtil.toProductResponseDTO(saved)));
-                });
+        AggregationUpdate update = AggregationUpdate.update()
+                .set("productQuantity")
+                .toValue(ArithmeticOperators.valueOf("productQuantity").add(productQuantity))
+                .set("status")
+                .toValue(ConditionalOperators.when(
+                        Criteria.where("productQuantity").lt(EntityDTOUtil.REORDER_THRESHOLD))
+                        .then(Status.RE_ORDER.name())
+                        .otherwise(Status.AVAILABLE.name()))
+                .set("lastUpdatedAt").toValue(LocalDateTime.now());
+
+        return mongoTemplate.findAndModify(
+                        eligible,
+                        update,
+                        FindAndModifyOptions.options().returnNew(true),
+                        Product.class)
+                .switchIfEmpty(Mono.defer(() ->
+                        productRepository.findProductByInventoryIdAndProductId(inventoryId, productId)
+                                .switchIfEmpty(Mono.error(new NotFoundException(
+                                        "Product with id: " + productId
+                                                + " not found in inventory " + inventoryId)))
+                                .flatMap(product -> {
+                                    Integer quantity = product.getProductQuantity();
+                                    if (quantity == null || quantity < 0) {
+                                        return Mono.error(new InvalidInputException(
+                                                "The stored stock quantity is missing or negative. Correct it before restocking."));
+                                    }
+                                    return Mono.error(new InvalidInputException(
+                                            quantity < EntityDTOUtil.REORDER_THRESHOLD
+                                                    ? "The restock quantity would exceed the maximum stock quantity."
+                                                    : "Only RE ORDER or OUT OF STOCK supplies can be restocked. Refresh and try again."));
+                                })))
+                // Audit history is written after the stock update without a transaction.
+                // Propagate audit failures; the stock addition has already been applied.
+                .flatMap(updated ->
+                        recordSupplyChange(
+                                inventoryId,
+                                updated.getProductId(),
+                                updated.getProductName(),
+                                updated.getProductQuantity() - productQuantity,
+                                updated.getProductQuantity(),
+                                SupplyAuditAction.QUANTITY_UPDATED,
+                                changedBy)
+                                .thenReturn(EntityDTOUtil.toProductResponseDTO(updated)));
     }
 
     @Override
