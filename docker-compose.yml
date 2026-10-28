@@ -196,7 +196,6 @@ services:
       - .env
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - APP_IMAGE_MIGRATION_ENABLED=true
     depends_on:
       files-service:
         condition: service_started

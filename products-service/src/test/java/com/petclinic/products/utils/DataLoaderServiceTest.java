@@ -86,6 +86,13 @@ class DataLoaderServiceTest {
     }
 
     @Test
+    void deletedSeedImagesSkipProductRecreationWithoutBlockingStartup() throws Exception {
+        when(imagePublisher.publishSeed(any())).thenReturn(Mono.empty());
+        dataLoaderService.run();
+        verify(productRepository, never()).save(any());
+    }
+
+    @Test
     void existingProductsDoNotUploadOrOverwriteImages() throws Exception {
         stubAllProductsExist();
         dataLoaderService.run();

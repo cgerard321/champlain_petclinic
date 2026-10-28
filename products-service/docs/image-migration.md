@@ -4,13 +4,15 @@
 
 Product image reads, uploads and new catalog seeding use Files Service exclusively. Both PROD frontends consume embedded product image data. The /images endpoint preserves its response contract for CART while using Files Service only. The legacy image repository is read-only and used solely by the migration; original rows are retained for recovery, not served as a fallback.
 
-Both repository Compose configurations enable `APP_IMAGE_MIGRATION_ENABLED=true` for products-service, so deployment runs the migration before cutover. Outside Compose, migration remains opt-in. On an existing environment, back up the product database and Files Service storage, pause product/image writes, and run one products-service instance during migration. Verify migration before routing traffic to the cutover build. Startup refuses to continue if products still reference rows in the legacy images table. Fresh installations use `app.seed-data.enabled=true` (the default). Tests disable automatic seeding; deployments can also disable it explicitly.
+Startup automatically detects legacy image rows without a verified migration journal entry and migrates them before the data loader seeds new products. No migration opt-in flag or deployment environment variable is needed. Completed originals remain in the legacy table and do not trigger migration again unless a product still references their old IDs; those references are conditionally relinked without uploading again. On an existing environment, back up the product database and Files Service storage, pause product/image writes, and run one products-service instance during migration. Verify migration before routing traffic to the cutover build. Startup refuses to continue if products still reference rows in the legacy images table. Fresh installations use `app.seed-data.enabled=true` (the default). Tests disable automatic seeding; deployments can also disable it explicitly.
 
-Products-service depends on the Files Service container starting, then polls its existing `/metrics` HTTP endpoint before migration or catalog seeding. The wait runs when either migration or seeding is enabled. With both disabled (as in the test profile), startup still checks for legacy references but does not contact Files Service. Individual requests time out after five seconds, retries wait two seconds, and the complete wait is limited to two minutes. This checks HTTP startup availability, not ongoing storage health. If the wait fails, no migration uploads have been claimed. Uploads themselves are not blindly retried because a lost response could otherwise create duplicate files. Existing journal and byte-verification safeguards still handle upload failures.
+Products-service depends on the Files Service container starting, then polls its existing `/metrics` HTTP endpoint before migration or catalog seeding. The wait runs when pending legacy images are detected or seeding is enabled. With no pending images and seeding disabled (as in a fresh test database), startup still checks for legacy references but does not contact Files Service. Individual requests time out after five seconds, retries wait two seconds, and the complete wait is limited to two minutes. This checks HTTP startup availability, not ongoing storage health. If the wait fails, no migration uploads have been claimed. Uploads themselves are not blindly retried because a lost response could otherwise create duplicate files. Existing journal and byte-verification safeguards still handle upload failures.
 
 Migration runs before catalog seeding and processes every legacy image, including unreferenced rows. Each upload is read back and compared against original bytes and MIME type before product IDs are replaced. The link update and VERIFIED journal state are transactional. Products whose image changed meanwhile are not overwritten. A failed item is logged and processing continues; any failure fails startup.
 
-Fresh seed images are uploaded and verified before new products are saved, using `seed:` journal keys distinct from legacy image IDs. Restarting after a product-save failure reuses the uploaded file. Existing products skip seed publication entirely, preserving employee edits and deleted images. Files Service and other teams' code are unchanged.
+Legacy `image/jpg` metadata is normalized to `image/jpeg` for Files Service uploads and MIME comparison; original bytes and metadata are retained. The compatible /images endpoint resolves verified old IDs through the journal and returns Files Service bytes while preserving the requested ID for existing cart entries.
+
+Fresh seed images are uploaded and verified before new products are saved, using `seed:` journal keys distinct from legacy image IDs. Restarting after a product-save failure reuses the uploaded file. Existing products skip seed publication entirely, preserving employee edits and deleted images. If a completed seed file returns an explicit 404 when its product is absent, the loader skips recreating that product. Empty/malformed responses and availability errors still fail instead of being treated as deletion. Files Service and other teams' code are unchanged.
 
 ## Journal and safe reruns
 
@@ -19,7 +21,7 @@ Fresh seed images are uploaded and verified before new products are saved, using
 - `PENDING`: no upload has been claimed; safe to attempt.
 - `UPLOADING`: request may have reached Files Service. No automatic repeat upload.
 - `UPLOADED`: new ID is saved; rerun reads/verifies the same file and attempts linking again.
-- `VERIFIED`: file and product-link transaction succeeded; rerun skips this completed entry, preserving subsequent employee image edits/deletions. A migration rerun is not a file-health audit.
+- `VERIFIED`: file and product-link transaction succeeded; rerun avoids uploads/readbacks and conditionally relinks only products still holding the old image ID, preserving subsequent employee image edits/deletions. A migration rerun is not a file-health audit.
 
 Files Service creates its own IDs and has no idempotency key. A connection loss or process crash after a POST can therefore leave an uncertain outcome. For `UPLOADING`, inspect Files Service records/storage and compare the candidate file's bytes and MIME type with the source. If an upload exists, record its verified file ID and set the journal state to `UPLOADED`. Only reset to `PENDING` when it is established that no upload exists and no migration instance remains active. Do not guess an ID or blindly reset all entries. Retain the originals throughout reconciliation.
 
@@ -27,7 +29,7 @@ A readback failure with a recorded file ID is retried against that same ID. Neve
 
 ## Deployment verification
 
-1. Run the opt-in migration against the intended environment and retain its logs.
+1. Start products-service against the intended environment; automatic migration runs before seeding. Retain its logs.
 2. Confirm every source row has a verified journal entry:
 
 ```sql

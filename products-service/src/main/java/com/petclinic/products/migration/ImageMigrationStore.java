@@ -18,6 +18,17 @@ public class ImageMigrationStore {
 
     public record Entry(String state, String fileId) {}
 
+    public Mono<Long> pendingLegacyImages() {
+        return database.sql("SELECT COUNT(*) AS pending FROM images i WHERE NOT EXISTS (SELECT 1 FROM product_image_migration m WHERE m.legacy_image_id = i.image_id AND m.state = 'VERIFIED' AND m.file_id IS NOT NULL) OR EXISTS (SELECT 1 FROM products p WHERE p.image_id = i.image_id)")
+                .map((row, metadata) -> row.get("pending", Long.class)).one();
+    }
+
+    public Mono<String> resolveFileId(String imageId) {
+        return database.sql("SELECT file_id FROM product_image_migration WHERE legacy_image_id = :id AND state = 'VERIFIED' AND file_id IS NOT NULL")
+                .bind("id", imageId).map((row, metadata) -> row.get("file_id", String.class))
+                .one().defaultIfEmpty(imageId);
+    }
+
     public Mono<Long> remainingLegacyReferences() {
         return database.sql("SELECT COUNT(*) AS remaining FROM products p WHERE EXISTS (SELECT 1 FROM images i WHERE i.image_id = p.image_id)")
                 .map((row, metadata) -> row.get("remaining", Long.class)).one();

@@ -38,6 +38,11 @@ class SeedImagePublishingTest {
         verifyNoInteractions(originals);
     }
 
+    @org.junit.jupiter.api.BeforeEach
+    void allowVerifiedRelinking() {
+        when(store.linkProducts("seed:built-in", "new-file")).thenReturn(Mono.empty());
+    }
+
     @Test
     void retryAfterProductSaveFailureReusesUploadedSeed() {
         when(store.prepare("seed:built-in")).thenReturn(Mono.empty());
@@ -56,4 +61,23 @@ class SeedImagePublishingTest {
         StepVerifier.create(publisher.publishSeed(seed)).expectError(IllegalStateException.class).verify();
         verify(files, never()).addFile(any());
     }
+    @Test
+    void deletedCompletedSeedIsSkippedWithoutBlockingOrReuploading() {
+        when(store.prepare("seed:built-in")).thenReturn(Mono.empty());
+        when(store.find("seed:built-in")).thenReturn(Mono.just(new ImageMigrationStore.Entry("VERIFIED", "new-file")));
+        when(files.getFile("new-file")).thenReturn(Mono.error(
+                new com.petclinic.products.utils.exceptions.FileNotFoundInFilesServiceException("Deleted")));
+        StepVerifier.create(publisher.publishSeed(seed)).verifyComplete();
+        verify(files, never()).addFile(any());
+    }
+
+    @Test
+    void completedSeedOutageStillFailsInsteadOfTreatingItAsDeletion() {
+        when(store.prepare("seed:built-in")).thenReturn(Mono.empty());
+        when(store.find("seed:built-in")).thenReturn(Mono.just(new ImageMigrationStore.Entry("VERIFIED", "new-file")));
+        when(files.getFile("new-file")).thenReturn(Mono.error(new IllegalStateException("Unavailable")));
+        StepVerifier.create(publisher.publishSeed(seed)).expectError(IllegalStateException.class).verify();
+        verify(files, never()).addFile(any());
+    }
+
 }

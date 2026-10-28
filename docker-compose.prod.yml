@@ -234,7 +234,6 @@ services:
     hostname: products-service
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - APP_IMAGE_MIGRATION_ENABLED=true
     env_file:
       - .env
     restart: unless-stopped

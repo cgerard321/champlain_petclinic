@@ -27,13 +27,48 @@ class ImageMigrationStoreTest {
              var statement = connection.createStatement()) {
             assertNotNull(input);
             statement.execute(new String(input.readAllBytes(), StandardCharsets.UTF_8));
-            statement.execute("DELETE FROM product_image_migration; DELETE FROM products;");
+            statement.execute("DELETE FROM product_image_migration; DELETE FROM products; DELETE FROM images;");
             statement.execute("INSERT INTO products(product_id, image_id) VALUES ('one', 'legacy'), ('two', 'legacy'), ('edited', 'employee-file')");
         }
         var connectionFactory = ConnectionFactories.get("r2dbc:postgresql://" + postgres.getUsername() + ":"
                 + postgres.getPassword() + "@" + postgres.getHost() + ":" + postgres.getMappedPort(5432) + "/" + postgres.getDatabaseName());
         database = DatabaseClient.create(connectionFactory);
         store = new ImageMigrationStore(database, new R2dbcTransactionManager(connectionFactory));
+    }
+
+    @Test
+    void detectsUnreferencedAndIncompleteImagesButSkipsVerifiedOriginals() {
+        assertEquals(0L, store.pendingLegacyImages().block());
+        database.sql("INSERT INTO images(image_id) VALUES ('legacy'), ('unreferenced')")
+                .fetch().rowsUpdated().block();
+        assertEquals(2L, store.pendingLegacyImages().block());
+        prepareUploaded();
+        assertEquals(2L, store.pendingLegacyImages().block());
+        store.linkProducts("legacy", "new-file").block();
+        assertEquals(1L, store.pendingLegacyImages().block());
+        store.prepare("unreferenced").then(store.claim("unreferenced")).block();
+        store.uploaded("unreferenced", "other-file").block();
+        store.linkProducts("unreferenced", "other-file").block();
+        assertEquals(0L, store.pendingLegacyImages().block());
+        assertEquals(2L, database.sql("SELECT COUNT(*) AS total FROM images")
+                .map((row, metadata) -> row.get("total", Long.class)).one().block());
+    }
+
+    @Test
+    void verifiedMappingResolvesOldIdsAndDetectsRestoredReferences() {
+        database.sql("INSERT INTO images(image_id) VALUES ('legacy')").fetch().rowsUpdated().block();
+        prepareUploaded();
+        assertEquals("legacy", store.resolveFileId("legacy").block());
+        store.linkProducts("legacy", "new-file").block();
+        assertEquals("new-file", store.resolveFileId("legacy").block());
+        assertEquals("unmapped", store.resolveFileId("unmapped").block());
+        assertEquals(0L, store.pendingLegacyImages().block());
+        database.sql("UPDATE products SET image_id = 'legacy' WHERE product_id = 'one'").fetch().rowsUpdated().block();
+        assertEquals(1L, store.pendingLegacyImages().block());
+        store.linkProducts("legacy", "new-file").block();
+        assertEquals("new-file", imageId("one"));
+        assertEquals("employee-file", imageId("edited"));
+        assertEquals(0L, store.pendingLegacyImages().block());
     }
 
     @Test

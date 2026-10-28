@@ -10,8 +10,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.Arrays;
+import com.petclinic.products.utils.exceptions.FileNotFoundInFilesServiceException;
 
-/** Opt-in migration; originals are deliberately retained until deployment verification. */
+/** Automatic legacy migration; originals are retained until deployment verification. */
 @Service
 @RequiredArgsConstructor
 public class LegacyImageMigration {
@@ -34,7 +35,11 @@ public class LegacyImageMigration {
                         .filter(file -> entry.fileId().equals(file.getFileId())
                                 && file.getFileData() != null && file.getFileData().length > 0)
                         .switchIfEmpty(Mono.error(new IllegalStateException("Seed file is missing; reconcile before retrying")))
-                        .map(file -> entry.fileId()));
+                        .map(file -> entry.fileId())
+                        // A completed seed deleted with its product must not be recreated.
+                        // Only an explicit 404 confirms deletion; outages still fail startup.
+                        .onErrorResume(FileNotFoundInFilesServiceException.class, error ->
+                                "VERIFIED".equals(entry.state()) ? Mono.empty() : Mono.error(error)));
     }
 
     Mono<Result> migrateImage(Image image) {
@@ -50,7 +55,8 @@ public class LegacyImageMigration {
                     if ("VERIFIED".equals(entry.state()) && entry.fileId() != null) {
                         // A migrated file may since have been intentionally edited or deleted.
                         // Migration reruns must not restore its old bytes or reject that edit.
-                        return Mono.just(new Result(image.getImageId(), true, "Already migrated to " + entry.fileId()));
+                        return store.linkProducts(image.getImageId(), entry.fileId())
+                                .thenReturn(new Result(image.getImageId(), true, "Already migrated to " + entry.fileId()));
                     }
                     if (entry.fileId() != null) {
                         return verifyAndLink(image, entry.fileId());
@@ -62,7 +68,7 @@ public class LegacyImageMigration {
                     return store.claim(image.getImageId()).flatMap(claimed -> {
                         if (!claimed) return Mono.error(new IllegalStateException("Image is already claimed by another run"));
                         return files.addFile(FileRequestDTO.builder()
-                                        .fileName(image.getImageName()).fileType(image.getImageType())
+                                        .fileName(image.getImageName()).fileType(canonicalImageType(image.getImageType()))
                                         .fileData(image.getImageData()).build())
                                 .switchIfEmpty(Mono.error(new IllegalStateException("Upload returned no file")))
                                 .flatMap(file -> {
@@ -90,8 +96,12 @@ public class LegacyImageMigration {
     }
 
     private boolean matches(Image image, FileResponseDTO file, String fileId) {
-        return fileId.equals(file.getFileId()) && image.getImageType().equalsIgnoreCase(file.getFileType())
+        return fileId.equals(file.getFileId()) && canonicalImageType(image.getImageType()).equalsIgnoreCase(canonicalImageType(file.getFileType()))
                 && Arrays.equals(image.getImageData(), file.getFileData());
+    }
+
+    private String canonicalImageType(String type) {
+        return "image/jpg".equalsIgnoreCase(type) ? "image/jpeg" : type;
     }
 
     public record Result(String legacyImageId, boolean success, String message) {}

@@ -1,6 +1,7 @@
 package com.petclinic.products.businesslayer.images;
 
 import com.petclinic.products.domainclientlayer.FileRequestDTO;
+import com.petclinic.products.migration.ImageMigrationStore;
 import com.petclinic.products.domainclientlayer.FileResponseDTO;
 import com.petclinic.products.domainclientlayer.FilesServiceClient;
 import com.petclinic.products.utils.exceptions.FileNotFoundInFilesServiceException;
@@ -17,15 +18,23 @@ public class ImageServiceImpl implements ImageService{
 
     private final FilesServiceClient filesServiceClient;
 
-    public ImageServiceImpl(FilesServiceClient filesServiceClient) {
+    private final ImageMigrationStore migrationStore;
+
+    public ImageServiceImpl(FilesServiceClient filesServiceClient, ImageMigrationStore migrationStore) {
         this.filesServiceClient = filesServiceClient;
+        this.migrationStore = migrationStore;
     }
 
     @Override
     public Mono<ImageResponseModel> getImageByImageId(String imageId) {
         // Preserve the response contract used by CART; storage is exclusively Files Service.
-        return filesServiceClient.getFile(imageId)
-                .map(this::toResponse)
+        return migrationStore.resolveFileId(imageId)
+                .flatMap(filesServiceClient::getFile)
+                .map(file -> {
+                    ImageResponseModel response = toResponse(file);
+                    response.setImageId(imageId);
+                    return response;
+                })
                 .onErrorMap(FileNotFoundInFilesServiceException.class,
                         error -> new NotFoundException("Image id not found: " + imageId))
                 .switchIfEmpty(Mono.error(new NotFoundException("Image id not found: " + imageId)));
@@ -45,7 +54,8 @@ public class ImageServiceImpl implements ImageService{
                         imageRequestModel.getImageType().equals("image/jpg"))
                 .switchIfEmpty(Mono.error(new InvalidImageTypeException("Image type not supported: " + imageType)))
                 .flatMap(image -> filesServiceClient.addFile(FileRequestDTO.builder()
-                        .fileName(image.getImageName()).fileType(image.getImageType())
+                        .fileName(image.getImageName()).fileType("image/jpg".equalsIgnoreCase(image.getImageType())
+                                ? "image/jpeg" : image.getImageType())
                         .fileData(image.getImageData()).build()))
                 .map(this::toResponse);
     }

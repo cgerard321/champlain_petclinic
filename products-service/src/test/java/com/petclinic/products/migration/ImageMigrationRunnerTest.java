@@ -18,10 +18,11 @@ class ImageMigrationRunnerTest {
     @BeforeEach
     void filesAreReady() {
         when(files.awaitStartup()).thenReturn(Mono.empty());
+        when(store.pendingLegacyImages()).thenReturn(Mono.just(0L));
     }
 
     @Test
-    void disabledMigrationAndSeedingDoNotRequireFilesService() {
+    void noPendingImagesAndNoSeedingDoNotRequireFilesService() {
         when(store.remainingLegacyReferences()).thenReturn(Mono.just(0L));
         runner.run();
         verifyNoInteractions(files, migration);
@@ -29,7 +30,7 @@ class ImageMigrationRunnerTest {
     }
 
     @Test
-    void seedingStillWaitsWhenMigrationIsDisabled() {
+    void seedingStillWaitsWhenNoMigrationIsNeeded() {
         ReflectionTestUtils.setField(runner, "seedDataEnabled", true);
         when(store.remainingLegacyReferences()).thenReturn(Mono.just(0L));
         runner.run();
@@ -41,15 +42,16 @@ class ImageMigrationRunnerTest {
 
     @Test
     void unavailableFilesStopsBeforeAnyMigrationWrites() {
-        ReflectionTestUtils.setField(runner, "enabled", true);
+        when(store.pendingLegacyImages()).thenReturn(Mono.just(1L));
         when(files.awaitStartup()).thenReturn(Mono.error(new IllegalStateException("Unavailable")));
         assertThrows(IllegalStateException.class, runner::run);
-        verifyNoInteractions(migration, store);
+        verifyNoInteractions(migration);
+        verify(store, never()).remainingLegacyReferences();
     }
 
     @Test
-    void enabledDeploymentWaitsThenMigratesAndVerifiesCutover() {
-        ReflectionTestUtils.setField(runner, "enabled", true);
+    void detectedImagesAutomaticallyMigrateBeforeCutover() {
+        when(store.pendingLegacyImages()).thenReturn(Mono.just(1L));
         when(migration.migrate()).thenReturn(Flux.just(new LegacyImageMigration.Result("old", true, "verified")));
         when(store.remainingLegacyReferences()).thenReturn(Mono.just(0L));
         runner.run();
@@ -75,9 +77,9 @@ class ImageMigrationRunnerTest {
 
     @Test
     void failedMigrationStopsStartup() {
-        ReflectionTestUtils.setField(runner, "enabled", true);
+        when(store.pendingLegacyImages()).thenReturn(Mono.just(1L));
         when(migration.migrate()).thenReturn(Flux.just(new LegacyImageMigration.Result("old", false, "failed upload")));
         assertThrows(IllegalStateException.class, runner::run);
-        verifyNoInteractions(store);
+        verify(store, never()).remainingLegacyReferences();
     }
 }

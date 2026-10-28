@@ -36,6 +36,15 @@ class LegacyImageMigrationTest {
     }
 
     @Test
+    void jpgAliasUploadsAsJpegAndVerifiesWithoutChangingOriginal() {
+        source.setImageType("image/jpg");
+        uploaded.setFileType("image/jpeg");
+        StepVerifier.create(migration.migrate()).expectNextMatches(LegacyImageMigration.Result::success).verifyComplete();
+        verify(files).addFile(argThat(request -> "image/jpeg".equals(request.getFileType())));
+        org.junit.jupiter.api.Assertions.assertEquals("image/jpg", source.getImageType());
+    }
+
+    @Test
     void uploadsVerifiesThenLinksWithoutDeletingOriginals() {
         StepVerifier.create(migration.migrate()).expectNextMatches(LegacyImageMigration.Result::success).verifyComplete();
         var order = inOrder(store, files);
@@ -77,7 +86,7 @@ class LegacyImageMigrationTest {
         when(store.find("legacy")).thenReturn(Mono.just(new ImageMigrationStore.Entry("VERIFIED", "new-file")));
         StepVerifier.create(migration.migrate()).expectNextMatches(LegacyImageMigration.Result::success).verifyComplete();
         verifyNoInteractions(files);
-        verify(store, never()).linkProducts(anyString(), anyString());
+        verify(store).linkProducts("legacy", "new-file");
     }
 
     @Test

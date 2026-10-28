@@ -45,6 +45,9 @@ class ImageControllerIntegrationTest extends PostgresTestContainerBase {
     @MockBean
     private FilesServiceClient filesServiceClient;
 
+    @Autowired
+    private org.springframework.r2dbc.core.DatabaseClient database;
+
     private String baseURI = "/images";
 
     private final Image image1 = Image.builder()
@@ -85,6 +88,28 @@ class ImageControllerIntegrationTest extends PostgresTestContainerBase {
                     .fileName(request.getFileName()).fileType(request.getFileType())
                     .fileData(request.getFileData()).build());
         });
+    }
+
+    @Test
+    void cartLegacyIdResolvesToFilesServiceAndPreservesRequestedId() {
+        String oldId = "48d60181-7ce2-4abe-92db-bef08dbbe655";
+        String newId = "8803a3da-870b-4c0c-a38c-221f71a70402";
+        database.sql("INSERT INTO product_image_migration(legacy_image_id, file_id, state) VALUES (:old, :file, 'VERIFIED')")
+                .bind("old", oldId).bind("file", newId).fetch().rowsUpdated().block();
+        when(filesServiceClient.getFile(newId)).thenReturn(Mono.just(FileResponseDTO.builder()
+                .fileId(newId).fileName("cart-image").fileType("image/png").fileData(imageBytes).build()));
+        try {
+            webTestClient.get().uri(baseURI + "/" + oldId).exchange()
+                    .expectStatus().isOk().expectBody(ImageResponseModel.class)
+                    .value(image -> {
+                        assertEquals(oldId, image.getImageId());
+                        assertArrayEquals(imageBytes, image.getImageData());
+                    });
+            org.mockito.Mockito.verify(filesServiceClient, org.mockito.Mockito.never()).getFile(oldId);
+        } finally {
+            database.sql("DELETE FROM product_image_migration WHERE legacy_image_id = :id")
+                    .bind("id", oldId).fetch().rowsUpdated().block();
+        }
     }
 
     @Test
@@ -200,7 +225,7 @@ class ImageControllerIntegrationTest extends PostgresTestContainerBase {
                 .value(imageResponseModel -> {
                     assertNotNull(imageResponseModel);
                     assertEquals(imageName, imageResponseModel.getImageName());
-                    assertEquals(imageTypeRequestJPG, imageResponseModel.getImageType());
+                    assertEquals(imageTypeRequestJPEG, imageResponseModel.getImageType());
                     assertArrayEquals(imageBytes, imageResponseModel.getImageData());
                 });
     }

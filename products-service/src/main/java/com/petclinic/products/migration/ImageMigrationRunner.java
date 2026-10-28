@@ -18,21 +18,22 @@ public class ImageMigrationRunner implements CommandLineRunner {
     private final ImageMigrationStore store;
     private final FilesServiceClient files;
 
-    @Value("${app.image-migration.enabled:false}")
-    private boolean enabled;
-
     @Value("${app.seed-data.enabled:true}")
     private boolean seedDataEnabled;
 
     @Override
     public void run(String... args) {
-        if (enabled || seedDataEnabled) {
+        Long pending = store.pendingLegacyImages().block(Duration.ofMinutes(1));
+        if (pending == null) {
+            throw new IllegalStateException("Could not determine whether legacy images need migration.");
+        }
+        if (pending > 0 || seedDataEnabled) {
             files.awaitStartup().block(Duration.ofMinutes(3));
         }
-        if (enabled) migrate();
+        if (pending > 0) migrate();
         Long remaining = store.remainingLegacyReferences().block(Duration.ofMinutes(1));
         if (remaining == null || remaining > 0) {
-            throw new IllegalStateException("Products still reference legacy images. Run with app.image-migration.enabled=true before cutover.");
+            throw new IllegalStateException("Products still reference legacy images after migration. Inspect the migration journal before cutover.");
         }
     }
 
