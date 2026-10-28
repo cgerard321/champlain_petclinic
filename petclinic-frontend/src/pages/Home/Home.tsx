@@ -8,7 +8,6 @@ import { Container, Row, Col, Card, Button, Accordion } from 'react-bootstrap';
 import ServiceCard from '@/features/home/components/ServiceCard';
 import VetCard from '@/features/home/components/VetCard';
 import useFeaturedVets from '@/features/home/hooks/useFeaturedVets';
-// import { FAQ_ITEMS, formattedHours } from '@/features/faq/data/FaqItems';
 import { FAQ_ITEMS, formatHours } from '@/features/faq/data/FaqItems';
 import type { FaqItem } from '@/features/faq/models/FaqItem';
 
@@ -20,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 
 export default function Home(): JSX.Element {
   const navigate = useNavigate();
-  const { t } = useTranslation('home');
+  const { t } = useTranslation(['home', 'faq']);
 
   const { vets, photos, tagsByVet, loading, error } = useFeaturedVets(3);
 
