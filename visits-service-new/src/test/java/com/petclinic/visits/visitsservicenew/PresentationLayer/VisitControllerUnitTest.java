@@ -374,7 +374,7 @@ class VisitControllerUnitTest {
         ReviewResponseDTO reviewResponseDTO1 = ReviewResponseDTO.builder()
                 .reviewId(UUID.randomUUID().toString())
                 .rating(5)
-                .reviewerName("Zako")
+                .reviewerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
                 .review("Very good")
                 .dateSubmitted(LocalDateTime.now())
                 .build();
@@ -382,7 +382,7 @@ class VisitControllerUnitTest {
         ReviewResponseDTO reviewResponseDTO2 = ReviewResponseDTO.builder()
                 .reviewId(UUID.randomUUID().toString())
                 .rating(2)
-                .reviewerName("Zako2")
+                .reviewerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
                 .review("Very bad")
                 .dateSubmitted(LocalDateTime.now())
                 .build();
@@ -414,7 +414,7 @@ class VisitControllerUnitTest {
         ReviewResponseDTO reviewResponseDTO1 = ReviewResponseDTO.builder()
                 .reviewId(reviewId)
                 .rating(5)
-                .reviewerName("Zako")
+                .reviewerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
                 .review("Very good")
                 .dateSubmitted(LocalDateTime.now())
                 .build();
@@ -422,7 +422,7 @@ class VisitControllerUnitTest {
         ReviewResponseDTO reviewResponseDTO2 = ReviewResponseDTO.builder()
                 .reviewId(UUID.randomUUID().toString())
                 .rating(2)
-                .reviewerName("Zako2")
+                .reviewerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
                 .review("Very bad")
                 .dateSubmitted(LocalDateTime.now())
                 .build();
@@ -451,14 +451,14 @@ class VisitControllerUnitTest {
         ReviewResponseDTO reviewResponseDTO1 = ReviewResponseDTO.builder()
                 .reviewId(reviewId)
                 .rating(5)
-                .reviewerName("Zako")
+                .reviewerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
                 .review("Very good")
                 .dateSubmitted(LocalDateTime.now())
                 .build();
 
         ReviewRequestDTO reviewRequestDTO = ReviewRequestDTO.builder()
                 .rating(2)
-                .reviewerName("Zako2")
+                .reviewerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
                 .review("Very bad")
                 .dateSubmitted(LocalDateTime.now())
                 .build();
@@ -488,14 +488,14 @@ class VisitControllerUnitTest {
         ReviewResponseDTO reviewResponseDTO1 = ReviewResponseDTO.builder()
                 .reviewId(reviewId)
                 .rating(5)
-                .reviewerName("Zako")
+                .reviewerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
                 .review("Very good")
                 .dateSubmitted(LocalDateTime.now())
                 .build();
 
         ReviewRequestDTO reviewRequestDTO = ReviewRequestDTO.builder()
                 .rating(2)
-                .reviewerName("Zako2")
+                .reviewerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
                 .review("Very bad")
                 .dateSubmitted(LocalDateTime.now())
                 .build();
@@ -526,7 +526,7 @@ class VisitControllerUnitTest {
         ReviewResponseDTO reviewResponseDTO1 = ReviewResponseDTO.builder()
                 .reviewId(reviewId)
                 .rating(5)
-                .reviewerName("Zako")
+                .reviewerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
                 .review("Very good")
                 .dateSubmitted(LocalDateTime.now())
                 .build();
@@ -534,7 +534,7 @@ class VisitControllerUnitTest {
         ReviewResponseDTO reviewResponseDTO2 = ReviewResponseDTO.builder()
                 .reviewId(UUID.randomUUID().toString())
                 .rating(2)
-                .reviewerName("Zako2")
+                .reviewerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
                 .review("Very bad")
                 .dateSubmitted(LocalDateTime.now())
                 .build();
