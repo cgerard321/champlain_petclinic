@@ -1,18 +1,10 @@
 package com.petclinic.bffapigateway.presentationlayer.v1;
 
+import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.GeoapifyClient;
 import com.petclinic.bffapigateway.dtos.Addresses.AddressSuggestionDTO;
-import com.petclinic.bffapigateway.utils.Security.Filters.CsrfFilter;
-import com.petclinic.bffapigateway.utils.Security.Filters.IsUserFilter;
-import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
-import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 
@@ -20,21 +12,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@WebFluxTest(
-        controllers = AddressControllerV1.class,
-        excludeFilters = @ComponentScan.Filter(
-                type = FilterType.ASSIGNABLE_TYPE,
-                classes = {JwtTokenFilter.class, RoleFilter.class, IsUserFilter.class, CsrfFilter.class}
-        )
-)
-@AutoConfigureWebTestClient
+// No Spring context on purpose: bindToController keeps this test out of the shared
+// test context cache, so it doesn't push another context out (which shuts down the
+// shared Netty event loop used by the integration tests).
 class AddressControllerV1UnitTests {
 
-    @Autowired
+    private GeoapifyClient geoapifyClient;
     private WebTestClient client;
 
-    @MockBean
-    private GeoapifyClient geoapifyClient;
+    @BeforeEach
+    void setUp() {
+        geoapifyClient = mock(GeoapifyClient.class);
+        client = WebTestClient.bindToController(new AddressControllerV1(geoapifyClient))
+                .controllerAdvice(new GlobalExceptionHandler())
+                .build();
+    }
 
     @Test
     void whenAutocomplete_withValidQuery_thenReturnSuggestions() {
