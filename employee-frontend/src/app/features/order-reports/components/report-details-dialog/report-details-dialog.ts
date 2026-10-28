@@ -1,0 +1,84 @@
+import { DatePipe } from '@angular/common';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogModule,
+  MatDialogRef,
+} from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+
+import { OrderDetailsDialog } from '@features/order-reports/components/order-details-dialog/order-details-dialog';
+import {
+  OrderReport,
+  REPORT_REASON_LABELS,
+  REPORT_STATUS_LABELS,
+} from '@features/order-reports/models/order-report.model';
+import { ProductNameService } from '@features/order-reports/services/product-name.service';
+
+interface ReportDetailsData {
+  report: OrderReport;
+}
+
+@Component({
+  selector: 'app-report-details-dialog',
+  imports: [DatePipe, MatButtonModule, MatDialogModule, MatIconModule],
+  templateUrl: './report-details-dialog.html',
+  styleUrl: './report-details-dialog.css',
+})
+export class ReportDetailsDialog {
+  private readonly data = inject<ReportDetailsData>(MAT_DIALOG_DATA);
+  private readonly dialog = inject(MatDialog);
+  private readonly dialogRef = inject(MatDialogRef<ReportDetailsDialog>);
+  private readonly destroyRef = inject(DestroyRef);
+  private orderDialogRef: MatDialogRef<OrderDetailsDialog> | null = null;
+  protected readonly productNames = inject(ProductNameService);
+
+  protected readonly report = this.data.report;
+  protected readonly statusLabels = REPORT_STATUS_LABELS;
+  protected readonly reasonLabels = REPORT_REASON_LABELS;
+
+  constructor() {
+    this.productNames.load(this.report.affectedItems.map((item) => item.productId));
+
+    // report closed: re-center order
+    this.dialogRef
+      .beforeClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.orderDialogRef) {
+          this.dialogRef.removePanelClass('dialogs-side-by-side');
+          this.orderDialogRef.removePanelClass('dialog-slide-right');
+        }
+      });
+  }
+
+  protected openOrder(): void {
+    if (this.orderDialogRef) {
+      return;
+    }
+
+    // side by side, no stacking
+    this.dialogRef.addPanelClass(['dialog-shift-left', 'dialogs-side-by-side']);
+    this.orderDialogRef = this.dialog.open(OrderDetailsDialog, {
+      data: { orderId: this.report.orderId },
+      width: '820px',
+      maxWidth: '95vw',
+      autoFocus: 'dialog',
+      panelClass: ['order-dialog-pane', 'dialog-slide-right'],
+      // keep default dark backdrop
+      backdropClass: ['cdk-overlay-dark-backdrop', 'order-dialog-backdrop'],
+    });
+
+    // order closed: re-center report
+    this.orderDialogRef
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.orderDialogRef = null;
+        this.dialogRef.removePanelClass(['dialog-shift-left', 'dialogs-side-by-side']);
+      });
+  }
+}

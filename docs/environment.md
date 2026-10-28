@@ -3,9 +3,10 @@
 Back to [Main page](../README.md)
 
 <!-- TOC -->
-* [Environment Configuration](#environment-configuration)
-  * [Environment Variables Setup for Frontend Application](#environment-variables-setup-for-frontend-application)
-<!-- TOC -->
+
+- [Environment Configuration](#environment-configuration)
+  - [Environment Variables Setup for Frontend Application](#environment-variables-setup-for-frontend-application)
+  <!-- TOC -->
 
 ## Environment Variables Setup for Frontend Application
 
@@ -17,6 +18,7 @@ Back to [Main page](../README.md)
 # For development
 VITE_ENV=dev
 VITE_BACKEND_URL="http://localhost:8080/api/v2/gateway/"
+VITE_EMPLOYEE_PORTAL_URL="http://localhost:4200"
 
 # For production, this is simply for education purposes
 # since you won't be deploying this project to production (already done here : https://petclinic.benmusicgeek.synology.me/home)
