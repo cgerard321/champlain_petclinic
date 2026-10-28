@@ -207,12 +207,7 @@
                 [ngModel]="filters().customerId"
                 (ngModelChange)="updateFilter('customerId', $event)"
               />
-              <button
-                class="bill-secondary-action"
-                type="button"
-                [disabled]="!filters().customerId.trim()"
-                (click)="addFilter('customerId')"
-              >
+              <button class="bill-secondary-action" type="button" (click)="addFilter('customerId')">
                 Add
               </button>
             </label>
@@ -227,7 +222,6 @@
               <button
                 class="bill-secondary-action"
                 type="button"
-                [disabled]="!filters().customerName.trim()"
                 (click)="addFilter('customerName')"
               >
                 Add
