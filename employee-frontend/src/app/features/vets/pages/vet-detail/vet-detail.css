@@ -36,6 +36,14 @@ button {
   margin-top: 20px;
 }
 
+.warning {
+  padding: 16px;
+  border: 1px solid #b4851f;
+  border-radius: 8px;
+  background: #fdf4e0;
+  color: #6b4c05;
+}
+
 .success {
   padding: 16px;
   border: 1px solid #91ad83;
