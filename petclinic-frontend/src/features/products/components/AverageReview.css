@@ -1,9 +1,6 @@
 .average-review {
-  margin: 1rem 0;
-  padding: 1rem;
-  border: 1px solid #d5dce2;
-  border-radius: 8px;
-  background: #f8fafc;
+  min-width: 0;
+  flex: 1;
   color: #263544;
 }
 
@@ -12,48 +9,48 @@
   font-size: 1.15rem;
 }
 
-.average-review-rows {
-  display: grid;
-  gap: 0.8rem;
+.average-review-box {
+  padding: 1rem;
+  background: #f8fafc;
+  border: 1px solid #d5dce2;
+  border-radius: 8px;
 }
 
-.average-review-row {
+.average-review-meter-row {
   display: grid;
-  grid-template-columns: minmax(9rem, 1fr) minmax(5rem, 2fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.25rem 0.75rem;
+  gap: 0.75rem;
 }
 
-.average-review-row meter {
+.average-review-meter-row meter {
   width: 100%;
+  min-width: 0;
   height: 1.25rem;
-  accent-color: #005a8b;
+}
+
+.average-review-stars {
+  margin-top: 1rem;
 }
 
 .average-review-count {
-  grid-column: 2 / -1;
-  font-size: 0.85rem;
+  margin: 0.75rem 0 0;
 }
 
-.average-review-empty {
-  grid-column: 2 / -1;
+.average-review-categories {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #d5dce2;
 }
 
-.average-review-score {
+.average-review-category h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.average-review-meter-row > span {
   white-space: nowrap;
-}
-
-@media (max-width: 480px) {
-  .average-review-row {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .average-review-label {
-    grid-column: 1 / -1;
-  }
-
-  .average-review-count,
-  .average-review-empty {
-    grid-column: 1 / -1;
-  }
 }

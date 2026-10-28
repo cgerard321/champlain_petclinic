@@ -217,11 +217,6 @@
   "noReviewResults": "Aucun résultat trouvé",
   "averageReview": {
     "title": "Notes moyennes des clients",
-    "overall": "Note globale",
-    "quality": "Qualité du produit",
-    "value": "Rapport qualité-prix",
-    "petSatisfaction": "Satisfaction de l’animal",
-    "ingredients": "Ingrédients",
     "empty": "Aucune note pour le moment",
     "score": "{{value}} / 5",
     "count_one": "{{count}} note",

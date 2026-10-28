@@ -11,12 +11,10 @@ import { updateUserRating } from '@/features/products/api/updateUserRating.ts';
 import { Button } from 'react-bootstrap';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import WriteReviewModal from '@/features/products/components/WriteReviewModal.tsx';
-import StarRating from '@/features/products/components/StarRating.tsx';
 import EditReviewModal from '@/features/products/components/EditReviewModal.tsx';
 import DeleteReviewModal from '@/features/products/components/DeleteReviewModal.tsx';
 import { Review } from '@/features/products/components/Review.tsx';
 import { useNavigate } from 'react-router-dom';
-import { ProductModel } from '@/features/products/models/ProductModels/ProductModel.ts';
 import { Reveal } from '@/shared/components';
 import { MdClear } from 'react-icons/md';
 import './ReviewsList.css';
@@ -30,7 +28,6 @@ interface ReviewListProps {
   isStaff: boolean;
   onReviewModification: () => Promise<void>;
   onModifyReviews: (reviewCount: number) => void;
-  currentProduct: ProductModel;
 }
 
 export function ReviewsList({
@@ -39,7 +36,6 @@ export function ReviewsList({
   isStaff,
   onReviewModification,
   onModifyReviews,
-  currentProduct,
 }: ReviewListProps): JSX.Element {
   const { t } = useTranslation('products');
   const [productRatings, setProductRatings] = useState<RatingModel[]>([]);
@@ -205,27 +201,9 @@ export function ReviewsList({
     <div className="review-section-container">
       <div className="reviewproduct-container">
         <h2>{t('customerReview')}</h2>
-        <AverageReview ratings={productRatings} status={ratingsStatus} />
 
         <div className="rating-summary-container">
-          <div className="rating-left">
-            <div className="rating-display">
-              <div className="rating-display-row">
-                <span className="rating-number">
-                  {currentProduct.averageRating.toFixed(1)}
-                </span>
-                <div className="rating-stars-beside">
-                  <StarRating
-                    currentRating={currentProduct.averageRating}
-                    viewOnly={true}
-                  />
-                </div>
-              </div>
-              <p className="review-count">
-                {t('basedOn', { count: productReviews.length })}
-              </p>
-            </div>
-          </div>
+          <AverageReview ratings={productRatings} status={ratingsStatus} />
 
           <div className="rating-breakdown">
             {[5, 4, 3, 2, 1].map(star => {

@@ -217,11 +217,6 @@
   "noReviewResults": "No results were found",
   "averageReview": {
     "title": "Average Customer Ratings",
-    "overall": "Overall rating",
-    "quality": "Quality of Product",
-    "value": "Value of Product",
-    "petSatisfaction": "Pet Satisfaction",
-    "ingredients": "Ingredients",
     "empty": "No ratings yet",
     "score": "{{value}} / 5",
     "count_one": "{{count}} rating",

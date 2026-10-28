@@ -680,10 +680,6 @@
 }
 
 /* Keep the average box, rating distribution, and written reviews separate. */
-.reviewproduct-container > .average-review {
-  margin-bottom: 2rem;
-}
-
 .reviewproduct-container > .rating-summary-container {
   gap: 2rem;
   padding-bottom: 1.5rem;

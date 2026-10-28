@@ -1,14 +1,12 @@
 import type {
-  RatingCategory,
   RatingModel,
+  RatingCategories,
 } from '../models/ProductModels/RatingModel';
 
-export const ratingCategories: RatingCategory[] = [
-  'quality',
-  'value',
-  'petSatisfaction',
-  'ingredients',
-];
+export type RatingCategory = keyof RatingCategories;
+
+type RatingsWithCategories = Omit<RatingModel, RatingCategory> &
+  Partial<Record<RatingCategory, number | null>>;
 
 export interface RatingAverage {
   average: number | null;
@@ -17,13 +15,11 @@ export interface RatingAverage {
 
 // Missing and invalid scores must not count as zero or dilute an average.
 export function averageRating(
-  reviews: readonly RatingModel[],
+  reviews: readonly RatingsWithCategories[],
   category?: RatingCategory
 ): RatingAverage {
   const scores = reviews
-    .map(review =>
-      category ? review.categoryRatings?.[category] : review.rating
-    )
+    .map(review => (category ? review[category] : review.rating))
     .filter(
       (score): score is number =>
         typeof score === 'number' &&
