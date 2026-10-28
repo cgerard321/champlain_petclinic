@@ -227,6 +227,7 @@
               <button
                 class="bill-secondary-action"
                 type="button"
+                [disabled]="!filters().customerName.trim()"
                 (click)="addFilter('customerName')"
               >
                 Add
