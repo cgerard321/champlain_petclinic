@@ -3,6 +3,7 @@ import { useUser } from '@/context/UserContext.tsx';
 import axiosInstance from '@/shared/api/axiosInstance';
 import { Link, useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
+
 import anotherDoctorAndDoggy from '@/assets/Login/another-doctor-and-doggy.jpg';
 import doctorAndDoggy from '@/assets/Login/doctor-and-doggy.jpg';
 import doggyAndKitty from '@/assets/Login/doggy-and-kitty.jpg';
@@ -20,10 +21,11 @@ const images = [
   kitty,
   sadDoggy,
 ];
+import { redirectToEmployeePortal } from '@/utils/employeePortal';
 
 export default function Login(): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const { checkSession } = useUser();
+  const { checkSession, logout } = useUser();
   const navigate = useNavigate();
   function togglePasswordVisibility(): void {
     const passwordInput = document.getElementById(
@@ -60,7 +62,15 @@ export default function Login(): JSX.Element {
       );
 
       // Pull the authoritative session/user info from the server
-      await checkSession();
+      const status = await checkSession();
+
+      // Redirects 'blocked' users to Employee Portal
+      if (status === 'blocked') {
+        await logout();
+        redirectToEmployeePortal('/login');
+        return;
+      }
+
       navigate(AppRoutePaths.Home);
     } catch (error) {
       if (isAxiosError(error)) {
