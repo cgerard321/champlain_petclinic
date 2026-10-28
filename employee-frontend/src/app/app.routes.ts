@@ -41,6 +41,11 @@ export const routes: Routes = [
       },
 
       {
+        path: 'customerDetails',
+        loadChildren: () => import('@features/cust/pages/customerDetails/routes'),
+      },
+
+      {
         path: 'bill',
         loadChildren: () => import('@features/bill/routes'),
       },
@@ -69,6 +74,10 @@ export const routes: Routes = [
       {
         path: 'promo',
         loadChildren: () => import('@features/promo/routes'),
+      },
+      {
+        path: 'order-reports',
+        loadChildren: () => import('@features/order-reports/routes'),
       },
       {
         path: 'error',

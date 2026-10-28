@@ -53,10 +53,10 @@ describe('SupplyHistoryDialog', () => {
     expect(getSupplyHistory).toHaveBeenCalledWith(dialogData.inventoryId, dialogData.productId);
 
     const content = fixture.nativeElement.textContent as string;
-    expect(content).toContain('History: Bandages');
-    expect(content).toContain('QUANTITY UPDATED');
+    expect(content).toContain('Historique : Bandages');
+    expect(content).toContain('Quantit\u00e9 modifi\u00e9e');
     expect(content).toContain('8 → 10 (+2)');
-    expect(content).toContain('By test-user');
+    expect(content).toContain('Par test-user');
     expect(content).toContain('2026');
   });
 
@@ -66,7 +66,7 @@ describe('SupplyHistoryDialog', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain(
-      'No audit history is available for this supply.',
+      'Aucun historique disponible pour cet article.',
     );
   });
 
@@ -76,7 +76,7 @@ describe('SupplyHistoryDialog', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
-      'Unable to load supply history.',
+      "Impossible de charger l'historique de l'article.",
     );
   });
 

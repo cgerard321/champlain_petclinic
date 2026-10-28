@@ -48,6 +48,7 @@
       "inventory": "Inventory",
       "products": "Products",
       "promos": "Promos",
+      "orderReports": "Order Reports",
       "users": "Users",
       "settings": "Settings",
       "logout": "Logout"
@@ -189,9 +190,9 @@
       "statusMenuLabel": "Visit statuses",
       "listLabel": "Visit list",
       "title": "List of Visits",
-    "searchVisits": "Search visits",
-    "searchPlaceholder": "Search by pet name, description or visit ID",
-    "noVisitsFound": "No visits found.",
+      "searchVisits": "Search visits",
+      "searchPlaceholder": "Search by pet name, description or visit ID",
+      "noVisitsFound": "No visits found.",
       "nextAppointmentTitle": "Next appointment",
       "upcomingAppointmentNotification": "Your next appointment for {$petName} is on {$appointmentDate}.",
       "nextAppointmentLoading": "Loading next appointment...",
@@ -414,7 +415,7 @@
         "loading": "Loading profile…",
         "saved": "The profile has been saved."
       },
-      "specialty":{
+      "specialty": {
         "radiology": "Radiology",
         "surgery": "Surgery",
         "dentistry": "Dentistry",
@@ -422,6 +423,76 @@
       }
     },
     "cust": {
+      "notAvailable": "Not available",
+      "profile": {
+        "title": "Customer Details",
+        "subtitle": "Contact information and registered pets",
+        "loading": "Loading customer...",
+        "profile": "Customer profile",
+        "edit": "Edit Customer",
+        "infoTitle": "Customer Info",
+        "editTitle": "Edit customer information",
+        "infoSubtitle": "Personal details and contact information",
+        "editSubtitle": "Update the details below, then save your changes.",
+        "fields": {
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "address": "Address",
+          "city": "City",
+          "province": "Province",
+          "telephone": "Telephone"
+        },
+        "validation": {
+          "firstNameRequired": "First name is required",
+          "lastNameRequired": "Last name is required",
+          "addressRequired": "Address is required",
+          "cityRequired": "City is required",
+          "provinceRequired": "Province is required",
+          "telephoneRequired": "Telephone is required",
+          "telephoneTenDigits": "Telephone must be exactly 10 digits (numbers only)"
+        },
+        "selectProvince": "Select Province",
+        "telephoneHint": "Enter a 10-digit telephone number.",
+        "cancel": "Cancel",
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "petsTitle": "Registered pets",
+        "petsSubtitle": "Animals linked to this customer",
+        "loadingPets": "Loading pets...",
+        "birthDate": "Birth Date",
+        "weight": "Weight",
+        "noPets": "No pets registered",
+        "noPetsHint": "This customer's pets will appear here.",
+        "back": "Back to All Customers",
+        "photoAlt": "{$INTERPOLATION}'s profile photo",
+        "noPhoto": "No customer profile photo",
+        "petCount": "{$INTERPOLATION} registered pets",
+        "noPetPhoto": "No profile photo for {$INTERPOLATION}",
+        "confirmSave": "Are you sure you want to save these changes?",
+        "updateSuccess": "Customer has been successfully updated.",
+        "errors": {
+          "noId": "No customer ID provided.",
+          "load": "Could not load customer details.",
+          "pets": "Could not load pets. Please try again later.",
+          "petTypes": "Could not load pet types.",
+          "update": "Could not update customer. Please try again."
+        },
+        "provinces": {
+          "alberta": "Alberta",
+          "britishColumbia": "British Columbia",
+          "manitoba": "Manitoba",
+          "newBrunswick": "New Brunswick",
+          "newfoundlandAndLabrador": "Newfoundland and Labrador",
+          "novaScotia": "Nova Scotia",
+          "ontario": "Ontario",
+          "princeEdwardIsland": "Prince Edward Island",
+          "quebec": "Quebec",
+          "saskatchewan": "Saskatchewan",
+          "northwestTerritories": "Northwest Territories",
+          "nunavut": "Nunavut",
+          "yukon": "Yukon"
+        }
+      },
       "customerList": "Customer List",
       "customerListLoading": "Loading customers...",
       "noCustomers": "No customers registered.",
@@ -452,7 +523,7 @@
           "lastName": "Last Name: ",
           "address": "Address: ",
           "city": "City: ",
-          "phone":"Phone Number: ",
+          "phone": "Phone Number: ",
           "province": "Province: "
         },
         "error": {
@@ -460,7 +531,7 @@
           "lastName": "Last name is required.",
           "address": "Address is required.",
           "city": "City is required.",
-          "phoneM":"Telephone is required.",
+          "phoneM": "Telephone is required.",
           "phoneL": "Telephone must contain exactly 10 digits.",
           "province": "Province is required."
         }
@@ -479,17 +550,17 @@
         "quebec": "Quebec",
         "saskatchewan": "Saskatchewan",
         "yukon": "Yukon"
-      }
-
+      },
+      "allPetsButton": "All pets"
     },
     "pet": {
-      "petAddTitle" : "Add a new Pet",
+      "petAddTitle": "Add a new Pet",
       "petDetailsTitle": "Pet Details",
       "petDetailsSubtitle": "Registered pets and their information",
       "closeButton": "Close",
       "loadingPets": "Loading pets...",
       "noPetsFound": "No registered found for this customer.",
-      "button":{
+      "button": {
         "add": "Add",
         "addAnimal": "Add an animal"
       },
@@ -538,6 +609,11 @@
       "search": {
         "label": "Search products by name",
         "placeholder": "Enter a product name"
+      },
+      "tabs": {
+        "products": "Products",
+        "bundles": "Bundles",
+        "settings": "Settings"
       },
       "reviewSettings": {
         "title": "Review Settings",
@@ -634,6 +710,23 @@
         "alt": "Product image",
         "unavailable": "No product image available",
         "none": "No image"
+      }
+    },
+    "petList": {
+      "title": "Pets",
+      "loadingLabel": "Loading",
+      "loading": "Loading pets...",
+      "loadError": "Unable to load pets. Please try again later.",
+      "empty": "No pets registered.",
+      "caption": "Pets registered at the clinic",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "noResults": "No pets match the filters.",
+      "filters": {
+        "petType": "Pet type",
+        "petTypePlaceholder": "e.g. dog",
+        "name": "Pet name"
       }
     },
     "modal": {
@@ -768,6 +861,7 @@
       "expiration": { "expired": "Expired", "soon": "Expiring soon", "none": "No expiration" },
       "actions": {
         "add": "Add Supply",
+        "restock": "Restock",
         "edit": "Edit",
         "history": "History",
         "delete": "Delete",
@@ -785,6 +879,22 @@
         "summary": "Info",
         "cannotConsumeStock": "Cannot consume - out of stock",
         "cannotConsumeExpired": "Cannot consume - expired"
+      },
+      "restock": {
+        "quantityRequired": "Quantity is required.",
+        "quantityPositive": "Enter an integer greater than 0.",
+        "quantityMax": "Quantity must not exceed 2147483647.",
+        "permission": "You no longer have permission to restock this supply.",
+        "quantityInteger": "Enter an integer between 1 and 2147483647.",
+        "uncertain": "Unable to confirm restock. Stock may have changed. Reload the page to check quantities before trying again.",
+        "failed": "Unable to restock supply.",
+        "ariaLabel": "Restock {$name}",
+        "adding": "Adding stock...",
+        "add": "Add stock",
+        "title": "Restock supply",
+        "cancel": "Cancel",
+        "currentQuantity": "{$INTERPOLATION} — Current quantity: {$INTERPOLATION_1}",
+        "quantity": "Quantity to add"
       },
       "summary": {
         "ariaLabel": "Summary for {$name}",
@@ -930,7 +1040,76 @@
         "descriptionRequired": "Description is required."
       }
     },
-
+    "orderReports": {
+      "title": "Order Reports",
+      "subtitle": "View the issues customers reported on their orders.",
+      "loading": "Loading order reports...",
+      "empty": "No order reports found.",
+      "close": "Close",
+      "columns": {
+        "report": "Report",
+        "order": "Order Number",
+        "customer": "Customer",
+        "category": "Category",
+        "status": "Status"
+      },
+      "fields": {
+        "submitted": "Submitted",
+        "category": "Category",
+        "email": "Email",
+        "order": "Order",
+        "date": "Date",
+        "shipping": "Shipping",
+        "address": "Address"
+      },
+      "status": {
+        "NEW": "New",
+        "IN_REVIEW": "In Review",
+        "RESOLVED": "Resolved",
+        "REJECTED": "Rejected"
+      },
+      "reasons": {
+        "DAMAGED_ITEM": "Damaged Item(s)",
+        "MISSING_ITEM": "Missing Item(s)",
+        "WRONG_ITEM": "Wrong Item Received",
+        "PACKAGE_NOT_RECEIVED": "Package Did Not Arrive",
+        "OTHER": "Other"
+      },
+      "reportDialog": {
+        "eyebrow": "Order report",
+        "closeAria": "Close report dialog",
+        "details": "Details",
+        "description": "Description",
+        "affectedItems": "Affected items",
+        "noItems": "No specific items were selected.",
+        "viewOrder": "View order"
+      },
+      "orderDialog": {
+        "eyebrow": "Order details",
+        "title": "Order",
+        "closeAria": "Close order dialog",
+        "loading": "Loading order...",
+        "customerDelivery": "Customer & delivery",
+        "items": "Items",
+        "product": "Product",
+        "quantity": "Quantity",
+        "price": "Price",
+        "total": "Total"
+      },
+      "errors": {
+        "loadFailed": "Could not load order reports.",
+        "orderLoadFailed": "Could not load the order."
+      },
+      "paginator": {
+        "itemsPerPage": "Items per page:",
+        "next": "Next page",
+        "previous": "Previous page",
+        "first": "First page",
+        "last": "Last page",
+        "empty": "0 of 0",
+        "range": "{$START} – {$END} of {$LENGTH}"
+      }
+    },
     "users": {
       "title": "Users",
       "description": "View and manage user accounts for inventory managers, vets, receptionists and customers.",

@@ -1,0 +1,126 @@
+:host {
+  --brand: #1b382b;
+  --brand-accent: #afc79a;
+
+  display: block;
+  min-height: 100%;
+}
+
+.pet-type-page {
+  max-width: 1100px;
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
+  color: var(--mat-sys-on-surface);
+}
+
+.pet-type-page h1 {
+  position: relative;
+  margin: 0 0 2rem;
+  padding-bottom: 1rem;
+  color: var(--brand);
+  font-size: clamp(1.8rem, 3vw, 2.35rem);
+  font-weight: 700;
+}
+
+.pet-type-page h1::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 58px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--brand), var(--brand-accent));
+  content: '';
+}
+
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 3rem 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.table-container {
+  overflow-x: auto;
+  border: 1px solid var(--mat-sys-outline-variant, #dce8d2);
+  background: var(--mat-sys-surface-container-highest, #fff);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgb(27 56 43 / 5%);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+caption {
+  padding: 1rem 1.25rem;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: left;
+}
+
+th,
+td {
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid var(--mat-sys-outline-variant, #dce8d2);
+  text-align: left;
+}
+
+th {
+  color: var(--brand);
+  font-weight: 600;
+}
+
+/* Dark mode: only the custom brand colours need overriding */
+:host-context(.dark-mode) {
+  --brand: #fff;
+}
+
+.filters-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.filter-field label {
+  color: var(--brand);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.filter-field input[type='search'] {
+  min-height: 42px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--mat-sys-outline, #b8cbbf);
+  background: var(--mat-sys-surface-container-highest, #fff);  border-radius: 10px;
+  color: var(--mat-sys-on-surface);
+  font: inherit;
+}
+
+.filter-field input[type='search']:hover {
+  border-color: var(--brand);
+}
+
+.filter-field input[type='search']:focus-visible {
+  border-color: var(--brand);
+  outline: 3px solid rgb(36 75 63 / 22%);
+}
+
+
+.no-results {
+  padding: 2rem;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+}
