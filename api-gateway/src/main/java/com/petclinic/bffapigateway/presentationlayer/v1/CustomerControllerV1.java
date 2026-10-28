@@ -136,7 +136,7 @@ public class CustomerControllerV1 {
                 .switchIfEmpty(Mono.defer(() -> Mono.error(
                         new InvalidInputException("Provided customer id is invalid: " + customerId))))
                 .flatMap(customersServiceClient::softDeleteCustomer)
-                .then(Mono.just(ResponseEntity.noContent().<Void>build()));
+                .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
     @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
