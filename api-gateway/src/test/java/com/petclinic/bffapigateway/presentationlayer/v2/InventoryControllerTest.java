@@ -50,12 +50,38 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {
         InventoryControllerV1.class,
-        InventoryServiceClient.class
+        InventoryServiceClient.class,
+        com.petclinic.bffapigateway.config.GlobalExceptionHandler.class
 })
 @WebFluxTest(controllers = InventoryControllerV1.class)
 @AutoConfigureWebTestClient
 @Import(InventoryControllerTest.TestActorConfiguration.class)
 public class InventoryControllerTest {
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"ADMIN", "INVENTORY_MANAGER", "VET", "CUST", "RECEPTIONIST"})
+    void restockRoleFilter_enforcesTheActualControllerAnnotation(String role) throws Exception {
+        com.petclinic.bffapigateway.utils.Utility utility = mock(com.petclinic.bffapigateway.utils.Utility.class);
+        var exchange = org.springframework.mock.web.server.MockServerWebExchange.from(
+                org.springframework.mock.http.server.reactive.MockServerHttpRequest.put(
+                        "/api/gateway/inventories/inventory/products/supply/restockProduct?productQuantity=1"));
+        var controller = new InventoryControllerV1(inventoryServiceClient);
+        when(utility.getHandler(exchange)).thenReturn(new org.springframework.web.method.HandlerMethod(
+                controller, InventoryControllerV1.class.getMethod("restockLowStockProduct",
+                String.class, String.class, Integer.class, org.springframework.web.server.ServerWebExchange.class)));
+        exchange.getAttributes().put("tokenValues", com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO
+                .builder().roles(java.util.List.of(role)).build());
+        org.springframework.web.server.WebFilterChain chain = mock(org.springframework.web.server.WebFilterChain.class);
+        when(chain.filter(exchange)).thenReturn(Mono.empty());
+        var result = new com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter(utility).filter(exchange, chain);
+        if (role.equals("ADMIN") || role.equals("INVENTORY_MANAGER")) {
+            reactor.test.StepVerifier.create(result).verifyComplete();
+            verify(chain).filter(exchange);
+        } else {
+            reactor.test.StepVerifier.create(result)
+                    .expectError(com.petclinic.bffapigateway.exceptions.ForbiddenAccessException.class).verify();
+            verify(chain, never()).filter(any());
+        }
+    }
     @TestConfiguration
     static class TestActorConfiguration {
         @Bean
@@ -1092,7 +1118,7 @@ public class InventoryControllerTest {
 
         // Verify that the service client was never called
         verify(inventoryServiceClient, never())
-                .restockLowStockProduct(eq(inventoryId), eq(productId), eq(productQuantity));
+                .restockLowStockProduct(eq(inventoryId), eq(productId), eq(productQuantity), eq("test-user"));
     }
 
     @Test

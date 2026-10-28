@@ -110,6 +110,16 @@ export class VisitService {
     return this.http.patch<Visit>(`/api/gateway/visits/${visitId}/note`, { vetNote });
   }
 
+  sendWeeklyScheduleEmail(): Observable<string> {
+    return this.http.post(
+      '/api/gateway/visits/weekly-email',
+      {},
+      {
+        responseType: 'text',
+      },
+    );
+  }
+
   cancelVisit(visitId: string, details: string): Observable<Visit> {
     return this.http.patch<Visit>(`/api/gateway/visits/${visitId}/cancel`, {
       cancellationReason: CancellationReason.OTHER,
