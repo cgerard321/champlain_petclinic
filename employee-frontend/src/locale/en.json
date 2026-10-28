@@ -615,6 +615,69 @@
         "bundles": "Bundles",
         "settings": "Settings"
       },
+      "bundles": {
+        "title": "Bundles",
+        "description": "Manage bundles available to the clinic.",
+        "loading": "Loading bundles...",
+        "itemCount": "{$INTERPOLATION} items",
+        "actions": {
+          "add": "Add Bundle",
+          "update": "Update Bundle",
+          "addItems": "Add items",
+          "removeItem": "Remove item"
+        },
+        "fields": {
+          "name": "Bundle name",
+          "description": "Description",
+          "items": "Bundle items",
+          "originalPrice": "Original price",
+          "bundlePrice": "Bundle price"
+        },
+        "discount": {
+          "title": "Bundle discount",
+          "percentage": "Percentage",
+          "percentageLabel": "Discount percentage",
+          "manual": "Manual",
+          "enter": "Enter a discount",
+          "savings": "Customer saves"
+        },
+        "add": {
+          "title": "Add Bundle",
+          "close": "Close Add Bundle dialog"
+        },
+        "update": {
+          "title": "Update Bundle",
+          "close": "Close Update Bundle dialog"
+        },
+        "delete": {
+          "title": "Delete bundle?",
+          "confirm": "Are you sure you want to delete {$name}? This cannot be undone."
+        },
+        "selector": {
+          "selected": "{$INTERPOLATION} product(s) selected",
+          "clear": "Clear",
+          "addAll": "Add all",
+          "empty": "No products match your search.",
+          "confirm": "OK"
+        },
+        "validation": {
+          "nameRequired": "Bundle name is required.",
+          "descriptionRequired": "Bundle description is required.",
+          "priceRequired": "Bundle price is required.",
+          "itemRequired": "Bundle needs at least one item.",
+          "percentageRequired": "Discount percentage is required.",
+          "percentageMinimum": "Discount must be at least 1%.",
+          "percentageMaximum": "Discount cannot be more than 100%.",
+          "pricePositive": "Bundle price must be greater than zero.",
+          "priceBelowOriginal": "Bundle price must be less than {$price}.",
+          "priceNumber": "Bundle price must be a valid number.",
+          "priceBelowOriginalGeneric": "Bundle price must be less than the original price."
+        },
+        "errors": {
+          "load": "Failed to load bundles.",
+          "save": "Could not save the bundle."
+        }
+      },
       "reviewSettings": {
         "title": "Review Settings",
         "description": "Set how long customers can edit their reviews.",

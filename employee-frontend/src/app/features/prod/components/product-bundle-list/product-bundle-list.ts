@@ -148,9 +148,9 @@ export class ProductBundleList implements OnInit {
     this.dialog
       .open(ProductDeleteDialog, {
         data: {
-          title: 'Delete bundle?',
-          message: `Are you sure you want to delete ${bundle.bundleName}? This cannot be undone.`,
-          confirmLabel: 'Delete',
+          title: $localize`:@@products.bundles.delete.title:Supprimer l'ensemble?`,
+          message: $localize`:@@products.bundles.delete.confirm:Voulez-vous vraiment supprimer ${bundle.bundleName}:name: ? Cette action est irréversible.`,
+          confirmLabel: $localize`:@@products.actions.delete:Supprimer`,
         },
         width: '520px',
         maxWidth: '95vw',
@@ -178,7 +178,9 @@ export class ProductBundleList implements OnInit {
         this.isLoading.set(false);
       },
       error: () => {
-        this.bundlesError.set('Failed to load bundles.');
+        this.bundlesError.set(
+          $localize`:@@products.bundles.errors.load:Impossible de charger les ensembles.`,
+        );
         this.isLoading.set(false);
       },
     });

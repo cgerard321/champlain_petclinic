@@ -1,18 +1,25 @@
 <mat-dialog-content (close)="close()">
-  <mat-label>{{ selectedProductIds().size }} product(s) selected</mat-label>
+  <mat-label i18n="@@products.bundles.selector.selected">
+    {{ selectedProductIds().size }} produit(s) sélectionné(s)
+  </mat-label>
   <mat-form-field appearance="outline" class="search-field">
-    <mat-label>Search products by name</mat-label>
+    <mat-label i18n="@@products.search.label">Rechercher des produits par nom</mat-label>
     <input
       matInput
       type="search"
-      placeholder="Enter a product name"
+      placeholder="Saisissez un nom de produit"
+      i18n-placeholder="@@products.search.placeholder"
       (input)="searchProducts($any($event.target).value)"
     />
   </mat-form-field>
 
   <div class="selection-actions">
-    <button mat-button type="button" (click)="clear()">Clear</button>
-    <button mat-button type="button" (click)="addAll()">Add all</button>
+    <button mat-button type="button" (click)="clear()" i18n="@@products.bundles.selector.clear">
+      Effacer
+    </button>
+    <button mat-button type="button" (click)="addAll()" i18n="@@products.bundles.selector.addAll">
+      Tout ajouter
+    </button>
   </div>
 
   <mat-list class="product-list">
@@ -26,12 +33,23 @@
         </mat-checkbox>
       </mat-list-item>
     } @empty {
-      <p class="empty-message">No products match your search.</p>
+      <p class="empty-message" i18n="@@products.bundles.selector.empty">
+        Aucun produit ne correspond à votre recherche.
+      </p>
     }
   </mat-list>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="cancel()">Cancel</button>
-  <button mat-flat-button type="button" (click)="close()">OK</button>
+  <button mat-button type="button" (click)="cancel()" i18n="@@products.actions.cancel">
+    Annuler
+  </button>
+  <button
+    mat-flat-button
+    type="button"
+    (click)="close()"
+    i18n="@@products.bundles.selector.confirm"
+  >
+    OK
+  </button>
 </mat-dialog-actions>
