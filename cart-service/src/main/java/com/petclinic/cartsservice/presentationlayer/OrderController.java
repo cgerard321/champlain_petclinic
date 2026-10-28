@@ -42,4 +42,38 @@ public class OrderController {
         return orderService.findOrdersByCustomerId(customerId);
     }
 
+    @PostMapping(
+            value = "/customer/{customerId}/{orderId}/reports",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<OrderReportResponseModel>> createOrderReport(
+            @PathVariable String customerId,
+            @PathVariable String orderId,
+            @RequestBody CreateOrderReportRequestModel request
+    ) {
+        return orderService.createOrderReport(customerId, orderId, request)
+                .map(report -> ResponseEntity
+                        .status(HttpStatus.CREATED)
+                        .body(report));
+    }
+
+    @GetMapping(
+            value = "/customer/{customerId}/reports",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Flux<OrderReportResponseModel> getCustomerOrderReports(
+            @PathVariable String customerId
+    ) {
+        return orderService.findReportsByCustomerId(customerId);
+    }
+
+    @GetMapping(
+            value = "/reports",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Flux<OrderReportResponseModel> getAllOrderReports() {
+        return orderService.getAllReports();
+    }
+
 }

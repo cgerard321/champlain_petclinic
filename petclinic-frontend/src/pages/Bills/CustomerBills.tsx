@@ -4,8 +4,10 @@ import BillsListTable from '@/features/bills/BillsListTable.tsx';
 import CurrentBalance from '@/features/bills/CurrentBalance';
 import { Currency } from '@/features/bills/utils/convertCurrency';
 import './CustomerBills.css';
+import { useTranslation } from 'react-i18next';
 
 export default function CustomerBillingPage(): JSX.Element {
+  const { t } = useTranslation('bills');
   const [currency, setCurrency] = useState<Currency>('CAD');
   const [currencyOpen, setCurrencyOpen] = useState(false);
 
@@ -22,29 +24,29 @@ export default function CustomerBillingPage(): JSX.Element {
       <NavBar />
 
       <div className="customer-bills-layout">
-        <aside className="modern-sidebar" aria-label="Billing options">
-          <div className="sidebar-title">Options</div>
+        <aside className="modern-sidebar" aria-label={t('sidebar.ariaLabel')}>
+          <div className="sidebar-title">{t('sidebar.title')}</div>
 
           <div className="sidebar-button-container">
             <button
               type="button"
               onClick={() => dispatchSidebarEvent('customerToggleStatusFilter')}
             >
-              Filter by Status
+              {t('buttons.filterStatus')}
             </button>
 
             <button
               type="button"
               onClick={() => dispatchSidebarEvent('customerToggleAmountFilter')}
             >
-              Filter by Amount
+              {t('buttons.filterAmount')}
             </button>
 
             <button
               type="button"
               onClick={() => dispatchSidebarEvent('customerToggleDateFilter')}
             >
-              Filter by Date
+              {t('buttons.filterDate')}
             </button>
           </div>
 
@@ -59,11 +61,13 @@ export default function CustomerBillingPage(): JSX.Element {
                 className="currency-btn"
                 aria-haspopup="true"
                 aria-expanded={currencyOpen}
-                aria-label="Select currency"
+                aria-label={t('currency.ariaLabel')}
                 onClick={() => setCurrencyOpen(prev => !prev)}
               >
                 <span className="currency-label">
-                  <span className="currency-prefix">Currency:</span>
+                  <span className="currency-prefix">
+                    {t('buttons.currency')}
+                  </span>
                   <span className="currency-value">{currency}</span>
                 </span>
                 <span className="caret">▾</span>
@@ -104,7 +108,7 @@ export default function CustomerBillingPage(): JSX.Element {
 
         <main className="customer-bills-main">
           <div className="customer-bills-content">
-            <h1 className="customer-bills-title">Your Bills</h1>
+            <h1 className="customer-bills-title">{t('title')}</h1>
 
             <div className="customer-bills-balance">
               <CurrentBalance currency={currency} />

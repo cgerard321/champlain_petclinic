@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { type ComponentFixture, TestBed } from '@angular/core/testing';
+import { clearTranslations, loadTranslations } from '@angular/localize';
 import { MatDialog } from '@angular/material/dialog';
 import { type Observable, of, throwError } from 'rxjs';
 import { type Mock, vi } from 'vitest';
@@ -53,6 +54,10 @@ describe('Bill page', () => {
     getReceptionistBills: Mock<() => Observable<BillRecord>>;
     payBill: Mock;
   };
+
+  afterEach(() => {
+    clearTranslations();
+  });
 
   async function render(
     roles: string[] = [],
@@ -313,6 +318,295 @@ describe('Bill page', () => {
     expect(getBillById).toHaveBeenCalledWith('BILL-123');
     expect(host.querySelector('[role="alert"]')?.textContent).toContain('Bill not found');
     expect(openDialog).not.toHaveBeenCalled();
+  });
+
+  it('shows customer and veterinarian suggestions after three characters', async () => {
+    const secondBill: BillRecord = {
+      ...sampleBill,
+      billId: 'BILL-456',
+      customerFirstName: 'Bob',
+      customerLastName: 'Jones',
+      vetFirstName: 'Clara',
+      vetLastName: 'Brown',
+    };
+
+    const { fixture, host } = await render([Roles.admin], [sampleBill, secondBill]);
+    const input = host.querySelector<HTMLInputElement>('#bill-smart-search-input');
+
+    expect(input).not.toBeNull();
+
+    if (!input) {
+      throw new Error('Smart bill search input not found');
+    }
+
+    input.value = 'ja';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.querySelectorAll('[role="option"]')).toHaveLength(0);
+
+    input.value = 'jan';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.querySelectorAll('[role="option"]')).toHaveLength(1);
+    expect(host.querySelector('.bill-search-suggestion')?.textContent).toContain('Jane Smith');
+
+    input.value = 'aRt';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.querySelectorAll('[role="option"]')).toHaveLength(1);
+    expect(host.querySelector('.bill-search-suggestion')?.textContent).toContain('Alex Martin');
+    expect(host.querySelector('.bill-search-suggestion')?.textContent).toContain('Vétérinaire');
+  });
+
+  it('renders the French smart-search text by default', async () => {
+    const { host } = await render([Roles.admin]);
+    const input = host.querySelector<HTMLInputElement>('#bill-smart-search-input');
+
+    expect(host.textContent).toContain('Rechercher par nom de client ou de vétérinaire');
+    expect(input?.getAttribute('placeholder')).toBe('Saisir au moins 3 caractères');
+    expect(host.textContent).toContain('Rechercher des factures');
+  });
+
+  it('renders the English smart-search text when English translations are loaded', async () => {
+    loadTranslations({
+      'bills.smartSearch.label': 'Search by customer or veterinarian name',
+      'bills.smartSearch.placeholder': 'Type at least 3 characters',
+      'bills.smartSearch.submit': 'Search Bills',
+      'bills.smartSearch.clear': 'Clear',
+      'bills.smartSearch.clearLabel': 'Clear bill search',
+      'bills.smartSearch.customerSuggestion': 'Customer',
+      'bills.smartSearch.veterinarianSuggestion': 'Veterinarian',
+      'bills.smartSearch.noResultsTitle': 'No matching bills',
+      'bills.smartSearch.noResultsMessage':
+        'No bills match « {$INTERPOLATION} ». Try another customer or veterinarian name.',
+    });
+
+    const { fixture, host } = await render([Roles.admin]);
+    const input = host.querySelector<HTMLInputElement>('#bill-smart-search-input')!;
+
+    expect(host.textContent).toContain('Search by customer or veterinarian name');
+    expect(input.getAttribute('placeholder')).toBe('Type at least 3 characters');
+    expect(host.textContent).toContain('Search Bills');
+
+    input.value = 'jan';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.querySelector('.bill-search-suggestion small')?.textContent).toContain('Customer');
+    expect(host.querySelector('.bill-smart-search__clear')?.textContent).toContain('Clear');
+    expect(host.querySelector('.bill-smart-search__clear')?.getAttribute('aria-label')).toBe(
+      'Clear bill search',
+    );
+
+    input.value = 'aRt';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.querySelector('.bill-search-suggestion small')?.textContent).toContain(
+      'Veterinarian',
+    );
+
+    input.value = 'nobody';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    host
+      .querySelector('form.bill-smart-search')
+      ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+    expect(host.textContent).toContain('No matching bills');
+    expect(host.textContent).toContain(
+      'No bills match « nobody ». Try another customer or veterinarian name.',
+    );
+  });
+
+  it('filters the bill list when a suggestion is selected', async () => {
+    const secondBill: BillRecord = {
+      ...sampleBill,
+      billId: 'BILL-456',
+      customerFirstName: 'Bob',
+      customerLastName: 'Jones',
+      vetFirstName: 'Clara',
+      vetLastName: 'Brown',
+    };
+
+    const { fixture, host } = await render([Roles.admin], [sampleBill, secondBill]);
+    const input = host.querySelector<HTMLInputElement>('#bill-smart-search-input');
+
+    if (!input) {
+      throw new Error('Smart bill search input not found');
+    }
+
+    input.value = 'jan';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    host.querySelector<HTMLButtonElement>('.bill-search-suggestion')?.click();
+    fixture.detectChanges();
+
+    expect(host.querySelector('tbody')?.textContent).toContain('BILL-123');
+    expect(host.querySelector('tbody')?.textContent).not.toContain('BILL-456');
+    expect(input.value).toBe('Jane Smith');
+  });
+
+  it('applies the entered text when the smart search form is submitted', async () => {
+    const secondBill: BillRecord = {
+      ...sampleBill,
+      billId: 'BILL-456',
+      customerFirstName: 'Bob',
+      customerLastName: 'Jones',
+      vetFirstName: 'Clara',
+      vetLastName: 'Brown',
+    };
+
+    const { fixture, host } = await render([Roles.admin], [sampleBill, secondBill]);
+    const input = host.querySelector<HTMLInputElement>('#bill-smart-search-input');
+
+    if (!input) {
+      throw new Error('Smart bill search input not found');
+    }
+
+    input.value = 'LaR';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    host
+      .querySelector('form.bill-smart-search')
+      ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(host.querySelector('tbody')?.textContent).toContain('BILL-456');
+    expect(host.querySelector('tbody')?.textContent).not.toContain('BILL-123');
+  });
+
+  it('clears the smart search and restores the full bill list', async () => {
+    const secondBill: BillRecord = {
+      ...sampleBill,
+      billId: 'BILL-456',
+      customerFirstName: 'Bob',
+      customerLastName: 'Jones',
+      vetFirstName: 'Clara',
+      vetLastName: 'Brown',
+    };
+
+    const { fixture, host } = await render([Roles.admin], [sampleBill, secondBill]);
+    const input = host.querySelector<HTMLInputElement>('#bill-smart-search-input');
+
+    if (!input) {
+      throw new Error('Smart bill search input not found');
+    }
+
+    input.value = 'jan';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    host
+      .querySelector('form.bill-smart-search')
+      ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    host.querySelector<HTMLButtonElement>('.bill-smart-search__clear')?.click();
+    fixture.detectChanges();
+
+    expect(host.querySelector('tbody')?.textContent).toContain('BILL-123');
+    expect(host.querySelector('tbody')?.textContent).toContain('BILL-456');
+    expect(input.value).toBe('');
+  });
+
+  it('shows a specific empty state when no bills match the smart search', async () => {
+    const { fixture, host } = await render([Roles.admin]);
+    const input = host.querySelector<HTMLInputElement>('#bill-smart-search-input');
+
+    if (!input) {
+      throw new Error('Smart bill search input not found');
+    }
+
+    input.value = 'nobody';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    host
+      .querySelector('form.bill-smart-search')
+      ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(host.querySelector('tbody')).toBeNull();
+    expect(host.textContent).toContain('Aucune facture correspondante');
+    expect(host.textContent).toContain('nobody');
+  });
+
+  it.each(['', '   '])('restores the list when the input is cleared to %j', async (value) => {
+    const otherBill = {
+      ...sampleBill,
+      billId: 'BILL-456',
+      customerFirstName: 'Bob',
+      customerLastName: 'Jones',
+    };
+    const { fixture, host } = await render([Roles.admin], [sampleBill, otherBill]);
+    const input = host.querySelector<HTMLInputElement>('#bill-smart-search-input')!;
+
+    input.value = 'jan';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    host
+      .querySelector('form.bill-smart-search')
+      ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+    expect(host.querySelectorAll('tbody tr')).toHaveLength(1);
+
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+
+    expect(host.querySelectorAll('tbody tr')).toHaveLength(2);
+    expect(host.querySelectorAll('[role="option"]')).toHaveLength(0);
+  });
+
+  it.each([
+    { key: 'status' as const, value: 'UNPAID', other: { billStatus: 'PAID' as const } },
+    { key: 'visitType' as const, value: 'CHECKUP', other: { visitType: 'SURGERY' } },
+    { key: 'year' as const, value: '2026', other: { date: new Date(2025, 9, 1) } },
+    { key: 'month' as const, value: '10', other: { date: new Date(2026, 8, 1) } },
+  ])('preserves the $key filter when searching and clearing', async ({ key, value, other }) => {
+    const otherBill = { ...sampleBill, ...other, billId: 'BILL-456' };
+    const { fixture, host } = await render([Roles.admin], [sampleBill, otherBill]);
+
+    fixture.componentInstance['updateFilter'](key, value);
+    const input = host.querySelector<HTMLInputElement>('#bill-smart-search-input')!;
+    input.value = 'sMi';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    host
+      .querySelector('form.bill-smart-search')
+      ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+
+    expect(host.querySelectorAll('tbody tr')).toHaveLength(1);
+    expect(host.querySelector('tbody')?.textContent).toContain('BILL-123');
+    host.querySelector<HTMLButtonElement>('.bill-smart-search__clear')?.click();
+    fixture.detectChanges();
+    expect(host.querySelectorAll('tbody tr')).toHaveLength(1);
+    expect(host.querySelector('tbody')?.textContent).toContain('BILL-123');
+  });
+
+  it('keeps search results and suggestions within the selected archive view', async () => {
+    const archivedBill = {
+      ...sampleBill,
+      billId: 'BILL-456',
+      customerFirstName: 'Janet',
+      archive: true,
+    };
+    const { fixture, host } = await render([Roles.admin], [sampleBill, archivedBill]);
+    const input = host.querySelector<HTMLInputElement>('#bill-smart-search-input')!;
+    input.value = 'jan';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    fixture.detectChanges();
+    expect(host.querySelectorAll('[role="option"]')).toHaveLength(1);
+    expect(host.querySelector('.bill-search-suggestion')?.textContent).toContain('Jane Smith');
+
+    host
+      .querySelector('form.bill-smart-search')
+      ?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    fixture.detectChanges();
+    expect(host.querySelector('tbody')?.textContent).toContain('BILL-123');
+    expect(host.querySelector('tbody')?.textContent).not.toContain('BILL-456');
+
+    host.querySelectorAll<HTMLButtonElement>('.bill-view-action')[1]?.click();
+    input.dispatchEvent(new Event('focus'));
+    fixture.detectChanges();
+    expect(host.querySelector('tbody')?.textContent).toContain('BILL-456');
+    expect(host.querySelector('tbody')?.textContent).not.toContain('BILL-123');
+    expect(host.querySelectorAll('[role="option"]')).toHaveLength(1);
+    expect(host.querySelector('.bill-search-suggestion')?.textContent).toContain('Janet Smith');
   });
 
   describe('CPC-2135: overdue interest exemption', () => {

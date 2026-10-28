@@ -1,0 +1,37 @@
+<mat-dialog-content (close)="close()">
+  <mat-label>{{ selectedProductIds().size }} product(s) selected</mat-label>
+  <mat-form-field appearance="outline" class="search-field">
+    <mat-label>Search products by name</mat-label>
+    <input
+      matInput
+      type="search"
+      placeholder="Enter a product name"
+      (input)="searchProducts($any($event.target).value)"
+    />
+  </mat-form-field>
+
+  <div class="selection-actions">
+    <button mat-button type="button" (click)="clear()">Clear</button>
+    <button mat-button type="button" (click)="addAll()">Add all</button>
+  </div>
+
+  <mat-list class="product-list">
+    @for (product of filteredProducts(); track product.productId) {
+      <mat-list-item>
+        <mat-checkbox
+          [checked]="isSelected(product.productId)"
+          (change)="toggleProduct(product.productId, $event.checked)"
+        >
+          {{ product.productName }}
+        </mat-checkbox>
+      </mat-list-item>
+    } @empty {
+      <p class="empty-message">No products match your search.</p>
+    }
+  </mat-list>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-flat-button type="button" (click)="close()">OK</button>
+</mat-dialog-actions>

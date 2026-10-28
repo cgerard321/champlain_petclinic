@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Cart.*;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
@@ -484,4 +486,111 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                     .retrieve()
                     .bodyToFlux(OrderResponseDTO.class);
         }
+
+    public Mono<OrderReportResponseDTO> createOrderReport(
+            String customerId,
+            String orderId,
+            OrderReportRequestDTO request
+    ) {
+        return webClientBuilder.build()
+                .post()
+                .uri(
+                        ordersServiceUrl()
+                                + "/customer/{customerId}/{orderId}/reports",
+                        customerId,
+                        orderId
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        this::mapOrderReportError
+                )
+                .bodyToMono(OrderReportResponseDTO.class);
+    }
+
+    public Flux<OrderReportResponseDTO> getCustomerOrderReports(
+            String customerId
+    ) {
+        return webClientBuilder.build()
+                .get()
+                .uri(
+                        ordersServiceUrl()
+                                + "/customer/{customerId}/reports",
+                        customerId
+                )
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        this::mapOrderReportError
+                )
+                .bodyToFlux(OrderReportResponseDTO.class);
+    }
+
+    public Flux<OrderReportResponseDTO> getAllOrderReports() {
+        return webClientBuilder.build()
+                .get()
+                .uri(ordersServiceUrl() + "/reports")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        this::mapOrderReportError
+                )
+                .bodyToFlux(OrderReportResponseDTO.class);
+    }
+
+    public Mono<OrderResponseDTO> getOrderByOrderId(String orderId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(ordersServiceUrl() + "/{orderId}", orderId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        this::mapOrderReportError
+                )
+                .bodyToMono(OrderResponseDTO.class);
+    }
+
+    private String ordersServiceUrl() {
+        return cartServiceUrl.replace(
+                "/api/v1/carts",
+                "/api/v1/orders"
+        );
+    }
+
+    private Mono<? extends Throwable> mapOrderReportError(
+            ClientResponse response
+    ) {
+        HttpStatus resolvedStatus = HttpStatus.resolve(
+                response.statusCode().value()
+        );
+        HttpStatus status = resolvedStatus == null
+                ? HttpStatus.BAD_GATEWAY
+                : resolvedStatus;
+
+        GenericHttpException fallback = new GenericHttpException(
+                "Order report request failed",
+                status
+        );
+
+        return response.bodyToMono(
+                        new ParameterizedTypeReference<Map<String, Object>>() {
+                        }
+                )
+                .map(body -> {
+                    Object message = body.get("message");
+                    return new GenericHttpException(
+                            message == null
+                                    ? "Order report request failed"
+                                    : String.valueOf(message),
+                            status
+                    );
+                })
+                .switchIfEmpty(Mono.just(fallback))
+                .onErrorReturn(fallback);
+    }
 }
