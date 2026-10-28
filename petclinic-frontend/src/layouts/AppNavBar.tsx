@@ -1,7 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import {
   IsAdmin,
-  IsInventoryManager,
   IsCustomer,
   IsReceptionist,
   IsVet,
@@ -26,7 +25,6 @@ export function NavBar(): JSX.Element {
   const { cartCount, refreshFromAPI } = useCart();
   const navigate = useNavigate();
   const isAdmin = IsAdmin();
-  const isInventoryManager = IsInventoryManager();
   const isReceptionist = IsReceptionist();
   const isVet = IsVet();
   const isCustomer = IsCustomer();
@@ -135,14 +133,11 @@ export function NavBar(): JSX.Element {
                     </NavDropdown.Item>
                   </NavDropdown>
                 )}
-                {!isAdmin &&
-                  !isInventoryManager &&
-                  !isVet &&
-                  !isReceptionist && (
-                    <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
-                      {t('nav.bills')}
-                    </Nav.Link>
-                  )}
+                {isCustomer && !hasStaffVisits && (
+                  <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
+                    {t('nav.bills')}
+                  </Nav.Link>
+                )}
                 {isCustomer && !hasStaffVisits && (
                   <NavDropdown
                     title={t('nav.visits')}
