@@ -85,7 +85,7 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
       <h3 className="bundle-title">{bundleName}</h3>
       <p>{bundleDescription}</p>
       <div className="product-bundle-products">
-        {products.map(product => (
+        {products.slice(0, 3).map(product => (
           <div
             key={product.productId}
             className="product-bundle-item"
@@ -127,6 +127,11 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
           </div>
         ))}
       </div>
+      {products.length > 3 && (
+        <span className="bundle-more-products">
+          {t('moreBundleProducts', { count: products.length - 3 })}
+        </span>
+      )}
       <p>
         {t('originalPrice')}{' '}
         <span className="original-price">

@@ -11,15 +11,14 @@ import { updateUserRating } from '@/features/products/api/updateUserRating.ts';
 import { Button } from 'react-bootstrap';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import WriteReviewModal from '@/features/products/components/WriteReviewModal.tsx';
-import StarRating from '@/features/products/components/StarRating.tsx';
 import EditReviewModal from '@/features/products/components/EditReviewModal.tsx';
 import DeleteReviewModal from '@/features/products/components/DeleteReviewModal.tsx';
 import { Review } from '@/features/products/components/Review.tsx';
 import { useNavigate } from 'react-router-dom';
-import { ProductModel } from '@/features/products/models/ProductModels/ProductModel.ts';
 import { Reveal } from '@/shared/components';
 import { MdClear } from 'react-icons/md';
 import './ReviewsList.css';
+import { AverageReview } from './AverageReview';
 import Stack from 'react-bootstrap/Stack';
 import { likeReview } from '@/features/products/api/likeReview.ts';
 
@@ -29,7 +28,6 @@ interface ReviewListProps {
   isStaff: boolean;
   onReviewModification: () => Promise<void>;
   onModifyReviews: (reviewCount: number) => void;
-  currentProduct: ProductModel;
 }
 
 export function ReviewsList({
@@ -38,10 +36,13 @@ export function ReviewsList({
   isStaff,
   onReviewModification,
   onModifyReviews,
-  currentProduct,
 }: ReviewListProps): JSX.Element {
   const { t } = useTranslation('products');
-  const [productReviews, setProductReviews] = useState<RatingModel[]>([]);
+  const [productRatings, setProductRatings] = useState<RatingModel[]>([]);
+  const [ratingsStatus, setRatingsStatus] = useState<
+    'loading' | 'ready' | 'error'
+  >('loading');
+  const productReviews = productRatings.filter(rating => rating.review !== '');
   const [currentUserReview, setCurrentUserReview] = useState<RatingModel>({
     rating: 0,
     review: '',
@@ -68,6 +69,7 @@ export function ReviewsList({
 
   const fetchReviews = async (): Promise<void> => {
     if (!productId) return;
+    setRatingsStatus('loading');
     try {
       let reviews: RatingModel[];
       try {
@@ -80,8 +82,10 @@ export function ReviewsList({
         );
         reviews = await getUserRatingsForProduct(productId);
       }
-      setProductReviews(reviews.filter((r: RatingModel) => r.review !== ''));
+      setProductRatings(reviews);
+      setRatingsStatus('ready');
     } catch (err) {
+      setRatingsStatus('error');
       console.error('Failed to fetch product ratings', err);
     }
   };
@@ -167,7 +171,7 @@ export function ReviewsList({
     }
 
     const result = await likeReview(productId, review.customerId);
-    setProductReviews(currentReviews =>
+    setProductRatings(currentReviews =>
       currentReviews.map(currentReview =>
         currentReview.customerId === review.customerId
           ? {
@@ -199,33 +203,16 @@ export function ReviewsList({
         <h2>{t('customerReview')}</h2>
 
         <div className="rating-summary-container">
-          <div className="rating-left">
-            <div className="rating-display">
-              <div className="rating-display-row">
-                <span className="rating-number">
-                  {currentProduct.averageRating.toFixed(1)}
-                </span>
-                <div className="rating-stars-beside">
-                  <StarRating
-                    currentRating={currentProduct.averageRating}
-                    viewOnly={true}
-                  />
-                </div>
-              </div>
-              <p className="review-count">
-                {t('basedOn', { count: productReviews.length })}
-              </p>
-            </div>
-          </div>
+          <AverageReview ratings={productRatings} status={ratingsStatus} />
 
           <div className="rating-breakdown">
             {[5, 4, 3, 2, 1].map(star => {
-              const count = productReviews.filter(
+              const count = productRatings.filter(
                 r => Math.floor(r.rating) === star
               ).length;
               const percentage =
-                productReviews.length > 0
-                  ? (count / productReviews.length) * 100
+                productRatings.length > 0
+                  ? (count / productRatings.length) * 100
                   : 0;
 
               return (
@@ -237,7 +224,7 @@ export function ReviewsList({
                   }`}
                   onClick={() => handleRatingFilter(star)}
                   aria-pressed={selectedRating === star}
-                  aria-label={`${t('stars', { count: star })}, ${t('reviewCount', { count })}`}
+                  aria-label={`${t('stars', { count: star })}, ${t('averageReview.count', { count })}`}
                 >
                   <span className="star-label">
                     {t('stars', { count: star })}

@@ -283,7 +283,6 @@ export default function ProductDetails(): JSX.Element {
                     setCurrentProduct(resRefresh);
                   }}
                   onModifyReviews={setReviewCount}
-                  currentProduct={currentProduct}
                 />
               </>
             )}
