@@ -64,7 +64,8 @@
                 >
                   <app-product-thumbnail
                     class="bundle-item-thumbnail"
-                    imageId="{{ bundleItem.imageId }}"
+                    [image]="bundleItem.image"
+                    [alt]="bundleItem.productName"
                   />
                   <span>{{ bundleItem.productName }}</span>
                 </a>
