@@ -1,4 +1,8 @@
+import { FileDetails } from '@features/prod/models/image.model';
+
 export interface Promo {
+  imageId?: string;
+  image?: FileDetails | null;
   id: string;
   name: string;
   code: string;
@@ -11,6 +15,8 @@ export interface Promo {
 }
 
 export interface PromoRequest {
+  image?: FileDetails;
+  removeImage?: boolean;
   name: string;
   code: string;
   discount: number;

@@ -13,6 +13,49 @@
 
 <form class="promo-form" (submit)="submit($event)">
   <mat-dialog-content>
+    <section class="image-editor" aria-label="Promotion image">
+      <label class="file-label" for="promo-image">Promotion image (optional)</label>
+      <p id="promo-image-help">JPEG, JPG, or PNG</p>
+      @if (previewImage; as image) {
+        @if (!previewFailed()) {
+          <img
+            class="image-preview"
+            [src]="'data:' + image.fileType + ';base64,' + image.fileData"
+            alt="Promotion preview"
+            (error)="imageFailed()"
+          />
+        } @else {
+          <div class="image-placeholder">Image unavailable</div>
+        }
+      } @else {
+        <div class="image-placeholder">No image</div>
+      }
+      <input
+        class="file-input"
+        id="promo-image"
+        type="file"
+        accept="image/jpeg,image/jpg,image/png"
+        aria-describedby="promo-image-help"
+        [disabled]="isSubmitting() || isReadingImage()"
+        (change)="selectFile($event)"
+      />
+      @if (previewImage || (promo?.imageId && !removeOriginalImage())) {
+        <button
+          mat-button
+          type="button"
+          [disabled]="isSubmitting() || isReadingImage()"
+          (click)="removeImage()"
+        >
+          Remove image
+        </button>
+      }
+      @if (isReadingImage()) {
+        <p role="status">Reading image...</p>
+      }
+      @if (fileError()) {
+        <p class="error-message" role="alert">{{ fileError() }}</p>
+      }
+    </section>
     <mat-form-field appearance="outline">
       <mat-label>Name</mat-label>
       <input matInput type="text" [formField]="promoForm.name" />
@@ -91,7 +134,12 @@
 
   <mat-dialog-actions align="end">
     <button mat-button type="button" [disabled]="isSubmitting()" (click)="cancel()">Cancel</button>
-    <button mat-flat-button color="primary" type="submit" [disabled]="isSubmitting()">
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      [disabled]="isSubmitting() || isReadingImage() || !!fileError()"
+    >
       @if (isSubmitting()) {
         <mat-progress-spinner diameter="20" mode="indeterminate" />
       } @else {
