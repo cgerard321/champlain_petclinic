@@ -120,6 +120,7 @@
 
 .filter-footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -439,3 +440,10 @@
   font-size: 1rem;
   font-weight: 700;
 }
+<<<<<<< Updated upstream
+=======
+
+.inventory-sort {
+  width: min(100%, 22rem);
+}
+>>>>>>> Stashed changes

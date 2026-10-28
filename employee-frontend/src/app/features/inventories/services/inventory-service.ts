@@ -67,8 +67,9 @@ export class InventoryService {
       );
   }
 
+  // Counts distinct supply records; available to every inventory-list role.
   getQuantity(inventoryId: string): Observable<number> {
-    return this.http.get<number>(`${this.baseUrl}/${inventoryId}/productquantity`);
+    return this.http.get<number>(`${this.baseUrl}/${inventoryId}/products-count`);
   }
 
   updateImportantStatus(inventoryId: string, important: boolean): Observable<void> {

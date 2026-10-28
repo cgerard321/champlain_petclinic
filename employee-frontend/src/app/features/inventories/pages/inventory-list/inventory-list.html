@@ -119,20 +119,173 @@
             class="inventory-card-link"
             [routerLink]="['/invt', inventory.inventoryId, 'supplies']"
           >
+<<<<<<< Updated upstream
             <mat-card appearance="outlined" class="inventory-card">
               <mat-card-header>
                 <mat-card-title>{{ inventory.inventoryName }}</mat-card-title>
                 <mat-card-subtitle>{{ inventory.inventoryType }}</mat-card-subtitle>
               </mat-card-header>
+=======
+            <option value="">
+              {{ inventoryTypesLoading() ? loadingTypesLabel : allTypesLabel }}
+            </option>
+            @for (type of inventoryTypes(); track type.typeId) {
+              <option [value]="type.type">{{ localizedInventoryType(type.type) }}</option>
+            }
+          </select>
+          @if (inventoryTypesError(); as typeError) {
+            <span class="filter-error" role="status">{{ typeError }}</span>
+          }
+        </label>
+        <label class="filter-field">
+          <span i18n="@@inventory.fields.description">Description</span>
+          <input
+            type="search"
+            placeholder="Rechercher par description"
+            i18n-placeholder="@@inventory.filters.descriptionPlaceholder"
+            [value]="filters().inventoryDescription"
+            (input)="setTextFilter('inventoryDescription', $event)"
+          />
+        </label>
+      </div>
+      <div class="filter-footer">
+        <label class="important-filter">
+          <input
+            type="checkbox"
+            [checked]="filters().importantOnly"
+            [disabled]="isSavingAnyFavorite()"
+            (change)="setImportantOnly($event)"
+          />
+          <span i18n="@@inventory.filters.favoritesOnly">Favoris seulement</span>
+        </label>
+        <label class="filter-field inventory-sort">
+          <span i18n="@@inventory.sort.label">Trier par</span>
+          <select [value]="sort()" (change)="setSort($event)">
+            <option value="name-asc" i18n="@@inventory.sort.nameAsc">Nom A–Z</option>
+            <option value="name-desc" i18n="@@inventory.sort.nameDesc">Nom Z–A</option>
+            <option value="type" i18n="@@inventory.sort.type">Type</option>
+            <option value="count-desc" i18n="@@inventory.sort.countDesc">
+              Nombre d'articles (le plus élevé d'abord)
+            </option>
+          </select>
+        </label>
+      </div>
+    </section>
+>>>>>>> Stashed changes
 
               <mat-card-content>
                 <p>{{ inventory.inventoryDescription }}</p>
 
+<<<<<<< Updated upstream
                 <p class="quantity">
                   @if (quantityFor(inventory.inventoryId) !== null) {
                     {{ quantityFor(inventory.inventoryId) }} items in stock
                   } @else {
                     Quantity unavailable
+=======
+    @if (isLoading()) {
+      <div class="state-container">
+        <mat-spinner diameter="40" />
+        <p i18n="@@inventory.loading">Chargement des inventaires…</p>
+      </div>
+    } @else if (errorMessage(); as err) {
+      <div class="state-container">
+        <mat-icon color="warn">error_outline</mat-icon>
+        <p>{{ err.message }}</p>
+      </div>
+    } @else if (countSortError()) {
+      <div class="state-container" role="alert">
+        <mat-icon color="warn">error_outline</mat-icon>
+        <p i18n="@@inventory.sort.countError">
+          Impossible de charger le nombre d'articles. Réessayez ou choisissez un autre tri.
+        </p>
+        <button
+          class="clear-filters-button"
+          type="button"
+          (click)="retryQuantities()"
+          i18n="@@inventory.sort.retry"
+        >
+          Réessayer
+        </button>
+      </div>
+    } @else if (countSortBlocked()) {
+      <div class="state-container" role="status">
+        <mat-spinner diameter="40" />
+        <p i18n="@@inventory.sort.loadingCounts">Chargement du nombre d'articles…</p>
+      </div>
+    } @else if (noResultsMessage(); as message) {
+      <div class="state-container no-results-state" role="status">
+        <div class="no-results-icon"><mat-icon>search_off</mat-icon></div>
+        <h2 i18n="@@inventory.noResults.heading">Aucun inventaire correspondant</h2>
+        <p>{{ message }}</p>
+        <button class="clear-filters-button" type="button" (click)="clearFilters()">
+          <ng-container i18n="@@inventory.filters.clear">Effacer les filtres</ng-container>
+        </button>
+      </div>
+    } @else if (inventories().length === 0) {
+      <div class="state-container">
+        <mat-icon>inventory_2</mat-icon>
+        <h2 i18n="@@inventory.empty.heading">Aucun inventaire disponible</h2>
+        <p>{{ filters().importantOnly ? noFavoritesLabel : emptyLabel }}</p>
+      </div>
+    } @else {
+      <div class="inventory-grid">
+        @for (inventory of inventories(); track inventory.inventoryId) {
+          <div class="inventory-card-wrapper">
+            <a
+              class="inventory-card-link"
+              [routerLink]="['/invt', inventory.inventoryId, 'supplies']"
+            >
+              <mat-card appearance="outlined" class="inventory-card">
+                <mat-card-header>
+                  <mat-card-title>{{
+                    localizedInventoryName(inventory.inventoryName)
+                  }}</mat-card-title>
+                  <mat-card-subtitle>{{
+                    localizedInventoryType(inventory.inventoryType)
+                  }}</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <p>{{ localizedInventoryDescription(inventory.inventoryDescription) }}</p>
+                  <p class="quantity">
+                    @if (quantityFor(inventory.inventoryId) !== null) {
+                      {{ stockQuantityLabel(inventory.inventoryId) }}
+                    } @else {
+                      <ng-container i18n="@@inventory.quantity.unavailable"
+                        >Quantité indisponible</ng-container
+                      >
+                    }
+                  </p>
+                  @if (can().canUpdateInventory || can().canDeleteInventory) {
+                    <div class="inventory-actions">
+                      @if (can().canUpdateInventory) {
+                        <button
+                          type="button"
+                          class="edit-button"
+                          (click)="
+                            $event.stopPropagation();
+                            $event.preventDefault();
+                            editInventory(inventory)
+                          "
+                        >
+                          <ng-container i18n="@@inventory.actions.edit">Modifier</ng-container>
+                        </button>
+                      }
+                      @if (can().canDeleteInventory) {
+                        <button
+                          type="button"
+                          class="delete-button"
+                          (click)="
+                            $event.stopPropagation();
+                            $event.preventDefault();
+                            deleteInventoryAction(inventory)
+                          "
+                        >
+                          <ng-container i18n="@@inventory.actions.delete">Supprimer</ng-container>
+                        </button>
+                      }
+                    </div>
+>>>>>>> Stashed changes
                   }
                 </p>
               </mat-card-content>
@@ -165,8 +318,14 @@
       <button
         class="pagination-button"
         type="button"
+<<<<<<< Updated upstream
         aria-label="Previous page"
         [disabled]="currentPage() === 0 || isLoading()"
+=======
+        aria-label="Page précédente"
+        i18n-aria-label="@@inventory.pagination.previous"
+        [disabled]="currentPage() === 0 || isLoading() || countSortBlocked()"
+>>>>>>> Stashed changes
         (click)="goToPreviousPage()"
       >
         &lt;
