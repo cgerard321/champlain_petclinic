@@ -20,6 +20,7 @@ public class OrderReportResponseModel {
     private String orderId;
     private String customerId;
     private String customerName;
+    private String customerEmail;
     private OrderReportReason reason;
     private List<AffectedItemResponse> affectedItems;
     private String description;
