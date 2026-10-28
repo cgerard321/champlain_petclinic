@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getAllVets } from '@/features/veterinarians/api/getAllVets';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import AddVet from '@/pages/Vet/AddVet.tsx';
 import UploadVetPhoto from '@/pages/Vet/UploadVetPhoto.tsx';
 import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
 import VetCardTable from '@/features/veterinarians/VetListCards';
-import { IsInventoryManager, IsVet } from '@/context/UserContext';
+import { IsInventoryManager, IsVet, IsAdmin } from '@/context/UserContext';
 
 export default function Vet(): JSX.Element {
   const isInventoryManager = IsInventoryManager();
   const isVet = IsVet();
+  const isAdmin = IsAdmin();
+  const canSeeInactiveVets = isAdmin || isVet;
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState<VetRequestModel[]>([]);
   const [allVets, setAllVets] = useState<VetRequestModel[]>([]);
@@ -19,7 +21,7 @@ export default function Vet(): JSX.Element {
 
   const [loaded, setLoaded] = useState<boolean>(false);
 
-  const fetchAllVets = async (): Promise<void> => {
+  const fetchAllVets = useCallback(async (): Promise<void> => {
     try {
       const response = await getAllVets();
 
@@ -41,19 +43,22 @@ export default function Vet(): JSX.Element {
         username: vet.username ?? '',
       }));
 
-      setAllVets(vets);
-      setResults(vets);
+      const visibleVets = canSeeInactiveVets
+        ? vets
+        : vets.filter(vet => vet.active);
+      setAllVets(visibleVets);
+      setResults(visibleVets);
     } catch (err) {
       console.error('Error fetching all vets:', (err as Error)?.message ?? err);
       setError('Error fetching all vets.');
     } finally {
       setLoaded(true);
     }
-  };
+  }, [canSeeInactiveVets]);
 
   useEffect(() => {
     fetchAllVets();
-  }, []);
+  }, [fetchAllVets]);
 
   const handleSearch = (query: string): void => {
     const trimmed = query.trim();
