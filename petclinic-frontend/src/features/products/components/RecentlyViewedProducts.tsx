@@ -7,7 +7,13 @@ import '@/features/products/ProductList.css';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '@/context/UserContext';
 
-export default function RecentlyViewedProducts(): JSX.Element | null {
+interface RecentlyViewedProductsProps {
+  compact?: boolean;
+}
+
+export default function RecentlyViewedProducts({
+  compact = false,
+}: RecentlyViewedProductsProps): JSX.Element | null {
   const { t } = useTranslation('products');
   const { user } = useUser();
   const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<
@@ -34,8 +40,13 @@ export default function RecentlyViewedProducts(): JSX.Element | null {
   }
 
   return (
-    <div className="products-section-container">
-      <h2 className="section-title">{t('recent')}</h2>
+    <section
+      className={`products-section-container${compact ? ' shop-recently-viewed' : ''}`}
+    >
+      <div className="shop-section-heading">
+        <h2 className="section-title">{t('recent')}</h2>
+        {compact && <span>{t('recentHint')}</span>}
+      </div>
       <div className="recently-viewed-flex">
         {recentlyClickedProducts.length > 0 ? (
           recentlyClickedProducts
@@ -50,6 +61,7 @@ export default function RecentlyViewedProducts(): JSX.Element | null {
                   key={product.productId}
                   product={product}
                   recentlyViewed
+                  compact={compact}
                 />
               </div>
             ))
@@ -57,7 +69,7 @@ export default function RecentlyViewedProducts(): JSX.Element | null {
           <p>{t('noRecent')}</p>
         )}
       </div>
-    </div>
+    </section>
   );
 
   /**recently-viewed-list used to be grid changed it since I wanted it to be horizontally scrollable */

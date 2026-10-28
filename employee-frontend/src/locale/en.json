@@ -1,11 +1,43 @@
 {
   "locale": "en",
   "translations": {
+    "auth": {
+      "errors": {
+        "unreachable": "Could not reach the server.",
+        "generic": "Something went wrong. Please try again."
+      }
+    },
     "login": {
-      "title": "Login",
+      "title": "Welcome",
       "username": "Username or email",
       "password": "Password",
-      "submit": "Sign in"
+      "usernamePlaceholder": "Enter your username or email",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot Password?",
+      "togglePassword": "Show or hide password",
+      "submit": "Login",
+      "errors": {
+        "usernameRequired": "Username or email is required.",
+        "passwordRequired": "Password is required.",
+        "incorrectCredentials": "Incorrect username or password for user: {$username}",
+        "userNotFound": "User not found.",
+        "accountDisabled": "Your account has been disabled. Please contact support.",
+        "accountNotVerified": "Your account is not verified. A verification link has been sent to your email."
+      }
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "message": "Enter your email and we'll send you a reset link.",
+      "email": "Email",
+      "submit": "Send reset link",
+      "cancel": "Cancel",
+      "sent": "If an account exists for this address, a recovery email has just been sent.",
+      "errors": {
+        "emailRequired": "Email is required.",
+        "emailInvalid": "Enter a valid email.",
+        "notFound": "No account is associated with {$email}.",
+        "sendFailed": "Unable to send the reset email. Please try again later."
+      }
     },
     "navbar": {
       "home": "Home",
@@ -16,8 +48,22 @@
       "inventory": "Inventory",
       "products": "Products",
       "promos": "Promos",
+      "users": "Users",
       "settings": "Settings",
       "logout": "Logout"
+    },
+    "bills": {
+      "smartSearch": {
+        "label": "Search by customer or veterinarian name",
+        "placeholder": "Type at least 3 characters",
+        "clearLabel": "Clear bill search",
+        "clear": "Clear",
+        "customerSuggestion": "Customer",
+        "veterinarianSuggestion": "Veterinarian",
+        "submit": "Search Bills",
+        "noResultsTitle": "No matching bills",
+        "noResultsMessage": "No bills match « {$INTERPOLATION} ». Try another customer or veterinarian name."
+      }
     },
     "home": {
       "loadError": "Failed to load user information. Please try again later.",
@@ -104,7 +150,8 @@
       "vet": "Veterinarian",
       "receptionist": "Receptionist",
       "inventoryManager": "Inventory Manager",
-      "unknown": "Employee"
+      "unknown": "Employee",
+      "customer": "Customer"
     },
     "notFound": {
       "title": "Page Not Found",
@@ -254,7 +301,13 @@
         "profiles_label": "Sample veterinarian profiles",
         "empty": "No profiles to display.",
         "loading": "Loading veterinarians…",
-        "live_profiles_label": "Veterinarian profiles"
+        "live_profiles_label": "Veterinarian profiles",
+        "search_placeholder": "Search by name",
+        "search_label": "Search for a veterinarian by name",
+        "specialty_label": "Filter by specialty",
+        "all_specialties": "All specialties",
+        "clear": "Clear filters",
+        "no_results": "No veterinarians found"
       },
       "profile": {
         "role": "Veterinarian",
@@ -326,19 +379,119 @@
         "phone_hint": "Example: (514) 555-0123, with an optional extension #1234.",
         "biography_hint": "At least 10 characters.",
         "title": "Edit profile",
-        "description": "All fields are required. Specialties, status, and working hours are preserved.",
+        "description": "All fields are required. Specialties and status are preserved.",
         "legend": "Veterinarian information",
+        "available_specialties": "Available specialties",
+        "all_specialties_selected": "All specialties selected",
+        "custom_specialty": "Other specialty",
+        "add": "Add",
+        "add_custom_specialty": "Add specialty",
         "saving": "Saving…",
         "leave": "Leave this page and discard unsaved changes?"
+      },
+      "availability": {
+        "title": "Availability",
+        "description": "Remove a time slot or a whole day. Removals take effect when you save.",
+        "remove_day": "Remove this day",
+        "remove_hour": "Remove",
+        "removed_hour": "{$day} {$hour} removed.",
+        "removed_day": "{$day} removed.",
+        "no_hours": "No hours specified.",
+        "empty": "No availability on this profile.",
+        "confirm_title": "Remove this availability?",
+        "confirm_message": "The following availability will be removed from the profile: {$slots}.",
+        "confirm": "Remove",
+        "confirm_final": "This cannot be undone once saved.",
+        "visits_one": "1 visit booked in these slots will be cancelled.",
+        "visits_many": "{$count} visits booked in these slots will be cancelled.",
+        "visits_unknown": "Booked visits for these slots could not be checked.",
+        "cancel_failed_one": "The profile was saved, but one visit could not be cancelled: it is still active. Report it to an administrator.",
+        "cancel_failed_many": "The profile was saved, but {$count} visits could not be cancelled: they are still active. Report them to an administrator."
       },
       "detail": {
         "back": "Back to directory",
         "title": "Veterinarian profile",
         "loading": "Loading profile…",
         "saved": "The profile has been saved."
+      },
+      "specialty":{
+        "radiology": "Radiology",
+        "surgery": "Surgery",
+        "dentistry": "Dentistry",
+        "general": "General"
       }
     },
     "cust": {
+      "notAvailable": "Not available",
+      "profile": {
+        "title": "Customer Details",
+        "subtitle": "Contact information and registered pets",
+        "loading": "Loading customer...",
+        "profile": "Customer profile",
+        "edit": "Edit Customer",
+        "infoTitle": "Customer Info",
+        "editTitle": "Edit customer information",
+        "infoSubtitle": "Personal details and contact information",
+        "editSubtitle": "Update the details below, then save your changes.",
+        "fields": {
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "address": "Address",
+          "city": "City",
+          "province": "Province",
+          "telephone": "Telephone"
+        },
+        "validation": {
+          "firstNameRequired": "First name is required",
+          "lastNameRequired": "Last name is required",
+          "addressRequired": "Address is required",
+          "cityRequired": "City is required",
+          "provinceRequired": "Province is required",
+          "telephoneRequired": "Telephone is required",
+          "telephoneTenDigits": "Telephone must be exactly 10 digits (numbers only)"
+        },
+        "selectProvince": "Select Province",
+        "telephoneHint": "Enter a 10-digit telephone number.",
+        "cancel": "Cancel",
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "petsTitle": "Registered pets",
+        "petsSubtitle": "Animals linked to this customer",
+        "loadingPets": "Loading pets...",
+        "birthDate": "Birth Date",
+        "weight": "Weight",
+        "noPets": "No pets registered",
+        "noPetsHint": "This customer's pets will appear here.",
+        "back": "Back to All Customers",
+        "photoAlt": "{$INTERPOLATION}'s profile photo",
+        "noPhoto": "No customer profile photo",
+        "petCount": "{$INTERPOLATION} registered pets",
+        "noPetPhoto": "No profile photo for {$INTERPOLATION}",
+        "confirmSave": "Are you sure you want to save these changes?",
+        "updateSuccess": "Customer has been successfully updated.",
+        "errors": {
+          "noId": "No customer ID provided.",
+          "load": "Could not load customer details.",
+          "pets": "Could not load pets. Please try again later.",
+          "petTypes": "Could not load pet types.",
+          "update": "Could not update customer. Please try again."
+        },
+        "provinces": {
+          "alberta": "Alberta",
+          "britishColumbia": "British Columbia",
+          "manitoba": "Manitoba",
+          "newBrunswick": "New Brunswick",
+          "newfoundlandAndLabrador": "Newfoundland and Labrador",
+          "novaScotia": "Nova Scotia",
+          "ontario": "Ontario",
+          "princeEdwardIsland": "Prince Edward Island",
+          "quebec": "Quebec",
+          "saskatchewan": "Saskatchewan",
+          "northwestTerritories": "Northwest Territories",
+          "nunavut": "Nunavut",
+          "yukon": "Yukon"
+        }
+      },
       "customerList": "Customer List",
       "customerListLoading": "Loading customers...",
       "noCustomers": "No customers registered.",
@@ -396,8 +549,8 @@
         "quebec": "Quebec",
         "saskatchewan": "Saskatchewan",
         "yukon": "Yukon"
-      }
-
+      },
+      "allPetsButton": "All pets"
     },
     "pet": {
       "petAddTitle" : "Add a new Pet",
@@ -435,6 +588,23 @@
         "date": "Date of Birth is required",
         "weightR": "Weight is required",
         "weightP": "Weight should be a valid number"
+      }
+    },
+    "petList": {
+      "title": "Pets",
+      "loadingLabel": "Loading",
+      "loading": "Loading pets...",
+      "loadError": "Unable to load pets. Please try again later.",
+      "empty": "No pets registered.",
+      "caption": "Pets registered at the clinic",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "noResults": "No pets match the filters.",
+      "filters": {
+        "petType": "Pet type",
+        "petTypePlaceholder": "e.g. dog",
+        "name": "Pet name"
       }
     },
     "modal": {
@@ -569,6 +739,7 @@
       "expiration": { "expired": "Expired", "soon": "Expiring soon", "none": "No expiration" },
       "actions": {
         "add": "Add Supply",
+        "restock": "Restock",
         "edit": "Edit",
         "history": "History",
         "delete": "Delete",
@@ -587,6 +758,22 @@
         "cannotConsumeStock": "Cannot consume - out of stock",
         "cannotConsumeExpired": "Cannot consume - expired"
       },
+      "restock": {
+        "quantityRequired": "Quantity is required.",
+        "quantityPositive": "Enter an integer greater than 0.",
+        "quantityMax": "Quantity must not exceed 2147483647.",
+        "permission": "You no longer have permission to restock this supply.",
+        "quantityInteger": "Enter an integer between 1 and 2147483647.",
+        "uncertain": "Unable to confirm restock. Stock may have changed. Reload the page to check quantities before trying again.",
+        "failed": "Unable to restock supply.",
+        "ariaLabel": "Restock {$name}",
+        "adding": "Adding stock...",
+        "add": "Add stock",
+        "title": "Restock supply",
+        "cancel": "Cancel",
+        "currentQuantity": "{$INTERPOLATION} — Current quantity: {$INTERPOLATION_1}",
+        "quantity": "Quantity to add"
+        },
       "summary": {
         "ariaLabel": "Summary for {$name}",
         "title": "Supply summary",
@@ -729,6 +916,63 @@
         "nameRequired": "Inventory name is required.",
         "typeRequired": "Inventory type is required.",
         "descriptionRequired": "Description is required."
+      }
+    },
+
+    "users": {
+      "title": "Users",
+      "description": "View and manage user accounts for inventory managers, vets, receptionists and customers.",
+      "table": {
+        "label": "User accounts"
+      },
+      "fields": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "actions": "Actions",
+        "password": "Password",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "phone": "Phone number",
+        "resume": "Résumé",
+        "address": "Address",
+        "city": "City",
+        "province": "Province"
+      },
+      "actions": {
+        "add": "Add user",
+        "addRole": "Add user: {$role}",
+        "next": "Next",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "editAria": "Edit {$name}",
+        "editTitle": "Edit user",
+        "saveChanges": "Save changes",
+        "delete": "Delete",
+        "deleteAria": "Delete {$name}",
+        "deleteTitle": "Delete user",
+        "deleteConfirm": "Are you sure you want to delete {$name}? This cannot be undone."
+      },
+      "loading": "Loading users…",
+      "error": "Unable to load the users.",
+      "empty": "No users found.",
+      "success": {
+        "created": "User created successfully.",
+        "updated": "User updated successfully.",
+        "deleted": "User deleted successfully."
+      },
+      "errors": {
+        "save": "The user could not be saved. Please try again.",
+        "delete": "The user could not be deleted. Please try again."
+      },
+      "validation": {
+        "email": "Enter a valid email address.",
+        "emailLength": "The email must have at least 6 characters.",
+        "password": "Use at least 8 characters with a number, an uppercase letter, a lowercase letter and a special character. No spaces.",
+        "nameLength": "Use 2 to 30 characters.",
+        "vetPhone": "The phone number must have exactly 20 characters, for example (514) 555-0123 #1234.",
+        "resumeLength": "The résumé must have at least 10 characters.",
+        "customerPhone": "Enter 10 digits, without spaces or dashes."
       }
     }
   }

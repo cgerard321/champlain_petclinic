@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { payBill } from '@/features/bills/api/payBill.tsx';
 import './PaymentForm.css';
+import { useTranslation } from 'react-i18next';
 
 interface PaymentFormProps {
   billId: string;
@@ -33,6 +34,7 @@ const PaymentForm = ({
   onPaymentSuccess,
   onCancel,
 }: PaymentFormProps): JSX.Element => {
+  const { t } = useTranslation('bills');
   const finalInterestAmount = interestAmount || 0;
   const actualBillAmount = billAmount || baseAmount || 0;
   const actualTaxedAmount = taxedAmount || 0;
@@ -79,23 +81,23 @@ const PaymentForm = ({
     const newErrors: { [key: string]: string } = {};
 
     if (!formData.cardNumber) {
-      newErrors.cardNumber = 'Card number is required';
+      newErrors.cardNumber = t('errors.cardNumberRequired');
     } else if (formData.cardNumber.length !== 16) {
-      newErrors.cardNumber = 'Card number must be 16 digits';
+      newErrors.cardNumber = t('errors.cardNumberLength');
     }
 
     if (!formData.cvv) {
-      newErrors.cvv = 'CVV is required';
+      newErrors.cvv = t('errors.cvvRequired');
     } else if (formData.cvv.length !== 3) {
-      newErrors.cvv = 'CVV must be 3 digits';
+      newErrors.cvv = t('errors.cvvLength');
     }
 
     if (!formData.expirationDate) {
-      newErrors.expirationDate = 'Expiration date is required';
+      newErrors.expirationDate = t('errors.expirationDateRequired');
     } else {
       const expirationDatePattern = /^(0[1-9]|1[0-2])\/\d{2}$/;
       if (!expirationDatePattern.test(formData.expirationDate)) {
-        newErrors.expirationDate = 'Invalid format. Use MM/YY';
+        newErrors.expirationDate = t('errors.expirationDateFormat');
       } else {
         const [expMonth, expYear] = formData.expirationDate.split('/');
         const currentDate = new Date();
@@ -118,7 +120,7 @@ const PaymentForm = ({
         );
 
         if (expiryDate < currentMonthEnd) {
-          newErrors.expirationDate = 'Card is expired';
+          newErrors.expirationDate = t('errors.cardExpired');
         }
       }
     }
@@ -149,7 +151,7 @@ const PaymentForm = ({
     } catch (error) {
       console.error('Payment error:', error);
       setErrors({
-        general: 'Payment failed. Please try again.',
+        general: t('errors.paymentFailed'),
       });
     } finally {
       setIsProcessing(false);
@@ -160,40 +162,47 @@ const PaymentForm = ({
     <div className="payment-modal-overlay">
       <div className="payment-modal">
         <div className="payment-header">
-          <h2>Pay Bill</h2>
+          <h2>{t('buttons.payBill')}</h2>
           <button className="close-button" onClick={onCancel} type="button">
             ×
           </button>
         </div>
         <div className="payment-details">
           <p>
-            <strong>Bill ID:</strong> {billId}
+            <strong>{t('billCard.detail.id')}</strong> {billId}
           </p>
           {baseAmount && finalInterestAmount && actualTaxedAmount > 0 ? (
             <div className="payment-breakdown">
               <p>
-                <strong>Base Amount:</strong> ${baseAmount.toFixed(2)}
+                <strong>{t('paymentForm.amounts.baseAmount')}</strong> $
+                {baseAmount.toFixed(2)}
               </p>
               <p>
-                <strong>GST (5%):</strong> ${actualGst.toFixed(2)}
+                <strong>{t('billCard.detail.gst')}</strong> $
+                {actualGst.toFixed(2)}
               </p>
               <p>
-                <strong>QST (9.975%):</strong> ${actualQst.toFixed(2)}
+                <strong>{t('billCard.detail.qst')}</strong> $
+                {actualQst.toFixed(2)}
               </p>
               <p>
-                <strong>Total Tax:</strong> ${actualTaxedAmount.toFixed(2)}
+                <strong>{t('billCard.detail.tax')}</strong> $
+                {actualTaxedAmount.toFixed(2)}
               </p>
               <p>
-                <strong>Interest:</strong> ${finalInterestAmount.toFixed(2)}
+                <strong>{t('billCard.detail.interest')}</strong> $
+                {finalInterestAmount.toFixed(2)}
               </p>
               <hr className="breakdown-divider" />
               <p className="total-amount">
-                <strong>Total Amount:</strong> ${actualBillAmount.toFixed(2)}
+                <strong>{t('paymentForm.amounts.totalAmount')}</strong> $
+                {actualBillAmount.toFixed(2)}
               </p>
             </div>
           ) : (
             <p>
-              <strong>Amount:</strong> ${actualBillAmount.toFixed(2)}
+              <strong>{t('billCard.detail.amount')}</strong> $
+              {actualBillAmount.toFixed(2)}
             </p>
           )}
         </div>
@@ -204,7 +213,7 @@ const PaymentForm = ({
           )}
 
           <div className="form-group">
-            <label htmlFor="cardNumber">Card Number</label>
+            <label htmlFor="cardNumber">{t('paymentForm.cardNumber')}</label>
             <input
               type="text"
               id="cardNumber"
@@ -222,7 +231,9 @@ const PaymentForm = ({
 
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="expirationDate">Expiration Date</label>
+              <label htmlFor="expirationDate">
+                {t('paymentForm.expirationDate')}
+              </label>
               <input
                 type="text"
                 id="expirationDate"
@@ -239,7 +250,7 @@ const PaymentForm = ({
             </div>
 
             <div className="form-group">
-              <label htmlFor="cvv">CVV</label>
+              <label htmlFor="cvv">{t('paymentForm.cvv')}</label>
               <input
                 type="text"
                 id="cvv"
@@ -263,7 +274,7 @@ const PaymentForm = ({
               onClick={onCancel}
               disabled={isProcessing}
             >
-              Cancel
+              {t('paymentForm.cancel')}
             </button>
             <button
               type="submit"
@@ -271,8 +282,8 @@ const PaymentForm = ({
               disabled={isProcessing}
             >
               {isProcessing
-                ? 'Processing...'
-                : `Pay $${actualBillAmount.toFixed(2)}`}
+                ? t('paymentForm.processing')
+                : `${t('buttons.payBill')} $${actualBillAmount.toFixed(2)}`}
             </button>
           </div>
         </form>

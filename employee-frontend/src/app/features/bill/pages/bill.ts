@@ -20,8 +20,10 @@ import { ArchiveBillsDialog } from '@features/bill/components/archive-bills-dial
 import { BillDetails } from '@features/bill/components/bill-details/bill-details';
 import { BillUpdate } from '@features/bill/components/bill-update/bill-update';
 import { CreateBill } from '@features/bill/components/createBill/create-bill';
+import { CustomerBillLookup } from '@features/bill/components/customer-bill-lookup/customer-bill-lookup';
 import { BillRecord, PaymentRequest } from '@features/bill/models/bill.model';
 import { BillService } from '@features/bill/services/bill-service';
+import { ConfirmDialog } from '@shared/components/confirm-dialog/confirm-dialog';
 import { Roles } from '@shared/models/roles';
 
 interface BillFilters {
@@ -32,6 +34,10 @@ interface BillFilters {
   status: string;
   year: string;
   month: string;
+}
+interface BillSearchSuggestion {
+  label: string;
+  type: 'customer' | 'veterinarian';
 }
 
 const emptyFilters: BillFilters = {
@@ -46,8 +52,8 @@ const emptyFilters: BillFilters = {
 
 @Component({
   selector: 'app-bill',
-  imports: [CurrencyPipe, FormsModule],
-  styleUrl: './bill.css',
+  imports: [CurrencyPipe, FormsModule, CustomerBillLookup],
+  styleUrls: ['./bill.css', './bill-search.css'],
   templateUrl: './bill.html',
 })
 export class Bill implements OnInit {
@@ -71,6 +77,9 @@ export class Bill implements OnInit {
 
   protected readonly canViewOwnBills = computed(() => this.auth.hasRole(Roles.vet));
   protected readonly canPayBill = computed(() => this.auth.hasRole(Roles.receptionist));
+  protected readonly showCustomerBillLookup = computed(
+    () => this.canPayBill() && !this.canViewBills() && !this.canViewOwnBills(),
+  );
 
   protected readonly selectedBill = signal<BillRecord | null>(null);
   protected readonly paying = signal(false);
@@ -88,6 +97,9 @@ export class Bill implements OnInit {
 
   protected readonly currency = signal<'CAD' | 'USD'>('CAD');
   protected readonly filters = signal<BillFilters>({ ...emptyFilters });
+  protected readonly billSearchInput = signal('');
+  protected readonly billSearchQuery = signal('');
+  protected readonly showBillSearchSuggestions = signal(false);
 
   protected readonly updatingInterestId = signal<string | null>(null);
   protected readonly downloadingPdfId = signal<string | null>(null);
@@ -95,11 +107,39 @@ export class Bill implements OnInit {
   protected readonly billActionSuccess = signal<string | null>(null);
 
   protected toggleInterestExemption(bill: BillRecord): void {
-    if (!this.canViewBills() || this.updatingInterestId() !== null) {
+    if (
+      !this.canViewBills() ||
+      bill.billStatus !== 'OVERDUE' ||
+      this.updatingInterestId() !== null
+    ) {
       return;
     }
 
     const exempt = !bill.interestExempt;
+
+    this.dialog
+      .open(ConfirmDialog, {
+        data: {
+          title: 'Confirm Interest Exemption',
+          message: exempt
+            ? 'Exempt this overdue bill from interest? Interest will become $0.00.'
+            : 'Remove interest exemption and recalculate overdue interest?',
+          confirmLabel: 'Confirm',
+          cancelLabel: 'Cancel',
+        },
+      })
+      .afterClosed()
+      .pipe(take(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe((confirmed: boolean | undefined) => {
+        if (confirmed !== true) {
+          return;
+        }
+
+        this.applyInterestExemption(bill, exempt);
+      });
+  }
+
+  private applyInterestExemption(bill: BillRecord, exempt: boolean): void {
     let exemptionSaved = false;
 
     this.updatingInterestId.set(bill.billId);
@@ -114,10 +154,12 @@ export class Bill implements OnInit {
         }),
         switchMap(() => this.billService.getBillById(bill.billId)),
         takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.updatingInterestId.set(null)),
+        finalize(() => {
+          this.updatingInterestId.set(null);
+        }),
       )
       .subscribe({
-        next: (updatedBill) => {
+        next: (updatedBill: BillRecord) => {
           this.bills.update((currentBills) =>
             currentBills.map((item) => (item.billId === updatedBill.billId ? updatedBill : item)),
           );
@@ -126,6 +168,7 @@ export class Bill implements OnInit {
             exempt ? 'Interest exemption applied.' : 'Interest exemption removed.',
           );
         },
+
         error: () => {
           this.billActionError.set(
             exemptionSaved
@@ -192,6 +235,74 @@ export class Bill implements OnInit {
   protected clearFilters(): void {
     this.filters.set({ ...emptyFilters });
   }
+
+  protected updateBillSearch(value: string): void {
+    this.billSearchInput.set(value);
+
+    if (!value.trim()) {
+      this.billSearchQuery.set('');
+      this.showBillSearchSuggestions.set(false);
+      return;
+    }
+
+    this.showBillSearchSuggestions.set(true);
+  }
+
+  protected submitBillSearch(event: Event): void {
+    event.preventDefault();
+    this.billSearchQuery.set(this.billSearchInput().trim());
+    this.showBillSearchSuggestions.set(false);
+  }
+
+  protected selectBillSearchSuggestion(suggestion: BillSearchSuggestion): void {
+    this.billSearchInput.set(suggestion.label);
+    this.billSearchQuery.set(suggestion.label);
+    this.showBillSearchSuggestions.set(false);
+  }
+
+  protected clearBillSearch(): void {
+    this.billSearchInput.set('');
+    this.billSearchQuery.set('');
+    this.showBillSearchSuggestions.set(false);
+  }
+
+  protected readonly billSearchSuggestions = computed<BillSearchSuggestion[]>(() => {
+    const search = this.billSearchInput().trim().toLowerCase();
+
+    if (search.length < 3) {
+      return [];
+    }
+
+    const activeArchive = this.showArchivedBills();
+    const suggestions = new Map<string, BillSearchSuggestion>();
+
+    for (const bill of this.bills()) {
+      if (this.canViewBills() && (bill.archive === true) !== activeArchive) {
+        continue;
+      }
+
+      const names: Array<BillSearchSuggestion> = [
+        {
+          label: `${bill.customerFirstName ?? ''} ${bill.customerLastName ?? ''}`.trim(),
+          type: 'customer',
+        },
+        {
+          label: `${bill.vetFirstName ?? ''} ${bill.vetLastName ?? ''}`.trim(),
+          type: 'veterinarian',
+        },
+      ];
+
+      for (const suggestion of names) {
+        const key = `${suggestion.type}:${suggestion.label.toLowerCase()}`;
+
+        if (suggestion.label && suggestion.label.toLowerCase().includes(search)) {
+          suggestions.set(key, suggestion);
+        }
+      }
+    }
+
+    return [...suggestions.values()].sort((a, b) => a.label.localeCompare(b.label));
+  });
 
   protected setCurrency(value: string): void {
     if (value === 'CAD' || value === 'USD') {
@@ -295,12 +406,26 @@ export class Bill implements OnInit {
       .subscribe({
         next: (bill: BillRecord) => {
           this.isDetailsLoading.set(false);
-          this.dialog.open(BillDetails, {
-            data: bill,
-            width: '780px',
-            maxWidth: '95vw',
-            maxHeight: '90vh',
-          });
+          this.dialog
+            .open(BillDetails, {
+              data: bill,
+              width: '780px',
+              maxWidth: '95vw',
+              maxHeight: '90vh',
+            })
+            .afterClosed()
+            .pipe(take(1), takeUntilDestroyed(this.destroyRef))
+            .subscribe((updatedBill: BillRecord | undefined) => {
+              if (!updatedBill) {
+                return;
+              }
+
+              this.bills.update((currentBills) =>
+                currentBills.map((item) =>
+                  item.billId === updatedBill.billId ? updatedBill : item,
+                ),
+              );
+            });
         },
         error: (error: unknown) => {
           this.isDetailsLoading.set(false);
@@ -419,19 +544,18 @@ export class Bill implements OnInit {
   protected readonly showArchivedBills = signal(false);
 
   protected readonly displayedBills = computed(() => {
-    if (!this.canViewBills()) {
-      return this.bills();
-    }
-
     const filters = this.filters();
+    const searchQuery = this.billSearchQuery();
 
     const matchesText = (value: string | null, search: string): boolean =>
       (value ?? '').toLowerCase().includes(search.trim().toLowerCase());
 
     return this.bills().filter((bill) => {
-      const matchesArchive = this.showArchivedBills()
-        ? bill.archive === true
-        : bill.archive !== true;
+      const matchesArchive = !this.canViewBills()
+        ? true
+        : this.showArchivedBills()
+          ? bill.archive === true
+          : bill.archive !== true;
 
       const customerName = `${bill.customerFirstName ?? ''} ${bill.customerLastName ?? ''}`.trim();
 
@@ -439,13 +563,15 @@ export class Bill implements OnInit {
 
       return (
         matchesArchive &&
-        matchesText(bill.customerId, filters.customerId) &&
-        matchesText(customerName, filters.customerName) &&
-        matchesText(vetName, filters.vetName) &&
-        (!filters.visitType || bill.visitType === filters.visitType) &&
-        (!filters.status || bill.billStatus === filters.status) &&
-        (!filters.year || bill.date.getFullYear() === Number(filters.year)) &&
-        (!filters.month || bill.date.getMonth() + 1 === Number(filters.month))
+        (matchesText(customerName, searchQuery) || matchesText(vetName, searchQuery)) &&
+        (!this.canViewBills() ||
+          (matchesText(bill.customerId, filters.customerId) &&
+            matchesText(customerName, filters.customerName) &&
+            matchesText(vetName, filters.vetName) &&
+            (!filters.visitType || bill.visitType === filters.visitType) &&
+            (!filters.status || bill.billStatus === filters.status) &&
+            (!filters.year || bill.date.getFullYear() === Number(filters.year)) &&
+            (!filters.month || bill.date.getMonth() + 1 === Number(filters.month))))
       );
     });
   });
