@@ -25,6 +25,7 @@ import { updateVetProfilePhoto } from '@/features/veterinarians/api/updateVetPro
 import { deleteAlbumPhoto } from '@/features/veterinarians/api/deleteAlbumPhoto';
 import { addSpecialty } from '@/features/veterinarians/api/addSpecialty';
 import { deleteSpecialty } from '@/features/veterinarians/api/deleteSpecialty';
+import Forbidden from '@/pages/Error/Forbidden';
 
 const WORKDAY_DISPLAY_ORDER: string[] = [
   Workday.Monday,
@@ -135,6 +136,7 @@ export default function VetDetails(): JSX.Element {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingPhotoId, setPendingPhotoId] = useState<number | null>(null);
   const canManageVet = isVet || isAdmin; // Only allow Vets and Admins to manage vet details
+  const canSeeInactiveVets = canManageVet;
 
   const [notification, setNotification] = useState<{
     show: boolean;
@@ -516,6 +518,8 @@ export default function VetDetails(): JSX.Element {
   if (loading) return <p>Loading vet details...</p>;
   if (error) return <p>{error}</p>;
   if (!vetId) throw new Error('Vet ID undefined');
+  if (!vet) return <p>Loading vet details...</p>;
+  if (!vet.active && !canSeeInactiveVets) return <Forbidden />;
 
   return (
     <div>
