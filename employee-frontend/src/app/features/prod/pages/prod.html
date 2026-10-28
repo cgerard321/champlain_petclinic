@@ -47,9 +47,8 @@
       } @else {
         <div class="product-grid">
           @for (product of products(); track product.productId) {
-                       <mat-card class="product-card">
+                            <mat-card class="product-card">
               <app-product-thumbnail [image]="product.image" [alt]="product.productName" />
-              <mat-card-header>
               <mat-card-header>
                 <mat-card-title>{{ product.productName }}</mat-card-title>
                 <mat-card-subtitle>{{ product.productType }}</mat-card-subtitle>
