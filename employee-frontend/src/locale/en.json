@@ -469,12 +469,16 @@
         "noPetPhoto": "No profile photo for {$INTERPOLATION}",
         "confirmSave": "Are you sure you want to save these changes?",
         "updateSuccess": "Customer has been successfully updated.",
+        "deactivate": "Deactivate account",
+        "deactivating": "Deactivating...",
+        "confirmDeactivate": "Are you sure you want to deactivate this customer's account? Their profile photo will be permanently deleted.",
         "errors": {
           "noId": "No customer ID provided.",
           "load": "Could not load customer details.",
           "pets": "Could not load pets. Please try again later.",
           "petTypes": "Could not load pet types.",
-          "update": "Could not update customer. Please try again."
+          "update": "Could not update customer. Please try again.",
+          "deactivate": "Failed to deactivate the customer's account. Please try again."
         },
         "provinces": {
           "alberta": "Alberta",

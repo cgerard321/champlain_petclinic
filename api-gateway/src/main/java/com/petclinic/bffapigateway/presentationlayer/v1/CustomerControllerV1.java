@@ -128,6 +128,17 @@ public class CustomerControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @DeleteMapping(value = "/{customerId}/soft")
+    public Mono<ResponseEntity<Void>> softDeleteCustomer(@PathVariable String customerId) {
+        return Mono.just(customerId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(
+                        new InvalidInputException("Provided customer id is invalid: " + customerId))))
+                .flatMap(customersServiceClient::softDeleteCustomer)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()));
+    }
+
     @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
     @DeleteMapping("/{customerId}/photo")
     public Mono<ResponseEntity<CustomerResponseDTO>> deleteCustomerPhoto(@PathVariable String customerId) {
