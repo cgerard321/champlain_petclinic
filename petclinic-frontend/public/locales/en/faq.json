@@ -1,4 +1,9 @@
 {
+  "title": "Frequently Asked Questions",
+  "subtitle": "Quick answers to the questions we hear most often.",
+  "barPlaceholder": "Search FAQs...",
+  "contactPrompt": "Still need help? Contact us.",
+  "noResults": "No results. Try a different search.",
   "items": {
     "hours": {
       "question": "What are your hours?",
