@@ -82,7 +82,7 @@ public class EntityDtoUtil {
             reviewResponseDTO.setReviewId(review.getReviewId());
             reviewResponseDTO.setOwnerId(review.getOwnerId());
             reviewResponseDTO.setRating(review.getRating());
-            reviewResponseDTO.setReviewerName(review.getReviewerId());
+            reviewResponseDTO.setReviewerId(review.getReviewerId());
             reviewResponseDTO.setReview(review.getReview());
             reviewResponseDTO.setDateSubmitted(review.getDateSubmitted());
         return reviewResponseDTO;
