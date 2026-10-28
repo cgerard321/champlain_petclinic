@@ -317,7 +317,8 @@ public class InventoryController {
             @RequestHeader("X-Actor-Username") String changedBy
     ) {
         if (productQuantity == null || productQuantity <= 0) {
-            return Mono.just(ResponseEntity.badRequest().body(null));
+            return Mono.error(new com.petclinic.inventoryservice.utils.exceptions.InvalidInputException(
+                    "The restock quantity must be greater than 0."));
         }
 
         return productInventoryService
