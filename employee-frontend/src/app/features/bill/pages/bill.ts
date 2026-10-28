@@ -252,9 +252,6 @@ export class Bill implements OnInit {
     }));
   }
 
-  // protected clearFilters(): void {
-  //   this.filters.set({ ...emptyFilters });
-  // }
   protected addFilter(key: keyof BillFilters): void {
     const value = this.filters()[key].trim();
 
