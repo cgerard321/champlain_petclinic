@@ -11,14 +11,14 @@ import {
 import type { ShippingMethod } from '@/shared/api/cart';
 
 export interface InvoiceItem {
-  productId: number;
+  productId: string;
   productName: string;
   productSalePrice: number;
   quantity: number;
 }
 
 export interface BillingStored {
-  fullName: string;
+  customerName: string;
   email: string;
   address: string;
   city: string;
@@ -86,7 +86,7 @@ function Invoice({
   const downloadInvoice = async (): Promise<void> => {
     // Build smaller pieces to avoid nested template literals
     const billingHtml = inv.billing
-      ? `<p><strong>Name:</strong> ${inv.billing.fullName}</p>
+      ? `<p><strong>Name:</strong> ${inv.billing.customerName}</p>
          <p><strong>Email:</strong> ${inv.billing.email}</p>
          <p><strong>Address:</strong> ${inv.billing.address}</p>
          <p><strong>City:</strong> ${inv.billing.city}</p>
@@ -287,7 +287,7 @@ function Invoice({
             <div className="invoice-client-info">
               <h3>{t('invoice.clientInformation')}</h3>
               <p>
-                <strong>{t('invoice.name')}</strong> {inv.billing.fullName}
+                <strong>{t('invoice.name')}</strong> {inv.billing.customerName}
               </p>
               <p>
                 <strong>{t('invoice.email')}</strong> {inv.billing.email}

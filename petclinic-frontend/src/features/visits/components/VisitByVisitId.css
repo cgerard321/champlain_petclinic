@@ -49,3 +49,32 @@
     grid-template-columns: 1fr;
   }
 }
+
+.follow-up-label-container {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.follow-up-label {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background-color: #e3f2fd;
+  color: #1565c0;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.follow-up-note {
+  margin-top: 10px;
+  text-align: center;
+  color: #666;
+}
+
+.visit-details-container .button-visit-details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}

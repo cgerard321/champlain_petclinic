@@ -9,5 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ApplyPromoRequestDTO {
 
-    private Double promoPercent;
+    private String promoCode;
 }
