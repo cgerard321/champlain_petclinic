@@ -23,7 +23,7 @@ export function localizedProductType(type: string): string {
     case 'EQUIPMENT':
       return $localize`:@@products.types.equipment:Équipement`;
     default:
-      return type.replaceAll('_', ' ');
+      return type;
   }
 }
 
