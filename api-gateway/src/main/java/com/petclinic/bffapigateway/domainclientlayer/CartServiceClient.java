@@ -529,6 +529,32 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .bodyToFlux(OrderReportResponseDTO.class);
     }
 
+    public Flux<OrderReportResponseDTO> getAllOrderReports() {
+        return webClientBuilder.build()
+                .get()
+                .uri(ordersServiceUrl() + "/reports")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        this::mapOrderReportError
+                )
+                .bodyToFlux(OrderReportResponseDTO.class);
+    }
+
+    public Mono<OrderResponseDTO> getOrderByOrderId(String orderId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(ordersServiceUrl() + "/{orderId}", orderId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        this::mapOrderReportError
+                )
+                .bodyToMono(OrderResponseDTO.class);
+    }
+
     private String ordersServiceUrl() {
         return cartServiceUrl.replace(
                 "/api/v1/carts",
