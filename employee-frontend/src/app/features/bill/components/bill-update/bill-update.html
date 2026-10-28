@@ -19,7 +19,7 @@
     </div>
 
     <mat-form-field appearance="outline">
-      <mat-label i18n="@@bill.vistType">Type de visite</mat-label>
+      <mat-label i18n="@@bill.visitType">Type de visite</mat-label>
       <mat-select [formField]="billForm.visitType">
         @for (type of visitTypes; track type) {
           <mat-option [value]="type">{{ translateVisit(type) }}</mat-option>

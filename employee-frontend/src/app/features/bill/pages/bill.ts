@@ -380,7 +380,7 @@ export class Bill implements OnInit {
       error: () => {
         this.isLoading.set(false);
         this.errorMessage.set(
-          $localize`:@@bill.detailErr.unable:Impossible de charger les détails de la facture. Veuillez réessayer`,
+          $localize`:@@bill.lookup.loadBillUnable:Impossible de charger les factures. Veuillez réessayer`,
         );
       },
       complete: () => {

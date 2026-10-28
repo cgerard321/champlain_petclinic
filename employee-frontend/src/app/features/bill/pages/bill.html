@@ -259,7 +259,7 @@
             </label>
 
             <label>
-              <ng-container i18n="@@bill.vistType">Type de visite</ng-container>
+              <ng-container i18n="@@bill.visitType">Type de visite</ng-container>
               <select
                 [ngModel]="filters().visitType"
                 (ngModelChange)="updateFilter('visitType', $event)"
@@ -301,7 +301,7 @@
                 <option value="2" i18n="@@bill.month.feb">Février</option>
                 <option value="3" i18n="@@bill.month.mar">Mars</option>
                 <option value="4" i18n="@@bill.month.apr">Avril</option>
-                <option value="5" i18n="@@bill.month.mai">Mai</option>
+                <option value="5" i18n="@@bill.month.may">Mai</option>
                 <option value="6" i18n="@@bill.month.june">Juin</option>
                 <option value="7" i18n="@@bill.month.july">Juillet</option>
                 <option value="8" i18n="@@bill.month.aug">Août</option>
@@ -372,7 +372,7 @@
                         {{ bill.customerFirstName }}
                         {{ bill.customerLastName }}
                       } @else {
-                        <span i18n="@@notAvailable">Non disponible</span>
+                        <span i18n="@@bill.notAvailable">Non disponible</span>
                       }
                     </td>
 
