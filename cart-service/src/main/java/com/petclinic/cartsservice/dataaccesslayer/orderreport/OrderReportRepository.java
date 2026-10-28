@@ -17,4 +17,6 @@ public interface OrderReportRepository
     Flux<OrderReport> findAllByCustomerIdOrderBySubmittedAtDesc(
             String customerId
     );
+
+    Flux<OrderReport> findAllByOrderBySubmittedAtDesc();
 }

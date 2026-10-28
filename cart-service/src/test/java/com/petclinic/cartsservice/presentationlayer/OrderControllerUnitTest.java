@@ -3,6 +3,8 @@ package com.petclinic.cartsservice.presentationlayer;
 
 import com.petclinic.cartsservice.businesslayer.OrderService;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportReason;
+import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportStatus;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -221,5 +223,35 @@ class OrderControllerUnitTest {
 
         verify(orderService, times(1))
                 .findOrdersByCustomerId(CUSTOMER_ID);
+    }
+
+    @Test
+    void getAllOrderReports_ReturnsReports() {
+        // Arrange
+        OrderReportResponseModel report = OrderReportResponseModel.builder()
+                .reportId("RPT-123")
+                .orderId(VALID_ORDER_ID)
+                .customerEmail("test@email.com")
+                .reason(OrderReportReason.DAMAGED_ITEM)
+                .status(OrderReportStatus.NEW)
+                .build();
+
+        when(orderService.getAllReports())
+                .thenReturn(Flux.just(report));
+
+        // Act & Assert
+        webTestClient.get()
+                .uri("/api/v1/orders/reports")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(OrderReportResponseModel.class)
+                .value(reports -> {
+                    assertEquals(1, reports.size());
+                    assertEquals("RPT-123", reports.get(0).getReportId());
+                    assertEquals("test@email.com", reports.get(0).getCustomerEmail());
+                });
+
+        verify(orderService, times(1)).getAllReports();
     }
 }
