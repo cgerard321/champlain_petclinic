@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import java.time.Duration;
+import com.petclinic.products.domainclientlayer.FilesServiceClient;
 
 @Component
 @Order(-100)
@@ -15,12 +16,14 @@ import java.time.Duration;
 public class ImageMigrationRunner implements CommandLineRunner {
     private final LegacyImageMigration migration;
     private final ImageMigrationStore store;
+    private final FilesServiceClient files;
 
     @Value("${app.image-migration.enabled:false}")
     private boolean enabled;
 
     @Override
     public void run(String... args) {
+        files.awaitStartup().block(Duration.ofMinutes(3));
         if (enabled) migrate();
         Long remaining = store.remainingLegacyReferences().block(Duration.ofMinutes(1));
         if (remaining == null || remaining > 0) {
