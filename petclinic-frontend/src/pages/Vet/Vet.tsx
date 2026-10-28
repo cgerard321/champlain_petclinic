@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getAllVets } from '@/features/veterinarians/api/getAllVets';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import AddVet from '@/pages/Vet/AddVet.tsx';
@@ -21,7 +21,7 @@ export default function Vet(): JSX.Element {
 
   const [loaded, setLoaded] = useState<boolean>(false);
 
-  const fetchAllVets = async (): Promise<void> => {
+  const fetchAllVets = useCallback(async (): Promise<void> => {
     try {
       const response = await getAllVets();
 
@@ -54,11 +54,11 @@ export default function Vet(): JSX.Element {
     } finally {
       setLoaded(true);
     }
-  };
+  }, [canSeeInactiveVets]);
 
   useEffect(() => {
     fetchAllVets();
-  }, [canSeeInactiveVets]);
+  }, [fetchAllVets]);
 
   const handleSearch = (query: string): void => {
     const trimmed = query.trim();
