@@ -31,7 +31,10 @@ import reactor.test.StepVerifier;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
@@ -846,5 +849,18 @@ class VisitControllerUnitTest {
                 .bodyValue(RescheduleRequestDTO.builder().visitDate(LocalDateTime.of(2030, 1, 15, 9, 0)).build())
                 .exchange()
                 .expectStatus().isBadRequest();
+    }
+    @Test
+    void sendWeeklyScheduleEmail_usesCurrentWeeksMondayAndReturnsMailerResponse() {
+        LocalDate weekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        when(visitService.sendSchedule("vet-1", weekStart)).thenReturn(Mono.just("Message queued"));
+
+        webTestClient.post()
+                .uri("/visits/practitioner/{practitionerId}/weekly-email", "vet-1")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class).isEqualTo("Message queued");
+
+        verify(visitService).sendSchedule("vet-1", weekStart);
     }
 }
