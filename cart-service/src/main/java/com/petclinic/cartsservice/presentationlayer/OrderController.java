@@ -68,4 +68,12 @@ public class OrderController {
         return orderService.findReportsByCustomerId(customerId);
     }
 
+    @GetMapping(
+            value = "/reports",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Flux<OrderReportResponseModel> getAllOrderReports() {
+        return orderService.getAllReports();
+    }
+
 }
