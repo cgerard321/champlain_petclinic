@@ -41,6 +41,11 @@ export const routes: Routes = [
       },
 
       {
+        path: 'customerDetails',
+        loadChildren: () => import('@features/cust/pages/customerDetails/routes'),
+      },
+
+      {
         path: 'bill',
         loadChildren: () => import('@features/bill/routes'),
       },

@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { EMPTY, Subject, of, throwError } from 'rxjs';
 import { describe, expect, it, vi } from 'vitest';
@@ -6,6 +7,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { AuthState } from '@core/services/auth-state';
 import { Inventory } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
+import { ModalForm } from '@shared/components/modal-form/modal-form';
+import { ModalFormData, ModalFormResult } from '@shared/components/modal-form/modal-form-models';
 import { Roles } from '@shared/models/roles';
 
 import { InventoryList } from './inventory-list';
@@ -48,15 +51,27 @@ describe('InventoryList', () => {
     updateImportantStatus,
   };
 
+  let dialogClosed: Subject<ModalFormResult<Record<string, unknown>> | undefined>;
+  const openDialog = vi.fn(
+    (dialogComponent: unknown, config?: { data?: ModalFormData<Record<string, unknown>> }) => {
+      expect(dialogComponent).toBeDefined();
+      expect(config).toBeDefined();
+      return {
+        afterClosed: () => dialogClosed.asObservable(),
+      };
+    },
+  );
+
   let activeRoles: string[] = [Roles.admin];
 
   function setup(roles: string[] = [Roles.admin]): Subject<Inventory> {
     vi.clearAllMocks();
     activeRoles = roles;
+    dialogClosed = new Subject();
 
     const stream = new Subject<Inventory>();
     getInventories.mockReturnValue(stream);
-    getInventoryTypes.mockReturnValue(EMPTY);
+    getInventoryTypes.mockReturnValue(of({ typeId: 'type-1', type: 'Medication' }));
     getQuantity.mockReturnValue(of(10));
     createInventory.mockReturnValue(of(inventoryOne));
     updateInventory.mockReturnValue(of(inventoryOne));
@@ -76,7 +91,9 @@ describe('InventoryList', () => {
         },
         { provide: ActivatedRoute, useValue: {} },
       ],
-    }).compileComponents();
+    })
+      .overrideProvider(MatDialog, { useValue: { open: openDialog } })
+      .compileComponents();
 
     fixture = TestBed.createComponent(InventoryList);
     component = fixture.componentInstance;
@@ -94,38 +111,51 @@ describe('InventoryList', () => {
       expect(component['can']().canDeleteInventory).toBe(true);
     });
 
-    it('creates a new inventory and reflects it immediately', () => {
+    it('creates a new inventory and reloads the list', async () => {
       setup([Roles.admin]);
 
-      component['newInventory'].set({
+      const value = {
         inventoryName: 'Pharmacy',
         inventoryType: 'Medication',
         inventoryDescription: 'Prescription drugs',
-      });
+      };
 
-      component['saveInventory'](new Event('submit', { cancelable: true }));
+      await component['saveInventory'](value, null);
 
       expect(createInventory).toHaveBeenCalledWith({
         inventoryName: 'Pharmacy',
         inventoryType: 'Medication',
         inventoryDescription: 'Prescription drugs',
       });
-      expect(component['inventories']()).toEqual([inventoryOne]);
-      expect(component['showAddForm']()).toBe(false);
+      expect(getInventories).toHaveBeenCalledTimes(2);
+      expect(component['savingInventory']()).toBe(false);
     });
 
-    it('updates the inventory being edited instead of creating a new one', () => {
+    it('updates the inventory being edited instead of creating a new one', async () => {
       const stream = setup([Roles.admin]);
       stream.next(inventoryOne);
 
       component['editInventory'](inventoryOne);
-      expect(component['editingInventoryId']()).toBe('inv-1');
-      expect(component['showAddForm']()).toBe(true);
+      expect(openDialog).toHaveBeenCalledWith(
+        ModalForm,
+        expect.objectContaining({
+          data: expect.objectContaining({
+            initialValue: expect.objectContaining({ inventoryType: 'Medication' }),
+          }),
+        }),
+      );
 
       const updated = { ...inventoryOne, inventoryName: 'Pharmacy (updated)' };
       updateInventory.mockReturnValue(of(updated));
 
-      component['saveInventory'](new Event('submit', { cancelable: true }));
+      await component['saveInventory'](
+        {
+          inventoryName: 'Pharmacy',
+          inventoryType: 'Medication',
+          inventoryDescription: 'Prescription drugs',
+        },
+        inventoryOne,
+      );
 
       expect(updateInventory).toHaveBeenCalledWith('inv-1', {
         inventoryName: 'Pharmacy',
@@ -133,22 +163,22 @@ describe('InventoryList', () => {
         inventoryDescription: 'Prescription drugs',
       });
       expect(createInventory).not.toHaveBeenCalled();
-      expect(component['inventories']()).toEqual([updated]);
-      expect(component['editingInventoryId']()).toBe(null);
+      expect(getInventories).toHaveBeenCalledTimes(2);
+      expect(component['savingInventory']()).toBe(false);
     });
 
-    it('shows a form error when saving fails', () => {
+    it('shows a form error when saving fails', async () => {
       setup([Roles.admin]);
       createInventory.mockReturnValue(throwError(() => new Error('failed')));
 
-      component['newInventory'].set({
+      const value = {
         inventoryName: 'Pharmacy',
         inventoryType: 'Medication',
         inventoryDescription: 'Prescription drugs',
-      });
-      component['saveInventory'](new Event('submit', { cancelable: true }));
+      };
+      await component['saveInventory'](value, null);
 
-      expect(component['formError']()).toBe('Unable to create inventory.');
+      expect(component['formError']()).toBe("Impossible de créer l'inventaire.");
     });
 
     it('deletes an inventory after confirmation and removes it locally', () => {
@@ -156,26 +186,22 @@ describe('InventoryList', () => {
       stream.next(inventoryOne);
       stream.next(inventoryTwo);
 
-      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
       component['deleteInventoryAction'](inventoryOne);
+      dialogClosed.next({ value: {} });
 
       expect(deleteInventory).toHaveBeenCalledWith('inv-1');
       expect(component['inventories']()).toEqual([inventoryTwo]);
-
-      confirmSpy.mockRestore();
     });
 
     it('does not delete when the user cancels the confirmation', () => {
       const stream = setup([Roles.admin]);
       stream.next(inventoryOne);
 
-      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
       component['deleteInventoryAction'](inventoryOne);
+      dialogClosed.next(undefined);
 
       expect(deleteInventory).not.toHaveBeenCalled();
       expect(component['inventories']()).toEqual([inventoryOne]);
-
-      confirmSpy.mockRestore();
     });
   });
 
@@ -193,12 +219,10 @@ describe('InventoryList', () => {
       stream.next(inventoryOne);
 
       component['editInventory'](inventoryOne);
-      expect(component['showAddForm']()).toBe(false);
+      expect(openDialog).not.toHaveBeenCalled();
 
-      const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
       component['deleteInventoryAction'](inventoryOne);
       expect(deleteInventory).not.toHaveBeenCalled();
-      confirmSpy.mockRestore();
     });
   });
 

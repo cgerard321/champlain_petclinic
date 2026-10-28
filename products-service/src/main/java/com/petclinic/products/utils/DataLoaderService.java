@@ -21,11 +21,14 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Order(0)
@@ -948,7 +951,55 @@ public class DataLoaderService implements CommandLineRunner {
 
         List<ProductTypeDb> seededProductTypes = List.of(
                 productType1, productType2, productType3, productType4);
-        List<ProductBundle> seededBundles = List.of(bundle1, bundle2, bundle3);
+        Map<String, Product> productsById = seededProducts.stream()
+                .collect(Collectors.toMap(Product::getProductId, Function.identity()));
+
+        List<ProductBundle> seededBundles = List.of(
+                bundle1, bundle2, bundle3,
+                seedBundle(productsById, "Saddle Special", "Horse Saddle on sale", 179.99,
+                        "a6a27433-e7a9-4e78-8ae3-0cb57d756863"),
+                seedBundle(productsById, "Aquarium Starter Kit", "Filter, heater & fish flakes for a new tank", 37.99,
+                        "4d508fb7-f1f2-4952-829d-10dd7254cf26", "1501f30e-1db1-44b2-a555-bca6f64450e4",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7021"),
+                seedBundle(productsById, "New Kitten Bundle", "Everything a new kitten needs at home", 89.99,
+                        "98f7b33a-d62a-420a-a84a-05a27c85fc91", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7019",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7009", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7013",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7006"),
+                seedBundle(productsById, "Dog Walk & Care Bundle", "Food, walking gear and grooming for dogs", 124.99,
+                        "06a7d573-bcab-4db3-956f-773324b92a80", "baee7cd2-b67a-449f-b262-91f45dde8a6d",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7010", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7015",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7004", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7003",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7014"),
+                seedBundle(productsById, "Senior Pet Comfort Bundle", "Comfort, health and monitoring for aging pets", 279.99,
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7001", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7012",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7016", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7023",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7011", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7025",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7005", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7029",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7030"),
+                seedBundle(productsById, "Small Animal & Bird Bundle", "Housing, food and accessories for rabbits and birds", 379.99,
+                        "ae2d3af7-f2a2-407f-ad31-ca7d8220cb7a", "4affcab7-3ab1-4917-a114-2b6301aa5565",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7020", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7022",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7031", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7009",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7015", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7026",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7027", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7014",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7030"),
+                seedBundle(productsById, "Home Vet Care Bundle", "Treatments and tools for at-home pet health care", 239.99,
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7002", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7003",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7004", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7005",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7006", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7007",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7008", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7011",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7029", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7032",
+                        "baee7cd2-b67a-449f-b262-91f45dde8a6d", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7025",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7030"),
+                seedBundle(productsById, "Ultimate Pet Owner Bundle", "Our biggest bundle: food, gear and equipment for every pet", 599.99,
+                        "06a7d573-bcab-4db3-956f-773324b92a80", "98f7b33a-d62a-420a-a84a-05a27c85fc91",
+                        "4d508fb7-f1f2-4952-829d-10dd7254cf26", "4affcab7-3ab1-4917-a114-2b6301aa5565",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7012", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7013",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7016", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7017",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7018", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7024",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7026", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7027",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7028", "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7031",
+                        "b2d7a3c1-4e5f-4a61-8b72-9c3d1e5f7032"));
 
         seedData(seededProductTypes, seededImages, seededProducts, seededRatings, seededBundles)
                 .then(backfillSeedTranslations())
@@ -1138,6 +1189,25 @@ public class DataLoaderService implements CommandLineRunner {
                 .build();
     }
 
+    private ProductBundle seedBundle(
+            Map<String, Product> productsById,
+            String bundleName,
+            String bundleDescription,
+            double bundlePrice,
+            String... productIds) {
+        double originalTotalPrice = Arrays.stream(productIds)
+                .mapToDouble(productId -> productsById.get(productId).getProductSalePrice())
+                .sum();
+
+        return ProductBundle.builder()
+                .bundleId(UUID.randomUUID().toString())
+                .bundleName(bundleName)
+                .bundleDescription(bundleDescription)
+                .productIds(List.of(productIds))
+                .originalTotalPrice(Math.round(originalTotalPrice * 100) / 100.0)
+                .bundlePrice(bundlePrice)
+                .build();
+    }
     private SeededProduct seedProduct(
             String productId,
             String productName,
