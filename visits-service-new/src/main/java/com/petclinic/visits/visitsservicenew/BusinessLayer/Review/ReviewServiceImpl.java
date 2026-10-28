@@ -2,7 +2,6 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer.Review;
 
 import com.petclinic.visits.visitsservicenew.DataLayer.Review.ReviewRepository;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Customers.CustomerServiceClient;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.Customers.CustomerResponseDTO;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
