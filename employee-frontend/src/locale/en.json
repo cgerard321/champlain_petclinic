@@ -48,6 +48,7 @@
       "inventory": "Inventory",
       "products": "Products",
       "promos": "Promos",
+      "orderReports": "Order Reports",
       "users": "Users",
       "settings": "Settings",
       "logout": "Logout"
@@ -918,7 +919,76 @@
         "descriptionRequired": "Description is required."
       }
     },
-
+    "orderReports": {
+      "title": "Order Reports",
+      "subtitle": "View the issues customers reported on their orders.",
+      "loading": "Loading order reports...",
+      "empty": "No order reports found.",
+      "close": "Close",
+      "columns": {
+        "report": "Report",
+        "order": "Order Number",
+        "customer": "Customer",
+        "category": "Category",
+        "status": "Status"
+      },
+      "fields": {
+        "submitted": "Submitted",
+        "category": "Category",
+        "email": "Email",
+        "order": "Order",
+        "date": "Date",
+        "shipping": "Shipping",
+        "address": "Address"
+      },
+      "status": {
+        "NEW": "New",
+        "IN_REVIEW": "In Review",
+        "RESOLVED": "Resolved",
+        "REJECTED": "Rejected"
+      },
+      "reasons": {
+        "DAMAGED_ITEM": "Damaged Item(s)",
+        "MISSING_ITEM": "Missing Item(s)",
+        "WRONG_ITEM": "Wrong Item Received",
+        "PACKAGE_NOT_RECEIVED": "Package Did Not Arrive",
+        "OTHER": "Other"
+      },
+      "reportDialog": {
+        "eyebrow": "Order report",
+        "closeAria": "Close report dialog",
+        "details": "Details",
+        "description": "Description",
+        "affectedItems": "Affected items",
+        "noItems": "No specific items were selected.",
+        "viewOrder": "View order"
+      },
+      "orderDialog": {
+        "eyebrow": "Order details",
+        "title": "Order",
+        "closeAria": "Close order dialog",
+        "loading": "Loading order...",
+        "customerDelivery": "Customer & delivery",
+        "items": "Items",
+        "product": "Product",
+        "quantity": "Quantity",
+        "price": "Price",
+        "total": "Total"
+      },
+      "errors": {
+        "loadFailed": "Could not load order reports.",
+        "orderLoadFailed": "Could not load the order."
+      },
+      "paginator": {
+        "itemsPerPage": "Items per page:",
+        "next": "Next page",
+        "previous": "Previous page",
+        "first": "First page",
+        "last": "Last page",
+        "empty": "0 of 0",
+        "range": "{$START} – {$END} of {$LENGTH}"
+      }
+    },
     "users": {
       "title": "Users",
       "description": "View and manage user accounts for inventory managers, vets, receptionists and customers.",
