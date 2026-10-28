@@ -21,9 +21,14 @@ public class ImageMigrationRunner implements CommandLineRunner {
     @Value("${app.image-migration.enabled:false}")
     private boolean enabled;
 
+    @Value("${app.seed-data.enabled:true}")
+    private boolean seedDataEnabled;
+
     @Override
     public void run(String... args) {
-        files.awaitStartup().block(Duration.ofMinutes(3));
+        if (enabled || seedDataEnabled) {
+            files.awaitStartup().block(Duration.ofMinutes(3));
+        }
         if (enabled) migrate();
         Long remaining = store.remainingLegacyReferences().block(Duration.ofMinutes(1));
         if (remaining == null || remaining > 0) {

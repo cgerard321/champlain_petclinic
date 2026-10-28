@@ -21,6 +21,25 @@ class ImageMigrationRunnerTest {
     }
 
     @Test
+    void disabledMigrationAndSeedingDoNotRequireFilesService() {
+        when(store.remainingLegacyReferences()).thenReturn(Mono.just(0L));
+        runner.run();
+        verifyNoInteractions(files, migration);
+        verify(store).remainingLegacyReferences();
+    }
+
+    @Test
+    void seedingStillWaitsWhenMigrationIsDisabled() {
+        ReflectionTestUtils.setField(runner, "seedDataEnabled", true);
+        when(store.remainingLegacyReferences()).thenReturn(Mono.just(0L));
+        runner.run();
+        var order = inOrder(files, store);
+        order.verify(files).awaitStartup();
+        order.verify(store).remainingLegacyReferences();
+        verifyNoInteractions(migration);
+    }
+
+    @Test
     void unavailableFilesStopsBeforeAnyMigrationWrites() {
         ReflectionTestUtils.setField(runner, "enabled", true);
         when(files.awaitStartup()).thenReturn(Mono.error(new IllegalStateException("Unavailable")));
