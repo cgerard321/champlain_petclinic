@@ -549,8 +549,8 @@
         "quebec": "Quebec",
         "saskatchewan": "Saskatchewan",
         "yukon": "Yukon"
-      }
-
+      },
+      "allPetsButton": "All pets"
     },
     "pet": {
       "petAddTitle" : "Add a new Pet",
@@ -588,6 +588,23 @@
         "date": "Date of Birth is required",
         "weightR": "Weight is required",
         "weightP": "Weight should be a valid number"
+      }
+    },
+    "petList": {
+      "title": "Pets",
+      "loadingLabel": "Loading",
+      "loading": "Loading pets...",
+      "loadError": "Unable to load pets. Please try again later.",
+      "empty": "No pets registered.",
+      "caption": "Pets registered at the clinic",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "noResults": "No pets match the filters.",
+      "filters": {
+        "petType": "Pet type",
+        "petTypePlaceholder": "e.g. dog",
+        "name": "Pet name"
       }
     },
     "modal": {
@@ -722,6 +739,7 @@
       "expiration": { "expired": "Expired", "soon": "Expiring soon", "none": "No expiration" },
       "actions": {
         "add": "Add Supply",
+        "restock": "Restock",
         "edit": "Edit",
         "history": "History",
         "delete": "Delete",
@@ -740,6 +758,22 @@
         "cannotConsumeStock": "Cannot consume - out of stock",
         "cannotConsumeExpired": "Cannot consume - expired"
       },
+      "restock": {
+        "quantityRequired": "Quantity is required.",
+        "quantityPositive": "Enter an integer greater than 0.",
+        "quantityMax": "Quantity must not exceed 2147483647.",
+        "permission": "You no longer have permission to restock this supply.",
+        "quantityInteger": "Enter an integer between 1 and 2147483647.",
+        "uncertain": "Unable to confirm restock. Stock may have changed. Reload the page to check quantities before trying again.",
+        "failed": "Unable to restock supply.",
+        "ariaLabel": "Restock {$name}",
+        "adding": "Adding stock...",
+        "add": "Add stock",
+        "title": "Restock supply",
+        "cancel": "Cancel",
+        "currentQuantity": "{$INTERPOLATION} — Current quantity: {$INTERPOLATION_1}",
+        "quantity": "Quantity to add"
+        },
       "summary": {
         "ariaLabel": "Summary for {$name}",
         "title": "Supply summary",

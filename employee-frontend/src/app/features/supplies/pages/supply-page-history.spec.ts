@@ -53,7 +53,9 @@ describe('SupplyPage supply history', () => {
         },
         { provide: MatDialog, useValue: { open: openDialog } },
       ],
-    }).compileComponents();
+    })
+      .overrideProvider(MatDialog, { useValue: { open: openDialog } })
+      .compileComponents();
 
     fixture = TestBed.createComponent(SupplyPage);
     component = fixture.componentInstance;
@@ -67,7 +69,7 @@ describe('SupplyPage supply history', () => {
       SupplyHistoryDialog,
       expect.objectContaining({
         data: { inventoryId, productId: supply.productId, supplyName: supply.productName },
-        ariaLabel: 'History for Bandages',
+        ariaLabel: "Historique de l'article Bandages",
       }),
     );
   });

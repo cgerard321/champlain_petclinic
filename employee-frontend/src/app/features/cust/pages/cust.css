@@ -461,3 +461,23 @@ tbody tr:focus-within {
   border-color: #1c3d33;
   background: #1c3d33;
 }
+
+.pet-types-link {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  margin-left: 0.75rem;
+  color: #244b3f;
+  background: transparent;
+  text-decoration: none;
+}
+
+.pet-types-link:hover {
+  color: #fff;
+}
+
+:host-context(.dark-mode) .pet-types-link {
+  border-color: #afc79a;
+  background: transparent;
+}
+

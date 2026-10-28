@@ -49,6 +49,48 @@
 /* --- Action buttons --- */
 .history-button,
 .consume-button,
+.download-pdf-button {
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 180ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.add-supply-button {
+  padding: 10px 18px;
+  background: var(--forest-700);
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.edit-button,
+.history-button,
+.delete-button {
+  padding: 7px 8px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  background: var(--forest-700);
+  color: #fff;
+}
+
+.consume-button {
+  padding: 10px 18px;
+  background: #1976d2;
+  color: #fff;
+  font-size: 0.875rem;
+}
+
+.delete-button {
+  background: #b71c1c;
+  border: 1px solid #8e0000;
+}
+
+.delete-button:hover {
+  background: #8e0000;
+}
+
 .summary-button {
   background: var(--sage-400);
   color: var(--text-primary);
@@ -144,4 +186,189 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+  color: var(--text-primary);
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.filter-field > span {
+  color: var(--forest-700);
+}
+
+.filter-field :is(input, select) {
+  width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border-strong);
+  border-radius: 11px;
+  outline: none;
+  color: var(--text-primary);
+  background-color: var(--white);
+  font: inherit;
+  font-weight: 400;
+  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+}
+
+.filter-field input::placeholder {
+  color: var(--text-muted);
+}
+
+.filter-field input:hover,
+.filter-field select:hover:not(:disabled) {
+  border-color: rgb(36 75 63 / 42%);
+}
+
+.filter-field :is(input, select):focus-visible {
+  border-color: var(--forest-700);
+  box-shadow: 0 0 0 3px rgb(36 75 63 / 14%);
+}
+
+.filter-field select:disabled {
+  cursor: not-allowed;
+  background-color: var(--sage-50);
+  opacity: 0.7;
+}
+
+.clear-filters-button {
+  min-height: 40px;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid var(--forest-700);
+  border-radius: 10px;
+  color: var(--forest-700);
+  background-color: rgb(255 255 255 / 78%);
+  font: inherit;
+  font-size: 0.87rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, opacity 160ms ease;
+}
+
+.clear-filters-button:hover:not(:disabled) {
+  border-color: var(--forest-800);
+  color: var(--white);
+  background-color: var(--forest-700);
+}
+
+.clear-filters-button:focus-visible {
+  outline: 3px solid rgb(36 75 63 / 22%);
+  outline-offset: 3px;
+}
+
+@media (width <= 1100px) {
+  .desktop-action-button {
+    display: none;
+  }
+
+  .mobile-actions-button {
+    display: inline-block;
+  }
+}
+
+@media (width <= 850px) {
+  .supply-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 700px) {
+  .supply-page {
+    padding: 2rem 1rem 3rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (width <= 600px) {
+  .supply-filters {
+    padding: 1.1rem;
+    border-radius: 16px;
+  }
+
+  .supply-filter-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .filter-heading {
+    align-items: flex-start;
+  }
+}
+
+@media (width <= 420px) {
+  .filter-heading {
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .download-label {
+    transition: none;
+  }
+}
+
+:host-context(.dark-mode) {
+  --cream: var(--mat-sys-surface-container-highest);
+  --white: var(--mat-sys-surface-container-highest);
+  --text-muted: #7f958a;
+  --border-strong: rgb(36 75 63 / 20%);
+  --sage-50: #121f1a;
+  --sage-400: #3f5a4b;
+  --forest-700: #e3eeee;
+  --text-primary: #e6efe9;
+  --text-secondary: #a3b8ac;
+  --border: rgb(36 75 63 / 12%);
+
+  .supply-page {
+    background: none;
+  }
+
+  .state-message {
+    background: var(--mat-sys-surface);
+    border: none;
+    box-shadow: none;
+  }
+
+  .add-supply-button,
+  .edit-button,
+  .clear-filters-button {
+    color: #111;
+  }
+
+  .filter-field :is(input, select) {
+    border-color: var(--sage-400);
+  }
+
+  .filter-field select {
+    color: #7f958a;
+  }
+}
+
+.restock-submit-button {
+  background: #198754;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.restock-submit-button:hover:not(:disabled) {
+  background: #157347;
+}
+
+.restock-submit-button:disabled {
+  background: #d1d5db;
+  color: #4b5563;
+  cursor: not-allowed;
 }
