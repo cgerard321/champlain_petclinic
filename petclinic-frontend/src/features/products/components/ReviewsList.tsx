@@ -207,12 +207,12 @@ export function ReviewsList({
 
           <div className="rating-breakdown">
             {[5, 4, 3, 2, 1].map(star => {
-              const count = productReviews.filter(
+              const count = productRatings.filter(
                 r => Math.floor(r.rating) === star
               ).length;
               const percentage =
-                productReviews.length > 0
-                  ? (count / productReviews.length) * 100
+                productRatings.length > 0
+                  ? (count / productRatings.length) * 100
                   : 0;
 
               return (
@@ -224,7 +224,7 @@ export function ReviewsList({
                   }`}
                   onClick={() => handleRatingFilter(star)}
                   aria-pressed={selectedRating === star}
-                  aria-label={`${t('stars', { count: star })}, ${t('reviewCount', { count })}`}
+                  aria-label={`${t('stars', { count: star })}, ${t('averageReview.count', { count })}`}
                 >
                   <span className="star-label">
                     {t('stars', { count: star })}
