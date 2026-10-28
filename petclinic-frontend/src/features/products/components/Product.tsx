@@ -24,11 +24,13 @@ import { FaHeart, FaRegHeart } from 'react-icons/fa';
 interface ProductProps {
   product: ProductModel;
   recentlyViewed?: boolean;
+  compact?: boolean;
 }
 
 export default function Product({
   product,
   recentlyViewed = false,
+  compact = false,
 }: ProductProps): JSX.Element {
   const { t, i18n } = useTranslation('products');
   const language = i18n.resolvedLanguage || i18n.language || 'en';
@@ -149,7 +151,7 @@ export default function Product({
 
   return (
     <div
-      className={`card product-card product-card-no-bg ${
+      className={`card product-card product-card-no-bg${compact ? ' product-card-compact' : ''} ${
         currentProduct.productQuantity === 0
           ? 'out-of-stock'
           : currentProduct.productQuantity < 10
