@@ -422,6 +422,76 @@
       }
     },
     "cust": {
+      "notAvailable": "Not available",
+      "profile": {
+        "title": "Customer Details",
+        "subtitle": "Contact information and registered pets",
+        "loading": "Loading customer...",
+        "profile": "Customer profile",
+        "edit": "Edit Customer",
+        "infoTitle": "Customer Info",
+        "editTitle": "Edit customer information",
+        "infoSubtitle": "Personal details and contact information",
+        "editSubtitle": "Update the details below, then save your changes.",
+        "fields": {
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "address": "Address",
+          "city": "City",
+          "province": "Province",
+          "telephone": "Telephone"
+        },
+        "validation": {
+          "firstNameRequired": "First name is required",
+          "lastNameRequired": "Last name is required",
+          "addressRequired": "Address is required",
+          "cityRequired": "City is required",
+          "provinceRequired": "Province is required",
+          "telephoneRequired": "Telephone is required",
+          "telephoneTenDigits": "Telephone must be exactly 10 digits (numbers only)"
+        },
+        "selectProvince": "Select Province",
+        "telephoneHint": "Enter a 10-digit telephone number.",
+        "cancel": "Cancel",
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "petsTitle": "Registered pets",
+        "petsSubtitle": "Animals linked to this customer",
+        "loadingPets": "Loading pets...",
+        "birthDate": "Birth Date",
+        "weight": "Weight",
+        "noPets": "No pets registered",
+        "noPetsHint": "This customer's pets will appear here.",
+        "back": "Back to All Customers",
+        "photoAlt": "{$INTERPOLATION}'s profile photo",
+        "noPhoto": "No customer profile photo",
+        "petCount": "{$INTERPOLATION} registered pets",
+        "noPetPhoto": "No profile photo for {$INTERPOLATION}",
+        "confirmSave": "Are you sure you want to save these changes?",
+        "updateSuccess": "Customer has been successfully updated.",
+        "errors": {
+          "noId": "No customer ID provided.",
+          "load": "Could not load customer details.",
+          "pets": "Could not load pets. Please try again later.",
+          "petTypes": "Could not load pet types.",
+          "update": "Could not update customer. Please try again."
+        },
+        "provinces": {
+          "alberta": "Alberta",
+          "britishColumbia": "British Columbia",
+          "manitoba": "Manitoba",
+          "newBrunswick": "New Brunswick",
+          "newfoundlandAndLabrador": "Newfoundland and Labrador",
+          "novaScotia": "Nova Scotia",
+          "ontario": "Ontario",
+          "princeEdwardIsland": "Prince Edward Island",
+          "quebec": "Quebec",
+          "saskatchewan": "Saskatchewan",
+          "northwestTerritories": "Northwest Territories",
+          "nunavut": "Nunavut",
+          "yukon": "Yukon"
+        }
+      },
       "customerList": "Customer List",
       "customerListLoading": "Loading customers...",
       "noCustomers": "No customers registered.",
@@ -479,8 +549,8 @@
         "quebec": "Quebec",
         "saskatchewan": "Saskatchewan",
         "yukon": "Yukon"
-      }
-
+      },
+      "allPetsButton": "All pets"
     },
     "pet": {
       "petAddTitle" : "Add a new Pet",
@@ -518,6 +588,23 @@
         "date": "Date of Birth is required",
         "weightR": "Weight is required",
         "weightP": "Weight should be a valid number"
+      }
+    },
+    "petList": {
+      "title": "Pets",
+      "loadingLabel": "Loading",
+      "loading": "Loading pets...",
+      "loadError": "Unable to load pets. Please try again later.",
+      "empty": "No pets registered.",
+      "caption": "Pets registered at the clinic",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "noResults": "No pets match the filters.",
+      "filters": {
+        "petType": "Pet type",
+        "petTypePlaceholder": "e.g. dog",
+        "name": "Pet name"
       }
     },
     "modal": {
@@ -652,6 +739,7 @@
       "expiration": { "expired": "Expired", "soon": "Expiring soon", "none": "No expiration" },
       "actions": {
         "add": "Add Supply",
+        "restock": "Restock",
         "edit": "Edit",
         "history": "History",
         "delete": "Delete",
@@ -670,6 +758,22 @@
         "cannotConsumeStock": "Cannot consume - out of stock",
         "cannotConsumeExpired": "Cannot consume - expired"
       },
+      "restock": {
+        "quantityRequired": "Quantity is required.",
+        "quantityPositive": "Enter an integer greater than 0.",
+        "quantityMax": "Quantity must not exceed 2147483647.",
+        "permission": "You no longer have permission to restock this supply.",
+        "quantityInteger": "Enter an integer between 1 and 2147483647.",
+        "uncertain": "Unable to confirm restock. Stock may have changed. Reload the page to check quantities before trying again.",
+        "failed": "Unable to restock supply.",
+        "ariaLabel": "Restock {$name}",
+        "adding": "Adding stock...",
+        "add": "Add stock",
+        "title": "Restock supply",
+        "cancel": "Cancel",
+        "currentQuantity": "{$INTERPOLATION} — Current quantity: {$INTERPOLATION_1}",
+        "quantity": "Quantity to add"
+        },
       "summary": {
         "ariaLabel": "Summary for {$name}",
         "title": "Supply summary",
