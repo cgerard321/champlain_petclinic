@@ -39,7 +39,6 @@ export interface InventoryPermissions {
 
   // Not strictly CRUD, but tied to the same product level access rule
   canConsumeProduct: boolean;
-  // Distinct supply count via GET .../products-count, available to all list roles.
   canViewProductQuantity: boolean;
 }
 
@@ -72,7 +71,7 @@ const VET_ACCESS: InventoryPermissions = {
   canUpdateProduct: false,
   canDeleteProduct: false,
   canConsumeProduct: true,
-  canViewProductQuantity: true, // GET .../products-count includes VET
+  canViewProductQuantity: true,
 };
 
 const NO_ACCESS: InventoryPermissions = {

@@ -236,7 +236,7 @@ export class InventoryList implements OnInit, OnDestroy {
   }
 
   private inventoryResults(): Observable<Inventory[]> {
-    // Keep the complete source, including an extra empty batch for exact multiples.
+    // Exact multiples require an extra empty batch to detect the end.
     const batchSize = 50;
     return this.inventoryService.getInventories({}, 0, batchSize).pipe(
       toArray(),
@@ -702,7 +702,6 @@ export class InventoryList implements OnInit, OnDestroy {
     const missing = this.sourceInventories().filter(
       (inventory) => this.quantityFor(inventory.inventoryId) === null,
     );
-    // Cache successful counts for this visit; limit concurrent requests for large lists.
     this.quantitySubscription = from(missing)
       .pipe(
         mergeMap(
