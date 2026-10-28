@@ -254,4 +254,41 @@ class OrderControllerUnitTest {
 
         verify(orderService, times(1)).getAllReports();
     }
+
+    @Test
+    void updateReportStatus_ReturnsUpdatedReport() {
+        // Arrange
+        UpdateOrderReportStatusRequestModel request =
+                UpdateOrderReportStatusRequestModel.builder()
+                        .status(OrderReportStatus.RESOLVED)
+                        .resolutionNote("Refund sent")
+                        .build();
+
+        OrderReportResponseModel report = OrderReportResponseModel.builder()
+                .reportId("RPT-123")
+                .status(OrderReportStatus.RESOLVED)
+                .resolutionNote("Refund sent")
+                .resolvedAt(LocalDateTime.now())
+                .build();
+
+        when(orderService.updateReportStatus(eq("RPT-123"), any()))
+                .thenReturn(Mono.just(report));
+
+        // Act & Assert
+        webTestClient.patch()
+                .uri("/api/v1/orders/reports/RPT-123/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(OrderReportResponseModel.class)
+                .value(response -> {
+                    assertEquals("RPT-123", response.getReportId());
+                    assertEquals(OrderReportStatus.RESOLVED, response.getStatus());
+                    assertEquals("Refund sent", response.getResolutionNote());
+                });
+
+        verify(orderService, times(1)).updateReportStatus(eq("RPT-123"), any());
+    }
 }
