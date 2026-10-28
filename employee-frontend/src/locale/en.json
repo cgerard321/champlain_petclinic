@@ -1003,10 +1003,7 @@
         "title":"Confirm Interest Exemption",
         "exempt":"Exempt this overdue bill from interest? Interest will become",
         "remove":"Remove interest exemption and recalculate overdue interest?"
-      }
-
-
-
+      },
 
     "users": {
       "title": "Users",
