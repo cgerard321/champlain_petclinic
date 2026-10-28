@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class ReviewRequestDTO {
     private String ownerId;
     private int rating;
-    private String reviewerName;
+    private String reviewerId;
     private String review;
     private LocalDateTime dateSubmitted;
 

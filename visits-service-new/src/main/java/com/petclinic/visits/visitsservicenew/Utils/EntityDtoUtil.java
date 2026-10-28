@@ -82,7 +82,7 @@ public class EntityDtoUtil {
             reviewResponseDTO.setReviewId(review.getReviewId());
             reviewResponseDTO.setOwnerId(review.getOwnerId());
             reviewResponseDTO.setRating(review.getRating());
-            reviewResponseDTO.setReviewerName(review.getReviewerName());
+            reviewResponseDTO.setReviewerName(review.getReviewerId());
             reviewResponseDTO.setReview(review.getReview());
             reviewResponseDTO.setDateSubmitted(review.getDateSubmitted());
         return reviewResponseDTO;
@@ -92,7 +92,7 @@ public class EntityDtoUtil {
         return Review.builder()
                 .ownerId(reviewRequestDTO.getOwnerId())
                 .rating(reviewRequestDTO.getRating())
-                .reviewerName(reviewRequestDTO.getReviewerName())
+                .reviewerId(reviewRequestDTO.getReviewerId())
                 .review(reviewRequestDTO.getReview())
                 .dateSubmitted(reviewRequestDTO.getDateSubmitted())
                 .build();
