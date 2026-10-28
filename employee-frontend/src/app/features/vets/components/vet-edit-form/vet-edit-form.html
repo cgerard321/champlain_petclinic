@@ -52,7 +52,9 @@
           (click)="toggleShowAllAvailabilities()"
         >
           @if (showAllAvailabilities()) {
-            <span i18n="@@vets.availability.show_active_only">Afficher uniquement les créneaux actifs</span>
+            <span i18n="@@vets.availability.show_active_only"
+              >Afficher uniquement les créneaux actifs</span
+            >
           } @else {
             <span i18n="@@vets.availability.show_all">Afficher tous les créneaux</span>
           }
@@ -70,8 +72,14 @@
       <p class="visually-hidden" role="status" aria-live="polite">{{ announcement() }}</p>
 
       <ul class="day-list">
-        @for (entry of (showAllAvailabilities() ? allAvailabilities() : availability()); track entry.day) {
-          <li class="day" [class.inactive]="!entry.selected && !entry.hours.some(h => h.selected)">
+        @for (
+          entry of showAllAvailabilities() ? allAvailabilities() : availability();
+          track entry.day
+        ) {
+          <li
+            class="day"
+            [class.inactive]="!entry.selected && !entry.hours.some((h) => h.selected)"
+          >
             <div class="day-header">
               <span class="day-label">{{ entry.label }}</span>
               @if (entry.selected) {
@@ -110,7 +118,9 @@
                       (click)="removeHour(entry.day, hour.value)"
                     >
                       <span aria-hidden="true">×</span>
-                      <span class="visually-hidden" i18n="@@vets.availability.remove_hour">Retirer</span>
+                      <span class="visually-hidden" i18n="@@vets.availability.remove_hour"
+                        >Retirer</span
+                      >
                       <span class="visually-hidden">{{ entry.label }} {{ hour.label }}</span>
                     </button>
                   } @else {
@@ -121,7 +131,9 @@
                       (click)="addHour(entry.day, hour.value)"
                     >
                       <span aria-hidden="true">+ </span>
-                      <span class="visually-hidden" i18n="@@vets.availability.add_hour">Ajouter</span>
+                      <span class="visually-hidden" i18n="@@vets.availability.add_hour"
+                        >Ajouter</span
+                      >
                       <span class="visually-hidden">{{ entry.label }} {{ hour.label }}</span>
                     </button>
                   }

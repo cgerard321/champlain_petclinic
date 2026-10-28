@@ -17,6 +17,7 @@ import { MatDialog } from '@angular/material/dialog';
 
 import {
   ALL_WORK_HOURS,
+  STANDARD_SHIFT_HOURS,
   DAYS,
   emptySchedule,
   hourRange,
@@ -135,7 +136,7 @@ export class VetEditForm {
     const initialSchedule = this.initialSchedule();
 
     const allHours = Array.from(
-      new Set([...ALL_WORK_HOURS, ...DAYS.flatMap((day) => initialSchedule[day] || [])])
+      new Set([...ALL_WORK_HOURS, ...DAYS.flatMap((day) => initialSchedule[day] || [])]),
     ).sort((a, b) => {
       const rangeA = hourRange(a)?.[0] ?? 0;
       const rangeB = hourRange(b)?.[0] ?? 0;
@@ -161,17 +162,6 @@ export class VetEditForm {
 
   protected addDay(day: Workday): void {
     this.days.update((current) => (current.includes(day) ? current : [...current, day]));
-
-    const STANDARD_SHIFT_HOURS = [
-      'Hour_9_10',
-      'Hour_10_11',
-      'Hour_11_12',
-      'Hour_12_13',
-      'Hour_13_14',
-      'Hour_14_15',
-      'Hour_15_16',
-      'Hour_16_17',
-    ];
 
     const initialSchedule = this.initialSchedule();
     const defaultHours = initialSchedule[day]?.length ? initialSchedule[day] : STANDARD_SHIFT_HOURS;
@@ -225,7 +215,9 @@ export class VetEditForm {
         if (confirmed) {
           this.days.set([...this.initialDays()]);
           this.schedule.set(JSON.parse(JSON.stringify(this.initialSchedule())));
-          this.announcement.set($localize`:@@vets.availability.reset:Disponibilités réinitialisées.`);
+          this.announcement.set(
+            $localize`:@@vets.availability.reset:Disponibilités réinitialisées.`,
+          );
           this.restoreFocus('#availability-title');
         }
       });
@@ -360,7 +352,7 @@ export class VetEditForm {
     const hasScheduleChanges = DAYS.some(
       (day) =>
         initialDays.includes(day) !== days.includes(day) ||
-        JSON.stringify(initialSchedule[day]) !== JSON.stringify(schedule[day])
+        JSON.stringify(initialSchedule[day]) !== JSON.stringify(schedule[day]),
     );
     return this.form.dirty || hasScheduleChanges;
   }
@@ -460,7 +452,7 @@ export class VetEditForm {
       );
     }
     parts.push(
-      $localize`:@@vets.availability.confirm_visits_cancel:--- AVIS : Cela annulera toutes les visites réservées pendant cette disponibilité.`
+      $localize`:@@vets.availability.confirm_visits_cancel:--- AVIS : Cela annulera toutes les visites réservées pendant cette disponibilité.`,
     );
     return parts.join(' ');
   }
@@ -475,7 +467,7 @@ export class VetEditForm {
     const hasScheduleChanges = DAYS.some(
       (day) =>
         initialDays.includes(day) !== days.includes(day) ||
-        JSON.stringify(initialSchedule[day]) !== JSON.stringify(schedule[day])
+        JSON.stringify(initialSchedule[day]) !== JSON.stringify(schedule[day]),
     );
 
     const workHours: Record<string, readonly string[]> = {};
