@@ -35,6 +35,10 @@ interface BillFilters {
   year: string;
   month: string;
 }
+interface BillSearchSuggestion {
+  label: string;
+  type: 'customer' | 'veterinarian';
+}
 
 const emptyFilters: BillFilters = {
   customerId: '',
@@ -49,7 +53,7 @@ const emptyFilters: BillFilters = {
 @Component({
   selector: 'app-bill',
   imports: [CurrencyPipe, FormsModule, CustomerBillLookup],
-  styleUrl: './bill.css',
+  styleUrls: ['./bill.css', './bill-search.css'],
   templateUrl: './bill.html',
 })
 export class Bill implements OnInit {
@@ -93,6 +97,9 @@ export class Bill implements OnInit {
 
   protected readonly currency = signal<'CAD' | 'USD'>('CAD');
   protected readonly filters = signal<BillFilters>({ ...emptyFilters });
+  protected readonly billSearchInput = signal('');
+  protected readonly billSearchQuery = signal('');
+  protected readonly showBillSearchSuggestions = signal(false);
 
   protected readonly savedFilters = signal<Record<keyof BillFilters, string[]>>({
     customerId: [],
@@ -283,6 +290,74 @@ export class Bill implements OnInit {
       month: [],
     });
   }
+
+  protected updateBillSearch(value: string): void {
+    this.billSearchInput.set(value);
+
+    if (!value.trim()) {
+      this.billSearchQuery.set('');
+      this.showBillSearchSuggestions.set(false);
+      return;
+    }
+
+    this.showBillSearchSuggestions.set(true);
+  }
+
+  protected submitBillSearch(event: Event): void {
+    event.preventDefault();
+    this.billSearchQuery.set(this.billSearchInput().trim());
+    this.showBillSearchSuggestions.set(false);
+  }
+
+  protected selectBillSearchSuggestion(suggestion: BillSearchSuggestion): void {
+    this.billSearchInput.set(suggestion.label);
+    this.billSearchQuery.set(suggestion.label);
+    this.showBillSearchSuggestions.set(false);
+  }
+
+  protected clearBillSearch(): void {
+    this.billSearchInput.set('');
+    this.billSearchQuery.set('');
+    this.showBillSearchSuggestions.set(false);
+  }
+
+  protected readonly billSearchSuggestions = computed<BillSearchSuggestion[]>(() => {
+    const search = this.billSearchInput().trim().toLowerCase();
+
+    if (search.length < 3) {
+      return [];
+    }
+
+    const activeArchive = this.showArchivedBills();
+    const suggestions = new Map<string, BillSearchSuggestion>();
+
+    for (const bill of this.bills()) {
+      if (this.canViewBills() && (bill.archive === true) !== activeArchive) {
+        continue;
+      }
+
+      const names: Array<BillSearchSuggestion> = [
+        {
+          label: `${bill.customerFirstName ?? ''} ${bill.customerLastName ?? ''}`.trim(),
+          type: 'customer',
+        },
+        {
+          label: `${bill.vetFirstName ?? ''} ${bill.vetLastName ?? ''}`.trim(),
+          type: 'veterinarian',
+        },
+      ];
+
+      for (const suggestion of names) {
+        const key = `${suggestion.type}:${suggestion.label.toLowerCase()}`;
+
+        if (suggestion.label && suggestion.label.toLowerCase().includes(search)) {
+          suggestions.set(key, suggestion);
+        }
+      }
+    }
+
+    return [...suggestions.values()].sort((a, b) => a.label.localeCompare(b.label));
+  });
 
   protected setCurrency(value: string): void {
     if (value === 'CAD' || value === 'USD') {
@@ -524,20 +599,20 @@ export class Bill implements OnInit {
   protected readonly showArchivedBills = signal(false);
 
   protected readonly displayedBills = computed(() => {
-    if (!this.canViewBills()) {
-      return this.bills();
-    }
 
     const filters = this.savedFilters();
+    const searchQuery = this.billSearchQuery();
 
     const matchesText = (value: string | null, searches: string[]): boolean =>
       searches.length === 0 ||
       searches.some((search) => (value ?? '').toLowerCase().includes(search.toLowerCase()));
 
     return this.bills().filter((bill) => {
-      const matchesArchive = this.showArchivedBills()
-        ? bill.archive === true
-        : bill.archive !== true;
+      const matchesArchive = !this.canViewBills()
+        ? true
+        : this.showArchivedBills()
+          ? bill.archive === true
+          : bill.archive !== true;
 
       const customerName = `${bill.customerFirstName ?? ''} ${bill.customerLastName ?? ''}`.trim();
 
@@ -545,13 +620,24 @@ export class Bill implements OnInit {
 
       return (
         matchesArchive &&
-        matchesText(bill.customerId, filters.customerId) &&
-        matchesText(customerName, filters.customerName) &&
-        matchesText(vetName, filters.vetName) &&
-        (filters.visitType.length === 0 || filters.visitType.includes(bill.visitType)) &&
-        (filters.status.length === 0 || filters.status.includes(bill.billStatus)) &&
-        (filters.year.length === 0 || filters.year.includes(String(bill.date.getFullYear()))) &&
-        (filters.month.length === 0 || filters.month.includes(String(bill.date.getMonth() + 1)))
+
+      (
+          customerName.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+          vetName.toLowerCase().includes(searchQuery.trim().toLowerCase())
+        ) &&
+        (
+          !this.canViewBills() ||
+          (
+      
+            matchesText(bill.customerId, filters.customerId) &&
+            matchesText(customerName, filters.customerName) &&
+            matchesText(vetName, filters.vetName) &&
+             (filters.visitType.length === 0 || filters.visitType.includes(bill.visitType)) &&
+            (filters.status.length === 0 || filters.status.includes(bill.billStatus)) &&
+            (filters.year.length === 0 || filters.year.includes(String(bill.date.getFullYear()))) &&
+            (filters.month.length === 0 || filters.month.includes(String(bill.date.getMonth() + 1)))
+          )
+        )
       );
     });
   });

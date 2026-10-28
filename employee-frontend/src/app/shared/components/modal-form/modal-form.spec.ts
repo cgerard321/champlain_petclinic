@@ -72,7 +72,7 @@ describe('ModalForm', () => {
     const fixture = TestBed.createComponent(ModalForm<TestFormValue>);
     fixture.detectChanges();
 
-    const nameInput = fixture.nativeElement.querySelector('input[name="name"]');
+    const nameInput = fixture.nativeElement.querySelector('#name');
 
     nameInput.value = '';
     nameInput.dispatchEvent(new Event('input'));
@@ -91,8 +91,8 @@ describe('ModalForm', () => {
     const fixture = TestBed.createComponent(ModalForm<TestFormValue>);
     fixture.detectChanges();
 
-    const nameInput = fixture.nativeElement.querySelector('input[name="name"]');
-    const ageInput = fixture.nativeElement.querySelector('input[name="age"]');
+    const nameInput = fixture.nativeElement.querySelector('#name');
+    const ageInput = fixture.nativeElement.querySelector('#age');
 
     nameInput.value = 'Jane';
     nameInput.dispatchEvent(new Event('input'));
