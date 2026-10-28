@@ -20,4 +20,6 @@ public interface OrderService {
     );
 
     Flux<OrderReportResponseModel> findReportsByCustomerId(String customerId);
+
+    Flux<OrderReportResponseModel> getAllReports();
 }

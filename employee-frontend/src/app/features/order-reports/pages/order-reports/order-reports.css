@@ -1,0 +1,93 @@
+.reports-page {
+  padding: 24px;
+}
+
+.reports-header {
+  margin-bottom: 16px;
+}
+
+.reports-header h1 {
+  margin: 0;
+}
+
+.reports-header p {
+  margin: 8px 0 0;
+}
+
+.reports-table {
+  width: 100%;
+}
+
+.report-row {
+  cursor: pointer;
+}
+
+.report-row:hover {
+  background: var(--mat-sys-surface-container, #f5f5f5);
+}
+
+.cell-main {
+  font-weight: 500;
+}
+
+.cell-sub {
+  font-size: 0.85em;
+  color: var(--mat-sys-on-surface-variant, #666);
+}
+
+.link-button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--mat-sys-primary, #1565c0);
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.status {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.status-NEW {
+  background: #e3f2fd;
+  color: #0d47a1;
+}
+
+.status-IN_REVIEW {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.status-RESOLVED {
+  background: #d7f0dc;
+  color: #1b5e20;
+}
+
+.status-REJECTED {
+  background: #fde0e0;
+  color: #b71c1c;
+}
+
+.state-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 180px;
+  text-align: center;
+}
+
+.error-message {
+  color: var(--mat-sys-error, #b00020);
+}
+
+@media (width <= 560px) {
+  .reports-page {
+    padding: 16px;
+  }
+}

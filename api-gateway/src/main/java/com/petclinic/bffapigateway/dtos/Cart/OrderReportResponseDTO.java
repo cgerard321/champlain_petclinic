@@ -18,6 +18,7 @@ public class OrderReportResponseDTO {
     private String orderId;
     private String customerId;
     private String customerName;
+    private String customerEmail;
     private String reason;
     private List<AffectedItemDTO> affectedItems;
     private String description;

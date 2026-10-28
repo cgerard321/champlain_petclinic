@@ -1,0 +1,129 @@
+.average-review {
+  min-width: 0;
+  width: 100%;
+  color: inherit;
+}
+
+.average-review h3 {
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.average-review-box {
+  padding: 0;
+}
+
+.average-review-overall {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.average-review-score {
+  order: -1;
+  font-size: 2.5rem;
+  line-height: 1;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.average-review-stars .star-container {
+  align-items: center;
+}
+
+.average-review-count {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.average-review-categories {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.average-review-category h4 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.average-review-meter-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 4.5rem;
+  align-items: center;
+  gap: 1rem;
+}
+
+.average-review-meter-row > span {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.average-review-meter-row meter {
+  appearance: none;
+  width: 100%;
+  min-width: 0;
+  height: 0.5rem;
+  background: #e0e0e0;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.average-review-meter-row meter::-webkit-meter-bar {
+  background: #e0e0e0;
+  border: 0;
+  border-radius: 999px;
+  box-shadow: none;
+}
+
+.average-review-meter-row meter::-webkit-meter-optimum-value {
+  background: #222;
+  border-radius: 999px;
+}
+
+.average-review-meter-row meter::-moz-meter-bar {
+  background: #222;
+  border-radius: 999px;
+}
+
+.average-review-category {
+  display: grid;
+  grid-template-columns: minmax(8rem, 1fr) minmax(0, 1.5fr);
+  column-gap: 1rem;
+  align-items: center;
+}
+
+.average-review-category h4 {
+  grid-column: 1;
+  margin-bottom: 0;
+}
+
+.average-review-category > .average-review-count {
+  grid-column: 1;
+  margin-top: 0.2rem;
+}
+
+.average-review-category > .average-review-meter-row {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+@media (max-width: 420px) {
+  .average-review-category {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.4rem;
+  }
+
+  .average-review-category > .average-review-meter-row {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
