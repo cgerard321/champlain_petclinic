@@ -224,11 +224,14 @@
                 [ngModel]="filters().customerName"
                 (ngModelChange)="updateFilter('customerName', $event)"
               />
-               <button class="bill-secondary-action" type="button" (click)="addFilter('customerName')">
+              <button
+                class="bill-secondary-action"
+                type="button"
+                (click)="addFilter('customerName')"
+              >
                 Add
               </button>
             </label>
-
 
             <label>
               Veterinarian name
@@ -242,7 +245,6 @@
               </button>
             </label>
 
-
             <label>
               Visit type
               <select
@@ -254,12 +256,10 @@
                   <option [value]="visitType">{{ visitType }}</option>
                 }
               </select>
-                <button class="bill-secondary-action" type="button" (click)="addFilter('visitType')">
+              <button class="bill-secondary-action" type="button" (click)="addFilter('visitType')">
                 Add
               </button>
             </label>
-
-
 
             <label>
               Status
@@ -284,7 +284,7 @@
                 [value]="filters().year"
                 (input)="updateFilter('year', yearFilter.value)"
               />
-               <button class="bill-secondary-action" type="button" (click)="addFilter('year')">
+              <button class="bill-secondary-action" type="button" (click)="addFilter('year')">
                 Add
               </button>
             </label>
@@ -322,7 +322,7 @@
             <button class="bill-secondary-action" type="button" (click)="clearFilters()">
               Clear Filters
             </button>
-              <div class="bill-filter-tags" aria-label="Selected filters">
+            <div class="bill-filter-tags" aria-label="Selected filters">
               @for (field of filterFields; track field.key) {
                 @for (value of savedFilters()[field.key]; track value) {
                   <button

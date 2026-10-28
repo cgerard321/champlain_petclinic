@@ -599,7 +599,6 @@ export class Bill implements OnInit {
   protected readonly showArchivedBills = signal(false);
 
   protected readonly displayedBills = computed(() => {
-
     const filters = this.savedFilters();
     const searchQuery = this.billSearchQuery();
 
@@ -620,24 +619,17 @@ export class Bill implements OnInit {
 
       return (
         matchesArchive &&
-
-      (
-          customerName.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
-          vetName.toLowerCase().includes(searchQuery.trim().toLowerCase())
-        ) &&
-        (
-          !this.canViewBills() ||
-          (
-      
-            matchesText(bill.customerId, filters.customerId) &&
+        (customerName.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+          vetName.toLowerCase().includes(searchQuery.trim().toLowerCase())) &&
+        (!this.canViewBills() ||
+          (matchesText(bill.customerId, filters.customerId) &&
             matchesText(customerName, filters.customerName) &&
             matchesText(vetName, filters.vetName) &&
-             (filters.visitType.length === 0 || filters.visitType.includes(bill.visitType)) &&
+            (filters.visitType.length === 0 || filters.visitType.includes(bill.visitType)) &&
             (filters.status.length === 0 || filters.status.includes(bill.billStatus)) &&
             (filters.year.length === 0 || filters.year.includes(String(bill.date.getFullYear()))) &&
-            (filters.month.length === 0 || filters.month.includes(String(bill.date.getMonth() + 1)))
-          )
-        )
+            (filters.month.length === 0 ||
+              filters.month.includes(String(bill.date.getMonth() + 1)))))
       );
     });
   });
