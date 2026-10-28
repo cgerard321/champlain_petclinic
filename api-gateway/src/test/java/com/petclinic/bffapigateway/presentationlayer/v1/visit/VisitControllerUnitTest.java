@@ -13,6 +13,8 @@ import com.petclinic.bffapigateway.dtos.Visits.Status;
 import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VetNoteRequestDTO;
+import com.petclinic.bffapigateway.dtos.Visits.RescheduleRequestDTO;
+import com.petclinic.bffapigateway.exceptions.ForbiddenAccessException;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
@@ -1343,4 +1345,96 @@ public class VisitControllerUnitTest {
 
 
 
+    @Test
+    void confirmFollowUpVisit_whenOwnerOfPet_thenReturnConfirmedVisit() {
+        VisitResponseDTO followUp = VisitResponseDTO.builder().visitId("V002").petId("P001").followUpOfVisitId("V001").status(Status.UPCOMING).build();
+        VisitResponseDTO confirmed = VisitResponseDTO.builder().visitId("V002").petId("P001").followUpOfVisitId("V001").status(Status.CONFIRMED).build();
+        when(visitsServiceClient.getVisitByVisitId("V002", false)).thenReturn(Mono.just(followUp));
+        when(customersServiceClient.getPetByPetId("P001", false))
+                .thenReturn(Mono.just(PetResponseDTO.builder().petId("P001").customerId("owner-1").build()));
+        when(visitsServiceClient.confirmFollowUpVisit("V002")).thenReturn(Mono.just(confirmed));
+
+        StepVerifier.create(visitsControllerV1.confirmFollowUpVisit("V002", exchangeForOwner("owner-1")))
+                .expectNextMatches(response -> response.getBody().getStatus() == Status.CONFIRMED)
+                .verifyComplete();
+    }
+
+    @Test
+    void confirmFollowUpVisit_whenOtherOwner_thenThrowForbidden() {
+        VisitResponseDTO followUp = VisitResponseDTO.builder().visitId("V002").petId("P001").followUpOfVisitId("V001").build();
+        when(visitsServiceClient.getVisitByVisitId("V002", false)).thenReturn(Mono.just(followUp));
+        when(customersServiceClient.getPetByPetId("P001", false))
+                .thenReturn(Mono.just(PetResponseDTO.builder().petId("P001").customerId("owner-1").build()));
+
+        StepVerifier.create(visitsControllerV1.confirmFollowUpVisit("V002", exchangeForOwner("owner-2")))
+                .expectError(ForbiddenAccessException.class)
+                .verify();
+
+        verify(visitsServiceClient, never()).confirmFollowUpVisit(any());
+    }
+
+    @Test
+    void confirmFollowUpVisit_whenVisitDoesNotExist_thenReturnNotFound() {
+        when(visitsServiceClient.getVisitByVisitId("INVALID", false)).thenReturn(Mono.empty());
+
+        StepVerifier.create(visitsControllerV1.confirmFollowUpVisit("INVALID", exchangeForOwner("owner-1")))
+                .expectNextMatches(response -> response.getStatusCode() == HttpStatus.NOT_FOUND)
+                .verifyComplete();
+    }
+
+    @Test
+    void rescheduleFollowUpVisit_whenOwnerOfPet_thenReturnRescheduledVisit() {
+        LocalDateTime newDate = LocalDateTime.of(2030, 1, 15, 9, 0);
+        RescheduleRequestDTO request = RescheduleRequestDTO.builder().visitDate(newDate).build();
+        VisitResponseDTO followUp = VisitResponseDTO.builder().visitId("V002").petId("P001").followUpOfVisitId("V001").status(Status.CONFIRMED).build();
+        VisitResponseDTO rescheduled = VisitResponseDTO.builder().visitId("V002").petId("P001").visitDate(newDate).status(Status.UPCOMING).build();
+        when(visitsServiceClient.getVisitByVisitId("V002", false)).thenReturn(Mono.just(followUp));
+        when(customersServiceClient.getPetByPetId("P001", false))
+                .thenReturn(Mono.just(PetResponseDTO.builder().petId("P001").customerId("owner-1").build()));
+        when(visitsServiceClient.rescheduleFollowUpVisit("V002", request)).thenReturn(Mono.just(rescheduled));
+
+        StepVerifier.create(visitsControllerV1.rescheduleFollowUpVisit("V002", request, exchangeForOwner("owner-1")))
+                .expectNextMatches(response -> newDate.equals(response.getBody().getVisitDate())
+                        && response.getBody().getStatus() == Status.UPCOMING)
+                .verifyComplete();
+    }
+
+    @Test
+    void rescheduleFollowUpVisit_whenOtherOwner_thenThrowForbidden() {
+        RescheduleRequestDTO request = RescheduleRequestDTO.builder().visitDate(LocalDateTime.of(2030, 1, 15, 9, 0)).build();
+        VisitResponseDTO followUp = VisitResponseDTO.builder().visitId("V002").petId("P001").followUpOfVisitId("V001").build();
+        when(visitsServiceClient.getVisitByVisitId("V002", false)).thenReturn(Mono.just(followUp));
+        when(customersServiceClient.getPetByPetId("P001", false))
+                .thenReturn(Mono.just(PetResponseDTO.builder().petId("P001").customerId("owner-1").build()));
+
+        StepVerifier.create(visitsControllerV1.rescheduleFollowUpVisit("V002", request, exchangeForOwner("owner-2")))
+                .expectError(ForbiddenAccessException.class)
+                .verify();
+
+        verify(visitsServiceClient, never()).rescheduleFollowUpVisit(any(), any());
+    }
+    @Test
+    void sendMyWeeklyScheduleEmail_whenVetTokenExists_returnsQueuedMessage() {
+        when(visitsServiceClient.sendWeeklyScheduleEmail("vet-1")).thenReturn(Mono.just("Message queued"));
+
+        StepVerifier.create(visitsControllerV1.sendMyWeeklyScheduleEmail(exchangeForVet("vet-1")))
+                .assertNext(response -> {
+                    assertEquals(HttpStatus.OK, response.getStatusCode());
+                    assertEquals("Message queued", response.getBody());
+                })
+                .verifyComplete();
+
+        verify(visitsServiceClient).sendWeeklyScheduleEmail("vet-1");
+    }
+
+    @Test
+    void sendMyWeeklyScheduleEmail_whenTokenIsMissing_returnsUnauthorized() {
+        MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get(BASE_VISIT_URL));
+
+        StepVerifier.create(visitsControllerV1.sendMyWeeklyScheduleEmail(exchange))
+                .assertNext(response -> assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode()))
+                .verifyComplete();
+
+        verify(visitsServiceClient, never()).sendWeeklyScheduleEmail(anyString());
+    }
 }

@@ -8,8 +8,16 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public interface OrderService {
-    Mono<OrderResponseModel> createOrder(Cart cart);
+    Mono<OrderResponseModel> createOrder(Cart cart, BillingRequestModel billing);
     Mono<OrderResponseModel> getOrderByOrderId(String orderId);
     Flux<OrderResponseModel> getAllOrders();
     Flux<OrderResponseModel>  findOrdersByCustomerId(String customerId);
+
+    Mono<OrderReportResponseModel> createOrderReport(
+            String customerId,
+            String orderId,
+            CreateOrderReportRequestModel request
+    );
+
+    Flux<OrderReportResponseModel> findReportsByCustomerId(String customerId);
 }

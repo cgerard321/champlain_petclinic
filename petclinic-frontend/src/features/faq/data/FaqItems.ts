@@ -128,3 +128,12 @@ export function groupFaqByCategory(
     return acc;
   }, {});
 }
+export function getLocalizedFaqItems(t: TFunction): FaqItem[] {
+  return FAQ_ITEMS.map(item => ({
+    ...item,
+    question: t(`items.${item.id}.question`),
+    answer: t(`items.${item.id}.answer`, {
+      hours: formatHours(t),
+    }),
+  }));
+}

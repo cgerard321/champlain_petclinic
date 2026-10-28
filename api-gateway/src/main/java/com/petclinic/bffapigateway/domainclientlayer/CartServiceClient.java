@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Cart.*;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
@@ -322,10 +324,12 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .bodyToMono(CartResponseDTO.class);
     }
 
-    public Mono<CartResponseDTO> checkoutCart(final String cartId) {
+    public Mono<CartResponseDTO> checkoutCart(final String cartId, BillingRequestDTO billing) {
         return webClientBuilder.build()
                 .post()
                 .uri(cartServiceUrl + "/" + cartId + "/checkout")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(billing)
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class);
     }
@@ -415,19 +419,20 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<CartProductResponseDTO>>() {});
     }
-    public Mono<CartResponseDTO> applyPromoToCart(String cartId, Double promoPercent) {
-        if (promoPercent == null) {
-            return Mono.error(new InvalidInputException("promoPercent must be provided"));
+    public Mono<CartResponseDTO> applyPromoCodeToCart(String cartId, String promoCode) {
+        if (promoCode == null || promoCode.isBlank()) {
+            return Mono.error(new InvalidInputException("Promo code must be provided"));
         }
-
-        ApplyPromoRequestDTO payload = new ApplyPromoRequestDTO(promoPercent);
-
-        return webClientBuilder.build()
-                .put()
+        return webClientBuilder.build().put()
                 .uri(cartServiceUrl + "/{cartId}/promo", cartId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
+                .bodyValue(Map.of("promoCode", promoCode.trim()))
                 .retrieve()
+                .onStatus(status -> status.value() == 400 || status.value() == 422,
+                        response -> response.bodyToMono(CartResponseDTO.class)
+                                .map(body -> new InvalidInputException(body.getMessage() == null
+                                        ? "Promo code cannot be applied" : body.getMessage()))
+                                .defaultIfEmpty(new InvalidInputException("Promo code cannot be applied")))
                 .bodyToMono(CartResponseDTO.class);
     }
 
@@ -481,4 +486,85 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                     .retrieve()
                     .bodyToFlux(OrderResponseDTO.class);
         }
+
+    public Mono<OrderReportResponseDTO> createOrderReport(
+            String customerId,
+            String orderId,
+            OrderReportRequestDTO request
+    ) {
+        return webClientBuilder.build()
+                .post()
+                .uri(
+                        ordersServiceUrl()
+                                + "/customer/{customerId}/{orderId}/reports",
+                        customerId,
+                        orderId
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        this::mapOrderReportError
+                )
+                .bodyToMono(OrderReportResponseDTO.class);
+    }
+
+    public Flux<OrderReportResponseDTO> getCustomerOrderReports(
+            String customerId
+    ) {
+        return webClientBuilder.build()
+                .get()
+                .uri(
+                        ordersServiceUrl()
+                                + "/customer/{customerId}/reports",
+                        customerId
+                )
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        this::mapOrderReportError
+                )
+                .bodyToFlux(OrderReportResponseDTO.class);
+    }
+
+    private String ordersServiceUrl() {
+        return cartServiceUrl.replace(
+                "/api/v1/carts",
+                "/api/v1/orders"
+        );
+    }
+
+    private Mono<? extends Throwable> mapOrderReportError(
+            ClientResponse response
+    ) {
+        HttpStatus resolvedStatus = HttpStatus.resolve(
+                response.statusCode().value()
+        );
+        HttpStatus status = resolvedStatus == null
+                ? HttpStatus.BAD_GATEWAY
+                : resolvedStatus;
+
+        GenericHttpException fallback = new GenericHttpException(
+                "Order report request failed",
+                status
+        );
+
+        return response.bodyToMono(
+                        new ParameterizedTypeReference<Map<String, Object>>() {
+                        }
+                )
+                .map(body -> {
+                    Object message = body.get("message");
+                    return new GenericHttpException(
+                            message == null
+                                    ? "Order report request failed"
+                                    : String.valueOf(message),
+                            status
+                    );
+                })
+                .switchIfEmpty(Mono.just(fallback))
+                .onErrorReturn(fallback);
+    }
 }

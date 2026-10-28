@@ -9,6 +9,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTab, MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
 import {
   catchError,
   debounceTime,
@@ -23,6 +24,7 @@ import {
 import { isApiError } from '@core/models/api-error';
 import { AuthState } from '@core/services/auth-state';
 import { ProductAddDialog } from '@features/prod/components/product-add-dialog/product-add-dialog';
+import { ProductBundleList } from '@features/prod/components/product-bundle-list/product-bundle-list';
 import { ProductDeleteDialog } from '@features/prod/components/product-delete-dialog/product-delete-dialog';
 import { ProductDetailsDialog } from '@features/prod/components/product-details-dialog/product-details-dialog';
 import { ProductThumbnail } from '@features/prod/components/product-thumbnail/product-thumbnail';
@@ -43,6 +45,9 @@ import { Roles } from '@shared/models/roles';
     MatInputModule,
     MatProgressSpinnerModule,
     ProductThumbnail,
+    MatTabGroup,
+    MatTab,
+    ProductBundleList,
   ],
   selector: 'app-prod',
   styleUrl: './prod.css',
@@ -73,6 +78,9 @@ export class Prod implements OnInit {
     const roles = this.auth.roles();
     return roles.includes(Roles.admin) || roles.includes(Roles.inventoryManager);
   });
+  protected readonly selectedTabIndex = signal<number>(
+    Number(sessionStorage.getItem('productSelectedTabIndex') ?? 0),
+  );
 
   ngOnInit(): void {
     merge(
@@ -270,5 +278,9 @@ export class Prod implements OnInit {
       (error instanceof HttpErrorResponse && error.status === 409) ||
       (isApiError(error) && String(error.code) === '409')
     );
+  }
+
+  protected handleSelectedTabChange(event: MatTabChangeEvent): void {
+    sessionStorage.setItem('productSelectedTabIndex', event.index.toString());
   }
 }
