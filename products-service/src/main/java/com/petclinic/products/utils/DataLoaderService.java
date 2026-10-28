@@ -948,6 +948,19 @@ public class DataLoaderService implements CommandLineRunner {
                         rating1prod8, rating2prod8, rating3prod8
                 ));
         seededRatings.addAll(additionalRatingSeeds);
+        // Demo fixtures only: vary category scores without changing overall ratings.
+        // saveSeededRatings skips existing rows, including customer-edited reviews.
+        int[][] categoryProfiles = {
+                {5, 4, 5, 4}, {4, 3, 4, 5}, {3, 4, 2, 3}, {2, 3, 4, 2}
+        };
+        for (int index = 0; index < seededRatings.size(); index++) {
+            Rating seed = seededRatings.get(index);
+            int[] scores = categoryProfiles[index % categoryProfiles.length];
+            seed.setQualityRating((byte) scores[0]);
+            seed.setValueRating((byte) scores[1]);
+            seed.setPetSatisfactionRating((byte) scores[2]);
+            seed.setIngredientsRating((byte) scores[3]);
+        }
 
         List<ProductTypeDb> seededProductTypes = List.of(
                 productType1, productType2, productType3, productType4);

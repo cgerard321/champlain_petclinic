@@ -178,7 +178,20 @@ class DataLoaderServiceTest {
 
         dataLoaderService.run();
 
-        verify(ratingRepository, times(220)).save(any(Rating.class));
+        var saved = org.mockito.ArgumentCaptor.forClass(Rating.class);
+        verify(ratingRepository, times(220)).save(saved.capture());
+        Set<String> productsWithCategoryRatings = new HashSet<>();
+        Set<Byte> qualityScores = new HashSet<>();
+        for (Rating seed : saved.getAllValues()) {
+            for (Byte score : java.util.List.of(seed.getQualityRating(), seed.getValueRating(),
+                    seed.getPetSatisfactionRating(), seed.getIngredientsRating())) {
+                assertTrue(score >= 1 && score <= 5);
+            }
+            productsWithCategoryRatings.add(seed.getProductId());
+            qualityScores.add(seed.getQualityRating());
+        }
+        org.junit.jupiter.api.Assertions.assertEquals(40, productsWithCategoryRatings.size());
+        assertTrue(qualityScores.size() > 1);
     }
 
     @Test
