@@ -40,14 +40,11 @@ export function AverageReview({
           <p>{t('averageReview.empty')}</p>
         ) : (
           <>
-            <div className="average-review-meter-row">
-              <meter
-                min={0}
-                max={5}
-                value={average}
-                aria-labelledby={headingId}
-              />
-              <span>
+            <div className="average-review-overall">
+              <div className="average-review-stars" aria-hidden="true">
+                <StarRating currentRating={average} viewOnly={true} />
+              </div>
+              <span className="average-review-score">
                 {t('averageReview.score', {
                   value: average.toLocaleString(
                     i18n.resolvedLanguage || i18n.language,
@@ -105,11 +102,6 @@ export function AverageReview({
           </div>
         )}
       </div>
-      {status === 'ready' && average !== null && (
-        <div className="average-review-stars" aria-hidden="true">
-          <StarRating currentRating={average} viewOnly={true} />
-        </div>
-      )}
     </section>
   );
 }

@@ -681,13 +681,17 @@
 
 /* Keep the average box, rating distribution, and written reviews separate. */
 .reviewproduct-container > .rating-summary-container {
-  gap: 2rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 3rem;
   padding-bottom: 1.5rem;
   margin-bottom: 0;
 }
 
 .reviewproduct-container .rating-breakdown {
-  margin-left: auto;
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
 }
 
 .reviewproduct-container > .rating-section-separator {
@@ -696,7 +700,8 @@
 
 @media (max-width: 700px) {
   .reviewproduct-container > .rating-summary-container {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2rem;
   }
 
   .reviewproduct-container .rating-breakdown {
