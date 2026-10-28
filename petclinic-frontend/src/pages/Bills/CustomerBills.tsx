@@ -3,7 +3,6 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import BillsListTable from '@/features/bills/BillsListTable.tsx';
 import CurrentBalance from '@/features/bills/CurrentBalance';
 import { Currency } from '@/features/bills/utils/convertCurrency';
-import '@/features/bills/AdminBillsListTable.css';
 import './CustomerBills.css';
 
 export default function CustomerBillingPage(): JSX.Element {
