@@ -156,6 +156,25 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    public Flux<CustomerResponseDTO> getSoftDeletedCustomers() {
+        return customerRepo.findAll()
+                .filter(customer -> Boolean.FALSE.equals(customer.getIsActive()))
+                .map(EntityDTOUtil::toCustomerReponseDTO);
+    }
+
+    @Override
+    public Mono<CustomerResponseDTO> reactivateCustomerByCustomerId(String customerId) {
+        return customerRepo.findCustomerByCustomerId(customerId)
+                .filter(customer -> Boolean.FALSE.equals(customer.getIsActive()))
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Soft-deleted customer not found: " + customerId))))
+                .flatMap(customer -> {
+                    customer.setIsActive(true);
+                    return customerRepo.save(customer);
+                })
+                .map(EntityDTOUtil::toCustomerReponseDTO);
+    }
+
+    @Override
     public Mono<Long> getTotalNumberOfCustomersWithFilters(String customerId, String firstName, String lastName, String phoneNumber, String city) {
          Predicate<Customer> filterCriteria = customer ->
                 (customerId == null || customer.getCustomerId().equals(customerId)) &&
