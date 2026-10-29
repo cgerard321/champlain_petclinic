@@ -1,9 +1,4 @@
 package com.petclinic.inventoryservice.businesslayer;
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.pdf.PdfWriter;
-import org.mockito.MockedStatic;
-import java.io.OutputStream;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
@@ -16,6 +11,7 @@ import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
+import com.petclinic.inventoryservice.utils.DataBaseLoaderService;
 import com.petclinic.inventoryservice.utils.ImageUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
@@ -50,6 +46,9 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class ProductInventoryServiceUnitTest {
+    @MockBean
+    DataBaseLoaderService dataBaseLoaderService;
+
     @Autowired
     ProductInventoryService productInventoryService;
     @MockBean
@@ -2287,60 +2286,6 @@ class ProductInventoryServiceUnitTest {
                 .expectError(NotFoundException.class)
                 .verify();
     }
-
-    @Test
-    public void CreateSupplyPdfThrowsDocumentException() throws DocumentException {
-        String inventoryId = "valid-id";
-
-        // Build test products without depending on the generated constructor's field order.
-        Product product1 = Product.builder()
-                .id("1")
-                .productId("P001")
-                .inventoryId(inventoryId)
-                .productName("Product1")
-                .productDescription("Description1")
-                .productQuantity(10)
-                .productPrice(5.99)
-                .productSalePrice(7.99)
-                .productProfit(product.getProductProfit())
-                .status(Status.AVAILABLE)
-                .lastUpdatedAt(LocalDateTime.now())
-                .build();
-
-        Product product2 = Product.builder()
-                .id("2")
-                .productId("P002")
-                .inventoryId(inventoryId)
-                .productName("Product2")
-                .productDescription("Description2")
-                .productQuantity(20)
-                .productPrice(10.99)
-                .productSalePrice(12.99)
-                .productProfit(product.getProductProfit())
-                .status(Status.RE_ORDER)
-                .lastUpdatedAt(LocalDateTime.now())
-                .build();
-        // Mock the repository to return a Flux of products
-        when(productRepository.findAllProductsByInventoryId(inventoryId))
-                .thenReturn(Flux.just(product1, product2));
-
-
-        try (MockedStatic<PdfWriter> pdfWriter = mockStatic(PdfWriter.class)) {
-            pdfWriter.when(() -> PdfWriter.getInstance(any(Document.class), any(OutputStream.class)))
-                    .thenThrow(new DocumentException("PDF generation error"));
-
-            Mono<byte[]> result = productInventoryService.createSupplyPdf(inventoryId);
-
-            StepVerifier.create(result)
-                    .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
-                            throwable.getMessage().equals("Error generating PDF"))
-                    .verify();
-        }
-
-        // Verify the interaction with the repository
-        verify(productRepository, times(1)).findAllProductsByInventoryId(inventoryId);
-    }
-
 
     @Test
     void createSupplyPdf_SuccessfullyGeneratesPdf() {

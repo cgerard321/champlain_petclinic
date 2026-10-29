@@ -511,7 +511,9 @@ public class InventoryServiceClient {
         return webClient.get()
                 .uri(builder -> {
                     builder.path("/{inventoryId}/products/download");
-                    if (language != null) builder.queryParam("lang", language);
+                    if (language != null) {
+                        builder.queryParam("lang", language);
+                    }
                     return builder.build(inventoryId);
                 })
                 .accept(MediaType.APPLICATION_PDF) // Expect PDF response

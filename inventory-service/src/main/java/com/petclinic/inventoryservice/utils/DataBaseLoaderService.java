@@ -26,53 +26,51 @@ public class DataBaseLoaderService implements CommandLineRunner {
     InventoryTypeRepository inventoryTypeRepository;
     @Autowired
     InventoryNameRepository inventoryNameRepository;
+    @Autowired
+    LocalizedNameIndexes localizedNameIndexes;
 
     @Override
     public void run(String... args) throws Exception {
 
-        // If the db is not empty, then return
-        try {
-            // Upgrade records written before bilingual fields existed without changing their text.
-            inventoryRepository.findAll()
-                    .filter(inventory -> needsMigration(inventory.getName())
-                            || needsMigration(inventory.getDescription())
-                            || (inventory.getProducts() != null && inventory.getProducts().stream().anyMatch(
-                            product -> needsMigration(product.getName()) || needsMigration(product.getDescription()))))
-                    .flatMap(inventory -> {
-                        inventory.setName(LocalizedContent.stored(inventory.getName(), inventory.getInventoryName()));
-                        inventory.setDescription(LocalizedContent.stored(inventory.getDescription(), inventory.getInventoryDescription()));
-                        if (inventory.getProducts() != null) {
-                            for (Product product : inventory.getProducts()) {
-                                product.setName(LocalizedContent.stored(product.getName(), product.getProductName()));
-                                product.setDescription(LocalizedContent.stored(product.getDescription(), product.getProductDescription()));
-                            }
+        // Finish migration before startup completes so requests see both languages.
+        inventoryRepository.findAll()
+                .filter(inventory -> needsMigration(inventory.getName())
+                        || needsMigration(inventory.getDescription())
+                        || (inventory.getProducts() != null && inventory.getProducts().stream().anyMatch(
+                        product -> needsMigration(product.getName()) || needsMigration(product.getDescription()))))
+                .flatMap(inventory -> {
+                    inventory.setName(LocalizedContent.stored(inventory.getName(), inventory.getInventoryName()));
+                    inventory.setDescription(LocalizedContent.stored(inventory.getDescription(), inventory.getInventoryDescription()));
+                    if (inventory.getProducts() != null) {
+                        for (Product product : inventory.getProducts()) {
+                            product.setName(LocalizedContent.stored(product.getName(), product.getProductName()));
+                            product.setDescription(LocalizedContent.stored(product.getDescription(), product.getProductDescription()));
                         }
-                        return inventoryRepository.save(inventory);
-                    }).then().block();
-            productRepository.findAll()
-                    .filter(product -> needsMigration(product.getName()) || needsMigration(product.getDescription()))
-                    .flatMap(product -> {
-                        product.setName(LocalizedContent.stored(product.getName(), product.getProductName()));
-                        product.setDescription(LocalizedContent.stored(product.getDescription(), product.getProductDescription()));
-                        return productRepository.save(product);
-                    }).then().block();
-            if (Boolean.TRUE.equals(inventoryRepository.findAll().hasElements().block())) {
-                return;
-            }
+                    }
+                    return inventoryRepository.save(inventory);
+                }).then().block();
+        productRepository.findAll()
+                .filter(product -> needsMigration(product.getName()) || needsMigration(product.getDescription()))
+                .flatMap(product -> {
+                    product.setName(LocalizedContent.stored(product.getName(), product.getProductName()));
+                    product.setDescription(LocalizedContent.stored(product.getDescription(), product.getProductDescription()));
+                    return productRepository.save(product);
+                }).then().block();
+        localizedNameIndexes.ensureIndexes().block();
 
-            if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) {
-                return;
-            }
+        if (Boolean.TRUE.equals(inventoryRepository.findAll().hasElements().block())) {
+            return;
+        }
 
-            if (Boolean.TRUE.equals(inventoryTypeRepository.findAll().hasElements().block())) {
-                return;
-            }
+        if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) {
+            return;
+        }
 
-            if (Boolean.TRUE.equals(inventoryNameRepository.findAll().hasElements().block())) {
-                return;
-            }
-        } catch (Exception e) {
-            System.out.println("Database connection error: " + e.getMessage());
+        if (Boolean.TRUE.equals(inventoryTypeRepository.findAll().hasElements().block())) {
+            return;
+        }
+
+        if (Boolean.TRUE.equals(inventoryNameRepository.findAll().hasElements().block())) {
             return;
         }
 
@@ -695,8 +693,14 @@ public class DataBaseLoaderService implements CommandLineRunner {
         //--------------------------------------------------------------
 
 
-        JsonNode translations = new ObjectMapper().readTree(
-                getClass().getResourceAsStream("/seed-localizations.json"));
+        // This dictionary supplies starter data only; staff enter translations for later records.
+        JsonNode translations;
+        try (InputStream source = getClass().getResourceAsStream("/seed-localizations.json")) {
+            if (source == null) {
+                throw new IllegalStateException("Missing seed-localizations.json");
+            }
+            translations = new ObjectMapper().readTree(source);
+        }
         for (Inventory inventory : new Inventory[]{inventory1, inventory2, inventory3, inventory4, inventory5,
                 inventory6, inventory7, inventory8, inventory9, inventory10}) {
             inventory.setName(seedText(translations.path("inventories").path("names"), inventory.getInventoryName()));

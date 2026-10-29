@@ -7,6 +7,7 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepositor
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
 import com.petclinic.inventoryservice.utils.InventoryValidator;
+import com.petclinic.inventoryservice.utils.SupplyReportPdfGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -27,7 +28,7 @@ class ProductInventoryServiceSearchTest {
     private final InventoryRepository inventoryRepository = mock(InventoryRepository.class);
     private final ProductInventoryServiceImpl service = new ProductInventoryServiceImpl(
             inventoryRepository, productRepository, mock(InventoryTypeRepository.class),
-            mock(InventoryValidator.class), mock(SupplyAuditRepository.class));
+            mock(InventoryValidator.class), mock(SupplyAuditRepository.class), new SupplyReportPdfGenerator());
 
     @BeforeEach
     void setUp() {

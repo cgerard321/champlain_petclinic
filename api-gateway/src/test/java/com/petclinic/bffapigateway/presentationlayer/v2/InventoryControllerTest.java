@@ -56,6 +56,46 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @AutoConfigureWebTestClient
 @Import(InventoryControllerTest.TestActorConfiguration.class)
 public class InventoryControllerTest {
+    @Test
+    void frenchSupplyPdf_shouldForwardLanguageAndReturnDownload() {
+        byte[] pdf = "%PDF-fr".getBytes(StandardCharsets.UTF_8);
+        when(inventoryServiceClient.createSupplyPdf("inv1", "fr")).thenReturn(Mono.just(pdf));
+
+        client.get().uri(baseInventoryURL + "/inv1/products/download?lang=fr")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Disposition", "attachment; filename=\"inventory_report.pdf\"")
+                .expectBody(byte[].class).isEqualTo(pdf);
+
+        verify(inventoryServiceClient).createSupplyPdf("inv1", "fr");
+    }
+
+    @Test
+    void inventorySearch_shouldUseDefaultPaginationAndPreserveFrenchQuery() {
+        when(inventoryServiceClient.searchInventory(Optional.of(0), Optional.of(10), null,
+                "Bandages français", null, "Soins des plaies", null))
+                .thenReturn(Flux.just(InventoryResponseDTO.builder()
+                        .inventoryId("inv1")
+                        .name(Map.of("en", "Bandages", "fr", "Bandages français"))
+                        .description(Map.of("en", "Wound care", "fr", "Soins des plaies"))
+                        .build()));
+
+        client.get().uri(uri -> uri.path(baseInventoryURL)
+                        .queryParam("inventoryName", "Bandages français")
+                        .queryParam("inventoryDescription", "Soins des plaies")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(1)
+                .consumeWith(response -> assertEquals("Bandages français",
+                        response.getResponseBody().get(0).getName().get("fr")));
+
+        verify(inventoryServiceClient).searchInventory(Optional.of(0), Optional.of(10), null,
+                "Bandages français", null, "Soins des plaies", null);
+    }
+
     @TestConfiguration
     static class TestActorConfiguration {
         @Bean

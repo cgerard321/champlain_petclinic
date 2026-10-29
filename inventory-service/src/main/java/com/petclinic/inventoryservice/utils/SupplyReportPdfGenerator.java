@@ -18,14 +18,18 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfPageEventHelper;
 import com.lowagie.text.pdf.PdfWriter;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
+import org.springframework.stereotype.Component;
 
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Locale;
 
 
+@Component
 public final class SupplyReportPdfGenerator {
 
     // employee-frontend theme colours
@@ -52,33 +56,37 @@ public final class SupplyReportPdfGenerator {
     private static final Font CELL_LOSS = FontFactory.getFont(FontFactory.HELVETICA, 9, ERROR);
     private static final Font CELL_BOLD = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 9, HEADING);
 
-    private static final String[] COLUMNS = {"Product", "Qty", "Description", "Regular", "Sale", "Profit"};
+    private static final String[] ENGLISH_COLUMNS = {"Product", "Qty", "Description", "Regular", "Sale", "Profit"};
+    private static final String[] FRENCH_COLUMNS = {"Article", "Qté", "Description", "Prix régulier", "Prix de vente", "Bénéfice"};
     private static final float[] COLUMN_WIDTHS = {3.2f, 1f, 3.6f, 1.4f, 1.4f, 1.4f};
 
     private static final float BAR_HEIGHT = 40;
 
-    private SupplyReportPdfGenerator() {
-    }
-
-    public static byte[] generate(String inventoryId, List<Product> supplies) throws DocumentException {
+    public byte[] generate(String inventoryId, List<Product> supplies) throws DocumentException {
         return generate(inventoryId, supplies, "en");
     }
 
-    public static byte[] generate(String inventoryId, List<Product> supplies, String language) throws DocumentException {
+    public byte[] generate(String inventoryId, List<Product> supplies, String language) throws DocumentException {
+        boolean french = language != null && language.toLowerCase(Locale.ROOT).startsWith("fr");
+        String contentLanguage = french ? "fr" : "en";
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4, 40, 40, BAR_HEIGHT + 28, BAR_HEIGHT + 24);
         PdfWriter writer = PdfWriter.getInstance(document, out);
-        writer.setPageEvent(new PortalHeaderAndFooter());
+        writer.setPageEvent(new PortalHeaderAndFooter(french));
 
         document.open();
-        document.add(badge("INVENTORY REPORT"));
-        Paragraph title = new Paragraph("Supplies Report", TITLE);
+        document.add(badge(french ? "RAPPORT D'INVENTAIRE" : "INVENTORY REPORT"));
+        Paragraph title = new Paragraph(french ? "Rapport des articles" : "Supplies Report", TITLE);
         title.setSpacingBefore(8);
         document.add(title);
-        Paragraph meta = new Paragraph("Inventory ID: " + inventoryId + "    Generated " + LocalDate.now(), META);
+        String date = french
+                ? LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(Locale.CANADA_FRENCH))
+                : LocalDate.now().toString();
+        Paragraph meta = new Paragraph((french ? "ID de l'inventaire: " : "Inventory ID: ")
+                + inventoryId + (french ? "    Généré le " : "    Generated ") + date, META);
         meta.setSpacingBefore(2);
         document.add(meta);
-        document.add(buildTable(supplies, language));
+        document.add(buildTable(supplies, contentLanguage));
         document.close();
 
         return out.toByteArray();
@@ -100,17 +108,18 @@ public final class SupplyReportPdfGenerator {
     }
 
     private static PdfPTable buildTable(List<Product> supplies, String language) {
+        boolean french = "fr".equals(language);
         PdfPTable table = new PdfPTable(COLUMN_WIDTHS);
         table.setWidthPercentage(100);
         table.setSpacingBefore(16);
         table.setHeaderRows(1);
 
-        for (String column : COLUMNS) {
+        for (String column : french ? FRENCH_COLUMNS : ENGLISH_COLUMNS) {
             PdfPCell cell = new PdfPCell(new Phrase(column, HEADER));
             cell.setBackgroundColor(FOREST_700);
             cell.setBorderColor(FOREST_700);
             cell.setPadding(7);
-            boolean isText = column.equals("Product") || column.equals("Description");
+            boolean isText = column.equals(french ? "Article" : "Product") || column.equals("Description");
             cell.setHorizontalAlignment(isText ? Element.ALIGN_LEFT : Element.ALIGN_RIGHT);
             table.addCell(cell);
         }
@@ -126,13 +135,16 @@ public final class SupplyReportPdfGenerator {
             table.addCell(cell(LocalizedContent.get(supply.getName(), language, supply.getProductName()), CELL, background, Element.ALIGN_LEFT));
             table.addCell(cell(String.valueOf(quantity), CELL, background, Element.ALIGN_RIGHT));
             table.addCell(cell(LocalizedContent.get(supply.getDescription(), language, supply.getProductDescription()), CELL, background, Element.ALIGN_LEFT));
-            table.addCell(cell(money(supply.getProductPrice()), CELL, background, Element.ALIGN_RIGHT));
-            table.addCell(cell(money(supply.getProductSalePrice()), CELL, background, Element.ALIGN_RIGHT));
+            table.addCell(cell(money(supply.getProductPrice(), french), CELL, background, Element.ALIGN_RIGHT));
+            table.addCell(cell(money(supply.getProductSalePrice(), french), CELL, background, Element.ALIGN_RIGHT));
             Font profitFont = profit != null && profit < 0 ? CELL_LOSS : CELL;
-            table.addCell(cell(money(profit), profitFont, background, Element.ALIGN_RIGHT));
+            table.addCell(cell(money(profit, french), profitFont, background, Element.ALIGN_RIGHT));
         }
 
-        table.addCell(cell("Total (" + supplies.size() + " products)", CELL_BOLD, SAGE_100, Element.ALIGN_LEFT));
+        String totalLabel = french
+                ? "Total (" + supplies.size() + (supplies.size() == 1 ? " article)" : " articles)")
+                : "Total (" + supplies.size() + " products)";
+        table.addCell(cell(totalLabel, CELL_BOLD, SAGE_100, Element.ALIGN_LEFT));
         table.addCell(cell(String.valueOf(totalQuantity), CELL_BOLD, SAGE_100, Element.ALIGN_RIGHT));
         PdfPCell filler = cell("", CELL, SAGE_100, Element.ALIGN_LEFT);
         filler.setColspan(4);
@@ -157,11 +169,13 @@ public final class SupplyReportPdfGenerator {
         return supply.getProductSalePrice() - supply.getProductPrice();
     }
 
-    private static String money(Double value) {
+    private static String money(Double value, boolean french) {
         if (value == null) {
             return "-";
         }
-        String amount = String.format(Locale.US, "$%,.2f", Math.abs(value));
+        String amount = french
+                ? String.format(Locale.CANADA_FRENCH, "%,.2f $", Math.abs(value))
+                : String.format(Locale.US, "$%,.2f", Math.abs(value));
         return value < 0 ? "-" + amount : amount;
     }
 
@@ -188,6 +202,12 @@ public final class SupplyReportPdfGenerator {
 
 
     private static class PortalHeaderAndFooter extends PdfPageEventHelper {
+        private final boolean french;
+
+        PortalHeaderAndFooter(boolean french) {
+            this.french = french;
+        }
+
         @Override
         public void onEndPage(PdfWriter writer, Document document) {
             Rectangle page = document.getPageSize();
@@ -205,7 +225,8 @@ public final class SupplyReportPdfGenerator {
             ColumnText.showTextAligned(text, Element.ALIGN_LEFT,
                     new Phrase("Petclinic", BRAND), left, page.getHeight() - BAR_HEIGHT / 2 - 5, 0);
             ColumnText.showTextAligned(text, Element.ALIGN_RIGHT,
-                    new Phrase("Employee Portal", META), right, page.getHeight() - BAR_HEIGHT / 2 - 3, 0);
+                    new Phrase(french ? "Portail des employés" : "Employee Portal", META),
+                    right, page.getHeight() - BAR_HEIGHT / 2 - 3, 0);
 
             Phrase contact = new Phrase();
             contact.add(new Chunk("Champlain PetClinic", FOOTER_BOLD));

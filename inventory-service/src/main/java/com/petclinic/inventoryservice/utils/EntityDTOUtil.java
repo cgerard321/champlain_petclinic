@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+// Keep the original English fields for clients that do not read bilingual fields yet.
 public class EntityDTOUtil {
 
     public static ProductResponseDTO toProductResponseDTO(Product product) {

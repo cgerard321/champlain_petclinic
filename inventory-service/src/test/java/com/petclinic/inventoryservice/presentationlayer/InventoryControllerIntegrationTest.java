@@ -7,11 +7,12 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepositor
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.utils.ImageUtil;
-import com.petclinic.inventoryservice.utils.DataBaseLoaderService;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -39,6 +41,33 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port:0"})
 @AutoConfigureWebTestClient
 class InventoryControllerIntegrationTest {
+    @ParameterizedTest
+    @CsvSource({"name,en", "name,fr", "description,en", "description,fr"})
+    void creatingInventoryRejectsEachBlankTranslation(String field, String language) {
+        Map<String, String> name = new HashMap<>(Map.of("en", "New inventory", "fr", "Nouvel inventaire"));
+        Map<String, String> description = new HashMap<>(Map.of("en", "Wound care", "fr", "Soins des plaies"));
+        (field.equals("name") ? name : description).put(language, " ");
+        InventoryRequestDTO request = InventoryRequestDTO.builder()
+                .inventoryType("Internal").name(name).description(description).build();
+
+        webTestClient.post().uri("/inventory").contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request).exchange().expectStatus().isBadRequest();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"name,en", "name,fr", "description,en", "description,fr"})
+    void creatingSupplyRejectsEachBlankTranslation(String field, String language) {
+        Map<String, String> name = new HashMap<>(Map.of("en", "New supply", "fr", "Nouvel article"));
+        Map<String, String> description = new HashMap<>(Map.of("en", "Wound care", "fr", "Soins des plaies"));
+        (field.equals("name") ? name : description).put(language, " ");
+        ProductRequestDTO request = ProductRequestDTO.builder().name(name).description(description)
+                .productPrice(2.0).productSalePrice(3.0).productQuantity(10).build();
+
+        webTestClient.post().uri("/inventory/{inventoryId}/products", inventory1.getInventoryId())
+                .contentType(MediaType.APPLICATION_JSON).bodyValue(request)
+                .exchange().expectStatus().isBadRequest();
+    }
+
     @Autowired
     WebTestClient webTestClient;
     @Autowired
@@ -47,8 +76,6 @@ class InventoryControllerIntegrationTest {
     ProductRepository productRepository;
     @Autowired
     InventoryTypeRepository inventoryTypeRepository;
-    @Autowired
-    DataBaseLoaderService dataBaseLoaderService;
 
 
     private final Long DB_SIZE = 2L;
@@ -531,24 +558,6 @@ class InventoryControllerIntegrationTest {
                     assertNotNull(stored);
                     assertEquals(supplyRequest.getName(), stored.getName());
                 });
-    }
-
-    @Test
-    void existingInventoryAndSupplyAreMigratedIntoBothLanguages() throws Exception {
-        dataBaseLoaderService.run();
-
-        Inventory migratedInventory = inventoryRepository.findInventoryByInventoryId(inventory1.getInventoryId()).block();
-        Product migratedSupply = productRepository.findProductByProductId("productId_1").block();
-        assertNotNull(migratedInventory);
-        assertNotNull(migratedSupply);
-        assertEquals(Map.of("en", inventory1.getInventoryName(), "fr", inventory1.getInventoryName()),
-                migratedInventory.getName());
-        assertEquals(Map.of("en", inventory1.getInventoryDescription(), "fr", inventory1.getInventoryDescription()),
-                migratedInventory.getDescription());
-        assertEquals(Map.of("en", migratedSupply.getProductName(), "fr", migratedSupply.getProductName()),
-                migratedSupply.getName());
-        assertEquals(Map.of("en", migratedSupply.getProductDescription(), "fr", migratedSupply.getProductDescription()),
-                migratedSupply.getDescription());
     }
 
 

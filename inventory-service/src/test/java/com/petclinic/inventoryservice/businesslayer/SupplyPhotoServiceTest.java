@@ -10,6 +10,7 @@ import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.presentationlayer.ProductRequestDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
 import com.petclinic.inventoryservice.utils.InventoryValidator;
+import com.petclinic.inventoryservice.utils.SupplyReportPdfGenerator;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class SupplyPhotoServiceTest {
         InventoryTypeRepository types = mock(InventoryTypeRepository.class);
         audits = mock(SupplyAuditRepository.class);
         service = new ProductInventoryServiceImpl(inventories, products, types,
-                new InventoryValidator(inventories, types, products), audits);
+                new InventoryValidator(inventories, types, products), audits, new SupplyReportPdfGenerator());
         existing = Product.builder().productId("supply-1").inventoryId("inventory-1")
                 .productName("Original supply").productQuantity(10).productPrice(5.0)
                 .photoData(JPG.clone()).photoType("image/jpeg").build();
