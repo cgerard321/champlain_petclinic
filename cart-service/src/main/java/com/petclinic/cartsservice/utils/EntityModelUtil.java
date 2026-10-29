@@ -133,6 +133,7 @@ public class EntityModelUtil {
         responseModel.setScope(PromoEligibility.scope(promoCode));
         responseModel.setProductIds(promoCode.getProductIds());
         responseModel.setProductTypes(promoCode.getProductTypes());
+        responseModel.setImageId(promoCode.getImageId());
         responseModel.setId(promoCode.getId());
         responseModel.setName(promoCode.getName());
         responseModel.setCode(promoCode.getCode());
