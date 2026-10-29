@@ -186,6 +186,105 @@
       </div>
     </div>
 
+    <section class="education-section" aria-labelledby="education-title">
+      <h3 id="education-title" i18n="@@vets.education.education">Formation</h3>
+
+      <button
+        type="button"
+        [disabled]="saving()"
+        (click)="openEducationForm()"
+        [attr.aria-expanded]="showEducationForm"
+        aria-controls="education-form"
+        i18n="@@vets.education.add_education"
+      >
+        Ajouter une formation
+      </button>
+
+      <div id="education-form">
+        @if (showEducationForm) {
+          <fieldset [formGroup]="educationDraft">
+            <legend i18n="@@vets.education.new_education">Nouvelle formation</legend>
+
+            @for (field of educationFields; track field.key) {
+              <div class="field">
+                <label [for]="'education-draft-' + field.key">
+                  {{ field.label }}
+                </label>
+
+                <input
+                  [id]="'education-draft-' + field.key"
+                  [type]="field.type"
+                  [formControlName]="field.key"
+                  required
+                  (keydown.enter)="$event.preventDefault(); addEducation()"
+                  [attr.aria-invalid]="
+                    educationDraft.controls[field.key].touched &&
+                    educationDraft.controls[field.key].invalid
+                  "
+                  [attr.aria-describedby]="'education-draft-' + field.key + '-error'"
+                />
+
+                <p
+                  class="hint"
+                  [id]="'education-draft-' + field.key + '-error'"
+                  [class.invalid]="
+                    educationDraft.controls[field.key].touched &&
+                    educationDraft.controls[field.key].invalid
+                  "
+                  aria-live="polite"
+                >
+                  @if (
+                    educationDraft.controls[field.key].touched &&
+                    educationDraft.controls[field.key].invalid
+                  ) {
+                    <span i18n="@@vets.education.required_info">
+                      Veuillez renseigner ce champ avec une valeur valide.
+                    </span>
+                  }
+                </p>
+              </div>
+            }
+
+            @if (educationDateError) {
+              <p class="error" role="alert" i18n="@@vets.education.date_error">
+                La date de fin doit être égale ou postérieure à la date de début.
+              </p>
+            }
+
+            <button
+              type="button"
+              [disabled]="saving()"
+              (click)="addEducation()"
+              i18n="@@vets.edit.add"
+            >
+              Ajouter
+            </button>
+          </fieldset>
+        }
+      </div>
+
+      <ul class="education-list" aria-live="polite">
+        @for (entry of education.controls; track entry) {
+          <li>
+            <strong>{{ entry.controls.schoolName.value }}</strong>
+
+            <p>
+              {{ entry.controls.degree.value }}
+              — {{ entry.controls.fieldOfStudy.value }}
+            </p>
+
+            <p>
+              <span i18n="@@vets.education.from">Du</span>
+              {{ entry.controls.startDate.value }}
+
+              <span i18n="@@vets.education.to">Au</span>
+              {{ entry.controls.endDate.value }}
+            </p>
+          </li>
+        }
+      </ul>
+    </section>
+
     <div class="actions">
       <button type="submit" [disabled]="saving()">
         @if (saving()) {

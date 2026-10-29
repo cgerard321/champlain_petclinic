@@ -1,4 +1,4 @@
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -12,12 +12,13 @@ import { finalize, switchMap, take } from 'rxjs';
 import { AuthState } from '@core/services/auth-state';
 import { BillRecord } from '@features/bill/models/bill.model';
 import { BillService } from '@features/bill/services/bill-service';
+import { translateBillStatus, translateVisitType } from '@features/bill/utils/bill-translations';
 import { ConfirmDialog } from '@shared/components/confirm-dialog/confirm-dialog';
 import { Roles } from '@shared/models/roles';
 
 @Component({
   selector: 'app-bill-details',
-  imports: [CurrencyPipe, MatDialogModule],
+  imports: [CurrencyPipe, MatDialogModule, DatePipe],
   templateUrl: './bill-details.html',
   styleUrl: './bill-details.css',
 })
@@ -29,6 +30,9 @@ export class BillDetails {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly bill = signal(inject<BillRecord>(MAT_DIALOG_DATA));
+
+  protected readonly translateStatus = translateBillStatus;
+  protected readonly translateVisit = translateVisitType;
 
   protected readonly updatingInterest = signal(false);
   protected readonly interestError = signal<string | null>(null);
@@ -51,12 +55,12 @@ export class BillDetails {
     this.dialog
       .open(ConfirmDialog, {
         data: {
-          title: 'Confirm Interest Exemption',
+          title: $localize`:@@bill.exemption.title:Confirmer l'exemption de l'intérêt`,
           message: exempt
-            ? 'Exempt this overdue bill from interest? The interest will become $0.00.'
-            : 'Remove the exemption and recalculate overdue interest?',
-          confirmLabel: 'Confirm',
-          cancelLabel: 'Cancel',
+            ? $localize`:@@bill.exemption.exempt:Exempter cette facture en retard des intérêts ? Les intérêts seront ramenés à 0,00 $.`
+            : $localize`:@@bill.exemption.remove:Retirer l'exemption d'intérêts et recalculer les intérêts?`,
+          confirmLabel: $localize`:@@bill.confirm:Confirmer`,
+          cancelLabel: $localize`:@@bill.cancel:Annuler`,
         },
       })
       .afterClosed()
