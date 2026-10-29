@@ -113,12 +113,27 @@ export class OrderReportList implements OnInit {
   protected openReport(report: OrderReport): void {
     // no scroll to close button
     this.dialog.open(ReportDetailsDialog, {
-      data: { report },
+      data: {
+        report,
+        onUpdated: (updatedReport: OrderReport) => this.replaceReport(updatedReport),
+      },
       width: '820px',
       maxWidth: '95vw',
       autoFocus: 'dialog',
       panelClass: 'report-dialog-pane',
     });
+  }
+
+  // status changed in dialog
+  private replaceReport(updatedReport: OrderReport): void {
+    this.reports.update((reports) =>
+      reports.map((report) => {
+        if (report.reportId === updatedReport.reportId) {
+          return updatedReport;
+        }
+        return report;
+      }),
+    );
   }
 
   protected openOrder(event: Event, orderId: string): void {

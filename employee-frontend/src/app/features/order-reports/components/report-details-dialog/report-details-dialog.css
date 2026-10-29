@@ -63,8 +63,41 @@ mat-dialog-content::-webkit-scrollbar {
 }
 
 mat-dialog-actions {
+  flex-wrap: wrap;
+  justify-content: space-between;
   gap: 8px;
   padding: 12px 24px 20px;
+}
+
+.status-actions,
+.dialog-actions-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.dialog-actions-end {
+  margin-left: auto;
+}
+
+.reject-button:not(:disabled) {
+  border-color: var(--mat-sys-error, #b00020);
+  color: var(--mat-sys-error, #b00020);
+}
+
+.resolve-button:not(:disabled) {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.resolution-note {
+  margin-top: 12px;
+}
+
+.error-message {
+  margin: 0;
+  color: var(--mat-sys-error, #b00020);
 }
 
 .card {

@@ -24,6 +24,8 @@ public class OrderReportResponseDTO {
     private String description;
     private String status;
     private LocalDateTime submittedAt;
+    private String resolutionNote;
+    private LocalDateTime resolvedAt;
 
     @Data
     @Builder
