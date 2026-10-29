@@ -11,6 +11,7 @@ type ImageLoadState = 'loading' | 'loaded' | 'error';
 
 interface ImageContainerProps {
   image?: FileDetails | null;
+  alt?: string;
   imageId?: string;
   productId?: string;
   imageUrl?: string;
@@ -19,6 +20,7 @@ interface ImageContainerProps {
 
 export default function ImageContainer({
   image,
+  alt,
   imageId,
   productId,
   imageUrl,
@@ -184,8 +186,10 @@ export default function ImageContainer({
         }
         alt={
           showingFallback
-            ? 'Default product image'
-            : imageName || 'Product image'
+            ? alt
+              ? `${alt} (image unavailable)`
+              : 'Default product image'
+            : alt || imageName || 'Product image'
         }
         className={
           loadState === 'loading' && !showingFallback
