@@ -15,6 +15,9 @@
   @if (errorMessage()) {
     <p class="error-message" role="alert">{{ errorMessage() }}</p>
   }
+  @if (deactivateErrorMessage()) {
+    <p class="error-message" role="alert">{{ deactivateErrorMessage() }}</p>
+  }
   @if (isSaved()) {
     <p class="success-message" role="status" i18n="@@cust.profile.updateSuccess">
       Le client a été mis à jour avec succès.
@@ -55,6 +58,20 @@
           i18n="@@cust.profile.edit"
         >
           Modifier le client
+        </button>
+      }
+      @if (isAdmin() && !isEditing()) {
+        <button
+          class="danger-button deactivate-button"
+          type="button"
+          (click)="handleDeactivateCustomer()"
+          [disabled]="isDeactivating()"
+        >
+          @if (isDeactivating()) {
+            <span i18n="@@cust.profile.deactivating">Désactivation...</span>
+          } @else {
+            <span i18n="@@cust.profile.deactivate">Désactiver le compte</span>
+          }
         </button>
       }
     </header>

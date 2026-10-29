@@ -12,6 +12,10 @@ import { of, switchMap } from 'rxjs';
 import { isApiError } from '@core/models/api-error';
 import { FileDetails } from '@features/prod/models/image.model';
 import {
+  localizedDeliveryType,
+  localizedProductType,
+} from '@features/prod/models/product-localization';
+import {
   DeliveryType,
   Product,
   ProductEnums,
@@ -81,11 +85,21 @@ export class ProductUpdateDialog implements OnInit {
   });
 
   protected readonly productForm = form(this.model, (schemaPath) => {
-    required(schemaPath.productName, { message: 'Product name is required' });
-    required(schemaPath.productDescription, { message: 'Product description is required' });
-    required(schemaPath.productSalePrice, { message: 'Sale price is required' });
-    required(schemaPath.productQuantity, { message: 'Quantity is required' });
-    required(schemaPath.productTypeId, { message: 'Product type is required' });
+    required(schemaPath.productName, {
+      message: $localize`:@@products.validation.nameRequired:Le nom du produit est requis.`,
+    });
+    required(schemaPath.productDescription, {
+      message: $localize`:@@products.validation.descriptionRequired:La description du produit est requise.`,
+    });
+    required(schemaPath.productSalePrice, {
+      message: $localize`:@@products.validation.priceRequired:Le prix de vente est requis.`,
+    });
+    required(schemaPath.productQuantity, {
+      message: $localize`:@@products.validation.quantityRequired:La quantité est requise.`,
+    });
+    required(schemaPath.productTypeId, {
+      message: $localize`:@@products.validation.typeRequired:Le type de produit est requis.`,
+    });
   });
 
   ngOnInit(): void {
@@ -109,7 +123,9 @@ export class ProductUpdateDialog implements OnInit {
     }
 
     if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
-      this.fileError.set('Only JPEG, JPG, and PNG images are supported.');
+      this.fileError.set(
+        $localize`:@@products.validation.imageType:Seules les images JPEG, JPG et PNG sont prises en charge.`,
+      );
       input.value = '';
       return;
     }
@@ -170,11 +186,15 @@ export class ProductUpdateDialog implements OnInit {
   private validateBusinessRules(): boolean {
     const current = this.model();
     if (current.productSalePrice <= 0) {
-      this.errorMessage.set('Sale price must be greater than zero.');
+      this.errorMessage.set(
+        $localize`:@@products.validation.pricePositive:Le prix de vente doit être supérieur à zéro.`,
+      );
       return false;
     }
     if (current.productQuantity < 0) {
-      this.errorMessage.set('Quantity cannot be negative.');
+      this.errorMessage.set(
+        $localize`:@@products.validation.quantityNonNegative:La quantité ne peut pas être négative.`,
+      );
       return false;
     }
     return !this.fileError();
@@ -182,6 +202,18 @@ export class ProductUpdateDialog implements OnInit {
 
   private handleError(error: unknown): void {
     this.isSubmitting.set(false);
-    this.errorMessage.set(isApiError(error) ? error.message : 'Could not update the product.');
+    this.errorMessage.set(
+      isApiError(error)
+        ? error.message
+        : $localize`:@@products.errors.update:Impossible de modifier le produit.`,
+    );
+  }
+
+  protected productTypeLabel(type: string): string {
+    return localizedProductType(type);
+  }
+
+  protected deliveryTypeLabel(type: DeliveryType): string {
+    return localizedDeliveryType(type);
   }
 }

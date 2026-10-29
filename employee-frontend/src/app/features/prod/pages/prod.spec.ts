@@ -158,7 +158,7 @@ describe('Prod', () => {
       'button',
     ) as NodeListOf<HTMLButtonElement>;
     const deleteButton = Array.from(buttons).find(
-      (button) => button.textContent?.trim() === 'Delete',
+      (button) => button.textContent?.trim() === 'Supprimer',
     );
 
     expect(deleteButton).toBeTruthy();
@@ -173,7 +173,7 @@ describe('Prod', () => {
       'button',
     ) as NodeListOf<HTMLButtonElement>;
     const deleteButton = Array.from(buttons).find(
-      (button) => button.textContent?.trim() === 'Delete',
+      (button) => button.textContent?.trim() === 'Supprimer',
     );
 
     expect(deleteButton).toBeUndefined();

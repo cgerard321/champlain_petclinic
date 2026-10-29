@@ -101,6 +101,26 @@ export class Bill implements OnInit {
   protected readonly billSearchQuery = signal('');
   protected readonly showBillSearchSuggestions = signal(false);
 
+  protected readonly savedFilters = signal<Record<keyof BillFilters, string[]>>({
+    customerId: [],
+    customerName: [],
+    vetName: [],
+    visitType: [],
+    status: [],
+    year: [],
+    month: [],
+  });
+
+  protected readonly filterFields: { key: keyof BillFilters; label: string }[] = [
+    { key: 'customerId', label: 'Customer ID' },
+    { key: 'customerName', label: 'Customer name' },
+    { key: 'vetName', label: 'Veterinarian name' },
+    { key: 'visitType', label: 'Visit type' },
+    { key: 'status', label: 'Status' },
+    { key: 'year', label: 'Creation year' },
+    { key: 'month', label: 'Creation month' },
+  ];
+
   protected readonly updatingInterestId = signal<string | null>(null);
   protected readonly downloadingPdfId = signal<string | null>(null);
   protected readonly billActionError = signal<string | null>(null);
@@ -232,8 +252,40 @@ export class Bill implements OnInit {
     }));
   }
 
+  protected addFilter(key: keyof BillFilters): void {
+    const value = this.filters()[key].trim();
+
+    if (!value) {
+      return;
+    }
+
+    this.savedFilters.update((current) => {
+      const exists = current[key].some((item) => item.toLowerCase() === value.toLowerCase());
+
+      return exists ? current : { ...current, [key]: [...current[key], value] };
+    });
+
+    this.updateFilter(key, '');
+  }
+
+  protected removeFilter(key: keyof BillFilters, value: string): void {
+    this.savedFilters.update((current) => ({
+      ...current,
+      [key]: current[key].filter((item) => item !== value),
+    }));
+  }
+
   protected clearFilters(): void {
     this.filters.set({ ...emptyFilters });
+    this.savedFilters.set({
+      customerId: [],
+      customerName: [],
+      vetName: [],
+      visitType: [],
+      status: [],
+      year: [],
+      month: [],
+    });
   }
 
   protected updateBillSearch(value: string): void {
@@ -544,11 +596,12 @@ export class Bill implements OnInit {
   protected readonly showArchivedBills = signal(false);
 
   protected readonly displayedBills = computed(() => {
-    const filters = this.filters();
+    const filters = this.savedFilters();
     const searchQuery = this.billSearchQuery();
 
-    const matchesText = (value: string | null, search: string): boolean =>
-      (value ?? '').toLowerCase().includes(search.trim().toLowerCase());
+    const matchesText = (value: string | null, searches: string[]): boolean =>
+      searches.length === 0 ||
+      searches.some((search) => (value ?? '').toLowerCase().includes(search.toLowerCase()));
 
     return this.bills().filter((bill) => {
       const matchesArchive = !this.canViewBills()
@@ -563,15 +616,17 @@ export class Bill implements OnInit {
 
       return (
         matchesArchive &&
-        (matchesText(customerName, searchQuery) || matchesText(vetName, searchQuery)) &&
+        (customerName.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+          vetName.toLowerCase().includes(searchQuery.trim().toLowerCase())) &&
         (!this.canViewBills() ||
           (matchesText(bill.customerId, filters.customerId) &&
             matchesText(customerName, filters.customerName) &&
             matchesText(vetName, filters.vetName) &&
-            (!filters.visitType || bill.visitType === filters.visitType) &&
-            (!filters.status || bill.billStatus === filters.status) &&
-            (!filters.year || bill.date.getFullYear() === Number(filters.year)) &&
-            (!filters.month || bill.date.getMonth() + 1 === Number(filters.month))))
+            (filters.visitType.length === 0 || filters.visitType.includes(bill.visitType)) &&
+            (filters.status.length === 0 || filters.status.includes(bill.billStatus)) &&
+            (filters.year.length === 0 || filters.year.includes(String(bill.date.getFullYear()))) &&
+            (filters.month.length === 0 ||
+              filters.month.includes(String(bill.date.getMonth() + 1)))))
       );
     });
   });
