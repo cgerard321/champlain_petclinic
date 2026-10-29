@@ -9,9 +9,16 @@ import BasicModal from '@/shared/components/BasicModal';
 import StarRating from '@/features/products/components/StarRating';
 import EditingReview from './reviewComponents/EditingReview';
 import SvgIcon from '@/shared/components/SvgIcon';
+import { useTranslation } from 'react-i18next';
 
 const ReviewsList: React.FC = (): JSX.Element => {
+  const { t } = useTranslation('visits');
   const [reviewList, setReviewList] = useState<ReviewResponseDTO[]>([]);
+  const [selectedRating, setSelectedRating] = useState<number | null>(null);
+  const filteredReviews =
+    selectedRating === null
+      ? reviewList
+      : reviewList.filter(review => review.rating === selectedRating);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -78,6 +85,30 @@ const ReviewsList: React.FC = (): JSX.Element => {
             {successMessage}
           </div>
         )}
+
+        <div className="d-flex align-items-center gap-2 my-3">
+          <label htmlFor="review-rating-filter">
+            {t('reviews.filterByRating')}
+          </label>
+          <select
+            id="review-rating-filter"
+            className="form-select w-auto"
+            value={selectedRating ?? 'all'}
+            onChange={event =>
+              setSelectedRating(
+                event.target.value === 'all' ? null : Number(event.target.value)
+              )
+            }
+          >
+            <option value="all">{t('reviews.allRatings')}</option>
+            {[1, 2, 3, 4, 5].map(rating => (
+              <option key={rating} value={rating}>
+                {t('reviews.stars', { count: rating })}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <table className="reviews-table">
           <thead>
             <tr>
@@ -89,8 +120,8 @@ const ReviewsList: React.FC = (): JSX.Element => {
             </tr>
           </thead>
           <tbody>
-            {reviewList.length > 0 ? (
-              reviewList.map(review => (
+            {filteredReviews.length > 0 ? (
+              filteredReviews.map(review => (
                 <tr key={review.reviewId}>
                   <td>{review.reviewerName}</td>
                   <td>{review.review}</td>
@@ -129,7 +160,9 @@ const ReviewsList: React.FC = (): JSX.Element => {
             ) : (
               <tr>
                 <td colSpan={5} className="text-center">
-                  No reviews available
+                  {selectedRating === null
+                    ? t('reviews.noReviews')
+                    : t('reviews.noMatchingReviews')}{' '}
                 </td>
               </tr>
             )}
