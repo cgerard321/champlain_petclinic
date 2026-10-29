@@ -1,0 +1,32 @@
+<h2 mat-dialog-title>{{ title }}</h2>
+
+<mat-dialog-content>
+  <p class="message">{{ message }}</p>
+
+  <mat-form-field appearance="outline" class="note-field">
+    <mat-label>{{ noteLabel }}</mat-label>
+    <textarea
+      matInput
+      rows="4"
+      maxlength="500"
+      [value]="note()"
+      (input)="onNoteInput($event)"
+    ></textarea>
+    <mat-hint align="end">{{ note().length }} / 500</mat-hint>
+  </mat-form-field>
+
+  @if (showNoteError()) {
+    <p class="error-message" role="alert" i18n="@@orderReports.statusDialog.noteRequired">
+      Une raison est requise pour rejeter un signalement.
+    </p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close type="button" i18n="@@orderReports.statusDialog.cancel">
+    Annuler
+  </button>
+  <button mat-flat-button type="button" [class.reject-button]="isReject" (click)="confirm()">
+    {{ confirmLabel }}
+  </button>
+</mat-dialog-actions>

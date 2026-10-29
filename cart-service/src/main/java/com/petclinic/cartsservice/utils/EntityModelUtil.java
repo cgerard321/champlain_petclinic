@@ -221,6 +221,8 @@ public class EntityModelUtil {
                 .description(report.getDescription())
                 .status(report.getStatus())
                 .submittedAt(report.getSubmittedAt())
+                .resolutionNote(report.getResolutionNote())
+                .resolvedAt(report.getResolvedAt())
                 .build();
     }
 
