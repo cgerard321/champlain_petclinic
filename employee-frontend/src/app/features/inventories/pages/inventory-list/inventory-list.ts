@@ -125,10 +125,7 @@ export class InventoryList implements OnInit, OnDestroy {
     if (this.countSortBlocked()) return [];
 
     const compareName = (a: Inventory, b: Inventory): number =>
-      this.localizedInventoryName(a).localeCompare(
-        this.localizedInventoryName(b),
-        this.locale,
-      );
+      this.localizedInventoryName(a).localeCompare(this.localizedInventoryName(b), this.locale);
 
     return [...this.filteredInventories()].sort((a, b) => {
       let comparison = 0;
