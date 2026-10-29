@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, LOCALE_ID, signal } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import {
@@ -11,6 +11,7 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatList, MatListItem } from '@angular/material/list';
 
+import { localizedProductName } from '@features/prod/models/product-localization';
 import { Product } from '@features/prod/models/product.model';
 
 export interface ProductSelectorDialogData {
@@ -39,6 +40,7 @@ export class ProductSelectorDialog {
     this.dialogRef.backdropClick().subscribe(() => this.close());
   }
   private readonly dialogRef = inject(MatDialogRef<ProductSelectorDialog, string[]>);
+  private readonly locale = inject(LOCALE_ID);
   protected readonly data = inject<ProductSelectorDialogData>(MAT_DIALOG_DATA);
 
   private readonly searchTerm = signal('');
@@ -51,8 +53,14 @@ export class ProductSelectorDialog {
     if (!term) {
       return this.data.products;
     }
-    return this.data.products.filter((product) => product.productName.toLowerCase().includes(term));
+    return this.data.products.filter((product) =>
+      this.productName(product).toLowerCase().includes(term),
+    );
   });
+
+  protected productName(product: Product): string {
+    return localizedProductName(product, this.locale);
+  }
 
   protected searchProducts(productName: string): void {
     this.searchTerm.set(productName.trim());

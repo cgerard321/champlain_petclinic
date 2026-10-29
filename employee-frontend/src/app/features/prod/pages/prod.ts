@@ -1,6 +1,6 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, LOCALE_ID, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -29,6 +29,13 @@ import { ProductDeleteDialog } from '@features/prod/components/product-delete-di
 import { ProductDetailsDialog } from '@features/prod/components/product-details-dialog/product-details-dialog';
 import { ProductThumbnail } from '@features/prod/components/product-thumbnail/product-thumbnail';
 import { ProductUpdateDialog } from '@features/prod/components/product-update-dialog/product-update-dialog';
+import {
+  localizedDeliveryType,
+  localizedProductDescription,
+  localizedProductName,
+  localizedProductStatus,
+  localizedProductType,
+} from '@features/prod/models/product-localization';
 import { Product } from '@features/prod/models/product.model';
 import { ProductService } from '@features/prod/services/product.service';
 import { ReviewSettingsService } from '@features/prod/services/review-settings.service';
@@ -62,6 +69,7 @@ export class Prod implements OnInit {
   private readonly reload = new Subject<void>();
   private readonly searchTerm = signal('');
   private readonly reviewSettingsService = inject(ReviewSettingsService);
+  private readonly locale = inject(LOCALE_ID);
 
   protected readonly isAdmin = computed(() => this.auth.roles().includes(Roles.admin));
 
@@ -94,7 +102,11 @@ export class Prod implements OnInit {
           return this.productService.getProducts(productName ? { productName } : {}).pipe(
             catchError((error: unknown) => {
               this.isLoading.set(false);
-              this.errorMessage.set(isApiError(error) ? error.message : 'Could not load products.');
+              this.errorMessage.set(
+                isApiError(error)
+                  ? error.message
+                  : $localize`:@@products.errors.load:Impossible de charger les produits.`,
+              );
               return EMPTY;
             }),
           );
@@ -124,7 +136,9 @@ export class Prod implements OnInit {
         this.reviewEditPeriodHours.set(settings.editPeriodHours);
       },
       error: () => {
-        this.settingsError.set('Could not load review settings.');
+        this.settingsError.set(
+          $localize`:@@products.reviewSettings.errors.load:Impossible de charger les paramètres des avis.`,
+        );
       },
     });
   }
@@ -133,7 +147,9 @@ export class Prod implements OnInit {
     const hours = Number(this.reviewEditPeriodHours());
 
     if (!Number.isInteger(hours) || hours < 0) {
-      this.settingsError.set('The edit period must be at least zero or greater');
+      this.settingsError.set(
+        $localize`:@@products.reviewSettings.errors.minimum:La période de modification doit être supérieure ou égale à zéro.`,
+      );
       return;
     }
     this.isSavingSettings.set(true);
@@ -143,11 +159,15 @@ export class Prod implements OnInit {
     this.reviewSettingsService.updateSettings({ editPeriodHours: hours }).subscribe({
       next: (settings) => {
         this.reviewEditPeriodHours.set(settings.editPeriodHours);
-        this.settingsMessage.set('Review edit period saved.');
+        this.settingsMessage.set(
+          $localize`:@@products.reviewSettings.saved:Période de modification des avis enregistrée.`,
+        );
         this.isSavingSettings.set(false);
       },
       error: () => {
-        this.settingsError.set('Could not save review settings.');
+        this.settingsError.set(
+          $localize`:@@products.reviewSettings.errors.save:Impossible d'enregistrer les paramètres des avis.`,
+        );
         this.isSavingSettings.set(false);
       },
     });
@@ -221,9 +241,9 @@ export class Prod implements OnInit {
     this.dialog
       .open(ProductDeleteDialog, {
         data: {
-          title: 'Delete product?',
-          message: `Are you sure you want to delete ${product.productName}? This cannot be undone.`,
-          confirmLabel: 'Delete',
+          title: $localize`:@@products.delete.title:Supprimer le produit?`,
+          message: $localize`:@@products.delete.confirm:Voulez-vous vraiment supprimer ${this.productName(product)}:name: ? Cette action est irréversible.`,
+          confirmLabel: $localize`:@@products.actions.delete:Supprimer`,
         },
         width: '520px',
         maxWidth: '95vw',
@@ -250,9 +270,9 @@ export class Prod implements OnInit {
           this.dialog
             .open(ProductDeleteDialog, {
               data: {
-                title: 'Product is in a bundle',
-                message: `${product.productName} is part of one or more product bundles. Deleting it will also permanently delete those bundles. Do you want to continue?`,
-                confirmLabel: 'Delete product and bundles',
+                title: $localize`:@@products.delete.bundleTitle:Le produit fait partie d'un ensemble`,
+                message: $localize`:@@products.delete.bundleConfirm:${this.productName(product)}:name: fait partie d'un ou plusieurs ensembles de produits. Sa suppression supprimera aussi définitivement ces ensembles. Voulez-vous continuer?`,
+                confirmLabel: $localize`:@@products.delete.productAndBundles:Supprimer le produit et les ensembles`,
               },
               width: '620px',
               maxWidth: '95vw',
@@ -267,10 +287,32 @@ export class Prod implements OnInit {
         }
 
         this.deleteErrorMessage.set(
-          isApiError(error) ? error.message : 'Could not delete the product.',
+          isApiError(error)
+            ? error.message
+            : $localize`:@@products.errors.delete:Impossible de supprimer le produit.`,
         );
       },
     });
+  }
+
+  protected productName(product: Product): string {
+    return localizedProductName(product, this.locale);
+  }
+
+  protected productDescription(product: Product): string {
+    return localizedProductDescription(product, this.locale);
+  }
+
+  protected productType(type: string): string {
+    return localizedProductType(type);
+  }
+
+  protected productStatus(status: Product['productStatus']): string {
+    return localizedProductStatus(status);
+  }
+
+  protected deliveryType(type: Product['deliveryType']): string {
+    return localizedDeliveryType(type);
   }
 
   private isConflict(error: unknown): boolean {
