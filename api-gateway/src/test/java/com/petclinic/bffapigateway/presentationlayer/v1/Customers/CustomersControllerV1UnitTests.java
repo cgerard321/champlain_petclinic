@@ -26,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -808,5 +809,42 @@ public class CustomersControllerV1UnitTests {
                 .expectStatus().isBadRequest();
 
         verify(customersServiceClient, times(1)).patchPet(isActive, petId);
+    }
+
+    @Test
+    void whenSoftDeleteCustomer_withValidId_thenReturnNoContent() {
+        String validId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        when(customersServiceClient.softDeleteCustomer(validId)).thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/gateway/customers/{customerId}/soft", validId)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(customersServiceClient, times(1)).softDeleteCustomer(validId);
+    }
+
+    @Test
+    void whenSoftDeleteCustomer_withInvalidId_thenReturnUnprocessableEntity() {
+        client.delete()
+                .uri("/api/gateway/customers/{customerId}/soft", "invalid-id")
+                .exchange()
+                .expectStatus().isEqualTo(422);
+
+        verify(customersServiceClient, never()).softDeleteCustomer(anyString());
+    }
+
+    @Test
+    void whenSoftDeleteCustomer_withNonExistentId_thenReturnNotFound() {
+        String missingId = "00000000-0000-0000-0000-000000000000";
+        when(customersServiceClient.softDeleteCustomer(missingId))
+                .thenReturn(Mono.error(new NotFoundException("Customer id not found: " + missingId)));
+
+        client.delete()
+                .uri("/api/gateway/customers/{customerId}/soft", missingId)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(customersServiceClient, times(1)).softDeleteCustomer(missingId);
     }
 }
