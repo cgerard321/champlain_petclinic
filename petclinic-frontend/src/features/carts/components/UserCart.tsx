@@ -50,6 +50,7 @@ import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import { getCustomerOrders } from '../api/getCustomerOrders';
 import type { OrderModel } from '../models/OrderModel';
 import ReportOrderModal from './ReportOrderModal';
+import OrderReportBanner from './OrderReportBanner';
 import {
   getCustomerOrderReports,
   isOpenOrderReport,
@@ -1504,14 +1505,9 @@ const UserCart: React.FC = () => {
                   </div>
 
                   {reportsByOrderId[order.orderId] && (
-                    <div className="order-report-banner" role="status">
-                      {t('reports.banner', {
-                        status: t(
-                          `reports.status.${reportsByOrderId[order.orderId].status}`
-                        ),
-                        reportId: reportsByOrderId[order.orderId].reportId,
-                      })}
-                    </div>
+                    <OrderReportBanner
+                      report={reportsByOrderId[order.orderId]}
+                    />
                   )}
 
                   <div className="order-products">

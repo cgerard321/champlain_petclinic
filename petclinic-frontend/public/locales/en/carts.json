@@ -210,7 +210,9 @@
     "submit": "Submit Report",
     "submitting": "Submitting...",
     "success": "Your report has been submitted. Our team is reviewing it.",
-    "banner": "Issue Reported - Status: {{status}} - Reference: {{reportId}}",
+    "bannerTitle": "Issue Reported",
+    "reference": "Reference",
+    "note": "Note from our team",
     "reasons": {
       "DAMAGED_ITEM": "Damaged Item",
       "MISSING_ITEM": "Missing Item",

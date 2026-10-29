@@ -26,6 +26,8 @@ public class OrderReportResponseModel {
     private String description;
     private OrderReportStatus status;
     private LocalDateTime submittedAt;
+    private String resolutionNote;
+    private LocalDateTime resolvedAt;
 
     @Data
     @Builder

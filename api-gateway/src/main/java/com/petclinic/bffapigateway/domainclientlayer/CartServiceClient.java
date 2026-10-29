@@ -555,6 +555,24 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .bodyToMono(OrderResponseDTO.class);
     }
 
+    public Mono<OrderReportResponseDTO> updateOrderReportStatus(
+            String reportId,
+            OrderReportStatusRequestDTO request
+    ) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(ordersServiceUrl() + "/reports/{reportId}/status", reportId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        this::mapOrderReportError
+                )
+                .bodyToMono(OrderReportResponseDTO.class);
+    }
+
     private String ordersServiceUrl() {
         return cartServiceUrl.replace(
                 "/api/v1/carts",

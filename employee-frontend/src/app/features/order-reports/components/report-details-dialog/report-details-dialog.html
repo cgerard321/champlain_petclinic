@@ -1,12 +1,12 @@
 <div class="dialog-header">
   <div class="header-text">
     <span class="eyebrow" i18n="@@orderReports.reportDialog.eyebrow">Signalement de commande</span>
-    <h2 mat-dialog-title>{{ report.customerName }}</h2>
-    <span class="report-id">{{ report.reportId }}</span>
+    <h2 mat-dialog-title>{{ report().customerName }}</h2>
+    <span class="report-id">{{ report().reportId }}</span>
   </div>
   <div class="header-actions">
-    <span class="status" [class]="'status-' + report.status">
-      {{ statusLabels[report.status] }}
+    <span class="status" [class]="'status-' + report().status">
+      {{ statusLabels[report().status] }}
     </span>
     <button
       mat-icon-button
@@ -26,21 +26,21 @@
     <dl class="fields">
       <div class="field">
         <dt i18n="@@orderReports.fields.submitted">Soumis le</dt>
-        <dd>{{ report.submittedAt | date: 'medium' }}</dd>
+        <dd>{{ report().submittedAt | date: 'medium' }}</dd>
       </div>
       <div class="field">
         <dt i18n="@@orderReports.fields.category">Catégorie</dt>
-        <dd>{{ reasonLabels[report.reason] }}</dd>
+        <dd>{{ reasonLabels[report().reason] }}</dd>
       </div>
       <div class="field">
         <dt i18n="@@orderReports.fields.email">Courriel</dt>
-        <dd>{{ report.customerEmail }}</dd>
+        <dd>{{ report().customerEmail }}</dd>
       </div>
       <div class="field">
         <dt i18n="@@orderReports.fields.order">Commande</dt>
         <dd>
           <button class="link-button" type="button" (click)="openOrder()">
-            {{ report.orderId }}
+            {{ report().orderId }}
           </button>
         </dd>
       </div>
@@ -49,33 +49,98 @@
 
   <section class="card">
     <h3 i18n="@@orderReports.reportDialog.description">Description</h3>
-    <p class="description">{{ report.description }}</p>
+    <p class="description">{{ report().description }}</p>
   </section>
 
   <section class="card">
     <h3 i18n="@@orderReports.reportDialog.affectedItems">Articles concernés</h3>
-    @if (report.affectedItems.length === 0) {
+    @if (report().affectedItems.length === 0) {
       <p class="muted" i18n="@@orderReports.reportDialog.noItems">
         Aucun article précis n'a été sélectionné.
       </p>
     } @else {
       <ul class="item-list">
-        @for (item of report.affectedItems; track item.productId) {
+        @for (item of report().affectedItems; track item.productId) {
           <li>{{ productNames.name(item.productId, item.productName) }}</li>
         }
       </ul>
     }
   </section>
+
+  @if (report().resolvedAt) {
+    <section class="card">
+      <h3 i18n="@@orderReports.reportDialog.resolution">Résolution</h3>
+      <dl class="fields">
+        <div class="field">
+          <dt i18n="@@orderReports.fields.resolvedAt">Traité le</dt>
+          <dd>{{ report().resolvedAt | date: 'medium' }}</dd>
+        </div>
+      </dl>
+      @if (report().resolutionNote) {
+        <p class="description resolution-note">{{ report().resolutionNote }}</p>
+      } @else {
+        <p class="muted resolution-note" i18n="@@orderReports.reportDialog.noNote">
+          Aucune note ajoutée.
+        </p>
+      }
+    </section>
+  }
+
+  @if (updateError()) {
+    <p class="error-message" role="alert">{{ updateError() }}</p>
+  }
 </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button
-    mat-stroked-button
-    type="button"
-    (click)="openOrder()"
-    i18n="@@orderReports.reportDialog.viewOrder"
-  >
-    Voir la commande
-  </button>
-  <button mat-flat-button mat-dialog-close type="button" i18n="@@orderReports.close">Fermer</button>
+<mat-dialog-actions>
+  @if (isOpen()) {
+    <div class="status-actions">
+      @if (report().status === 'NEW') {
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="isUpdating()"
+          (click)="markInReview()"
+          i18n="@@orderReports.reportDialog.markInReview"
+        >
+          Mettre en examen
+        </button>
+      }
+      <button
+        mat-stroked-button
+        class="reject-button"
+        type="button"
+        [disabled]="isUpdating()"
+        (click)="reject()"
+        i18n="@@orderReports.reportDialog.reject"
+      >
+        Rejeter
+      </button>
+      <button
+        mat-flat-button
+        class="resolve-button"
+        type="button"
+        [disabled]="isUpdating()"
+        (click)="resolve()"
+        i18n="@@orderReports.reportDialog.resolve"
+      >
+        Résoudre
+      </button>
+      @if (isUpdating()) {
+        <mat-progress-spinner mode="indeterminate" diameter="20" />
+      }
+    </div>
+  }
+  <div class="dialog-actions-end">
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="openOrder()"
+      i18n="@@orderReports.reportDialog.viewOrder"
+    >
+      Voir la commande
+    </button>
+    <button mat-flat-button mat-dialog-close type="button" i18n="@@orderReports.close">
+      Fermer
+    </button>
+  </div>
 </mat-dialog-actions>
