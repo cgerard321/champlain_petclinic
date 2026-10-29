@@ -847,4 +847,63 @@ public class CustomersControllerV1UnitTests {
 
         verify(customersServiceClient, times(1)).softDeleteCustomer(missingId);
     }
+
+    @Test
+    void whenGetSoftDeletedCustomers_thenReturnCustomers() {
+        CustomerResponseDTO customer = new CustomerResponseDTO();
+        customer.setCustomerId("customerId-deleted");
+        when(customersServiceClient.getSoftDeletedCustomers()).thenReturn(Flux.just(customer));
+
+        client.get()
+                .uri("/api/gateway/customers/soft-deleted")
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(CustomerResponseDTO.class)
+                .value(list -> {
+                    assertEquals(1, list.size());
+                    assertEquals("customerId-deleted", list.get(0).getCustomerId());
+                });
+    }
+
+    @Test
+    void whenReactivateCustomer_withValidId_thenReturnOk() {
+        String validId = "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a";
+        CustomerResponseDTO customer = new CustomerResponseDTO();
+        customer.setCustomerId(validId);
+        when(customersServiceClient.reactivateCustomer(validId)).thenReturn(Mono.just(customer));
+
+        client.patch()
+                .uri("/api/gateway/customers/{customerId}/reactivate", validId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(CustomerResponseDTO.class)
+                .value(body -> assertEquals(validId, body.getCustomerId()));
+
+        verify(customersServiceClient, times(1)).reactivateCustomer(validId);
+    }
+
+    @Test
+    void whenReactivateCustomer_withInvalidId_thenReturnUnprocessableEntity() {
+        client.patch()
+                .uri("/api/gateway/customers/{customerId}/reactivate", "invalid-id")
+                .exchange()
+                .expectStatus().isEqualTo(422);
+
+        verify(customersServiceClient, never()).reactivateCustomer(anyString());
+    }
+
+    @Test
+    void whenReactivateCustomer_withNonExistentId_thenReturnNotFound() {
+        String missingId = "00000000-0000-0000-0000-000000000000";
+        when(customersServiceClient.reactivateCustomer(missingId))
+                .thenReturn(Mono.error(new NotFoundException("Soft-deleted customer not found: " + missingId)));
+
+        client.patch()
+                .uri("/api/gateway/customers/{customerId}/reactivate", missingId)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(customersServiceClient, times(1)).reactivateCustomer(missingId);
+    }
 }

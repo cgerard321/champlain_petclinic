@@ -485,13 +485,19 @@
         "deactivate": "Deactivate account",
         "deactivating": "Deactivating...",
         "confirmDeactivate": "Are you sure you want to deactivate this customer's account? Their profile photo will be permanently deleted.",
+        "reactivate": "Reactivate account",
+        "reactivating": "Reactivating...",
+        "reactivateSuccess": "The customer account has been reactivated.",
+        "statusInactive": "Deactivated account",
         "errors": {
           "noId": "No customer ID provided.",
           "load": "Could not load customer details.",
           "pets": "Could not load pets. Please try again later.",
           "petTypes": "Could not load pet types.",
           "update": "Could not update customer. Please try again.",
-          "deactivate": "Failed to deactivate the customer's account. Please try again."
+          "deactivate": "Failed to deactivate the customer's account. Please try again.",
+          "reactivate": "Failed to reactivate the customer's account. Please try again.",
+          "status": "Could not load the account status."
         },
         "provinces": {
           "alberta": "Alberta",
@@ -528,6 +534,12 @@
       "petsButton": "Registered Pets",
       "noCustFound": "No customers found.",
       "tryAgain": "Try a different name, ID, or phone number.",
+      "deactivated": {
+        "button": "Deactivated accounts",
+        "title": "Deactivated customer accounts",
+        "none": "No deactivated accounts.",
+        "loadError": "Unable to load deactivated accounts."
+      },
 
       "addCustomer": {
         "title": "Add a Client",
