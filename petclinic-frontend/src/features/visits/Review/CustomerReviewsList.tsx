@@ -12,8 +12,10 @@ import '../VisitListTable.css';
 import StarRating from '@/features/products/components/StarRating';
 import BasicModal from '@/shared/components/BasicModal';
 import SvgIcon from '@/shared/components/SvgIcon';
+import { useTranslation } from 'react-i18next';
 
 const CustomerReviewsList: React.FC = (): JSX.Element => {
+  const { t } = useTranslation('visits');
   const [reviewList, setReviewList] = useState<ReviewResponseDTO[]>([]);
 
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
@@ -98,7 +100,7 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
 
         <div className="d-flex align-items-center gap-2 my-3">
           <label htmlFor="customer-review-rating-filter">
-            Filter by rating:
+            {t('reviews.filterByRating')}
           </label>
           <select
             id="customer-review-rating-filter"
@@ -110,10 +112,10 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
               )
             }
           >
-            <option value="all">All ratings</option>
+            <option value="all">{t('reviews.allRatings')}</option>
             {[1, 2, 3, 4, 5].map(rating => (
               <option key={rating} value={rating}>
-                {rating} {rating === 1 ? 'star' : 'stars'}
+                {t('reviews.stars', { count: rating })}
               </option>
             ))}
           </select>
@@ -178,8 +180,8 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
               <tr>
                 <td colSpan={5} className="text-center">
                   {selectedRating === null
-                    ? 'No reviews available'
-                    : 'No reviews found for this rating'}
+                    ? t('reviews.noReviews')
+                    : t('reviews.noMatchingReviews')}
                 </td>
               </tr>
             )}

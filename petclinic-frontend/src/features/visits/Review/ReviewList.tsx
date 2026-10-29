@@ -9,8 +9,10 @@ import BasicModal from '@/shared/components/BasicModal';
 import StarRating from '@/features/products/components/StarRating';
 import EditingReview from './reviewComponents/EditingReview';
 import SvgIcon from '@/shared/components/SvgIcon';
+import { useTranslation } from 'react-i18next';
 
 const ReviewsList: React.FC = (): JSX.Element => {
+  const { t } = useTranslation('visits');
   const [reviewList, setReviewList] = useState<ReviewResponseDTO[]>([]);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   const filteredReviews =
@@ -85,11 +87,11 @@ const ReviewsList: React.FC = (): JSX.Element => {
         )}
 
         <div className="d-flex align-items-center gap-2 my-3">
-          <label htmlFor="customer-review-rating-filter">
-            Filter by rating:
+          <label htmlFor="review-rating-filter">
+            {t('reviews.filterByRating')}
           </label>
           <select
-            id="customer-review-rating-filter"
+            id="review-rating-filter"
             className="form-select w-auto"
             value={selectedRating ?? 'all'}
             onChange={event =>
@@ -98,10 +100,10 @@ const ReviewsList: React.FC = (): JSX.Element => {
               )
             }
           >
-            <option value="all">All ratings</option>
+            <option value="all">{t('reviews.allRatings')}</option>
             {[1, 2, 3, 4, 5].map(rating => (
               <option key={rating} value={rating}>
-                {rating} {rating === 1 ? 'star' : 'stars'}
+                {t('reviews.stars', { count: rating })}
               </option>
             ))}
           </select>
