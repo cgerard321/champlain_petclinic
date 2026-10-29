@@ -237,6 +237,77 @@ class CustomerControllerIntegrationTest {
     }
 
     @Test
+    void getSoftDeletedCustomers_ShouldReturnOnlyInactiveCustomers() {
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
+
+        Customer activeCustomer = buildCustomerId("Active", "55555555-5555-4555-8555-555555555555");
+        activeCustomer.setIsActive(true);
+        Customer inactiveCustomer = buildCustomerId("Inactive", "66666666-6666-4666-8666-666666666666");
+        inactiveCustomer.setIsActive(false);
+
+        StepVerifier.create(repo.save(activeCustomer).then(repo.save(inactiveCustomer)))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.get().uri("/customers/soft-deleted")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(CustomerResponseDTO.class)
+                .value(list -> {
+                    assertEquals(1, list.size());
+                    assertEquals("66666666-6666-4666-8666-666666666666", list.get(0).getCustomerId());
+                });
+    }
+
+    @Test
+    void reactivateCustomerByCustomerId_ShouldReturnOkAndSetCustomerActive() {
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
+
+        String testCustomerId = "77777777-7777-4777-8777-777777777777";
+        Customer inactiveCustomer = buildCustomerId("Inactive", testCustomerId);
+        inactiveCustomer.setIsActive(false);
+
+        StepVerifier.create(repo.save(inactiveCustomer))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.patch().uri("/customers/" + testCustomerId + "/reactivate")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.customerId").isEqualTo(testCustomerId);
+
+        StepVerifier.create(repo.findCustomerByCustomerId(testCustomerId))
+                .expectNextMatches(saved -> Boolean.TRUE.equals(saved.getIsActive()))
+                .verifyComplete();
+    }
+
+    @Test
+    void reactivateCustomerByCustomerId_WhenCustomerDoesNotExist_ShouldReturnNotFound() {
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
+
+        String missingCustomerId = "88888888-8888-4888-8888-888888888888";
+
+        client.patch().uri("/customers/" + missingCustomerId + "/reactivate")
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Soft-deleted customer not found: " + missingCustomerId);
+    }
+
+    @Test
+    void reactivateCustomerByCustomerId_WithInvalidId_ShouldReturnUnprocessableEntity() {
+        String invalidCustomerId = "not-a-valid-id";
+
+        client.patch().uri("/customers/" + invalidCustomerId + "/reactivate")
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Customer id: " + invalidCustomerId + " is invalid");
+    }
+
+    @Test
     void getTotalNumberOfCustomers(){
         Customer customer1 = Customer.builder()
                 .customerId("customerId-11")
