@@ -346,8 +346,10 @@ class CartControllerUnitTest {
     }
 
     @Test
-    void whenCheckoutCart_thenReturnCartResponseModel(){
+    void whenCheckoutCart_thenReturnCartResponseModel() {
         // Arrange
+        String stripeSessionId = "stripeId";
+
         Cart cart = Cart.builder()
                 .cartId(VALID_CART_ID)
                 .products(products)
@@ -359,12 +361,15 @@ class CartControllerUnitTest {
                 .customerId("1")
                 .products(new ArrayList<>())
                 .build();
-        when(cartService.checkoutCart(cart.getCartId()))
+
+        when(cartService.checkoutCart(cart.getCartId(), stripeSessionId))
                 .thenReturn(Mono.just(cartResponseModel));
 
+        // Act & Assert
         webTestClient
                 .post()
-                .uri("/api/v1/carts/" + cart.getCartId() + "/checkout")
+                .uri("/api/v1/carts/" + cart.getCartId()
+                        + "/checkout?stripeSessionId=" + stripeSessionId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -376,7 +381,9 @@ class CartControllerUnitTest {
                     assertEquals(0, response.getProducts().size());
                 });
 
-        verify(cartService, times(1)).checkoutCart(cartResponseModel.getCartId());
+        // Verify
+        verify(cartService, times(1))
+                .checkoutCart(cart.getCartId(), stripeSessionId);
     }
 
     @Test
@@ -1023,5 +1030,50 @@ class CartControllerUnitTest {
 
         verify(cartService, never()).getAllCarts(any());
     }
+
+    @Test
+    void checkoutCart_CartNotFound_ReturnsNotFound() {
+        // Arrange
+        String cartId = NOT_FOUND_ID;
+        String stripeSessionId = "cs_test_123";
+
+        when(cartService.checkoutCart(cartId, stripeSessionId))
+                .thenReturn(Mono.error(
+                        new NotFoundException("Cart not found: " + cartId)
+                ));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/carts/" + cartId
+                        + "/checkout?stripeSessionId=" + stripeSessionId)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(cartService).checkoutCart(cartId, stripeSessionId);
+    }
+
+
+    @Test
+    void checkoutCart_EmptyCart_ReturnsBadRequest() {
+        // Arrange
+        String cartId = VALID_CART_ID;
+        String stripeSessionId = "cs_test_123";
+
+        when(cartService.checkoutCart(cartId, stripeSessionId))
+                .thenReturn(Mono.error(
+                        new InvalidInputException("Cart is empty")
+                ));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/carts/" + cartId
+                        + "/checkout?stripeSessionId=" + stripeSessionId)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        verify(cartService).checkoutCart(cartId, stripeSessionId);
+    }
+
+
 
 }

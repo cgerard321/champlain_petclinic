@@ -21,7 +21,7 @@ public interface CartService {
     Mono<CartResponseModel> addProductToCart(String cartId, CartItemRequestModel cartItemRequestModel);
     Mono<CartResponseModel> updateProductQuantityInCart(String cartId, String productId, int quantity);
 
-    Mono<CartResponseModel> checkoutCart(String cartId);
+    Mono<CartResponseModel> checkoutCart(String cartId, String stripeSessionId);
 
     Mono<CartResponseModel> assignCartToCustomer(String customerId);
 

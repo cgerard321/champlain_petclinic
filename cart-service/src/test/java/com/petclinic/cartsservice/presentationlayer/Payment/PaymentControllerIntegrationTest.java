@@ -105,4 +105,160 @@ class PaymentControllerIntegrationTest {
                 .expectStatus().isBadRequest()
                 .expectBody().isEmpty();
     }
+
+
+    @Test
+    void createStripeCheckoutSession_withEmptyCart_returnsBadRequest() {
+
+        // Arrange
+        StripeProductRequestModel request = new StripeProductRequestModel();
+        request.setCartId(CART_ID);
+
+        when(paymentService.createStripeCheckoutSession(request, CART_ID))
+                .thenReturn(Mono.error(
+                        new InvalidInputException("No products found in cart.")
+                ));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/carts/{cartId}/checkout/sessions", CART_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody().isEmpty();
+
+        verify(paymentService)
+                .createStripeCheckoutSession(request, CART_ID);
+    }
+
+
+    @Test
+    void createStripeCheckoutSession_withInvalidPrice_returnsBadRequest() {
+
+        // Arrange
+        StripeProductRequestModel request = new StripeProductRequestModel();
+        request.setCartId(CART_ID);
+
+        when(paymentService.createStripeCheckoutSession(request, CART_ID))
+                .thenReturn(Mono.error(
+                        new InvalidInputException("Invalid price amount.")
+                ));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/carts/{cartId}/checkout/sessions", CART_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody().isEmpty();
+
+        verify(paymentService)
+                .createStripeCheckoutSession(request, CART_ID);
+    }
+
+
+    @Test
+    void createStripeCheckoutSession_withInvalidTotal_returnsBadRequest() {
+
+        // Arrange
+        StripeProductRequestModel request = new StripeProductRequestModel();
+        request.setCartId(CART_ID);
+
+        when(paymentService.createStripeCheckoutSession(request, CART_ID))
+                .thenReturn(Mono.error(
+                        new InvalidInputException("Invalid total price amount.")
+                ));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/carts/{cartId}/checkout/sessions", CART_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody().isEmpty();
+
+        verify(paymentService)
+                .createStripeCheckoutSession(request, CART_ID);
+    }
+
+
+    @Test
+    void createStripeCheckoutSession_withInvalidPromo_returnsBadRequest() {
+
+        // Arrange
+        StripeProductRequestModel request = new StripeProductRequestModel();
+        request.setCartId(CART_ID);
+
+        when(paymentService.createStripeCheckoutSession(request, CART_ID))
+                .thenReturn(Mono.error(
+                        new InvalidInputException("Invalid promo percent.")
+                ));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/carts/{cartId}/checkout/sessions", CART_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody().isEmpty();
+
+        verify(paymentService)
+                .createStripeCheckoutSession(request, CART_ID);
+    }
+
+
+    @Test
+    void createStripeCheckoutSession_withInvalidFrontendType_returnsBadRequest() {
+
+        // Arrange
+        StripeProductRequestModel request = new StripeProductRequestModel();
+        request.setCartId(CART_ID);
+        request.setFrontendTypeUrl("invalid-frontend");
+
+        when(paymentService.createStripeCheckoutSession(request, CART_ID))
+                .thenReturn(Mono.error(
+                        new InvalidInputException("Invalid frontend type")
+                ));
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/carts/{cartId}/checkout/sessions", CART_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody().isEmpty();
+
+        verify(paymentService)
+                .createStripeCheckoutSession(request, CART_ID);
+    }
+
+
+    @Test
+    void createStripeCheckoutSession_withEmptyResponse_returnsEmptyBody() {
+
+        // Arrange
+        StripeProductRequestModel request = new StripeProductRequestModel();
+        request.setCartId(CART_ID);
+
+        when(paymentService.createStripeCheckoutSession(request, CART_ID))
+                .thenReturn(Mono.empty());
+
+        // Act & Assert
+        webTestClient.post()
+                .uri("/api/v1/carts/{cartId}/checkout/sessions", CART_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().isEmpty();
+
+        verify(paymentService)
+                .createStripeCheckoutSession(request, CART_ID);
+    }
+
 }

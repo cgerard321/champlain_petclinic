@@ -305,6 +305,15 @@ public class CartControllerV1 {
                 ));
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping(value = "/webhook")
+    public Mono<ResponseEntity<String>> stripeWebhook(
+            @RequestBody String payload,
+            @RequestHeader(value = "Stripe-Signature", required = false) String signature) {
+
+        return cartServiceClient.forwardStripeWebhook(payload, signature);
+    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PostMapping("/{cartId}/wishlist")

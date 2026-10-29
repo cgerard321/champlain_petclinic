@@ -204,7 +204,7 @@ public class CartServiceImpl implements CartService {
 
 
     @Override
-    public Mono<CartResponseModel> checkoutCart(final String cartId) {
+    public Mono<CartResponseModel> checkoutCart(final String cartId, final String stripeSessionId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> {
@@ -220,26 +220,29 @@ public class CartServiceImpl implements CartService {
                     double total = orderCart.getTotal();
 
                     return generateRecommendations(purchasedProducts)
-                            .flatMap(recommendations -> {
-                                cart.setRecentPurchases(
-                                        EntityModelUtil.mergeRecentPurchases(
-                                                cart.getRecentPurchases(),
-                                                purchasedProducts)
-                                );
+                            .flatMap(recommendations ->
+                                    orderService.createOrder(orderCart, stripeSessionId)
+                                            .flatMap(savedOrder -> {
+                                                cart.setRecentPurchases(
+                                                        EntityModelUtil.mergeRecentPurchases(
+                                                                cart.getRecentPurchases(),
+                                                                purchasedProducts));
 
-                                cart.setRecommendationPurchase(recommendations);
-                                cart.setProducts(Collections.emptyList());
-                                cart.setShippingMethod(ShippingMethod.PICKUP);
-                                cart.setShippingCost(ShippingMethod.PICKUP.getCost());
+                                                cart.setRecommendationPurchase(recommendations);
+                                                cart.setProducts(Collections.emptyList());
+                                                cart.setShippingMethod(ShippingMethod.PICKUP);
+                                                cart.setShippingCost(ShippingMethod.PICKUP.getCost());
 
-                                return cartRepository.save(cart);
-                            })
-                            .flatMap(savedCart -> orderService.createOrder(orderCart))
-                            .map(savedOrder -> {
+                                                return cartRepository.save(cart);
+                                            })
+                            )
+                            .map(savedCart -> {
                                 CartResponseModel response =
                                         new CartResponseModel(invoiceId, cartId, purchasedProducts, total);
+
                                 response.setShippingMethod(orderCart.getShippingMethod());
                                 response.setShippingCost(orderCart.getShippingCost());
+
                                 return response;
                             });
                 });

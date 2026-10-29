@@ -1,10 +1,7 @@
 package com.petclinic.cartsservice.utils;
 
-import com.petclinic.cartsservice.dataaccesslayer.Cart;
-import com.petclinic.cartsservice.dataaccesslayer.ShippingMethod;
-import com.petclinic.cartsservice.dataaccesslayer.Order;
+import com.petclinic.cartsservice.dataaccesslayer.*;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
-import com.petclinic.cartsservice.dataaccesslayer.PromoCode;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeRequestModel;
 import com.petclinic.cartsservice.domainclientlayer.PromoCodeResponseModel;
@@ -135,7 +132,7 @@ public class EntityModelUtil {
         return responseModel;
     }
 
-    public static Order toOrder(Cart cart, CustomerResponseModel customer) {
+    public static Order toOrder(Cart cart, CustomerResponseModel customer, String stripeSessionId) {
         return Order.builder()
                 .orderId(UUID.randomUUID().toString())
                 .customerId(customer.getCustomerId())
@@ -151,6 +148,9 @@ public class EntityModelUtil {
                 .shippingCost(cart.getShippingCost())
                 .invoiceId(cart.getInvoiceId())
                 .orderDate(LocalDateTime.now())
+                .stripeSessionId(stripeSessionId)
+                .paymentStatus(PaymentStatus.PAID)
+                .paidDate(LocalDateTime.now())
                 .build();
     }
 

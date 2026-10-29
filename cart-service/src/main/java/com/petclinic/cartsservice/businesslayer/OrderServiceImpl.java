@@ -31,12 +31,12 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public Mono<OrderResponseModel> createOrder(Cart cart) {
+    public Mono<OrderResponseModel> createOrder(Cart cart, String stripeSessionId) {
         return customerClient.getCustomerById(cart.getCustomerId())
                         .switchIfEmpty(Mono.error(
                                 new NotFoundException("Customer not found")))
                         .map(customer ->
-                                EntityModelUtil.toOrder(cart, customer))
+                                EntityModelUtil.toOrder(cart, customer, stripeSessionId))
                         .flatMap(orderRepository::save)
                         .map(EntityModelUtil::toOrderResponseModel);
     }

@@ -182,8 +182,8 @@ public class CartController {
     }
 
     @PostMapping("/{cartId}/checkout")
-    public Mono<ResponseEntity<CartResponseModel>> checkoutCart(@PathVariable String cartId) {
-        return cartService.checkoutCart(cartId)
+    public Mono<ResponseEntity<CartResponseModel>> checkoutCart(@PathVariable String cartId, @RequestParam String stripeSessionId) {
+        return cartService.checkoutCart(cartId,stripeSessionId)
                 .map(ResponseEntity::ok)
                 .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()))
                 .onErrorResume(InvalidInputException.class, e -> Mono.just(ResponseEntity.badRequest().body(null)));

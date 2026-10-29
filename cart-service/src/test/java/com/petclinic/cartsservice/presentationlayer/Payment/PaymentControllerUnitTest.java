@@ -116,4 +116,117 @@ class PaymentControllerUnitTest {
                 .verifyComplete();
     }
 
+    @Test
+    void createStripeCheckoutSession_withEmptyCart_returnsBadRequest() {
+
+        // Arrange
+        StripeProductRequestModel request = new StripeProductRequestModel();
+        request.setCartId(CART_ID);
+
+        when(paymentService.createStripeCheckoutSession(request, CART_ID))
+                .thenReturn(Mono.error(
+                        new InvalidInputException("Cart is empty")
+                ));
+
+        // Act
+        Mono<ResponseEntity<StripeResponseModel>> result =
+                paymentController.createStripeCheckoutSession(request, CART_ID);
+
+        // Assert
+        StepVerifier.create(result)
+                .assertNext(entity -> {
+                    assertEquals(HttpStatus.BAD_REQUEST, entity.getStatusCode());
+                    assertNull(entity.getBody());
+                })
+                .verifyComplete();
+
+        verify(paymentService).createStripeCheckoutSession(request, CART_ID);
+    }
+
+    @Test
+    void createStripeCheckoutSession_withInvalidTotal_returnsBadRequest() {
+
+        // Arrange
+        StripeProductRequestModel request = new StripeProductRequestModel();
+        request.setCartId(CART_ID);
+
+        when(paymentService.createStripeCheckoutSession(request, CART_ID))
+                .thenReturn(Mono.error(
+                        new InvalidInputException("Invalid total price amount.")
+                ));
+
+        // Act
+        Mono<ResponseEntity<StripeResponseModel>> result =
+                paymentController.createStripeCheckoutSession(request, CART_ID);
+
+        // Assert
+        StepVerifier.create(result)
+                .assertNext(entity -> {
+                    assertEquals(HttpStatus.BAD_REQUEST, entity.getStatusCode());
+                    assertNull(entity.getBody());
+                })
+                .verifyComplete();
+
+        verify(paymentService).createStripeCheckoutSession(request, CART_ID);
+    }
+
+    @Test
+    void createStripeCheckoutSession_withUnexpectedError_propagatesError() {
+
+        // Arrange
+        StripeProductRequestModel request = new StripeProductRequestModel();
+        request.setCartId(CART_ID);
+
+        when(paymentService.createStripeCheckoutSession(request, CART_ID))
+                .thenReturn(Mono.error(
+                        new RuntimeException("Unexpected payment error")
+                ));
+
+        // Act
+        Mono<ResponseEntity<StripeResponseModel>> result =
+                paymentController.createStripeCheckoutSession(request, CART_ID);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(error ->
+                        error instanceof RuntimeException &&
+                                "Unexpected payment error".equals(error.getMessage()))
+                .verify();
+
+        verify(paymentService).createStripeCheckoutSession(request, CART_ID);
+    }
+
+    @Test
+    void createStripeCheckoutSession_passesCorrectCartIdToService() {
+
+        // Arrange
+        String pathCartId = "cart-001";
+
+        StripeProductRequestModel request = new StripeProductRequestModel();
+        request.setCartId(pathCartId);
+
+        StripeResponseModel response =
+                new StripeResponseModel(
+                        "cs_test_456",
+                        "https://checkout.stripe.com/test"
+                );
+
+        when(paymentService.createStripeCheckoutSession(request, pathCartId))
+                .thenReturn(Mono.just(response));
+
+        // Act
+        Mono<ResponseEntity<StripeResponseModel>> result =
+                paymentController.createStripeCheckoutSession(request, pathCartId);
+
+        // Assert
+        StepVerifier.create(result)
+                .assertNext(entity -> {
+                    assertEquals(HttpStatus.OK, entity.getStatusCode());
+                    assertSame(response, entity.getBody());
+                })
+                .verifyComplete();
+
+        verify(paymentService).createStripeCheckoutSession(request, pathCartId);
+    }
+
 }

@@ -67,6 +67,8 @@ interface Invoice {
   quantity: number;
 }
 
+import { useCreateStripCheckoutSessiontype } from '../api/createStripeCheckoutSession';
+
 /**
  * UserCart component displays the user's shopping cart, allowing them to view, update, and remove items,
  * manage billing information, and proceed to checkout. It also handles displaying invoices and notifications,
@@ -933,15 +935,26 @@ const UserCart: React.FC = () => {
     }
   };
 
-  const handleCheckoutConfirmation = (): void => {
+  const { createStripeSession } = useCreateStripCheckoutSessiontype();
+
+  const handleCheckoutConfirmation = async (): Promise<void> => {
     if (isStaff) {
       navigate(AppRoutePaths.Unauthorized, {
         state: { message: t('toasts.staffCheckout') },
       });
       return;
     }
-    setShowBillingForm(true);
+    //setShowBillingForm(true);
     setIsCheckoutModalOpen(false);
+
+    const success = await createStripeSession();
+    if (!success) {
+      setCheckoutMessage(
+        t('errors.checkoutFailed', {
+          message: t('errors.unexpected'),
+        })
+      );
+    }
   };
 
   const handleCheckout = async (billing?: BillingInfo): Promise<void> => {
@@ -1117,6 +1130,7 @@ const UserCart: React.FC = () => {
     }
     return acc;
   }, {});
+
   const recentPurchasesList = Object.values(uniqueRecentPurchases);
 
   // Helper to filter out duplicate recommendation purchases by productId

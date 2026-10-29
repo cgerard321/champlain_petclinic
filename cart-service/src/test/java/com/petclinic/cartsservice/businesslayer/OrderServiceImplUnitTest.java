@@ -4,6 +4,7 @@ package com.petclinic.cartsservice.businesslayer;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.Order;
 import com.petclinic.cartsservice.dataaccesslayer.OrderRepository;
+import com.petclinic.cartsservice.dataaccesslayer.PaymentStatus;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
@@ -107,6 +108,7 @@ class OrderServiceUnitTest {
     void createOrder_ValidCart_ReturnsOrderResponseModel() {
         // Arrange
         CustomerResponseModel customer = mockCustomer();
+        String stripeSessionId = "sessionId";
 
         when(customerClient.getCustomerById(CUSTOMER_ID))
                 .thenReturn(Mono.just(customer));
@@ -116,7 +118,7 @@ class OrderServiceUnitTest {
                         Mono.just(invocation.getArgument(0)));
 
         // Act & Assert
-        StepVerifier.create(orderService.createOrder(cart))
+        StepVerifier.create(orderService.createOrder(cart, stripeSessionId))
                 .assertNext(response -> {
                     assertNotNull(response.getOrderId());
                     assertEquals(CUSTOMER_ID, response.getCustomerId());
@@ -139,6 +141,9 @@ class OrderServiceUnitTest {
         assertEquals(CUSTOMER_NAME, savedOrder.getCustomerName());
         assertEquals(CUSTOMER_ADDRESS, savedOrder.getCustomerAddress());
         assertEquals(2, savedOrder.getProducts().size());
+        assertEquals(stripeSessionId, savedOrder.getStripeSessionId());
+        assertEquals(PaymentStatus.PAID, savedOrder.getPaymentStatus());
+        assertNotNull(savedOrder.getPaidDate());
         verify(customerClient).getCustomerById(CUSTOMER_ID);
     }
 
@@ -146,6 +151,7 @@ class OrderServiceUnitTest {
     void createOrder_ValidCart_SavesCorrectFinancialValues() {
         // Arrange
         CustomerResponseModel customer = mockCustomer();
+        String stripeSessionId = "sessionId";
 
         when(customerClient.getCustomerById(CUSTOMER_ID)).thenReturn(Mono.just(customer));
 
@@ -154,7 +160,7 @@ class OrderServiceUnitTest {
                         Mono.just(invocation.getArgument(0)));
 
         // Act & Assert
-        StepVerifier.create(orderService.createOrder(cart))
+        StepVerifier.create(orderService.createOrder(cart, stripeSessionId))
                 .assertNext(response -> {
                     assertEquals(125.0, response.getSubtotal(), 0.001);
                     assertEquals(12.47, response.getTvq(), 0.001);
@@ -178,10 +184,11 @@ class OrderServiceUnitTest {
     @Test
     void createOrder_CustomerNotFound_ThrowsNotFoundException() {
         // Arrange
+        String stripeSessionId = "sessionId";
         when(customerClient.getCustomerById(CUSTOMER_ID)).thenReturn(Mono.empty());
 
         // Act & Assert
-        StepVerifier.create(orderService.createOrder(cart))
+        StepVerifier.create(orderService.createOrder(cart,  stripeSessionId))
                 .expectErrorMatches(error ->
                         error instanceof NotFoundException &&
                                 error.getMessage().equals("Customer not found")).verify();
@@ -194,13 +201,14 @@ class OrderServiceUnitTest {
     void createOrder_RepositoryError_ThrowsException() {
         // Arrange
         CustomerResponseModel customer = mockCustomer();
+        String stripeSessionId = "sessionId";
 
         when(customerClient.getCustomerById(CUSTOMER_ID)).thenReturn(Mono.just(customer));
 
         when(orderRepository.save(any(Order.class)))
                 .thenReturn(Mono.error(new RuntimeException("Database error")));
         // Act & Assert
-        StepVerifier.create(orderService.createOrder(cart))
+        StepVerifier.create(orderService.createOrder(cart, stripeSessionId))
                 .expectErrorMatches(error ->
                         error instanceof RuntimeException &&
                                 error.getMessage().equals("Database error")).verify();

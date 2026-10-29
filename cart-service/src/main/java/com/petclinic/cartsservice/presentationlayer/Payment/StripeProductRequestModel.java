@@ -13,5 +13,6 @@ import lombok.NoArgsConstructor;
 public class StripeProductRequestModel {
 
     private String cartId;
+    private String frontendTypeUrl;
 
 }

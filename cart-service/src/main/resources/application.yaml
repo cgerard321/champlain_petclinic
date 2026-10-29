@@ -19,7 +19,6 @@ spring:
     activate:
       on-profile: test
 
-
   data:
     mongodb:
       username: root

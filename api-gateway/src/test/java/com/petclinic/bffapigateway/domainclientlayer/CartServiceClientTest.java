@@ -1364,6 +1364,26 @@ public class CartServiceClientTest {
                 .verify();
     }
 
+    @Test
+    void testForwardStripeWebhook_forwardsPayloadStatusAndSignature() throws InterruptedException {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader("Content-Type", "text/plain")
+                .setBody("Invalid Stripe signature"));
+
+        StepVerifier.create(mockCartServiceClient.forwardStripeWebhook("{\"id\":\"evt\"}", "t=1,v1=sig"))
+                .assertNext(response -> {
+                    assertEquals(400, response.getStatusCode().value());
+                    assertEquals("Invalid Stripe signature", response.getBody());
+                })
+                .verifyComplete();
+
+        okhttp3.mockwebserver.RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/api/v1/carts/webhook", request.getPath());
+        assertEquals("t=1,v1=sig", request.getHeader("Stripe-Signature"));
+        assertEquals("{\"id\":\"evt\"}", request.getBody().readUtf8());
+    }
+
 
     @Test
         void testCreateWishlistTransfer_Success() {
