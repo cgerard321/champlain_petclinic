@@ -6,6 +6,7 @@ import { Subscription, toArray } from 'rxjs';
 import { BillRecord } from '@features/bill/models/bill.model';
 import { Customer } from '@features/bill/models/customer.model';
 import { BillService } from '@features/bill/services/bill-service';
+import { translateBillStatus } from '@features/bill/utils/bill-translations';
 
 @Component({
   selector: 'app-customer-bill-lookup',
@@ -21,6 +22,8 @@ export class CustomerBillLookup implements OnInit {
   protected readonly customers = signal<Customer[]>([]);
   protected readonly bills = signal<BillRecord[]>([]);
   protected readonly selectedCustomerId = signal('');
+
+  protected readonly translateStatus = translateBillStatus;
 
   protected readonly customersLoading = signal(true);
   protected readonly customersFailed = signal(false);
@@ -88,11 +91,11 @@ export class CustomerBillLookup implements OnInit {
   protected statusLabel(status: BillRecord['billStatus']): string {
     switch (status) {
       case 'PAID':
-        return 'Paid';
+        return 'PAID';
       case 'UNPAID':
-        return 'Unpaid';
+        return 'UNPAID';
       case 'OVERDUE':
-        return 'Overdue';
+        return 'OVERDUE';
     }
   }
 }
