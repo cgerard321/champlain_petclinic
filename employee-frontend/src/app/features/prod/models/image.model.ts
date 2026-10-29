@@ -4,3 +4,10 @@ export interface FileDetails {
   fileType: string;
   fileData: string;
 }
+
+export interface ImageResponse {
+  imageId: string;
+  imageName: string;
+  imageType: string;
+  imageData: string;
+}
