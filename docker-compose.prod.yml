@@ -238,6 +238,8 @@ services:
       - .env
     restart: unless-stopped
     depends_on:
+      files-service:
+        condition: service_started
       postgres-products:
         condition: service_healthy
 

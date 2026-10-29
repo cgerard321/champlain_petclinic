@@ -438,7 +438,7 @@ class CustomerControllerIntegrationTest {
         updateDTO.setLastName("NewLastName");
         updateDTO.setAddress("New Address");
         updateDTO.setCity("New City");
-        updateDTO.setProvince("New Province");
+        updateDTO.setProvince("Ontario");
         updateDTO.setTelephone("9999999999");
         // photoId is left null
 
@@ -466,6 +466,35 @@ class CustomerControllerIntegrationTest {
                         customer.getFirstName().equals("NewFirstName") &&
                                 customer.getCity().equals("New City")
                 )
+                .verifyComplete();
+    }
+
+    @Test
+    void whenUpdateCustomer_withInvalidProvince_thenReturnUnprocessableEntityAndKeepOldData() {
+        String testCustomerId = "2c858ef6-a353-4293-bf03-3c7a48c093b3";
+        Customer existingCustomer = buildCustomerId("OldFirst", testCustomerId);
+        existingCustomer.setId("1");
+
+        Publisher<Customer> setup = repo.deleteAll().then(repo.save(existingCustomer));
+        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
+
+        CustomerRequestDTO updateDTO = new CustomerRequestDTO();
+        updateDTO.setFirstName("NewFirstName");
+        updateDTO.setLastName("NewLastName");
+        updateDTO.setAddress("New Address");
+        updateDTO.setCity("New City");
+        updateDTO.setProvince("Narnia");
+        updateDTO.setTelephone("9999999999");
+
+        client.put()
+                .uri("/customers/" + testCustomerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(updateDTO), CustomerRequestDTO.class)
+                .exchange()
+                .expectStatus().isEqualTo(422);
+
+        StepVerifier.create(repo.findCustomerByCustomerId(testCustomerId))
+                .expectNextMatches(customer -> customer.getFirstName().equals("OldFirst"))
                 .verifyComplete();
     }
 

@@ -136,6 +136,7 @@
   "customerForm": {
     "title": "Edit Profile",
     "selectProvince": "Select Province",
+    "noAddressSuggestions": "No suggestions",
     "submit": "Update",
     "back": "Back",
     "updateSuccess": "Profile updated successfully",

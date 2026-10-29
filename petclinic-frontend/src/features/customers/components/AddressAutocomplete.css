@@ -1,0 +1,51 @@
+.address-autocomplete {
+    position: relative;
+    width: 100%;
+}
+
+.address-autocomplete input {
+    width: 100%;
+}
+
+.address-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    margin: 2px 0 0;
+    padding: 0;
+    list-style: none;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.address-suggestions li {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 10px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.address-suggestions li:hover {
+    background: #f0f4ff;
+}
+
+.address-suggestions li span {
+    font-size: 0.85em;
+    color: #666;
+}
+
+.address-suggestions .address-suggestion-empty {
+    cursor: default;
+    color: #666;
+}
+
+.address-suggestions .address-suggestion-empty:hover {
+    background: none;
+}
