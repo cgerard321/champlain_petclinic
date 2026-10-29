@@ -34,6 +34,11 @@ export class Cust implements OnInit {
   );
   protected readonly notAvailable = $localize`:@@cust.notAvailable:Non disponible`;
   protected readonly searchPlaceholder = $localize`:@@cust.searchPlaceholder:Rechercher un client par nom, prénom, ID, téléphone, adresse ou ville`;
+  protected readonly isAdmin = computed(() => this.auth.hasRole(Roles.admin));
+  protected readonly showDeactivated = signal(false);
+  protected readonly deactivatedCustomers = signal<Customer[]>([]);
+  protected readonly deactivatedError = signal<string | null>(null);
+  protected readonly deactivatedLoadError = $localize`:@@cust.deactivated.loadError:Impossible de charger les comptes désactivés.`;
 
   ngOnInit(): void {
     this.customerService
@@ -89,5 +94,21 @@ export class Cust implements OnInit {
       width: '650px',
       maxWidth: '90vw',
     });
+  }
+
+  protected toggleDeactivated(): void {
+    this.showDeactivated.update((shown) => !shown);
+    if (!this.showDeactivated()) {
+      return;
+    }
+    this.deactivatedCustomers.set([]);
+    this.deactivatedError.set(null);
+    this.customerService
+      .getSoftDeletedCustomers()
+      .pipe(this.untilDestroyed)
+      .subscribe({
+        next: (customer) => this.deactivatedCustomers.update((list) => [...list, customer]),
+        error: () => this.deactivatedError.set(this.deactivatedLoadError),
+      });
   }
 }
