@@ -12,7 +12,14 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormArray,
+  FormControl,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 
 import {
@@ -41,6 +48,14 @@ export interface VetSavePayload extends VetEditSubmission {
   readonly visitsToCancel: readonly Visit[];
 }
 
+type EducationFormGroup = FormGroup<{
+  schoolName: FormControl<string>;
+  degree: FormControl<string>;
+  fieldOfStudy: FormControl<string>;
+  startDate: FormControl<string>;
+  endDate: FormControl<string>;
+}>;
+
 @Component({
   selector: 'app-vet-edit-form',
   imports: [ReactiveFormsModule],
@@ -61,6 +76,98 @@ export class VetEditForm {
   });
   protected readonly specialtyLabel = specialtyLabel;
   private readonly fb = inject(FormBuilder);
+
+  protected showEducationForm = false;
+  protected readonly educationDraft = this.createEducationGroup();
+  protected educationDateError = false;
+
+  protected readonly educationFields = [
+    {
+      key: 'schoolName',
+      label: $localize`:@@vets.education.school:École ou établissement`,
+      type: 'text',
+    },
+    {
+      key: 'degree',
+      label: $localize`:@@vets.education.degree:Diplôme ou qualification`,
+      type: 'text',
+    },
+    {
+      key: 'fieldOfStudy',
+      label: $localize`:@@vets.education.field:Domaine d’études`,
+      type: 'text',
+    },
+    {
+      key: 'startDate',
+      label: $localize`:@@vets.education.start_date:Date de début`,
+      type: 'date',
+    },
+    {
+      key: 'endDate',
+      label: $localize`:@@vets.education.end_date:Date de fin`,
+      type: 'date',
+    },
+  ] as const;
+  protected readonly education = new FormArray<EducationFormGroup>([]);
+  private createEducationGroup(): EducationFormGroup {
+    return this.fb.nonNullable.group({
+      schoolName: ['', [Validators.required, Validators.pattern(/\S/)]],
+      degree: ['', [Validators.required, Validators.pattern(/\S/)]],
+      fieldOfStudy: ['', [Validators.required, Validators.pattern(/\S/)]],
+      startDate: ['', Validators.required],
+      endDate: ['', Validators.required],
+    });
+  }
+
+  protected openEducationForm(): void {
+    if (this.saving()) return;
+
+    this.showEducationForm = true;
+  }
+
+  protected addEducation(): void {
+    if (this.saving()) return;
+
+    const values = this.educationDraft.getRawValue();
+
+    this.educationDraft.setValue({
+      schoolName: values.schoolName.trim(),
+      degree: values.degree.trim(),
+      fieldOfStudy: values.fieldOfStudy.trim(),
+      startDate: values.startDate,
+      endDate: values.endDate,
+    });
+
+    this.educationDraft.markAllAsTouched();
+    this.educationDateError = false;
+
+    if (this.educationDraft.invalid) return;
+
+    if (values.endDate < values.startDate) {
+      this.educationDateError = true;
+      return;
+    }
+
+    const entry = this.createEducationGroup();
+    entry.setValue(this.educationDraft.getRawValue());
+
+    this.education.push(entry);
+    this.education.markAsDirty();
+
+    this.educationDraft.reset();
+    this.showEducationForm = false;
+    this.educationDateError = false;
+  }
+
+  acknowledgeEducationSaved(): void {
+    if (!this.education.length) return;
+
+    this.education.removeAt(0);
+
+    if (!this.education.length) {
+      this.education.markAsPristine();
+    }
+  }
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
   private readonly labels = workdayLabels();
@@ -341,10 +448,19 @@ export class VetEditForm {
       this.announcement.set('');
       this.pendingSpecialtyNames.set([]);
       this.customSpecialty.reset();
+      this.education.clear();
+      this.education.markAsPristine();
+      this.education.markAsUntouched();
     });
   }
 
   hasUnsavedChanges(): boolean {
+    return (
+      this.form.dirty ||
+      this.education.dirty ||
+      this.educationDraft.dirty ||
+      this.removed().length > 0
+    );
     const days = this.days();
     const schedule = this.schedule();
     const initialDays = this.initialDays();
@@ -411,7 +527,8 @@ export class VetEditForm {
       specialties: values.specialties,
     });
     this.form.markAllAsTouched();
-    if (this.form.invalid) return;
+    this.education.markAllAsTouched();
+    if (this.form.invalid || this.education.invalid) return;
     const removed = this.removed();
     if (!removed.length) {
       this.emit();
@@ -489,6 +606,14 @@ export class VetEditForm {
         photoDefault: false,
       },
       newSpecialtyNames: [...this.pendingSpecialtyNames()],
+      newEducation: this.education.getRawValue().map((entry) => ({
+        vetId: vet.vetId,
+        schoolName: entry.schoolName.trim(),
+        degree: entry.degree.trim(),
+        fieldOfStudy: entry.fieldOfStudy.trim(),
+        startDate: entry.startDate,
+        endDate: entry.endDate,
+      })),
     });
   }
 }

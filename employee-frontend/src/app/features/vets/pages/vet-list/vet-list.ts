@@ -12,6 +12,7 @@ import {
 } from '@shared/components/confirm-dialog/confirm-dialog';
 import { Roles } from '@shared/models/roles';
 import { VetProfileCard } from '@features/vets/components/vet-profile-card/vet-profile-card';
+import { VetEducationResponse } from '@features/vets/models/vet-api.model';
 import { toVetProfile } from '@features/vets/models/vet-profile.mapper';
 import { VetProfile } from '@features/vets/models/vet-profile.model';
 import {
@@ -39,6 +40,7 @@ export class VetList {
   protected readonly deletingVetId = signal<string | null>(null);
   protected readonly searchQuery = signal('');
   protected readonly selectedSpecialty = signal('');
+  protected readonly educationsByVet = signal<Partial<Record<string, VetEducationResponse[]>>>({});
 
   protected readonly isAdmin = computed(() =>
     this.auth.hasRole(Roles.admin),
@@ -99,7 +101,41 @@ export class VetList {
 
     this.service
       .getVets()
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        switchMap((vets) => {
+          const profiles = vets.map(toVetProfile);
+
+          if (!profiles.length) {
+            return of({
+              profiles,
+              educationsByVetId: {},
+            });
+          }
+          return forkJoin(
+            profiles.map((vet) =>
+              this.service.getEducations(vet.vetId).pipe(
+                map((educations) => ({
+                  vetId: vet.vetId,
+                  educations,
+                })),
+              ),
+            ),
+          ).pipe(
+            map((results) => {
+              const educationsByVetId: Partial<Record<string, VetEducationResponse[]>> = {};
+              for (const result of results) {
+                educationsByVetId[result.vetId] = result.educations;
+              }
+
+              return {
+                profiles,
+                educationsByVetId,
+              };
+            }),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
         next: (vets) => {
           // Temporary diagnostic logs.
