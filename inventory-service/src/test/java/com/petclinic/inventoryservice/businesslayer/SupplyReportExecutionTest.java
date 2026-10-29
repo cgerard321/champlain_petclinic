@@ -36,7 +36,9 @@ class SupplyReportExecutionTest {
     private final SupplyReportPdfGenerator generator = spy(new SupplyReportPdfGenerator());
     private final ProductInventoryServiceImpl service = new ProductInventoryServiceImpl(
             mock(InventoryRepository.class), products, mock(InventoryTypeRepository.class),
-            mock(InventoryValidator.class), mock(SupplyAuditRepository.class), generator);
+            mock(InventoryValidator.class),
+            mock(org.springframework.data.mongodb.core.ReactiveMongoTemplate.class),
+            mock(SupplyAuditRepository.class), generator);
 
     @Test
     void pdfRenderingDoesNotRunOnReactiveRequestThread() {

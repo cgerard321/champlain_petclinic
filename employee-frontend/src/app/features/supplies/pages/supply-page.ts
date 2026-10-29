@@ -115,7 +115,7 @@ export class SupplyPage {
     this.restockForm().reset({ quantity: null });
     this.restockError.set('');
     const dialogRef = this.dialog.open(this.restockDialogTemplate(), {
-      ariaLabel: $localize`:@@supply.restock.ariaLabel:Réapprovisionner ${this.localizedSupplyName(supply)}:name:`,   
+      ariaLabel: $localize`:@@supply.restock.ariaLabel:Réapprovisionner ${this.localizedSupplyName(supply)}:name:`,
     });
     this.restockDialogRef = dialogRef;
     dialogRef.afterClosed().subscribe(() => {

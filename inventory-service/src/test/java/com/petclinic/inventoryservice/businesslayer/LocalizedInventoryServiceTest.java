@@ -42,6 +42,7 @@ class LocalizedInventoryServiceTest {
     private final InventoryTypeRepository types = mock(InventoryTypeRepository.class);
     private final ProductInventoryServiceImpl service = new ProductInventoryServiceImpl(
             inventories, products, types, new InventoryValidator(inventories, types, products),
+            mock(org.springframework.data.mongodb.core.ReactiveMongoTemplate.class),
             mock(SupplyAuditRepository.class), new SupplyReportPdfGenerator());
 
     static Stream<Map<String, String>> duplicateNames() {
