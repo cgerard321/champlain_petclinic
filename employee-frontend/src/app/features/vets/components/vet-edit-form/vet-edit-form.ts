@@ -16,8 +16,11 @@ import { FormControl, FormBuilder, ReactiveFormsModule, Validators } from '@angu
 import { MatDialog } from '@angular/material/dialog';
 
 import {
+  ALL_WORK_HOURS,
+  STANDARD_SHIFT_HOURS,
   DAYS,
   emptySchedule,
+  hourRange,
   hourLabel,
   readSchedule,
   RemovedSlot,
@@ -69,6 +72,12 @@ export class VetEditForm {
   private readonly injector = inject(Injector);
   protected readonly announcement = signal('');
   protected readonly pendingSpecialtyNames = signal<string[]>([]);
+  protected readonly showAllAvailabilities = signal(false);
+
+  protected toggleShowAllAvailabilities(): void {
+    this.showAllAvailabilities.update((value) => !value);
+  }
+
   protected readonly form = this.fb.nonNullable.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
@@ -120,15 +129,99 @@ export class VetEditForm {
       hint: $localize`:@@vets.edit.biography_hint:Au moins 10 caractères.`,
     },
   ] as const;
-  protected readonly availability = computed(() => {
+
+  protected readonly allAvailabilities = computed(() => {
     const days = this.days();
     const schedule = this.schedule();
-    return DAYS.filter((day) => days.includes(day) || schedule[day].length > 0).map((day) => ({
-      day,
-      label: this.labels[day],
-      hours: schedule[day].map((hour) => ({ value: hour, label: hourLabel(hour) })),
-    }));
+    const initialSchedule = this.initialSchedule();
+
+    const allHours = Array.from(
+      new Set([...ALL_WORK_HOURS, ...DAYS.flatMap((day) => initialSchedule[day] || [])]),
+    ).sort((a, b) => {
+      const rangeA = hourRange(a)?.[0] ?? 0;
+      const rangeB = hourRange(b)?.[0] ?? 0;
+      return rangeA - rangeB;
+    });
+
+    return DAYS.map((day) => {
+      const isDaySelected = days.includes(day);
+      const activeHours = schedule[day] || [];
+
+      return {
+        day,
+        label: this.labels[day],
+        selected: isDaySelected,
+        hours: allHours.map((hour) => ({
+          value: hour,
+          label: hourLabel(hour),
+          selected: activeHours.includes(hour),
+        })),
+      };
+    });
   });
+
+  protected addDay(day: Workday): void {
+    this.days.update((current) => (current.includes(day) ? current : [...current, day]));
+
+    const initialSchedule = this.initialSchedule();
+    const defaultHours = initialSchedule[day]?.length ? initialSchedule[day] : STANDARD_SHIFT_HOURS;
+
+    if (!this.schedule()[day]?.length) {
+      this.schedule.update((current) => ({ ...current, [day]: defaultHours }));
+    }
+    this.announcement.set(
+      $localize`:@@vets.availability.added_day:Journée ${this.labels[day]}:day: ajoutée.`,
+    );
+    this.restoreFocus(`#add-day-${day}`);
+  }
+
+  protected addHour(day: Workday, hour: string): void {
+    const currentHours = this.schedule()[day] || [];
+    if (!currentHours.includes(hour)) {
+      const updatedHours = [...currentHours, hour].sort();
+      this.schedule.update((current) => ({ ...current, [day]: updatedHours }));
+    }
+    if (!this.days().includes(day)) {
+      this.days.update((current) => [...current, day]);
+    }
+    this.announcement.set(
+      $localize`:@@vets.availability.added_hour:${this.labels[day]}:day: ${hourLabel(hour)}:hour: ajouté.`,
+    );
+    this.restoreFocus(`#add-hour-${day}-${hour}`);
+  }
+
+  protected readonly availability = computed(() => {
+    return this.allAvailabilities()
+      .filter((entry) => entry.selected && entry.hours.some((h) => h.selected))
+      .map((entry) => ({
+        ...entry,
+        hours: entry.hours.filter((h) => h.selected),
+      }));
+  });
+
+  protected resetSchedule(): void {
+    this.dialog
+      .open(ConfirmDialog, {
+        data: {
+          title: $localize`:@@vets.availability.reset_title:Réinitialiser les modifications ?`,
+          message: $localize`:@@vets.availability.reset_message:Voulez-vous restaurer les disponibilités initiales ? Cela annulera les modifications en cours, mais ne replanifiera pas les rendez-vous annulés.`,
+          confirmLabel: $localize`:@@vets.availability.reset_confirm:Réinitialiser`,
+          cancelLabel: $localize`:@@vets.actions.cancel:Annuler`,
+        },
+      })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.days.set([...this.initialDays()]);
+          this.schedule.set(JSON.parse(JSON.stringify(this.initialSchedule())));
+          this.announcement.set(
+            $localize`:@@vets.availability.reset:Disponibilités réinitialisées.`,
+          );
+          this.restoreFocus('#availability-title');
+        }
+      });
+  }
   protected readonly removedSlots = computed<readonly RemovedSlot[]>(() => {
     const initialSchedule = this.initialSchedule();
     const schedule = this.schedule();
@@ -252,7 +345,16 @@ export class VetEditForm {
   }
 
   hasUnsavedChanges(): boolean {
-    return this.form.dirty || this.removed().length > 0;
+    const days = this.days();
+    const schedule = this.schedule();
+    const initialDays = this.initialDays();
+    const initialSchedule = this.initialSchedule();
+    const hasScheduleChanges = DAYS.some(
+      (day) =>
+        initialDays.includes(day) !== days.includes(day) ||
+        JSON.stringify(initialSchedule[day]) !== JSON.stringify(schedule[day]),
+    );
+    return this.form.dirty || hasScheduleChanges;
   }
 
   protected removeHour(day: Workday, hour: string): void {
@@ -291,7 +393,7 @@ export class VetEditForm {
           (preferred && root.querySelector<HTMLElement>(preferred)) ||
           root.querySelector<HTMLElement>('.remove-day') ||
           root.querySelector<HTMLElement>('#availability-title');
-        target?.focus();
+        target?.focus({ preventScroll: true });
       },
       { injector: this.injector },
     );
@@ -350,7 +452,7 @@ export class VetEditForm {
       );
     }
     parts.push(
-      $localize`:@@vets.availability.confirm_final:Cette action est définitive une fois enregistrée.`,
+      $localize`:@@vets.availability.confirm_visits_cancel:--- AVIS : Cela annulera toutes les visites réservées pendant cette disponibilité.`,
     );
     return parts.join(' ');
   }
@@ -359,21 +461,30 @@ export class VetEditForm {
     const vet = this.vet();
     const days = this.days();
     const schedule = this.schedule();
-    const untouched = !this.removed().length;
+    const initialDays = this.initialDays();
+    const initialSchedule = this.initialSchedule();
+
+    const hasScheduleChanges = DAYS.some(
+      (day) =>
+        initialDays.includes(day) !== days.includes(day) ||
+        JSON.stringify(initialSchedule[day]) !== JSON.stringify(schedule[day]),
+    );
+
     const workHours: Record<string, readonly string[]> = {};
     for (const day of DAYS) {
       if (schedule[day].length) workHours[day] = schedule[day];
     }
+
     this.submitted.emit({
       visitsToCancel: this.affectedVisits(),
       request: {
         ...this.form.getRawValue(),
         vetId: vet.vetId,
         vetBillId: vet.vetBillId,
-        workday: untouched
+        workday: !hasScheduleChanges
           ? (vet.workday ?? [])
           : DAYS.filter((day) => days.includes(day) || schedule[day].length > 0),
-        workHoursJson: untouched ? vet.workHoursJson : JSON.stringify(workHours),
+        workHoursJson: !hasScheduleChanges ? vet.workHoursJson : JSON.stringify(workHours),
         active: vet.active,
         photoDefault: false,
       },
