@@ -73,7 +73,7 @@ const MAX_PHOTO_BYTES = 160 * 1024;
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
   selector: 'app-inventory-list',
-  styleUrls: ['./inventories.css', './inventory-list.css'],
+  styleUrls: ['./inventory-list.css', './inventories.css'],
   templateUrl: './inventory-list.html',
 })
 export class InventoryList implements OnInit, OnDestroy {
