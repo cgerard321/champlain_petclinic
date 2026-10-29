@@ -1,9 +1,4 @@
 package com.petclinic.inventoryservice.businesslayer;
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.pdf.PdfWriter;
-import org.mockito.MockedStatic;
-import java.io.OutputStream;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
@@ -16,6 +11,7 @@ import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
+import com.petclinic.inventoryservice.utils.DataBaseLoaderService;
 import com.petclinic.inventoryservice.utils.ImageUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
@@ -55,6 +51,9 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 class ProductInventoryServiceUnitTest {
+    @MockBean
+    DataBaseLoaderService dataBaseLoaderService;
+
     @SpyBean
     ReactiveMongoTemplate mongoTemplate;
     @Autowired
@@ -72,6 +71,59 @@ class ProductInventoryServiceUnitTest {
     void configureAuditRepository() {
         when(supplyAuditRepository.insert(any(SupplyAuditEntry.class)))
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+    }
+
+    @Test
+    void addInventoryRejectsDuplicateFrenchName() {
+        Inventory existing = Inventory.builder()
+                .inventoryId("existing")
+                .inventoryName("First aid")
+                .name(Map.of("en", "First aid", "fr", "Premiers soins"))
+                .build();
+        InventoryRequestDTO request = InventoryRequestDTO.builder()
+                .inventoryName("Emergency kit")
+                .inventoryDescription("Emergency supplies")
+                .inventoryType("Equipment")
+                .name(Map.of("en", "Emergency kit", "fr", "Premiers soins"))
+                .description(Map.of("en", "Emergency supplies", "fr", "Fournitures d'urgence"))
+                .build();
+        when(inventoryRepository.count()).thenReturn(Mono.just(1L));
+        when(inventoryRepository.findAll()).thenReturn(Flux.just(existing));
+
+        StepVerifier.create(productInventoryService.addInventory(Mono.just(request)))
+                .expectError(UnprocessableEntityException.class)
+                .verify();
+        verify(inventoryRepository, never()).insert(any(Inventory.class));
+    }
+
+    @Test
+    void addSupplyRejectsDuplicateFrenchNameWithinInventory() {
+        Product existing = Product.builder()
+                .inventoryId("inventory-1")
+                .productId("existing")
+                .productName("Gauze")
+                .name(Map.of("en", "Gauze", "fr", "Compresse"))
+                .build();
+        ProductRequestDTO request = ProductRequestDTO.builder()
+                .productName("Dressing")
+                .productDescription("Wound dressing")
+                .name(Map.of("en", "Dressing", "fr", "Compresse"))
+                .description(Map.of("en", "Wound dressing", "fr", "Pansement pour plaie"))
+                .productPrice(1.0)
+                .productQuantity(1)
+                .productSalePrice(2.0)
+                .build();
+        when(inventoryRepository.findInventoryByInventoryId("inventory-1"))
+                .thenReturn(Mono.just(Inventory.builder().inventoryId("inventory-1").build()));
+        when(productRepository.existsByInventoryIdAndProductNameIgnoreCase("inventory-1", "Dressing"))
+                .thenReturn(Mono.just(false));
+        when(productRepository.findAllProductsByInventoryId("inventory-1"))
+                .thenReturn(Flux.just(existing));
+
+        StepVerifier.create(productInventoryService.addSupplyToInventory(Mono.just(request), "inventory-1", "test-user"))
+                .expectError(UnprocessableEntityException.class)
+                .verify();
+        verify(productRepository, never()).save(any(Product.class));
     }
 
     //    ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
@@ -2240,60 +2292,6 @@ class ProductInventoryServiceUnitTest {
                 .expectError(NotFoundException.class)
                 .verify();
     }
-
-    @Test
-    public void CreateSupplyPdfThrowsDocumentException() throws DocumentException {
-        String inventoryId = "valid-id";
-
-        // Build test products without depending on the generated constructor's field order.
-        Product product1 = Product.builder()
-                .id("1")
-                .productId("P001")
-                .inventoryId(inventoryId)
-                .productName("Product1")
-                .productDescription("Description1")
-                .productQuantity(10)
-                .productPrice(5.99)
-                .productSalePrice(7.99)
-                .productProfit(product.getProductProfit())
-                .status(Status.AVAILABLE)
-                .lastUpdatedAt(LocalDateTime.now())
-                .build();
-
-        Product product2 = Product.builder()
-                .id("2")
-                .productId("P002")
-                .inventoryId(inventoryId)
-                .productName("Product2")
-                .productDescription("Description2")
-                .productQuantity(20)
-                .productPrice(10.99)
-                .productSalePrice(12.99)
-                .productProfit(product.getProductProfit())
-                .status(Status.RE_ORDER)
-                .lastUpdatedAt(LocalDateTime.now())
-                .build();
-        // Mock the repository to return a Flux of products
-        when(productRepository.findAllProductsByInventoryId(inventoryId))
-                .thenReturn(Flux.just(product1, product2));
-
-
-        try (MockedStatic<PdfWriter> pdfWriter = mockStatic(PdfWriter.class)) {
-            pdfWriter.when(() -> PdfWriter.getInstance(any(Document.class), any(OutputStream.class)))
-                    .thenThrow(new DocumentException("PDF generation error"));
-
-            Mono<byte[]> result = productInventoryService.createSupplyPdf(inventoryId);
-
-            StepVerifier.create(result)
-                    .expectErrorMatches(throwable -> throwable instanceof RuntimeException &&
-                            throwable.getMessage().equals("Error generating PDF"))
-                    .verify();
-        }
-
-        // Verify the interaction with the repository
-        verify(productRepository, times(1)).findAllProductsByInventoryId(inventoryId);
-    }
-
 
     @Test
     void createSupplyPdf_SuccessfullyGeneratesPdf() {

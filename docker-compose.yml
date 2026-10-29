@@ -197,6 +197,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
+      files-service:
+        condition: service_started
       postgres-products:
         condition: service_healthy
 
