@@ -33,7 +33,6 @@ import VisitDetails from './features/visits/components/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 import VisitsCalendar from '@/pages/Visit/VisitsCalendar.tsx';
 
-import AllUsers from '@/pages/Users/AllUsers.tsx';
 import ProductDetails from '@/features/products/components/ProductDetails';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
 import ForgotPassword from '@/pages/User/ForgotPassword.tsx';
@@ -44,9 +43,6 @@ import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
 import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
 import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
-import UserDetailsPage from './pages/Users/UserDetailsPage';
-import UpdateUserPage from './pages/Users/UpdateUserPage';
-import AllRoles from '@/pages/Users/AllRoles.tsx';
 import OwnerBookAppointment from '@/pages/Visit/OwnerBookAppointment.tsx';
 import FAQ from './pages/FAQ/FAQ';
 import ContactPage from './pages/Contact/Contact';
@@ -295,38 +291,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute roles={['CUST']}>
             <OrderDetailsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.AllUsers,
-        element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <AllUsers />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.UserDetailsPage,
-        element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <UserDetailsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.UpdateUserPage,
-        element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <UpdateUserPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.AllRoles,
-        element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <AllRoles />
           </ProtectedRoute>
         ),
       },

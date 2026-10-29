@@ -246,19 +246,24 @@ public class VisitServiceImpl implements VisitService {
                 .map(entityDtoUtil::toVisitEntity)
                 // Generate new ID with current date and incremented sequence
                 .flatMap(visit -> {
-                    visit.setVisitId(IdGenerator.generateVisitId());
-                    return repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
+                    return repo.findByVisitDateAndPractitionerId(visit.getVisitDate(),visit.getPractitionerId())
                             .collectList()
                             .flatMap(existingVisits -> {
-                                if (existingVisits.isEmpty()) {// If there are no existing visits
-                                    return repo.insert(visit); // Insert the visit
+                                if (existingVisits.isEmpty()) {
+                                    return generateUniqueVisitId()
+                                            .flatMap(uniqueId -> {
+                                                visit.setVisitId(uniqueId);
+                                                return repo.insert(visit);
+                                            });
                                 } else {
-                                    //return exception if a visits already exists at the specific day and time for a specific practitioner
-                                    return Mono.error(new DuplicateTimeException("A visit with the same time and practitioner already exists."));
+                                    return Mono.error(new DuplicateTimeException(
+                                            "A visit with the same time and practitioner already exists."
+                                    ));
                                 }
                             });
                 })
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
+
     }
 
 
@@ -769,6 +774,23 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(entityDtoUtil::toVisitResponseDTO)
                 .doOnNext(dto -> log.info("Converted to DTO with status: {}", dto.getStatus()));
     }
+
+
+    private Mono<String> generateUniqueVisitId() {
+        return Mono.defer(() -> {
+            String candidateId = IdGenerator.generateVisitId();
+
+            return repo.existsByVisitId(candidateId)
+                    .flatMap(exists -> {
+                        if (exists) {
+                            return generateUniqueVisitId();
+                        }
+
+                        return Mono.just(candidateId);
+                    });
+        });
+    }
+
 
 
 }

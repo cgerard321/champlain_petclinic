@@ -26,7 +26,7 @@
       />
     } @else {
       @if (profile(); as displayProfile) {
-        <app-vet-profile-card [vet]="displayProfile" />
+        <app-vet-profile-card [vet]="displayProfile" , [educations]="educations()" />
       }
       @if (canEdit()) {
         <button class="edit-button" type="button" (click)="edit()" i18n="@@vets.actions.edit">
