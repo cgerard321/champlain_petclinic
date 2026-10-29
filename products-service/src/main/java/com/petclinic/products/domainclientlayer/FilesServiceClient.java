@@ -16,6 +16,8 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
+import java.time.Duration;
 
 @Component
 @Slf4j
@@ -26,6 +28,16 @@ public class FilesServiceClient {
     public FilesServiceClient(WebClient.Builder webClientBuilder, @Value("${app.files-service.host}") String filesServiceHost, @Value("${app.files-service.port}") String filesServicePort) {
         this.webClientBuilder = webClientBuilder;
         filesServiceUrl = "http://" + filesServiceHost + ":" + filesServicePort + "/files";
+    }
+
+    /** Wait for the HTTP server before claiming any migration or seed uploads. */
+    public Mono<Void> awaitStartup() {
+        return Mono.defer(() -> webClientBuilder.build().get()
+                        .uri(filesServiceUrl.replaceFirst("/files$", "/metrics"))
+                        .retrieve().toBodilessEntity().then())
+                .timeout(Duration.ofSeconds(5))
+                .retryWhen(Retry.fixedDelay(60, Duration.ofSeconds(2)))
+                .timeout(Duration.ofMinutes(2));
     }
 
     public Mono<FileResponseDTO> getFile(String fileId) {
