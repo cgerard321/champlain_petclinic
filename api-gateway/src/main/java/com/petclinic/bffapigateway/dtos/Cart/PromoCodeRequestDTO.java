@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.dtos.Cart;
 
+import com.petclinic.bffapigateway.dtos.Files.FileDetails;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +28,9 @@ public class PromoCodeRequestDTO {
         this.expirationDate = expirationDate;
         this.active = active;
     }
+
+    private FileDetails image;
+    private boolean removeImage;
 
     private String scope;
     private java.util.List<String> productIds;

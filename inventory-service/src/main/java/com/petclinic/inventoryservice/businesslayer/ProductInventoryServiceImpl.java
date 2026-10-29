@@ -13,6 +13,7 @@ import com.petclinic.inventoryservice.datalayer.Product.Status;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.InventoryValidator;
+import com.petclinic.inventoryservice.utils.LocalizedContent;
 import com.petclinic.inventoryservice.utils.SupplyReportPdfGenerator;
 import com.petclinic.inventoryservice.utils.exceptions.*;
 import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditAction;
@@ -20,6 +21,7 @@ import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditEntry;
 import com.petclinic.inventoryservice.datalayer.Audit.SupplyAuditRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DuplicateKeyException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -38,6 +40,7 @@ import java.util.Comparator;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -56,12 +59,18 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     private final ReactiveMongoTemplate mongoTemplate;
 
     private final SupplyAuditRepository supplyAuditRepository;
+    private final SupplyReportPdfGenerator supplyReportPdfGenerator;
 
     @Override
     public Mono<InventoryResponseDTO> addInventory(Mono<InventoryRequestDTO> inventoryRequestDTO) {
         return inventoryRepository.count()
                 .flatMap(count -> inventoryRequestDTO
-                        .map(EntityDTOUtil::toInventoryEntity)
+                        .flatMap(request -> {
+                            Inventory inventory = EntityDTOUtil.toInventoryEntity(request);
+                            return request.getName() == null
+                                    ? Mono.just(inventory)
+                                    : ensureUniqueInventoryNames(inventory, null).thenReturn(inventory);
+                        })
                         .flatMap(validator::validateInventory)
                         .doOnNext(e -> {
                             if (e.getInventoryType() == null) {
@@ -70,7 +79,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                             e.setInventoryId(EntityDTOUtil.generateUUID());
                             e.setInventoryCode(String.format("INV-%04d", count + 1));
                         })
-                        .flatMap(inventoryRepository::insert)
+                        .flatMap(inventory -> inventoryRepository.insert(inventory)
+                                .onErrorMap(DuplicateKeyException.class, error -> new UnprocessableEntityException(
+                                        "Inventory name already exists in English or French.", error)))
                         .map(EntityDTOUtil::toInventoryResponseDTO));
     }
 
@@ -79,22 +90,28 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     public Mono<InventoryResponseDTO> updateInventory(Mono<InventoryRequestDTO> inventoryRequestDTO, String inventoryId) {
 
         return inventoryRepository.findInventoryByInventoryId(inventoryId)
-                .flatMap(existingInventory -> inventoryRequestDTO.map(requestDTO -> {
+                .flatMap(existingInventory -> inventoryRequestDTO.flatMap(requestDTO -> {
 
-                    existingInventory.setInventoryName(requestDTO.getInventoryName());
+                    existingInventory.setName(LocalizedContent.complete(requestDTO.getName(), requestDTO.getInventoryName()));
+                    existingInventory.setDescription(LocalizedContent.complete(requestDTO.getDescription(), requestDTO.getInventoryDescription()));
+                    existingInventory.setInventoryName(existingInventory.getName().get("en"));
 
 
                     existingInventory.setInventoryType(requestDTO.getInventoryType());
-                    existingInventory.setInventoryDescription(requestDTO.getInventoryDescription());
+                    existingInventory.setInventoryDescription(existingInventory.getDescription().get("en"));
                     existingInventory.setInventoryImage(requestDTO.getInventoryImage());
                     existingInventory.setInventoryBackupImage(requestDTO.getInventoryBackupImage());
                     existingInventory.setImageUploaded(requestDTO.getImageUploaded());
-                    return existingInventory;
+                    return requestDTO.getName() == null
+                            ? Mono.just(existingInventory)
+                            : ensureUniqueInventoryNames(existingInventory, inventoryId).thenReturn(existingInventory);
 
                 }))
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
                 .flatMap(inv -> validator.validateInventoryForUpdate(inv, inventoryId))
-                .flatMap(inventoryRepository::save)
+                .flatMap(inventory -> inventoryRepository.save(inventory)
+                        .onErrorMap(DuplicateKeyException.class, error -> new UnprocessableEntityException(
+                                "Inventory name already exists in English or French.", error)))
                 .map(EntityDTOUtil::toInventoryResponseDTO);
     }
 
@@ -128,8 +145,10 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                                                 removePhoto ? null : requestDTO.getPhotoType());
                                                     }
 
-                                                    existingProduct.setProductName(requestDTO.getProductName());
-                                                    existingProduct.setProductDescription(requestDTO.getProductDescription());
+                                                    existingProduct.setName(LocalizedContent.complete(requestDTO.getName(), requestDTO.getProductName()));
+                                                    existingProduct.setDescription(LocalizedContent.complete(requestDTO.getDescription(), requestDTO.getProductDescription()));
+                                                    existingProduct.setProductName(existingProduct.getName().get("en"));
+                                                    existingProduct.setProductDescription(existingProduct.getDescription().get("en"));
                                                     existingProduct.setProductPrice(requestDTO.getProductPrice());
                                                     existingProduct.setProductQuantity(requestDTO.getProductQuantity());
                                                     existingProduct.setProductSalePrice(requestDTO.getProductSalePrice());
@@ -140,9 +159,12 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                                     }
                                                     existingProduct.setExpirationDate(requestDTO.getExpirationDate());
 
-                                                    return validator
-                                                            .validateProductForUpdate(existingProduct, inventoryId, productId)
-                                                            .flatMap(productRepository::save)
+                                                    Mono<Void> uniqueNames = requestDTO.getName() == null
+                                                            ? Mono.empty()
+                                                            : ensureUniqueProductNames(existingProduct, inventoryId, productId);
+                                                    return uniqueNames.then(Mono.<Product>defer(() -> validator
+                                                            .validateProductForUpdate(existingProduct, inventoryId, productId)))
+                                                            .flatMap(this::saveSupply)
                                                             .flatMap(saved -> {
                                                                 if (previousQuantity == saved.getProductQuantity()) {
                                                                     return Mono.just(
@@ -211,7 +233,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             if (productName != null) {
                 String escapedName = Pattern.quote(productName);
                 String regexPattern = "(?i)^" + escapedName + ".*";
-                result = result.filter(p -> p.getProductName().matches(regexPattern));
+                result = result.filter(p -> matchesLocalizedProductName(p, regexPattern));
             }
             return result.map(EntityDTOUtil::toProductResponseDTO).switchIfEmpty(Mono.error(new NotFoundException("No products found in price range")));
         }
@@ -224,7 +246,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             if (productName != null) {
                 String escapedName = Pattern.quote(productName);
                 String regexPattern = "(?i)^" + escapedName + ".*";
-                result = result.filter(p -> p.getProductName().matches(regexPattern));
+                result = result.filter(p -> matchesLocalizedProductName(p, regexPattern));
             }
             return result.map(EntityDTOUtil::toProductResponseDTO).switchIfEmpty(Mono.error(new NotFoundException("No products found in sale price range")));
         }
@@ -284,7 +306,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             if (productName != null) {
                 String escapedName = Pattern.quote(productName);
                 String regexPattern = "(?i)^" + escapedName + ".*";
-                result = result.filter(p -> p.getProductName().matches(regexPattern));
+                result = result.filter(p -> matchesLocalizedProductName(p, regexPattern));
             }
             return result.map(EntityDTOUtil::toProductResponseDTO)
                     .skip((long) pageable.getPageNumber() * pageable.getPageSize())
@@ -300,7 +322,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             if (productName != null) {
                 String escapedName = Pattern.quote(productName);
                 String regexPattern = "(?i)^" + escapedName + ".*";
-                result = result.filter(p -> p.getProductName().matches(regexPattern));
+                result = result.filter(p -> matchesLocalizedProductName(p, regexPattern));
             }
             return result.map(EntityDTOUtil::toProductResponseDTO)
                     .skip((long) pageable.getPageNumber() * pageable.getPageSize())
@@ -412,9 +434,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
         Flux<Inventory> matchingInventories = inventoryRepository.findAll()
                 .filter(inventory ->
-                        matchesPrefix(inventory.getInventoryName(), nameFilter)
+                        matchesLocalizedPrefix(inventory.getName(), inventory.getInventoryName(), nameFilter)
                                 && (typeFilter == null || typeFilter.equals(inventory.getInventoryType()))
-                                && matchesPrefix(inventory.getInventoryDescription(), descriptionFilter)
+                                && matchesLocalizedPrefix(inventory.getDescription(), inventory.getInventoryDescription(), descriptionFilter)
                                 && (!filterFavorites || Boolean.TRUE.equals(inventory.getImportant())));
 
         Flux<InventoryResponseDTO> results = matchingInventories
@@ -442,6 +464,12 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     private boolean matchesPrefix(String value, String filter) {
         return filter == null || (value != null && value.regionMatches(true, 0, filter, 0, filter.length()));
+    }
+
+    private boolean matchesLocalizedPrefix(Map<String, String> localized, String legacy, String filter) {
+        return matchesPrefix(legacy, filter)
+                || (localized != null && (matchesPrefix(localized.get("en"), filter)
+                || matchesPrefix(localized.get("fr"), filter)));
     }
 
 
@@ -562,7 +590,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                 .switchIfEmpty(Mono.error(
                                         new NotFoundException("Inventory not found with id: " + inventoryId)))
                                 .flatMap(inventory -> {
-                                    if (requestDTO.getProductName() == null
+                                    if ((requestDTO.getProductName() == null && requestDTO.getName() == null)
                                             || requestDTO.getProductPrice() == null
                                             || requestDTO.getProductQuantity() == null
                                             || requestDTO.getProductSalePrice() == null) {
@@ -579,7 +607,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
                                     return productRepository
                                             .existsByInventoryIdAndProductNameIgnoreCase(
-                                                    inventoryId, requestDTO.getProductName())
+                                                    inventoryId, LocalizedContent.complete(requestDTO.getName(), requestDTO.getProductName()).get("en"))
                                             .flatMap(exists -> {
                                                 if (exists) {
                                                     return Mono.error(new UnprocessableEntityException(
@@ -601,7 +629,10 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                                 product.setLastUpdatedAt(LocalDateTime.now());
                                                 product.setExpirationDate(requestDTO.getExpirationDate());
 
-                                                return productRepository.save(product)
+                                                Mono<Void> uniqueNames = requestDTO.getName() == null
+                                                        ? Mono.empty()
+                                                        : ensureUniqueProductNames(product, inventoryId, null);
+                                                return uniqueNames.then(Mono.defer(() -> saveSupply(product)))
                                                         .flatMap(saved ->
                                                                 recordSupplyChange(
                                                                         inventoryId,
@@ -638,7 +669,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                     product.setProductQuantity(previousQuantity - 1);
                     product.setLastUpdatedAt(LocalDateTime.now());
 
-                    return productRepository.save(product)
+                    return saveSupply(product)
                             .flatMap(saved ->
                                     recordSupplyChange(
                                             inventoryId,
@@ -652,6 +683,57 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 });
     }
 
+    private Mono<Void> ensureUniqueInventoryNames(Inventory candidate, String currentId) {
+        return inventoryRepository.findAll()
+                .filter(other -> currentId == null || !currentId.equals(other.getInventoryId()))
+                .filter(other -> sameName(candidate.getName(), candidate.getInventoryName(),
+                        other.getName(), other.getInventoryName()))
+                .hasElements()
+                .flatMap(duplicate -> duplicate
+                        ? Mono.error(new UnprocessableEntityException("Inventory name already exists in English or French."))
+                        : Mono.empty());
+    }
+
+    private Mono<Product> saveSupply(Product product) {
+        return productRepository.save(product)
+                .onErrorMap(DuplicateKeyException.class, error -> new UnprocessableEntityException(
+                        "Supply name already exists in English or French in this inventory.", error));
+    }
+
+    private Mono<Void> ensureUniqueProductNames(Product candidate, String inventoryId, String currentId) {
+        return productRepository.findAllProductsByInventoryId(inventoryId)
+                .filter(other -> currentId == null || !currentId.equals(other.getProductId()))
+                .filter(other -> sameName(candidate.getName(), candidate.getProductName(),
+                        other.getName(), other.getProductName()))
+                .hasElements()
+                .flatMap(duplicate -> duplicate
+                        ? Mono.error(new UnprocessableEntityException("Supply name already exists in English or French."))
+                        : Mono.empty());
+    }
+
+    private boolean sameName(Map<String, String> first, String firstLegacy,
+                             Map<String, String> second, String secondLegacy) {
+        // Uniqueness is per language: an English name may equal another record's French name.
+        for (String language : List.of("en", "fr")) {
+            String left = LocalizedContent.get(first, language, firstLegacy);
+            String right = LocalizedContent.get(second, language, secondLegacy);
+            if (left != null && right != null && left.equalsIgnoreCase(right)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean matchesLocalizedProductName(Product product, String regex) {
+        for (String language : List.of("en", "fr")) {
+            String name = LocalizedContent.get(product.getName(), language, product.getProductName());
+            if (name != null && name.matches(regex)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public Mono<Integer> getQuantityOfProductsInInventory(String inventoryId) {
         return inventoryRepository.findInventoryByInventoryId(inventoryId)
@@ -663,6 +745,11 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     @Override
     public Mono<byte[]> createSupplyPdf(String inventoryId) {
+        return createSupplyPdf(inventoryId, "en");
+    }
+
+    @Override
+    public Mono<byte[]> createSupplyPdf(String inventoryId, String language) {
         if (inventoryId == null || inventoryId.trim().isEmpty()) {
             return Mono.error(new InvalidInputException("Invalid inventory ID provided."));
         }
@@ -673,11 +760,10 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                     if (supplies.isEmpty()) {
                         return Mono.error(new NotFoundException("No products found for inventory ID: " + inventoryId));
                     }
-                    try {
-                        return Mono.just(SupplyReportPdfGenerator.generate(inventoryId, supplies));
-                    } catch (DocumentException e) {
-                        return Mono.error(new UnprocessableEntityException("Error generating PDF"));
-                    }
+                    return Mono.fromCallable(() -> supplyReportPdfGenerator.generate(inventoryId, supplies, language))
+                            .subscribeOn(Schedulers.boundedElastic())
+                            .onErrorMap(DocumentException.class,
+                                    error -> new UnprocessableEntityException("Error generating PDF", error));
                 });
     }
 
@@ -686,7 +772,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         return productRepository.findProductByInventoryIdAndProductId(currentInventoryId, productId)
                 .flatMap(product -> {
                     product.setInventoryId(newInventoryId);
-                    return productRepository.save(product);
+                    return saveSupply(product);
                 })
                 .map(EntityDTOUtil::toProductResponseDTO)
                 .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + productId)));

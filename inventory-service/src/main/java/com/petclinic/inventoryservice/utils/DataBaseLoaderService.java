@@ -1,19 +1,25 @@
 package com.petclinic.inventoryservice.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.inventoryservice.datalayer.Inventory.*;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DuplicateKeyException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.Map;
 
 @Service
+@Slf4j
 public class DataBaseLoaderService implements CommandLineRunner {
     @Autowired
     InventoryRepository inventoryRepository;
@@ -23,29 +29,62 @@ public class DataBaseLoaderService implements CommandLineRunner {
     InventoryTypeRepository inventoryTypeRepository;
     @Autowired
     InventoryNameRepository inventoryNameRepository;
+    @Autowired
+    LocalizedNameIndexes localizedNameIndexes;
 
     @Override
     public void run(String... args) throws Exception {
+        JsonNode translations = readTranslations();
+        JsonNode inventoryNames = translations.path("inventories").path("names");
+        JsonNode inventoryDescriptions = translations.path("inventories").path("descriptions");
+        JsonNode supplyNames = translations.path("supplies").path("names");
+        JsonNode supplyDescriptions = translations.path("supplies").path("descriptions");
 
-        // If the db is not empty, then return
-        try {
-            if (Boolean.TRUE.equals(inventoryRepository.findAll().hasElements().block())) {
-                return;
-            }
+        // Finish migration before startup completes so requests see both languages.
+        inventoryRepository.findAll()
+                .filter(inventory -> needsMigration(inventory.getName())
+                        || needsMigration(inventory.getDescription())
+                        || (inventory.getProducts() != null && inventory.getProducts().stream().anyMatch(
+                        product -> needsMigration(product.getName()) || needsMigration(product.getDescription()))))
+                .flatMap(inventory -> {
+                    inventory.setName(migratedText(inventory.getName(), inventoryNames, inventory.getInventoryName()));
+                    inventory.setDescription(migratedText(inventory.getDescription(), inventoryDescriptions, inventory.getInventoryDescription()));
+                    if (inventory.getProducts() != null) {
+                        for (Product product : inventory.getProducts()) {
+                            product.setName(migratedText(product.getName(), supplyNames, product.getProductName()));
+                            product.setDescription(migratedText(product.getDescription(), supplyDescriptions, product.getProductDescription()));
+                        }
+                    }
+                    return inventoryRepository.save(inventory);
+                }).then().block();
+        productRepository.findAll()
+                .filter(product -> needsMigration(product.getName()) || needsMigration(product.getDescription()))
+                .flatMap(product -> {
+                    product.setName(migratedText(product.getName(), supplyNames, product.getProductName()));
+                    product.setDescription(migratedText(product.getDescription(), supplyDescriptions, product.getProductDescription()));
+                    return productRepository.save(product);
+                }).then().block();
+        localizedNameIndexes.ensureIndexes()
+                .onErrorResume(DuplicateKeyException.class, error -> {
+                    log.warn("Unique name indexes could not be created because duplicate names exist. "
+                            + "Resolve duplicates and restart to enforce database uniqueness: {}", error.getMessage());
+                    return Mono.empty();
+                })
+                .block();
 
-            if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) {
-                return;
-            }
+        if (Boolean.TRUE.equals(inventoryRepository.findAll().hasElements().block())) {
+            return;
+        }
 
-            if (Boolean.TRUE.equals(inventoryTypeRepository.findAll().hasElements().block())) {
-                return;
-            }
+        if (Boolean.TRUE.equals(productRepository.findAll().hasElements().block())) {
+            return;
+        }
 
-            if (Boolean.TRUE.equals(inventoryNameRepository.findAll().hasElements().block())) {
-                return;
-            }
-        } catch (Exception e) {
-            System.out.println("Database connection error: " + e.getMessage());
+        if (Boolean.TRUE.equals(inventoryTypeRepository.findAll().hasElements().block())) {
+            return;
+        }
+
+        if (Boolean.TRUE.equals(inventoryNameRepository.findAll().hasElements().block())) {
             return;
         }
 
@@ -668,6 +707,19 @@ public class DataBaseLoaderService implements CommandLineRunner {
         //--------------------------------------------------------------
 
 
+        for (Inventory inventory : new Inventory[]{inventory1, inventory2, inventory3, inventory4, inventory5,
+                inventory6, inventory7, inventory8, inventory9, inventory10}) {
+            inventory.setName(seedText(translations.path("inventories").path("names"), inventory.getInventoryName()));
+            inventory.setDescription(seedText(translations.path("inventories").path("descriptions"), inventory.getInventoryDescription()));
+        }
+        for (Product supply : new Product[]{supply1, supply2, supply3, supply4, supply5, supply6, supply7,
+                supply8, supply9, supply10, supply11, supply12, supply13, supply14, supply15, supply16,
+                supply17, supply18, supply19, supply20, supply21, supply22, supply23, supply24, supply25,
+                supply26, supply27, supply28, supply29, supply30, supply31}) {
+            supply.setName(seedText(translations.path("supplies").path("names"), supply.getProductName()));
+            supply.setDescription(seedText(translations.path("supplies").path("descriptions"), supply.getProductDescription()));
+        }
+
         Flux.concat(
                         Flux.just(inventoryType1, inventoryType2, inventoryType3, inventoryType4, inventoryType5)
                                 .flatMap(inventoryTypeRepository::insert),
@@ -686,5 +738,38 @@ public class DataBaseLoaderService implements CommandLineRunner {
                 .then()
                 .block();
 
+    }
+
+    private JsonNode readTranslations() throws java.io.IOException {
+        try (InputStream source = getClass().getResourceAsStream("/seed-localizations.json")) {
+            if (source == null) {
+                throw new IllegalStateException("Missing seed-localizations.json");
+            }
+            return new ObjectMapper().readTree(source);
+        }
+    }
+
+    // Restore known starter translations; custom legacy text keeps the same value in both languages.
+    static Map<String, String> migratedText(Map<String, String> stored, JsonNode dictionary, String english) {
+        if (stored != null || english == null) {
+            return LocalizedContent.stored(stored, english);
+        }
+        JsonNode translation = dictionary.get(english);
+        String french = translation != null && translation.isTextual() && !translation.asText().isBlank()
+                ? translation.asText() : english;
+        return Map.of("en", english, "fr", french);
+    }
+
+    static Map<String, String> seedText(JsonNode dictionary, String english) {
+        JsonNode translation = dictionary.get(english);
+        if (translation == null || !translation.isTextual() || translation.asText().isBlank()) {
+            throw new IllegalStateException("Missing French seed text for: " + english);
+        }
+        String french = translation.asText();
+        return Map.of("en", english, "fr", french);
+    }
+
+    private static boolean needsMigration(Map<String, String> value) {
+        return value == null;
     }
 }

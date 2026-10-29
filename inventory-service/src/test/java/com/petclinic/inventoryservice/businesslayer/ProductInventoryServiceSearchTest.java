@@ -7,14 +7,19 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepositor
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
 import com.petclinic.inventoryservice.utils.InventoryValidator;
+import com.petclinic.inventoryservice.utils.SupplyReportPdfGenerator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
+import java.time.Duration;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -27,9 +32,9 @@ class ProductInventoryServiceSearchTest {
     private final InventoryRepository inventoryRepository = mock(InventoryRepository.class);
     private final ProductInventoryServiceImpl service = new ProductInventoryServiceImpl(
             inventoryRepository, productRepository, mock(InventoryTypeRepository.class),
-            mock(InventoryValidator.class), mock(org.springframework.data.mongodb.core.ReactiveMongoTemplate.class),
-            mock(SupplyAuditRepository.class));
-
+            mock(InventoryValidator.class),
+            mock(org.springframework.data.mongodb.core.ReactiveMongoTemplate.class),
+            mock(SupplyAuditRepository.class), new SupplyReportPdfGenerator());
     @BeforeEach
     void setUp() {
         when(productRepository.countByInventoryIdAndLastUpdatedAtAfter(anyString(), any(LocalDateTime.class)))
@@ -38,6 +43,26 @@ class ProductInventoryServiceSearchTest {
 
     private static Inventory inventory(String id, String code) {
         return Inventory.builder().inventoryId(id).inventoryCode(code).inventoryType("Internal").build();
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"médic,NULL", "NULL,antibiotiques", "medicine,NULL", "NULL,infection",
+            "médic,antibiotiques", "old name,old description"}, nullValues = "NULL")
+    void searchInventoriesMatchesEitherLanguageAndLegacyText(String name, String description) {
+        Inventory matching = Inventory.builder().inventoryId("matching").inventoryCode("INV-0001")
+                .inventoryType("Internal").important(true)
+                .inventoryName("Old name").inventoryDescription("Old description")
+                .name(Map.of("en", "Medicine", "fr", "Médicaments"))
+                .description(Map.of("en", "Infection treatments", "fr", "Antibiotiques pour animaux"))
+                .build();
+        Inventory unrelated = Inventory.builder().inventoryId("unrelated").inventoryCode("INV-0002")
+                .inventoryType("Internal").important(true).inventoryName("Equipment")
+                .inventoryDescription("Surgical tools").build();
+        when(inventoryRepository.findAll()).thenReturn(Flux.just(unrelated, matching));
+
+        StepVerifier.create(service.searchInventories(PageRequest.of(0, 10), null, name,
+                        "Internal", description, true).map(InventoryResponseDTO::getInventoryId))
+                .expectNext("matching").expectComplete().verify(Duration.ofSeconds(5));
     }
 
     @Test

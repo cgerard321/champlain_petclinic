@@ -2,29 +2,120 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.promo-cards-container h2 {
+  font-size: clamp(20px, 2.2vw, 24px);
+  font-weight: 700;
+  margin-bottom: 16px;
 }
 
 .promo-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
   width: 100%;
 }
 
 .promo-card {
   overflow-wrap: anywhere;
-  background-color: #f9f9f9;
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease-in-out;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  padding: 16px;
+  border-radius: 12px;
+  transition:
+    transform 0.16s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.16s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.16s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .promo-card:hover {
-  transform: scale(1.02);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 10px 28px rgba(2, 6, 23, 0.12);
+  border-color: #e6eefb;
 }
 
 .promo-card h3 {
   margin-top: 0;
+  color: #000;
+}
+
+.promo-card p {
+  color: #555;
+}
+
+.empty-promo-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 40px 0;
+  color: #475569;
+  grid-column: 1 / -1;
+}
+
+.empty-promo-card p {
+  margin: 0;
+}
+
+.promo-card-image {
+  margin-bottom: 16px;
+  background: #f1f3f5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.promo-card-image .image-container,
+.promo-card-image img {
+  width: 100%;
+  height: 180px;
+  object-fit: contain;
+}
+
+.promo-code-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px;
+  border: 1px dashed #2563eb;
+  border-radius: 6px;
+}
+
+.promo-code-row code {
+  user-select: all;
+  color: #24364b;
+}
+
+.promo-code-row button {
+  background: #2563eb;
+  color: white;
+  border: 0;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition:
+    background 0.18s,
+    box-shadow 0.18s,
+    transform 0.18s;
+}
+
+.promo-code-row button:hover:not(:disabled) {
+  background: #174ea6;
+  transform: translateY(-1px);
+}
+
+.promo-code-row button:focus-visible {
+  outline: 3px solid #2563eb;
+  outline-offset: 3px;
+}
+
+.promo-copy-feedback {
+  min-height: 1.5em;
+  margin: 6px 0;
 }
