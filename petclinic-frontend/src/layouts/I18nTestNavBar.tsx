@@ -112,16 +112,6 @@ export function I18nTestNavBar(): JSX.Element {
                     )}
                   </NavDropdown>
                 )}
-                {isAdmin && (
-                  <NavDropdown title={t('nav.users')} id="users-dropdown">
-                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllUsers}>
-                      {t('nav.usersList')}
-                    </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllRoles}>
-                      {t('nav.rolesList')}
-                    </NavDropdown.Item>
-                  </NavDropdown>
-                )}
                 {!isAdmin &&
                   !isInventoryManager &&
                   !isVet &&
