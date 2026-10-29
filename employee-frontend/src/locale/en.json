@@ -1123,7 +1123,8 @@
         "type": "Inventory type",
         "description": "Description",
         "descriptionEn": "Description (English)",
-        "descriptionFr": "Description (French)"
+        "descriptionFr": "Description (French)",
+        "photo": "Inventory photo"
       },
       "filters": {
         "aria": "Filter inventories",

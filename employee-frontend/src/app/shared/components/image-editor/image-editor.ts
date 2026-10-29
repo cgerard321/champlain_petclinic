@@ -6,6 +6,19 @@ export type ImageAction =
 
 const DEFAULT_MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
+export function readImageAsBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result;
+      if (typeof result === 'string') resolve(result.substring(result.indexOf(',') + 1));
+      else reject(new Error('Unable to read image.'));
+    };
+    reader.onerror = () => reject(new Error('Unable to read image.'));
+    reader.readAsDataURL(file);
+  });
+}
+
 @Component({
   selector: 'app-image-editor',
   standalone: true,

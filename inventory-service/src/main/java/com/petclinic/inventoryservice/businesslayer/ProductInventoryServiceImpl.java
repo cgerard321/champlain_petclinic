@@ -67,6 +67,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .flatMap(count -> inventoryRequestDTO
                         .flatMap(request -> {
                             Inventory inventory = EntityDTOUtil.toInventoryEntity(request);
+                            applyInventoryPhoto(inventory, request);
                             return request.getName() == null
                                     ? Mono.just(inventory)
                                     : ensureUniqueInventoryNames(inventory, null).thenReturn(inventory);
@@ -99,9 +100,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
                     existingInventory.setInventoryType(requestDTO.getInventoryType());
                     existingInventory.setInventoryDescription(existingInventory.getDescription().get("en"));
-                    existingInventory.setInventoryImage(requestDTO.getInventoryImage());
-                    existingInventory.setInventoryBackupImage(requestDTO.getInventoryBackupImage());
-                    existingInventory.setImageUploaded(requestDTO.getImageUploaded());
+                    applyInventoryPhoto(existingInventory, requestDTO);
                     return requestDTO.getName() == null
                             ? Mono.just(existingInventory)
                             : ensureUniqueInventoryNames(existingInventory, inventoryId).thenReturn(existingInventory);
@@ -918,6 +917,21 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         return normalized;
     }
 
+    private void applyInventoryPhoto(Inventory inventory, InventoryRequestDTO requestDTO) {
+        byte[] upload = requestDTO.getImageUploaded();
+        if (upload != null) {
+            inventory.setImageUploaded(upload.length == 0 ? null : upload);
+            inventory.setInventoryImage(null);
+            inventory.setInventoryBackupImage(null);
+            return;
+        }
+        if (requestDTO.getInventoryImage() != null) {
+            inventory.setInventoryImage(requestDTO.getInventoryImage());
+        }
+        if (requestDTO.getInventoryBackupImage() != null) {
+            inventory.setInventoryBackupImage(requestDTO.getInventoryBackupImage());
+        }
+    }
 
     private void validatePhoto(ProductRequestDTO requestDTO) {
         byte[] data = requestDTO.getPhotoData();
