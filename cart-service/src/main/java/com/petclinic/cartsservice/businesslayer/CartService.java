@@ -2,6 +2,7 @@ package com.petclinic.cartsservice.businesslayer;
 
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
+import com.petclinic.cartsservice.presentationlayer.BillingRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistTransferDirection;
@@ -21,7 +22,7 @@ public interface CartService {
     Mono<CartResponseModel> addProductToCart(String cartId, CartItemRequestModel cartItemRequestModel);
     Mono<CartResponseModel> updateProductQuantityInCart(String cartId, String productId, int quantity);
 
-    Mono<CartResponseModel> checkoutCart(String cartId);
+    Mono<CartResponseModel> checkoutCart(String cartId, BillingRequestModel billing);
 
     Mono<CartResponseModel> assignCartToCustomer(String customerId);
 
@@ -37,7 +38,9 @@ public interface CartService {
 
     Mono<List<CartProduct>> getRecommendationPurchasesByCustomerId(String customerId);
 
-    Mono<CartResponseModel> applyPromoToCart(String cartId, Double promoPercent);
+    Mono<CartResponseModel> applyPromoCodeToCart(String cartId, String promoCode);
+
+    Mono<CartResponseModel> clearPromoFromCart(String cartId);
 
     Mono<CartResponseModel> updateShippingMethod(String cartId, String shippingMethod);
 

@@ -15,13 +15,14 @@ import java.util.stream.Collectors;
 
 // Keep the original English fields for clients that do not read bilingual fields yet.
 public class EntityDTOUtil {
+    public static final int REORDER_THRESHOLD = 20;
 
     public static ProductResponseDTO toProductResponseDTO(Product product) {
         //should put the logic for the status here
         Status status;
         if (product.getProductQuantity() == 0) {
             status = Status.OUT_OF_STOCK;
-        } else if (product.getProductQuantity() < 20) {
+        } else if (product.getProductQuantity() < REORDER_THRESHOLD) {
             status = Status.RE_ORDER;
         } else {
             status = Status.AVAILABLE;

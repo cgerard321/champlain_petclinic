@@ -7,6 +7,7 @@ pub const SUDO_ROLE_UUID: Uuid = uuid::uuid!("11111111-1111-1111-1111-1111111111
 pub const ADMIN_ROLE_UUID: Uuid = uuid::uuid!("a48d7b18-ceb7-435b-b8ff-b28531f1a09f");
 pub const READER_ROLE_UUID: Uuid = uuid::uuid!("51f20832-79a3-4c05-b4da-ca175cba2ffc");
 pub const EDITOR_ROLE_UUID: Uuid = uuid::uuid!("96ee5d72-c27b-4256-8db8-cf49d64e65de");
+pub const API_GATEWAY_DEV_ROLE: Uuid = uuid::uuid!("166ef69f-03bd-4f28-920c-0627aac2071d");
 pub const AUTH_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("7bbec248-56bd-4cde-bbc8-0f66d2155130");
 pub const VET_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("a99390f2-de4d-4616-88e9-9f7d4b8cdc7b");
 pub const VISITS_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("d30cfb07-2933-44d6-8035-924f850fc2ef");
@@ -15,4 +16,9 @@ pub const PRODUCTS_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("84ab3608-e5d4-4e45-8b02
 pub const CART_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("a51e4699-3250-4cf7-ac2a-836675f62175");
 pub const INVENTORY_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("a7975ad7-f86e-49b7-898d-95da0175f4e5");
 pub const BILLING_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("d1d928c3-b8a8-4a01-8eaf-9f7dc1cf9739");
+pub const MAILER_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("5947f103-798c-40a9-921c-4b29a9b2967a");
+pub const FILES_SERVICE_DEV_ROLE: Uuid = uuid::uuid!("dca9bb01-095e-4a93-b1a6-9e373979ab87");
+pub const PETCLINIC_FRONTEND_DEV_ROLE: Uuid = uuid::uuid!("7e6bb3c0-181f-47c4-84fe-0c3e0d7e9f98");
+pub const EMPLOYEE_FRONTEND_DEV_ROLE: Uuid = uuid::uuid!("9bb4041d-8dc7-403e-8641-c1d888684c5a");
+
 pub const DEFAULT_TAIL_AMOUNT: usize = 100;

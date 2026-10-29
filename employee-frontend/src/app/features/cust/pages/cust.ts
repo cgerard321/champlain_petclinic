@@ -3,25 +3,35 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { RouterLink, Router } from '@angular/router';
 
+import { AuthState } from '@core/services/auth-state';
+import { AddCustomer } from '@features/cust/components/customer-add/customer-add';
 import { PetDetails } from '@features/cust/components/customer-pet-details/customer-pet-details';
 import { Customer } from '@features/cust/models/customer.model';
 import { CustomerService } from '@features/cust/services/customer-service';
+import { Roles } from '@shared/models/roles';
 
 @Component({
-  imports: [MatProgressSpinnerModule, MatCardModule, MatDialogModule],
+  imports: [MatProgressSpinnerModule, MatCardModule, MatDialogModule, RouterLink],
   selector: 'app-cust',
   styleUrl: './cust.css',
   templateUrl: './cust.html',
 })
 export class Cust implements OnInit {
+  private readonly router = inject(Router);
   private readonly customerService = inject(CustomerService);
   private readonly dialog = inject(MatDialog);
+  private readonly auth = inject(AuthState);
   private readonly untilDestroyed = takeUntilDestroyed<Customer>();
   protected readonly petDetails = signal<PetDetails[]>([]);
   protected readonly customers = signal<Customer[]>([]);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
+
+  protected readonly canViewCustomerDetails = computed(
+    () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.receptionist),
+  );
   protected readonly notAvailable = $localize`:@@cust.notAvailable:Non disponible`;
   protected readonly searchPlaceholder = $localize`:@@cust.searchPlaceholder:Rechercher un client par nom, prénom, ID, téléphone, adresse ou ville`;
 
@@ -70,4 +80,14 @@ export class Cust implements OnInit {
       ),
     );
   });
+
+  protected checkCustomerDetails(customerId: string): void {
+    this.router.navigate(['/customerDetails', customerId]);
+  }
+  protected addCustomerPopUp(): void {
+    this.dialog.open(AddCustomer, {
+      width: '650px',
+      maxWidth: '90vw',
+    });
+  }
 }

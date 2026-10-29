@@ -31,7 +31,10 @@ import reactor.test.StepVerifier;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.Set;
@@ -778,5 +781,86 @@ class VisitControllerUnitTest {
                 .bodyValue(VetNoteRequestDTO.builder().vetNote("Keep giving the meds").build())
                 .exchange()
                 .expectStatus().isBadRequest();
+    }
+    @Test
+    void confirmFollowUpVisit_whenValidRequest_thenReturnConfirmedVisit() {
+        VisitResponseDTO confirmedVisit = VisitResponseDTO.builder()
+                .visitId("VIST-2211-2401")
+                .status(Status.CONFIRMED)
+                .followUpOfVisitId("VIST-2211-2400")
+                .build();
+        when(visitService.confirmFollowUpVisit("VIST-2211-2401")).thenReturn(Mono.just(confirmedVisit));
+
+        webTestClient.patch()
+                .uri("/visits/{visitId}/confirm", "VIST-2211-2401")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(VisitResponseDTO.class)
+                .value(response -> assertEquals(Status.CONFIRMED, response.getStatus()));
+
+        verify(visitService, times(1)).confirmFollowUpVisit("VIST-2211-2401");
+    }
+
+    @Test
+    void confirmFollowUpVisit_whenLessThan24HoursAway_thenReturnBadRequest() {
+        when(visitService.confirmFollowUpVisit("VIST-2211-2401"))
+                .thenReturn(Mono.error(new BadRequestException("A visit can't be changed less than 24 hours before it starts.")));
+
+        webTestClient.patch()
+                .uri("/visits/{visitId}/confirm", "VIST-2211-2401")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void rescheduleFollowUpVisit_whenValidRequest_thenReturnUpdatedVisit() {
+        LocalDateTime newDate = LocalDateTime.of(2030, 1, 15, 9, 0);
+        VisitResponseDTO rescheduledVisit = VisitResponseDTO.builder()
+                .visitId("VIST-2211-2401")
+                .visitDate(newDate)
+                .status(Status.UPCOMING)
+                .build();
+        when(visitService.rescheduleFollowUpVisit(eq("VIST-2211-2401"), any(RescheduleRequestDTO.class)))
+                .thenReturn(Mono.just(rescheduledVisit));
+
+        webTestClient.patch()
+                .uri("/visits/{visitId}/reschedule", "VIST-2211-2401")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(RescheduleRequestDTO.builder().visitDate(newDate).build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(VisitResponseDTO.class)
+                .value(response -> {
+                    assertEquals(newDate, response.getVisitDate());
+                    assertEquals(Status.UPCOMING, response.getStatus());
+                });
+
+        verify(visitService, times(1)).rescheduleFollowUpVisit(eq("VIST-2211-2401"), any(RescheduleRequestDTO.class));
+    }
+
+    @Test
+    void rescheduleFollowUpVisit_whenSlotIsTaken_thenReturnBadRequest() {
+        when(visitService.rescheduleFollowUpVisit(eq("VIST-2211-2401"), any(RescheduleRequestDTO.class)))
+                .thenReturn(Mono.error(new BadRequestException("The selected time slot is not available.")));
+
+        webTestClient.patch()
+                .uri("/visits/{visitId}/reschedule", "VIST-2211-2401")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(RescheduleRequestDTO.builder().visitDate(LocalDateTime.of(2030, 1, 15, 9, 0)).build())
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+    @Test
+    void sendWeeklyScheduleEmail_usesCurrentWeeksMondayAndReturnsMailerResponse() {
+        LocalDate weekStart = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        when(visitService.sendSchedule("vet-1", weekStart)).thenReturn(Mono.just("Message queued"));
+
+        webTestClient.post()
+                .uri("/visits/practitioner/{practitionerId}/weekly-email", "vet-1")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class).isEqualTo("Message queued");
+
+        verify(visitService).sendSchedule("vet-1", weekStart);
     }
 }

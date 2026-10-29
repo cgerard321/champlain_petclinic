@@ -371,7 +371,8 @@ public class InventoryControllerV1 {
             ServerWebExchange exchange
     ) {
         if (productQuantity == null || productQuantity <= 0) {
-            return Mono.just(ResponseEntity.badRequest().body(null));
+            return Mono.error(new com.petclinic.bffapigateway.exceptions.InvalidInputsInventoryException(
+                    "The restock quantity must be greater than 0.", HttpStatus.BAD_REQUEST));
         }
 
         return inventoryServiceClient.restockLowStockProduct(
@@ -393,7 +394,7 @@ public class InventoryControllerV1 {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
     @PatchMapping("/{inventoryId}/important")
     public Mono<ResponseEntity<Object>> updateImportantStatus(
             @PathVariable String inventoryId,

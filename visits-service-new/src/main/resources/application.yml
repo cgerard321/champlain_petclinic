@@ -3,6 +3,8 @@ server.port: 7001
 server.error.include-message: always
 
 app:
+  weekly-schedule-email:
+    cron: "0 0 7 * * MON"
   vet-service:
     host: localhost
     port: 7002

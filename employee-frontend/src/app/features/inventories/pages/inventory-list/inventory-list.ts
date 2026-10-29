@@ -57,7 +57,7 @@ interface InventoryFormValue {
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
   selector: 'app-inventory-list',
-  styleUrls: ['../../inventories.css', './inventory-list.css'],
+  styleUrls: ['./inventories.css', './inventory-list.css'],
   templateUrl: './inventory-list.html',
 })
 export class InventoryList implements OnInit, OnDestroy {
@@ -81,10 +81,6 @@ export class InventoryList implements OnInit, OnDestroy {
   private filterTimer?: ReturnType<typeof setTimeout>;
 
   protected readonly can = computed(() => getInventoryPermissions(this.auth.roles()));
-
-  protected readonly canManageFavorites = computed(
-    () => this.auth.hasRole(Roles.admin) || this.auth.hasRole(Roles.inventoryManager),
-  );
 
   protected readonly currentPage = signal(0);
   protected readonly pageSize = 8;
@@ -111,6 +107,13 @@ export class InventoryList implements OnInit, OnDestroy {
     inventoryDescription: '',
     importantOnly: false,
   });
+
+  protected readonly canManageFavorites = computed(
+    () =>
+      this.auth.hasRole(Roles.admin) ||
+      this.auth.hasRole(Roles.inventoryManager) ||
+      this.auth.hasRole(Roles.vet),
+  );
 
   protected readonly isSavingAnyFavorite = computed(() =>
     Object.values(this.savingFavorites()).some(Boolean),

@@ -576,10 +576,12 @@ public class InventoryServiceClient {
                 })
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(status -> status.value() == 404,
+                        resp -> Mono.error(new NotFoundException("Product: " + productId + " not found in inventory: " + inventoryId)))
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        response -> Mono.error(new NotFoundException(
-                                "Product: " + productId
-                                        + " not found in inventory: " + inventoryId)))
+                        resp -> rethrower.rethrow(resp,
+                                ex -> new InvalidInputsInventoryException(
+                                        (ex.containsKey("message") ? ex.get("message") : "Unable to restock supply.").toString(), BAD_REQUEST)))
                 .bodyToMono(ProductResponseDTO.class);
     }
 

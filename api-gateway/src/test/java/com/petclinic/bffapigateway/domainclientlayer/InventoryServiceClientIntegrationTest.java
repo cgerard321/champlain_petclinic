@@ -343,6 +343,58 @@ class InventoryServiceClientIntegrationTest {
                 .verify();
     }
 
+    @Test
+    void restockLowStockProduct_preservesEligibilityErrorInsteadOfReportingNotFound() {
+        enqueueError(400, "Only RE ORDER or OUT OF STOCK supplies can be restocked.");
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", 5))
+                .expectErrorMatches(error -> error instanceof InvalidInputsInventoryException
+                        && error.getMessage().contains("Only RE ORDER"))
+                .verify();
+    }
+
+    @Test
+    void restockLowStockProduct_usesFallbackWhenMessageIsMissing() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{}"));
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", 5))
+                .expectErrorMatches(error -> error instanceof InvalidInputsInventoryException
+                        && error.getMessage().equals("Unable to restock supply."))
+                .verify();
+    }
+
+    @Test
+    void restockLowStockProduct_preservesExplicitNullMessageHandling() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":null}"));
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", 5))
+                .expectError(NullPointerException.class)
+                .verify();
+    }
+
+    @Test
+    void restockLowStockProduct_preservesServerFailureAsUncertainOutcome() {
+        enqueueError(500, "Audit unavailable");
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", 5))
+                .expectErrorMatches(error -> error instanceof
+                        org.springframework.web.reactive.function.client.WebClientResponseException response
+                        && response.getStatusCode().value() == 500
+                        && response.getResponseBodyAsString().contains("Audit unavailable"))
+                .verify();
+    }
+
+    @Test
+    void restockLowStockProduct_preservesOverflowErrorInsteadOfReportingNotFound() {
+        enqueueError(400, "The restock quantity would exceed the maximum stock quantity.");
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", Integer.MAX_VALUE))
+                .expectErrorMatches(error -> error instanceof InvalidInputsInventoryException
+                        && error.getMessage().contains("maximum stock"))
+                .verify();
+    }
+
 
 
 

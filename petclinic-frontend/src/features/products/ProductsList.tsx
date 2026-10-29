@@ -17,7 +17,10 @@ import ProductBundle from './components/ProductBundle';
 import './components/Image.css';
 //import ProductSearch from './components/ProductSearch';
 import Reveal from '@/shared/components/animations/Reveal';
-import { loadRecentlyViewed } from './utils/recentlyViewed';
+import {
+  addProductToRecentlyViewed,
+  loadRecentlyViewed,
+} from './utils/recentlyViewed';
 
 const CATALOG_PAGE_SIZE = 8;
 
@@ -152,6 +155,17 @@ const ProductList = function Productlist({
     return filteredList.slice(startIndex, startIndex + CATALOG_PAGE_SIZE);
   }, [currentPage, filteredList]);
 
+  const visiblePageNumbers = useMemo(() => {
+    const firstPage = Math.max(
+      0,
+      Math.min(currentPage - 2, Math.max(totalPages - 5, 0))
+    );
+    return Array.from(
+      { length: Math.min(totalPages, 5) },
+      (_, index) => firstPage + index
+    );
+  }, [currentPage, totalPages]);
+
   useEffect(() => {
     setCurrentPage(0);
   }, [filters, searchQuery, sortCriteria]);
@@ -161,52 +175,48 @@ const ProductList = function Productlist({
   }, [totalPages]);
 
   const handleProductClick = (product: ProductModel): void => {
+    addProductToRecentlyViewed(product, user.userId);
+
     setRecentlyClickedProducts(prev => {
       const updated = prev.filter(p => p.productId !== product.productId);
       updated.unshift(product);
-      if (updated.length > 5) updated.pop();
-      localStorage.setItem(
-        `recentlyClickedProducts_${user.userId}`,
-        JSON.stringify(updated)
-      );
-      return updated;
+      return updated.slice(0, 5);
     });
   };
 
-  const RecentlyViewedProducts = (): JSX.Element => (
-    <Reveal delay={80}>
-      <div className="products-section-container ">
-        <h2 className="section-title category-title">{t('recent')}</h2>
-        <div className="recently-viewed-flex">
-          {recentlyClickedProducts.length > 0 ? (
-            recentlyClickedProducts
-              .filter(p => !p.isUnlisted)
-              .map((p, i) => (
-                <Reveal key={p.productId} delay={i * 60 + 120}>
-                  <Product product={p} />
-                </Reveal>
-              ))
-          ) : (
-            <p>{t('noRecent')}</p>
-          )}
-        </div>
-      </div>
-    </Reveal>
-  );
   return (
     <div className="product-list-container">
       <div className="main-content">
         {view === 'catalog' && (
           <Reveal delay={80}>
             <div ref={catalogRef} className="products-section-container ">
-              <h2 className="section-title category-title">{t('catalog')}</h2>
+              <div className="shop-section-heading">
+                <div>
+                  <h2 className="section-title category-title">
+                    {t('catalog')}
+                  </h2>
+                  <p>{t('catalogHint')}</p>
+                </div>
+                {!isLoading && (
+                  <span>
+                    {t('productCount', { count: filteredList.length })}
+                  </span>
+                )}
+              </div>
               {isLoading ? (
-                <div className="products-loading-state">
-                  <span
-                    className="image-loading-spinner"
-                    role="status"
-                    aria-label={t('loading')}
-                  />
+                <div
+                  className="grid catalog-grid products-loading-grid"
+                  role="status"
+                  aria-label={t('loading')}
+                >
+                  {Array.from({ length: CATALOG_PAGE_SIZE }, (_, index) => (
+                    <div className="product-card-skeleton" key={index}>
+                      <span className="skeleton-image" />
+                      <span className="skeleton-line skeleton-line-title" />
+                      <span className="skeleton-line skeleton-line-short" />
+                      <span className="skeleton-line skeleton-line-button" />
+                    </div>
+                  ))}
                 </div>
               ) : filteredList.length > 0 ? (
                 <div className="grid catalog-grid">
@@ -219,6 +229,10 @@ const ProductList = function Productlist({
                               current => current.productId === p.productId
                             ) ?? p
                           }
+                          recentlyViewed={recentlyClickedProducts.some(
+                            recentlyViewedProduct =>
+                              recentlyViewedProduct.productId === p.productId
+                          )}
                         />
                       </div>
                     </Reveal>
@@ -261,15 +275,32 @@ const ProductList = function Productlist({
                       <span aria-hidden="true">&lsaquo;</span>
                     </button>
 
-                    <span
-                      className="catalog-page-number active"
-                      aria-current="page"
-                      aria-label={t('currentProductPage', {
-                        count: currentPage + 1,
-                      })}
-                    >
-                      {currentPage + 1}
-                    </span>
+                    {visiblePageNumbers.map(pageNumber => (
+                      <button
+                        type="button"
+                        key={pageNumber}
+                        className={`catalog-page-number${pageNumber === currentPage ? ' active' : ''}`}
+                        aria-current={
+                          pageNumber === currentPage ? 'page' : undefined
+                        }
+                        aria-label={t('currentProductPage', {
+                          count: pageNumber + 1,
+                        })}
+                        onClick={() => {
+                          setCurrentPage(pageNumber);
+                          catalogRef.current?.scrollIntoView({
+                            behavior: window.matchMedia(
+                              '(prefers-reduced-motion: reduce)'
+                            ).matches
+                              ? 'instant'
+                              : 'smooth',
+                            block: 'start',
+                          });
+                        }}
+                      >
+                        {pageNumber + 1}
+                      </button>
+                    ))}
 
                     <button
                       type="button"
@@ -299,8 +330,13 @@ const ProductList = function Productlist({
         {view === 'extras' && (
           <>
             <Reveal delay={80}>
-              <div className="products-section-container ">
-                <h2 className="section-title">{t('bundles')}</h2>
+              <div className="products-section-container shop-bundles-section">
+                <div className="shop-section-heading">
+                  <div>
+                    <h2 className="section-title">{t('bundles')}</h2>
+                    <p>{t('bundlesHint')}</p>
+                  </div>
+                </div>
                 <div className="grid product-bundles-grid">
                   {bundleList.length > 0 ? (
                     bundleList.map((b, i) => (
@@ -314,10 +350,6 @@ const ProductList = function Productlist({
                 </div>
               </div>
             </Reveal>
-            <div>
-              <hr />
-            </div>
-            <RecentlyViewedProducts />
           </>
         )}
       </div>

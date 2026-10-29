@@ -213,13 +213,13 @@ dd {
   border-bottom: var(--mat-sys-surface-container-highest);
 }
 
-  :host-context(.dark-mode) .dialog-title {
-    color: #e0e0e0;
-  }
+:host-context(.dark-mode) .dialog-title {
+  color: #e0e0e0;
+}
 
-  :host-context(.dark-mode) .dialog-subtitle {
-    color: #e0e0e0;
-  }
+:host-context(.dark-mode) .dialog-subtitle {
+  color: #e0e0e0;
+}
 
 :host-context(.dark-mode) .details-content {
   background: var(--mat-sys-surface-container-highest);
@@ -236,21 +236,70 @@ dd {
   border-color: var(--mat-sys-outline);
 }
 
-  :host-context(.dark-mode) .pet-avatar {
-    background: #244b3f;
-    border-color: var(--mat-sys-outline);
-    color: #edf3e7;
-  }
+:host-context(.dark-mode) .pet-avatar {
+  background: #244b3f;
+  border-color: var(--mat-sys-outline);
+  color: #edf3e7;
+}
 
-  :host-context(.dark-mode) .pet-card h3 {
-    color: #e0e0e0;
-  }
+:host-context(.dark-mode) .pet-card h3 {
+  color: #e0e0e0;
+}
 
-  :host-context(.dark-mode) .pet-card dt {
-    color: #e0e0e0;
-  }
+:host-context(.dark-mode) .pet-card dt {
+  color: #e0e0e0;
+}
 
-  :host-context(.dark-mode) .pet-card dd {
-    color: #e0e0e0;
-  }
+:host-context(.dark-mode) .pet-card dd {
+  color: #e0e0e0;
+}
 
+/* =========================================================
+   ADD PET BUTTON
+   ========================================================= */
+
+.primary-button {
+  align-self: center;
+  min-height: 42px;
+  margin-top: 0.25rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid #244b3f;
+  border-radius: 10px;
+  color: #fff;
+  background: #244b3f;
+  font: inherit;
+  font-size: 0.87rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.primary-button:hover {
+  border-color: #1c3d33;
+  background: #1c3d33;
+}
+
+.primary-button:focus-visible {
+  outline: 3px solid rgb(36 75 63 / 22%);
+  outline-offset: 3px;
+}
+
+.primary-button:active {
+  transform: translateY(1px);
+}
+
+:host-context(.dark-mode) .primary-button {
+  border-color: #244b3f;
+  color: #e0e0e0;
+  background: #244b3f;
+}
+
+:host-context(.dark-mode) .primary-button:hover {
+  border-color: #1c3d33;
+  background: #1c3d33;
+}

@@ -1,6 +1,6 @@
 package com.petclinic.visits.visitsservicenew.Utils;
 
-import com.itextpdf.text.DocumentException;
+import com.lowagie.text.DocumentException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.MedicationDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
 import org.junit.jupiter.api.Test;
