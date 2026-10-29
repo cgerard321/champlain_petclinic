@@ -341,6 +341,7 @@ class VisitServiceImplTest {
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(new PetResponseDTO()));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(new VetDTO()));
         when(visitRepo.findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString())).thenReturn(Flux.empty());
+        when(visitRepo.existsByVisitId(anyString())).thenReturn(Mono.just(false));
         when(entityDtoUtil.toVisitEntity(any())).thenReturn(visit1);
         when(visitRepo.insert(visit1)).thenReturn(Mono.just(visit1));
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
