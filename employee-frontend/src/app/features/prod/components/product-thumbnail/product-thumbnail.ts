@@ -1,6 +1,7 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 
 import { FileDetails } from '@features/prod/models/image.model';
+import { ImageService } from '@features/prod/services/image.service';
 
 @Component({
   selector: 'app-product-thumbnail',
@@ -8,6 +9,9 @@ import { FileDetails } from '@features/prod/models/image.model';
   styleUrl: './product-thumbnail.css',
 })
 export class ProductThumbnail {
+  private readonly imageService = inject(ImageService);
+
+  readonly imageId = input<string | undefined>();
   readonly image = input<FileDetails | null | undefined>();
   readonly alt = input($localize`:@@products.image.alt:Image du produit`);
   protected readonly imageSrc = signal<string | null>(null);
