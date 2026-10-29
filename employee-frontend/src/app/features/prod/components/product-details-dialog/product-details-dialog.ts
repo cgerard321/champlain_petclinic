@@ -14,6 +14,7 @@ import {
   localizedProductType,
 } from '@features/prod/models/product-localization';
 import { Product } from '@features/prod/models/product.model';
+import { ImageService } from '@features/prod/services/image.service';
 import { ProductService } from '@features/prod/services/product.service';
 
 interface ProductDetailsData {
