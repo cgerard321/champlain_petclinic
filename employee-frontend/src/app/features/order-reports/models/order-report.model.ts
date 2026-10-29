@@ -19,6 +19,13 @@ export interface OrderReport {
   description: string;
   status: OrderReportStatus;
   submittedAt: string;
+  resolutionNote: string | null;
+  resolvedAt: string | null;
+}
+
+export interface UpdateReportStatusRequest {
+  status: OrderReportStatus;
+  resolutionNote: string | null;
 }
 
 export interface OrderProduct {

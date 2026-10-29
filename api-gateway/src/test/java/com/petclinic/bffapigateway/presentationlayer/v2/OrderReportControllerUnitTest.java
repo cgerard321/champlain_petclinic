@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
 import com.petclinic.bffapigateway.dtos.Cart.OrderReportResponseDTO;
+import com.petclinic.bffapigateway.dtos.Cart.OrderReportStatusRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.OrderResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -83,5 +86,34 @@ class OrderReportControllerUnitTest {
                 .value(response -> assertThat(response.getOrderId()).isEqualTo("order-123"));
 
         verify(cartServiceClient).getOrderByOrderId("order-123");
+    }
+
+    @Test
+    void updateOrderReportStatus_returnsUpdatedReport() {
+        OrderReportStatusRequestDTO request = OrderReportStatusRequestDTO.builder()
+                .status("RESOLVED")
+                .resolutionNote("Refund sent")
+                .build();
+
+        OrderReportResponseDTO report = sampleReport("RESOLVED");
+        report.setResolutionNote("Refund sent");
+
+        when(cartServiceClient.updateOrderReportStatus(eq("RPT-123"), any()))
+                .thenReturn(Mono.just(report));
+
+        client.patch()
+                .uri(BASE_URL + "/reports/RPT-123/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(OrderReportResponseDTO.class)
+                .value(response -> {
+                    assertThat(response.getStatus()).isEqualTo("RESOLVED");
+                    assertThat(response.getResolutionNote()).isEqualTo("Refund sent");
+                });
+
+        verify(cartServiceClient).updateOrderReportStatus(eq("RPT-123"), any());
     }
 }
