@@ -20,5 +20,7 @@ public interface CustomerService {
     Mono<CustomerResponseDTO> deleteCustomerByCustomerId(String customerId);
     Mono<CustomerResponseDTO> deleteCustomerPhoto(String customerId);
     Mono<CustomerResponseDTO> softDeleteCustomerByCustomerId(String customerId);
+    Flux<CustomerResponseDTO> getSoftDeletedCustomers();
+    Mono<CustomerResponseDTO> reactivateCustomerByCustomerId(String customerId);
 }
 
