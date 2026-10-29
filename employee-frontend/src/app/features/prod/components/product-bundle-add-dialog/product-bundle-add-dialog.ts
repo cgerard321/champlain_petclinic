@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, LOCALE_ID, signal, viewChild } from '@angular/core';
 import { form, FormField, required, requiredError, validate } from '@angular/forms/signals';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatChipGrid, MatChipRemove, MatChipRow } from '@angular/material/chips';
@@ -31,6 +31,7 @@ import {
   ProductSelectorDialogData,
 } from '@features/prod/components/product-selector-dialog/product-selector-dialog';
 import { Bundle, BundleRequest } from '@features/prod/models/bundle.model';
+import { localizedProductName } from '@features/prod/models/product-localization';
 import { Product } from '@features/prod/models/product.model';
 import { BundleService } from '@features/prod/services/bundle.service';
 
@@ -79,6 +80,7 @@ export class ProductBundleAddDialog {
   private readonly dialogRef = inject(MatDialogRef<ProductBundleAddDialog, Bundle>);
   private readonly dialog = inject(MatDialog);
   private readonly bundleService = inject(BundleService);
+  private readonly locale = inject(LOCALE_ID);
   private readonly discountPercentage = signal<number>(0);
   private readonly discountManual = signal<number>(0);
   protected readonly usePercentageDiscount = signal<boolean>(false);
@@ -99,11 +101,21 @@ export class ProductBundleAddDialog {
   });
 
   protected readonly bundleForm = form(this.model, (schemaPath) => {
-    required(schemaPath.bundleName, { message: 'Bundle name is required' });
-    required(schemaPath.bundleDescription, { message: 'Bundle description is required' });
-    required(schemaPath.bundlePrice, { message: 'Bundle price is required' });
+    required(schemaPath.bundleName, {
+      message: $localize`:@@products.bundles.validation.nameRequired:Le nom de l'ensemble est requis.`,
+    });
+    required(schemaPath.bundleDescription, {
+      message: $localize`:@@products.bundles.validation.descriptionRequired:La description de l'ensemble est requise.`,
+    });
+    required(schemaPath.bundlePrice, {
+      message: $localize`:@@products.bundles.validation.priceRequired:Le prix de l'ensemble est requis.`,
+    });
     validate(schemaPath.productIds, ({ value }) =>
-      value().size === 0 ? requiredError({ message: 'Bundle needs at least one item' }) : undefined,
+      value().size === 0
+        ? requiredError({
+            message: $localize`:@@products.bundles.validation.itemRequired:L'ensemble doit contenir au moins un article.`,
+          })
+        : undefined,
     );
   });
 
@@ -125,9 +137,12 @@ export class ProductBundleAddDialog {
 
   protected readonly percentageError = computed(() => {
     const percentage = this.discountPercentage();
-    if (Number.isNaN(percentage)) return 'Discount percentage is required';
-    if (percentage < 1) return 'Discount must be at least 1%';
-    if (percentage > 100) return 'Discount cannot be more than 100%';
+    if (Number.isNaN(percentage))
+      return $localize`:@@products.bundles.validation.percentageRequired:Le pourcentage de rabais est requis.`;
+    if (percentage < 1)
+      return $localize`:@@products.bundles.validation.percentageMinimum:Le rabais doit être d'au moins 1 %.`;
+    if (percentage > 100)
+      return $localize`:@@products.bundles.validation.percentageMaximum:Le rabais ne peut pas dépasser 100 %.`;
     return null;
   });
 
@@ -138,9 +153,12 @@ export class ProductBundleAddDialog {
   protected readonly manualError = computed(() => {
     const price = this.discountManual();
     const original = this.model().bundleOriginalPrice;
-    if (Number.isNaN(price)) return 'Bundle price is required';
-    if (price <= 0) return 'Bundle price must be greater than $0';
-    if (price >= original) return `Bundle price must be less than $${original.toFixed(2)}`;
+    if (Number.isNaN(price))
+      return $localize`:@@products.bundles.validation.priceRequired:Le prix de l'ensemble est requis.`;
+    if (price <= 0)
+      return $localize`:@@products.bundles.validation.pricePositive:Le prix de l'ensemble doit être supérieur à zéro.`;
+    if (price >= original)
+      return $localize`:@@products.bundles.validation.priceBelowOriginal:Le prix de l'ensemble doit être inférieur à ${original.toFixed(2)}:price: $.`;
     return null;
   });
 
@@ -151,19 +169,27 @@ export class ProductBundleAddDialog {
   private validateBusinessRules(): boolean {
     const current = this.model();
     if (!Number.isFinite(current.bundlePrice)) {
-      this.errorMessage.set('Bundle price must be a valid number.');
+      this.errorMessage.set(
+        $localize`:@@products.bundles.validation.priceNumber:Le prix de l'ensemble doit être un nombre valide.`,
+      );
       return false;
     }
     if (current.bundlePrice <= 0) {
-      this.errorMessage.set('Bundle price must be greater than zero.');
+      this.errorMessage.set(
+        $localize`:@@products.bundles.validation.pricePositive:Le prix de l'ensemble doit être supérieur à zéro.`,
+      );
       return false;
     }
     if (current.bundlePrice >= current.bundleOriginalPrice) {
-      this.errorMessage.set('Bundle price must be less than the original price.');
+      this.errorMessage.set(
+        $localize`:@@products.bundles.validation.priceBelowOriginalGeneric:Le prix de l'ensemble doit être inférieur au prix original.`,
+      );
       return false;
     }
     if (current.productIds.size < 1) {
-      this.errorMessage.set('Cannot have less than one item in bundle.');
+      this.errorMessage.set(
+        $localize`:@@products.bundles.validation.itemRequired:L'ensemble doit contenir au moins un article.`,
+      );
       return false;
     }
     return true;
@@ -205,7 +231,11 @@ export class ProductBundleAddDialog {
 
   private handleError(error: unknown): void {
     this.isSubmitting.set(false);
-    this.errorMessage.set(isApiError(error) ? error.message : 'Could not save the bundle.');
+    this.errorMessage.set(
+      isApiError(error)
+        ? error.message
+        : $localize`:@@products.bundles.errors.save:Impossible d'enregistrer l'ensemble.`,
+    );
   }
 
   protected cancel(): void {
@@ -252,6 +282,11 @@ export class ProductBundleAddDialog {
 
   protected getProductByProductId(id: string): Product | undefined {
     return this.data.products.find((product: Product) => product.productId === id);
+  }
+
+  protected productName(productId: string): string {
+    const product = this.getProductByProductId(productId);
+    return product ? localizedProductName(product, this.locale) : '';
   }
 
   protected getBundleOriginalPrice(): number {

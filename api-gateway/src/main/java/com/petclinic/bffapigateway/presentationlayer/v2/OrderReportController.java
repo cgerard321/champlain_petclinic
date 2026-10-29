@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.CartServiceClient;
 import com.petclinic.bffapigateway.dtos.Cart.OrderReportResponseDTO;
+import com.petclinic.bffapigateway.dtos.Cart.OrderReportStatusRequestDTO;
 import com.petclinic.bffapigateway.dtos.Cart.OrderResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -29,6 +30,20 @@ public class OrderReportController {
     @GetMapping(value = "/{orderId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<OrderResponseDTO>> getOrderByOrderId(@PathVariable String orderId) {
         return cartServiceClient.getOrderByOrderId(orderId)
+                .map(ResponseEntity::ok);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
+    @PatchMapping(
+            value = "/reports/{reportId}/status",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<OrderReportResponseDTO>> updateOrderReportStatus(
+            @PathVariable String reportId,
+            @RequestBody OrderReportStatusRequestDTO request
+    ) {
+        return cartServiceClient.updateOrderReportStatus(reportId, request)
                 .map(ResponseEntity::ok);
     }
 }

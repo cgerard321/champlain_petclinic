@@ -1,7 +1,7 @@
 <div class="bundle-header">
   <div>
-    <h1>Bundles</h1>
-    <p>Manage bundles available to the clinic.</p>
+    <h1 i18n="@@products.bundles.title">Ensembles</h1>
+    <p i18n="@@products.bundles.description">Gérez les ensembles offerts par la clinique.</p>
   </div>
   @if (canManageBundles()) {
     <button
@@ -11,7 +11,7 @@
       (click)="openAddBundle()"
       disabled="{{ isLoading() }}"
     >
-      Add Bundle
+      <ng-container i18n="@@products.bundles.actions.add">Ajouter un ensemble</ng-container>
     </button>
   }
 </div>
@@ -23,36 +23,47 @@
 @if (isLoading()) {
   <div class="bundle-state-container" role="status">
     <mat-progress-spinner mode="indeterminate" diameter="40" />
-    <span>Loading bundles...</span>
+    <span i18n="@@products.bundles.loading">Chargement des ensembles...</span>
   </div>
 } @else if (bundlesError()) {
   <div class="state-container bundle-error-message" role="alert">
     <p>{{ bundlesError() }}</p>
-    <button mat-stroked-button type="button" (click)="loadBundles()">Try again</button>
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="loadBundles()"
+      i18n="@@products.actions.retry"
+    >
+      Réessayer
+    </button>
   </div>
 } @else {
   <div class="bundle-grid">
     @for (bundle of bundles(); track bundle.bundleId) {
       <mat-card class="bundle-card">
         <mat-card-header>
-          <mat-card-title [title]="bundle.bundleName">{{ bundle.bundleName }}</mat-card-title>
-          <mat-card-subtitle>{{ bundle.productIds.length }} items</mat-card-subtitle>
+          <mat-card-title [title]="bundleName(bundle)">{{ bundleName(bundle) }}</mat-card-title>
+          <mat-card-subtitle i18n="@@products.bundles.itemCount">
+            {{ bundle.productIds.length }} articles
+          </mat-card-subtitle>
         </mat-card-header>
         <mat-card-content>
-          <p class="bundle-description" [title]="bundle.bundleDescription">
-            {{ bundle.bundleDescription }}
+          <p class="bundle-description" [title]="bundleDescription(bundle)">
+            {{ bundleDescription(bundle) }}
           </p>
           <dl>
             <div>
-              <dt>Original price</dt>
+              <dt i18n="@@products.bundles.fields.originalPrice">Prix original</dt>
               <dd class="original-price">{{ bundle.originalTotalPrice | currency }}</dd>
             </div>
             <div>
-              <dt>Bundle price</dt>
+              <dt i18n="@@products.bundles.fields.bundlePrice">Prix de l'ensemble</dt>
               <dd>{{ bundle.bundlePrice | currency }}</dd>
             </div>
           </dl>
-          <h3 class="bundle-items-title">Bundle items</h3>
+          <h3 class="bundle-items-title" i18n="@@products.bundles.fields.items">
+            Articles de l'ensemble
+          </h3>
           <ul class="bundle-items">
             @for (bundleItem of bundle.products; track bundleItem.productId) {
               <li class="bundle-item">
@@ -66,7 +77,7 @@
                     class="bundle-item-thumbnail"
                     imageId="{{ bundleItem.imageId }}"
                   />
-                  <span>{{ bundleItem.productName }}</span>
+                  <span>{{ productName(bundleItem) }}</span>
                 </a>
               </li>
             }
@@ -80,7 +91,7 @@
               type="button"
               (click)="openUpdateBundle(bundle)"
             >
-              Update
+              <ng-container i18n="@@products.actions.update">Modifier</ng-container>
             </button>
           }
           @if (canDeleteBundles()) {
@@ -90,7 +101,7 @@
               type="button"
               (click)="openBundleDelete(bundle)"
             >
-              Delete
+              <ng-container i18n="@@products.actions.delete">Supprimer</ng-container>
             </button>
           }
         </mat-card-actions>

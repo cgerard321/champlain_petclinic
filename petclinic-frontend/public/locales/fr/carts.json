@@ -210,7 +210,9 @@
     "submit": "Soumettre le signalement",
     "submitting": "Envoi en cours...",
     "success": "Votre signalement a été soumis. Notre équipe l'examine.",
-    "banner": "Problème signalé - Statut : {{status}} - Référence : {{reportId}}",
+    "bannerTitle": "Problème signalé",
+    "reference": "Référence",
+    "note": "Note de notre équipe",
     "reasons": {
       "DAMAGED_ITEM": "Article endommagé",
       "MISSING_ITEM": "Article manquant",

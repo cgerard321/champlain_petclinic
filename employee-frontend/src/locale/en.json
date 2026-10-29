@@ -190,9 +190,9 @@
       "statusMenuLabel": "Visit statuses",
       "listLabel": "Visit list",
       "title": "List of Visits",
-    "searchVisits": "Search visits",
-    "searchPlaceholder": "Search by pet name, description or visit ID",
-    "noVisitsFound": "No visits found.",
+      "searchVisits": "Search visits",
+      "searchPlaceholder": "Search by pet name, description or visit ID",
+      "noVisitsFound": "No visits found.",
       "nextAppointmentTitle": "Next appointment",
       "upcomingAppointmentNotification": "Your next appointment for {$petName} is on {$appointmentDate}.",
       "nextAppointmentLoading": "Loading next appointment...",
@@ -394,6 +394,10 @@
         "title": "Availability",
         "description": "Remove a time slot or a whole day. Removals take effect when you save.",
         "remove_day": "Remove this day",
+        "add_day": "Add this day",
+        "add_hour": "Add",
+        "added_day": "{$day} added.",
+        "added_hour": "{$day} {$hour} added.",
         "remove_hour": "Remove",
         "removed_hour": "{$day} {$hour} removed.",
         "removed_day": "{$day} removed.",
@@ -407,7 +411,15 @@
         "visits_many": "{$count} visits booked in these slots will be cancelled.",
         "visits_unknown": "Booked visits for these slots could not be checked.",
         "cancel_failed_one": "The profile was saved, but one visit could not be cancelled: it is still active. Report it to an administrator.",
-        "cancel_failed_many": "The profile was saved, but {$count} visits could not be cancelled: they are still active. Report them to an administrator."
+        "cancel_failed_many": "The profile was saved, but {$count} visits could not be cancelled: they are still active. Report them to an administrator.",
+        "reset_title": "Reset modifications?",
+        "reset_message": "Do you want to restore the initial availabilities? This will cancel current modifications, but will not reschedule cancelled appointments.",
+        "reset_confirm": "Reset",
+        "reset": "Availabilities reset.",
+        "show_active_only": "Show active slots only",
+        "show_all": "Show all slots",
+        "reset_button": "Reset schedule",
+        "confirm_visits_cancel": "--- NOTICE: This will cancel all visits booked during this availability."
       },
       "detail": {
         "back": "Back to directory",
@@ -415,7 +427,7 @@
         "loading": "Loading profile…",
         "saved": "The profile has been saved."
       },
-      "specialty":{
+      "specialty": {
         "radiology": "Radiology",
         "surgery": "Surgery",
         "dentistry": "Dentistry",
@@ -523,7 +535,7 @@
           "lastName": "Last Name: ",
           "address": "Address: ",
           "city": "City: ",
-          "phone":"Phone Number: ",
+          "phone": "Phone Number: ",
           "province": "Province: "
         },
         "error": {
@@ -531,7 +543,7 @@
           "lastName": "Last name is required.",
           "address": "Address is required.",
           "city": "City is required.",
-          "phoneM":"Telephone is required.",
+          "phoneM": "Telephone is required.",
           "phoneL": "Telephone must contain exactly 10 digits.",
           "province": "Province is required."
         }
@@ -554,13 +566,13 @@
       "allPetsButton": "All pets"
     },
     "pet": {
-      "petAddTitle" : "Add a new Pet",
+      "petAddTitle": "Add a new Pet",
       "petDetailsTitle": "Pet Details",
       "petDetailsSubtitle": "Registered pets and their information",
       "closeButton": "Close",
       "loadingPets": "Loading pets...",
       "noPetsFound": "No registered found for this customer.",
-      "button":{
+      "button": {
         "add": "Add",
         "addAnimal": "Add an animal"
       },
@@ -589,6 +601,216 @@
         "date": "Date of Birth is required",
         "weightR": "Weight is required",
         "weightP": "Weight should be a valid number"
+      }
+    },
+    "products": {
+      "title": "Products",
+      "description": "Manage products available to the clinic.",
+      "loading": "Loading products...",
+      "empty": "No products found.",
+      "actions": {
+        "add": "Add Product",
+        "retry": "Try again",
+        "details": "Details",
+        "update": "Update",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "save": "Save Product",
+        "close": "Close"
+      },
+      "search": {
+        "label": "Search products by name",
+        "placeholder": "Enter a product name"
+      },
+      "tabs": {
+        "products": "Products",
+        "bundles": "Bundles",
+        "settings": "Settings"
+      },
+      "bundles": {
+        "title": "Bundles",
+        "description": "Manage bundles available to the clinic.",
+        "loading": "Loading bundles...",
+        "itemCount": "{$INTERPOLATION} items",
+        "actions": {
+          "add": "Add Bundle",
+          "update": "Update Bundle",
+          "addItems": "Add items",
+          "removeItem": "Remove item"
+        },
+        "fields": {
+          "name": "Bundle name",
+          "description": "Description",
+          "items": "Bundle items",
+          "originalPrice": "Original price",
+          "bundlePrice": "Bundle price"
+        },
+        "names": {
+          "dog": "Dog Bundle",
+          "fish": "Fish Bundle",
+          "accessory": "Accessory Bundle",
+          "saddle": "Saddle Special",
+          "aquarium": "Aquarium Starter Kit",
+          "kitten": "New Kitten Bundle",
+          "dogCare": "Dog Walk & Care Bundle",
+          "senior": "Senior Pet Comfort Bundle",
+          "smallAnimal": "Small Animal & Bird Bundle",
+          "homeCare": "Home Vet Care Bundle",
+          "ultimate": "Ultimate Pet Owner Bundle"
+        },
+        "descriptions": {
+          "dog": "Dog Food & Flea Collar",
+          "fish": "Cat Litter & Fish Tank Heater",
+          "accessory": "All Accessories",
+          "saddle": "Horse Saddle on sale",
+          "aquarium": "Filter, heater & fish flakes for a new tank",
+          "kitten": "Everything a new kitten needs at home",
+          "dogCare": "Food, walking gear and grooming for dogs",
+          "senior": "Comfort, health and monitoring for aging pets",
+          "smallAnimal": "Housing, food and accessories for rabbits and birds",
+          "homeCare": "Treatments and tools for at-home pet health care",
+          "ultimate": "Our biggest bundle: food, gear and equipment for every pet"
+        },
+        "discount": {
+          "title": "Bundle discount",
+          "percentage": "Percentage",
+          "percentageLabel": "Discount percentage",
+          "manual": "Manual",
+          "enter": "Enter a discount",
+          "savings": "Customer saves"
+        },
+        "add": {
+          "title": "Add Bundle",
+          "close": "Close Add Bundle dialog"
+        },
+        "update": {
+          "title": "Update Bundle",
+          "close": "Close Update Bundle dialog"
+        },
+        "delete": {
+          "title": "Delete bundle?",
+          "confirm": "Are you sure you want to delete {$name}? This cannot be undone."
+        },
+        "selector": {
+          "selected": "{$INTERPOLATION} product(s) selected",
+          "clear": "Clear",
+          "addAll": "Add all",
+          "empty": "No products match your search.",
+          "confirm": "OK"
+        },
+        "validation": {
+          "nameRequired": "Bundle name is required.",
+          "descriptionRequired": "Bundle description is required.",
+          "priceRequired": "Bundle price is required.",
+          "itemRequired": "Bundle needs at least one item.",
+          "percentageRequired": "Discount percentage is required.",
+          "percentageMinimum": "Discount must be at least 1%.",
+          "percentageMaximum": "Discount cannot be more than 100%.",
+          "pricePositive": "Bundle price must be greater than zero.",
+          "priceBelowOriginal": "Bundle price must be less than {$price}.",
+          "priceNumber": "Bundle price must be a valid number.",
+          "priceBelowOriginalGeneric": "Bundle price must be less than the original price."
+        },
+        "errors": {
+          "load": "Failed to load bundles.",
+          "save": "Could not save the bundle."
+        }
+      },
+      "reviewSettings": {
+        "title": "Review Settings",
+        "description": "Set how long customers can edit their reviews.",
+        "period": "Review edit period",
+        "hours": "hours",
+        "save": "Save Review Settings",
+        "saved": "Review edit period saved.",
+        "errors": {
+          "load": "Could not load review settings.",
+          "minimum": "The edit period must be zero or greater.",
+          "save": "Could not save review settings."
+        }
+      },
+      "fields": {
+        "name": "Product name (English)",
+        "description": "Description (English)",
+        "nameFrench": "Product name (French)",
+        "descriptionFrench": "Description (French)",
+        "frenchHint": "Optional. English is displayed when empty.",
+        "price": "Price",
+        "salePrice": "Sale price",
+        "quantity": "Quantity",
+        "type": "Product type",
+        "status": "Status",
+        "delivery": "Delivery",
+        "deliveryType": "Delivery type",
+        "releaseDate": "Release date",
+        "image": "Product image",
+        "replaceImage": "Replace product image",
+        "listed": "Listed",
+        "averageRating": "Average rating"
+      },
+      "add": {
+        "title": "Add Product",
+        "close": "Close Add Product dialog"
+      },
+      "update": {
+        "title": "Update Product",
+        "close": "Close Update Product dialog"
+      },
+      "details": {
+        "title": "Product Details",
+        "close": "Close Product Details dialog",
+        "loading": "Loading product..."
+      },
+      "delete": {
+        "title": "Delete product?",
+        "confirm": "Are you sure you want to delete {$name}? This cannot be undone.",
+        "close": "Close delete confirmation dialog",
+        "bundleTitle": "Product is in a bundle",
+        "bundleConfirm": "{$name} is part of one or more product bundles. Deleting it will also permanently delete those bundles. Do you want to continue?",
+        "productAndBundles": "Delete product and bundles"
+      },
+      "validation": {
+        "nameRequired": "Product name is required.",
+        "descriptionRequired": "Product description is required.",
+        "priceRequired": "Sale price is required.",
+        "quantityRequired": "Quantity is required.",
+        "typeRequired": "Product type is required.",
+        "imageType": "Only JPEG, JPG, and PNG images are supported.",
+        "pricePositive": "Sale price must be greater than zero.",
+        "quantityNonNegative": "Quantity cannot be negative."
+      },
+      "errors": {
+        "load": "Could not load products.",
+        "save": "Could not save the product.",
+        "update": "Could not update the product.",
+        "delete": "Could not delete the product.",
+        "details": "Could not load product details."
+      },
+      "types": {
+        "medication": "Medication",
+        "accessory": "Accessory",
+        "food": "Food",
+        "equipment": "Equipment"
+      },
+      "status": {
+        "available": "Available",
+        "preOrder": "Pre-order",
+        "outOfStock": "Out of stock"
+      },
+      "delivery": {
+        "delivery": "Delivery",
+        "pickup": "Pickup",
+        "deliveryAndPickup": "Delivery and pickup",
+        "none": "No delivery option"
+      },
+      "common": {
+        "yes": "Yes",
+        "no": "No"
+      },
+      "image": {
+        "alt": "Product image",
+        "unavailable": "No product image available",
+        "none": "No image"
       }
     },
     "petList": {
@@ -774,7 +996,7 @@
         "cancel": "Cancel",
         "currentQuantity": "{$INTERPOLATION} — Current quantity: {$INTERPOLATION_1}",
         "quantity": "Quantity to add"
-        },
+      },
       "summary": {
         "ariaLabel": "Summary for {$name}",
         "title": "Supply summary",
@@ -939,7 +1161,8 @@
         "order": "Order",
         "date": "Date",
         "shipping": "Shipping",
-        "address": "Address"
+        "address": "Address",
+        "resolvedAt": "Closed on"
       },
       "status": {
         "NEW": "New",
@@ -961,7 +1184,24 @@
         "description": "Description",
         "affectedItems": "Affected items",
         "noItems": "No specific items were selected.",
-        "viewOrder": "View order"
+        "viewOrder": "View order",
+        "resolution": "Resolution",
+        "noNote": "No note added.",
+        "markInReview": "Mark In Review",
+        "reject": "Reject",
+        "resolve": "Resolve"
+      },
+      "statusDialog": {
+        "resolveTitle": "Resolve report",
+        "resolveMessage": "The report will be closed as resolved. You can add a resolution note.",
+        "resolveNote": "Resolution note (optional)",
+        "resolveConfirm": "Resolve",
+        "rejectTitle": "Reject report",
+        "rejectMessage": "The report will be closed as rejected. Give the reason for the rejection.",
+        "rejectNote": "Rejection reason",
+        "rejectConfirm": "Reject",
+        "noteRequired": "A reason is required to reject a report.",
+        "cancel": "Cancel"
       },
       "orderDialog": {
         "eyebrow": "Order details",
@@ -977,7 +1217,8 @@
       },
       "errors": {
         "loadFailed": "Could not load order reports.",
-        "orderLoadFailed": "Could not load the order."
+        "orderLoadFailed": "Could not load the order.",
+        "updateFailed": "Could not update the report status."
       },
       "paginator": {
         "itemsPerPage": "Items per page:",
