@@ -1,0 +1,141 @@
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant, #e0e0e0);
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mat-sys-primary, #1565c0);
+}
+
+.dialog-header h2 {
+  margin: 0;
+  padding: 0;
+  overflow-wrap: anywhere;
+}
+
+/* hide material title spacer */
+.dialog-header h2::before {
+  display: none;
+}
+
+.order-id {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant, #666);
+  overflow-wrap: anywhere;
+}
+
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 75vh;
+  padding: 20px 24px;
+
+  /* hidden scrollbar */
+  scrollbar-width: none;
+}
+
+mat-dialog-content::-webkit-scrollbar {
+  display: none;
+}
+
+mat-dialog-actions {
+  padding: 12px 24px 20px;
+}
+
+.card {
+  padding: 16px;
+  border: 1px solid var(--mat-sys-outline-variant, #e0e0e0);
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container-low, #fafafa);
+}
+
+.card h3 {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+  margin: 0;
+}
+
+.field dt {
+  margin-bottom: 4px;
+  font-size: 0.75rem;
+  color: var(--mat-sys-on-surface-variant, #666);
+}
+
+.field dd {
+  margin: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.items-table th,
+.items-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant, #e0e0e0);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.items-table thead th {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface-variant, #666);
+}
+
+.items-table tfoot th,
+.items-table tfoot td {
+  border-bottom: none;
+  font-weight: 600;
+}
+
+.items-table .number {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.state-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 120px;
+}
+
+.error-message {
+  margin: 0;
+  color: var(--mat-sys-error, #b00020);
+}
+
+@media (width <= 600px) {
+  .fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
