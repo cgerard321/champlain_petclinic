@@ -1161,7 +1161,8 @@
         "order": "Order",
         "date": "Date",
         "shipping": "Shipping",
-        "address": "Address"
+        "address": "Address",
+        "resolvedAt": "Closed on"
       },
       "status": {
         "NEW": "New",
@@ -1183,7 +1184,24 @@
         "description": "Description",
         "affectedItems": "Affected items",
         "noItems": "No specific items were selected.",
-        "viewOrder": "View order"
+        "viewOrder": "View order",
+        "resolution": "Resolution",
+        "noNote": "No note added.",
+        "markInReview": "Mark In Review",
+        "reject": "Reject",
+        "resolve": "Resolve"
+      },
+      "statusDialog": {
+        "resolveTitle": "Resolve report",
+        "resolveMessage": "The report will be closed as resolved. You can add a resolution note.",
+        "resolveNote": "Resolution note (optional)",
+        "resolveConfirm": "Resolve",
+        "rejectTitle": "Reject report",
+        "rejectMessage": "The report will be closed as rejected. Give the reason for the rejection.",
+        "rejectNote": "Rejection reason",
+        "rejectConfirm": "Reject",
+        "noteRequired": "A reason is required to reject a report.",
+        "cancel": "Cancel"
       },
       "orderDialog": {
         "eyebrow": "Order details",
@@ -1199,7 +1217,8 @@
       },
       "errors": {
         "loadFailed": "Could not load order reports.",
-        "orderLoadFailed": "Could not load the order."
+        "orderLoadFailed": "Could not load the order.",
+        "updateFailed": "Could not update the report status."
       },
       "paginator": {
         "itemsPerPage": "Items per page:",
