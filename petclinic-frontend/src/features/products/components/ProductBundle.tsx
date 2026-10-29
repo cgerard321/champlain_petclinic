@@ -113,7 +113,10 @@ const ProductBundle: React.FC<ProductBundleProps> = ({ bundle }) => {
               }
             }}
           >
-            <ImageContainer image={product.image} imageId={product.imageId} />
+            <ImageContainer
+              image={product.image}
+              productId={product.productId}
+            />
             <div className="product-details">
               <p>{localizedProduct(product, language).name}</p>
               <p>
