@@ -419,6 +419,20 @@ public class VisitsServiceClient {
                 .bodyToMono(byte[].class);
     }
 
+    public Mono<byte[]> downloadSecondPrescriptionPdf(String visitId) {
+        String url = UriComponentsBuilder
+                .fromHttpUrl(visitServiceUrl)
+                .path("/{visitId}/prescription/2/pdf")
+                .buildAndExpand(visitId)
+                .toUriString();
+
+        return webClient.get()
+                .uri(url)
+                .accept(MediaType.APPLICATION_PDF)
+                .retrieve()
+                .bodyToMono(byte[].class);
+    }
+
     public Mono<PrescriptionResponseDTO> createPrescription(String visitId, Mono<PrescriptionResponseDTO> request) {
         String url = UriComponentsBuilder
                 .fromHttpUrl(visitServiceUrl)

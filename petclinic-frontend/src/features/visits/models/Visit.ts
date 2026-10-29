@@ -16,6 +16,7 @@ export interface Visit {
   cancellationReasonDetails?: string;
   visitEndDate: string;
   isEmergency: boolean;
-  prescriptionFile?: FileDetails;
+  prescription?: FileDetails;
+  prescription2?: FileDetails;
   vetNote?: string;
 }

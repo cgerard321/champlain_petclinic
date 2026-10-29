@@ -7,6 +7,7 @@ import { getAllOwnerVisits } from './api/getAllOwnerVisits';
 import { getAllVetVisits } from './api/getAllVetVisits';
 import axios from 'axios';
 import { downloadPrescription } from '@/features/visits/Prescription/api/downloadPrescription';
+import { downloadSecondPrescription } from '@/features/visits/Prescription/api/downloadSecondPrescription';
 import './CustomerVisitListTable.css';
 import '@/shared/components/BasicModal.css';
 import AutoDismissAlert from '@/shared/components/AutoDismissAlert';
@@ -257,25 +258,61 @@ export default function CustomerVisitListTable(): JSX.Element {
                     {visit.status}
                   </td>
                   <td className="action-column">
-                    {['CONFIRMED', 'UPCOMING', 'COMPLETED'].includes(
-                      visit.status
-                    ) && (
-                      <a
-                        onClick={async ev => {
-                          ev.preventDefault();
-                          ev.stopPropagation();
+                    {['CONFIRMED', 'UPCOMING', 'COMPLETED'].includes(visit.status) && (
+                        <>
+                          <a
+                              href="#"
+                              title="Download first prescription"
+                              onClick={async ev => {
+                                ev.preventDefault();
+                                ev.stopPropagation();
 
-                          try {
-                            await handleDownloadPrescription(
-                              visit.visitId,
-                              visit.prescriptionFile?.fileName ||
-                                `prescription-${visit.visitId}.pdf`
-                            );
-                          } catch {}
-                        }}
-                      >
-                        <SvgIcon id="download" className="icon-visits" />
-                      </a>
+                                try {
+                                  await handleDownloadPrescription(
+                                      visit.visitId,
+                                      visit.prescription?.fileName ||
+                                      `prescription-${visit.visitId}.pdf`
+                                  );
+                                } catch {}
+                              }}
+                          >
+                            <SvgIcon id="download" className="icon-visits" />
+                          </a>
+
+                          {visit.prescription2 && (
+                              <a
+                                  href="#"
+                                  title="Download second prescription"
+                                  onClick={async ev => {
+                                    ev.preventDefault();
+                                    ev.stopPropagation();
+
+                                    try {
+                                      const blob = await downloadSecondPrescription(visit.visitId);
+                                      const url = URL.createObjectURL(blob);
+                                      const link = document.createElement('a');
+
+                                      link.href = url;
+                                      link.download =
+                                          visit.prescription2?.fileName ||
+                                          `prescription-2-${visit.visitId}.pdf`;
+
+                                      document.body.appendChild(link);
+                                      link.click();
+                                      link.remove();
+                                      URL.revokeObjectURL(url);
+                                    } catch {
+                                      setAlertMessage('Unable to download the second prescription.');
+                                      setAlertType('error');
+                                      setAlertShow(true);
+                                    }
+                                  }}
+                              >
+                                <SvgIcon id="download" className="icon-visits" />
+                                <span>2</span>
+                              </a>
+                          )}
+                        </>
                     )}
                   </td>
                 </tr>

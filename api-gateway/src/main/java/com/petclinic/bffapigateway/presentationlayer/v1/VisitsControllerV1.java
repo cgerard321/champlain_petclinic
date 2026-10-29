@@ -363,6 +363,18 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.CUST})
+    @GetMapping(
+            value = "/{visitId}/prescription/2/pdf",
+            produces = MediaType.APPLICATION_PDF_VALUE)
+    public Mono<ResponseEntity<byte[]>> downloadSecondPrescriptionPdf(
+            @PathVariable String visitId) {
+
+        return visitsServiceClient.downloadSecondPrescriptionPdf(visitId)
+                .map(pdfBytes -> new ResponseEntity<>(pdfBytes, HttpStatus.OK))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.CUST})
     @PatchMapping(value = "/{visitId}/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> cancelVisit(@PathVariable String visitId, @RequestBody CancellationRequestDTO cancellationRequestDTO) {

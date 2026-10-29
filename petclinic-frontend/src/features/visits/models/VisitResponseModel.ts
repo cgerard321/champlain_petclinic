@@ -21,6 +21,7 @@ export interface VisitResponseModel {
   isEmergency: boolean;
   ownerFirstName: string;
   ownerLastName: string;
-  prescriptionFile?: FileDetails;
+  prescription?: FileDetails;
+  prescription2?: FileDetails;
   vetNote?: string;
 }
