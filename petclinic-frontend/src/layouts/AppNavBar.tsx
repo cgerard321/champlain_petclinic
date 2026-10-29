@@ -1,7 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import {
   IsAdmin,
-  IsInventoryManager,
   IsCustomer,
   IsReceptionist,
   IsVet,
@@ -26,7 +25,6 @@ export function NavBar(): JSX.Element {
   const { cartCount, refreshFromAPI } = useCart();
   const navigate = useNavigate();
   const isAdmin = IsAdmin();
-  const isInventoryManager = IsInventoryManager();
   const isReceptionist = IsReceptionist();
   const isVet = IsVet();
   const isCustomer = IsCustomer();

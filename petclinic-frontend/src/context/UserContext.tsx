@@ -9,6 +9,7 @@ import {
 import router from '@/router';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import axiosInstance from '@/shared/api/axiosInstance';
+import { redirectToEmployeePortal } from '@/utils/employeePortal';
 
 export interface ValidateUserTokenResponse {
   username: string;
@@ -23,11 +24,14 @@ interface CurrentUser {
   roles: Set<string>;
 }
 
+// Whether the user is authenticated, anonymous or authenticated but cannot log into this specific portal
+export type SessionStatus = 'authenticated' | 'anonymous' | 'blocked';
+
 interface UserContextType extends CurrentUser {
   user: CurrentUser;
   isAuthenticated: boolean;
   isLoading: boolean;
-  checkSession: () => Promise<void>;
+  checkSession: () => Promise<SessionStatus>;
   logout: () => Promise<void>;
 }
 
@@ -51,7 +55,7 @@ export const UserProvider = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const checkSession = useCallback(async (): Promise<void> => {
+  const checkSession = useCallback(async (): Promise<SessionStatus> => {
     try {
       const response = await axiosInstance.get<ValidateUserTokenResponse>(
         '/users/jwt',
@@ -63,6 +67,13 @@ export const UserProvider = ({
 
       const data = response.data;
 
+      // Sets Inventory Managers as 'blocked'
+      if (data.roles.includes('INVENTORY_MANAGER')) {
+        setUser(emptyUser);
+        setIsAuthenticated(false);
+        return 'blocked';
+      }
+
       setUser({
         username: data.username,
         email: data.email,
@@ -70,10 +81,12 @@ export const UserProvider = ({
         roles: new Set<string>(data.roles),
       });
       setIsAuthenticated(true);
+      return 'authenticated';
     } catch (err) {
       console.error('[UserProvider] checkSession failed:', err);
       setUser(emptyUser);
       setIsAuthenticated(false);
+      return 'anonymous';
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +111,25 @@ export const UserProvider = ({
   }, []);
 
   useEffect(() => {
-    checkSession();
+    let cancelled = false;
+
+    const verifySession = async (): Promise<void> => {
+      try {
+        const status = await checkSession();
+        // Redirects blocked users to the Employee Portal
+        if (!cancelled && status === 'blocked') {
+          redirectToEmployeePortal('/home');
+        }
+      } catch (err) {
+        console.error('[UserProvider] session check failed:', err);
+      }
+    };
+
+    verifySession();
+
+    return () => {
+      cancelled = true;
+    };
   }, [checkSession]);
 
   return (
@@ -127,7 +158,7 @@ export const useUser = (): UserContextType => {
       ...emptyUser,
       isAuthenticated: false,
       isLoading: false,
-      checkSession: async () => {},
+      checkSession: async () => 'anonymous',
       logout: async () => {},
     };
   }

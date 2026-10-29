@@ -117,7 +117,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerBills,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['CUST']}>
             <CustomerBillingPage />
           </ProtectedRoute>
         ),

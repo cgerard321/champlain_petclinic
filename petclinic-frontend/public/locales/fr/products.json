@@ -41,7 +41,7 @@
   "currentProductPage": "Page de produits actuelle {{count}}",
   "nextProductPage": "Page de produits suivante",
   "nextPage": "Page suivante",
-  "filterButton": "☰ Filtres",
+  "filterButton": "Filtres",
   "closeFilters": "Fermer les filtres",
   "sort": "Trier par",
   "sortDefault": "Ordre par défaut",
@@ -66,9 +66,15 @@
   "clear": "Réinitialiser",
   "search": "Rechercher un produit…",
   "catalog": "Catalogue",
+  "catalogHint": "Les bons soins, pour chaque moment de leur journée.",
+  "productCount_one": "{{count}} produit affiché",
+  "productCount_other": "{{count}} produits affichés",
   "trending": "Tendances",
+  "trendingHint": "Adorés des animaux. Approuvés par leurs humains.",
   "bundles": "Ensembles",
+  "bundlesHint": "Encore mieux ensemble, avec un peu plus de valeur.",
   "recent": "Consultés récemment",
+  "recentHint": "Un petit rappel de ce qui a attiré votre attention.",
   "noRecent": "Aucun produit consulté récemment.",
   "recentlyViewedBadge": "Consulté récemment",
   "loading": "Chargement des produits…",
@@ -86,6 +92,8 @@
   "wishRemoved": "Produit retiré de la liste de souhaits !",
   "bundleUnavailable": "Ensemble indisponible",
   "bundleMissing": "Ensemble temporairement indisponible en raison de produits manquants",
+  "moreBundleProducts_one": "+{{count}} autre produit",
+  "moreBundleProducts_other": "+{{count}} autres produits",
   "deal": "OFFRE",
   "originalPrice": "Prix total initial :",
   "bundlePrice": "Prix de l’ensemble :",
@@ -211,5 +219,13 @@
   "clearReviewSearch": "Effacer la recherche",
   "reviewSearchCount": "{{count}} avis affiché(s) sur {{total}}",
   "noReviewsWithRating": "Ce produit ne possède aucun avis de {{count}} étoile(s).",
-  "noReviewResults": "Aucun résultat trouvé"
+  "noReviewResults": "Aucun résultat trouvé",
+  "averageReview": {
+    "title": "Notes moyennes des clients",
+    "empty": "Aucune note pour le moment",
+    "score": "{{value}} / 5",
+    "count_one": "{{count}} note",
+    "count_other": "{{count}} notes",
+    "error": "Impossible de charger les notes. Veuillez réessayer."
+  }
 }
