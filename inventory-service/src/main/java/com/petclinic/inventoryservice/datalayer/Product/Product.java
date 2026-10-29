@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -19,6 +20,8 @@ public class Product {
     private String productName;
     private String supplierName;
     private String productDescription;
+    private Map<String, String> name;
+    private Map<String, String> description;
     private Integer productQuantity;
     private Double productPrice;
     private Double productSalePrice;

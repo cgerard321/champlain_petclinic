@@ -1,5 +1,7 @@
 package com.petclinic.inventoryservice.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.inventoryservice.datalayer.Inventory.*;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
@@ -12,6 +14,7 @@ import reactor.core.publisher.Mono;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.Map;
 
 @Service
 public class DataBaseLoaderService implements CommandLineRunner {
@@ -29,6 +32,30 @@ public class DataBaseLoaderService implements CommandLineRunner {
 
         // If the db is not empty, then return
         try {
+            // Upgrade records written before bilingual fields existed without changing their text.
+            inventoryRepository.findAll()
+                    .filter(inventory -> needsMigration(inventory.getName())
+                            || needsMigration(inventory.getDescription())
+                            || (inventory.getProducts() != null && inventory.getProducts().stream().anyMatch(
+                            product -> needsMigration(product.getName()) || needsMigration(product.getDescription()))))
+                    .flatMap(inventory -> {
+                        inventory.setName(LocalizedContent.stored(inventory.getName(), inventory.getInventoryName()));
+                        inventory.setDescription(LocalizedContent.stored(inventory.getDescription(), inventory.getInventoryDescription()));
+                        if (inventory.getProducts() != null) {
+                            for (Product product : inventory.getProducts()) {
+                                product.setName(LocalizedContent.stored(product.getName(), product.getProductName()));
+                                product.setDescription(LocalizedContent.stored(product.getDescription(), product.getProductDescription()));
+                            }
+                        }
+                        return inventoryRepository.save(inventory);
+                    }).then().block();
+            productRepository.findAll()
+                    .filter(product -> needsMigration(product.getName()) || needsMigration(product.getDescription()))
+                    .flatMap(product -> {
+                        product.setName(LocalizedContent.stored(product.getName(), product.getProductName()));
+                        product.setDescription(LocalizedContent.stored(product.getDescription(), product.getProductDescription()));
+                        return productRepository.save(product);
+                    }).then().block();
             if (Boolean.TRUE.equals(inventoryRepository.findAll().hasElements().block())) {
                 return;
             }
@@ -668,6 +695,21 @@ public class DataBaseLoaderService implements CommandLineRunner {
         //--------------------------------------------------------------
 
 
+        JsonNode translations = new ObjectMapper().readTree(
+                getClass().getResourceAsStream("/seed-localizations.json"));
+        for (Inventory inventory : new Inventory[]{inventory1, inventory2, inventory3, inventory4, inventory5,
+                inventory6, inventory7, inventory8, inventory9, inventory10}) {
+            inventory.setName(seedText(translations.path("inventories").path("names"), inventory.getInventoryName()));
+            inventory.setDescription(seedText(translations.path("inventories").path("descriptions"), inventory.getInventoryDescription()));
+        }
+        for (Product supply : new Product[]{supply1, supply2, supply3, supply4, supply5, supply6, supply7,
+                supply8, supply9, supply10, supply11, supply12, supply13, supply14, supply15, supply16,
+                supply17, supply18, supply19, supply20, supply21, supply22, supply23, supply24, supply25,
+                supply26, supply27, supply28, supply29, supply30, supply31}) {
+            supply.setName(seedText(translations.path("supplies").path("names"), supply.getProductName()));
+            supply.setDescription(seedText(translations.path("supplies").path("descriptions"), supply.getProductDescription()));
+        }
+
         Flux.concat(
                         Flux.just(inventoryType1, inventoryType2, inventoryType3, inventoryType4, inventoryType5)
                                 .flatMap(inventoryTypeRepository::insert),
@@ -686,5 +728,18 @@ public class DataBaseLoaderService implements CommandLineRunner {
                 .then()
                 .block();
 
+    }
+
+    static Map<String, String> seedText(JsonNode dictionary, String english) {
+        JsonNode translation = dictionary.get(english);
+        if (translation == null || !translation.isTextual() || translation.asText().isBlank()) {
+            throw new IllegalStateException("Missing French seed text for: " + english);
+        }
+        String french = translation.asText();
+        return Map.of("en", english, "fr", french);
+    }
+
+    private static boolean needsMigration(Map<String, String> value) {
+        return value == null;
     }
 }

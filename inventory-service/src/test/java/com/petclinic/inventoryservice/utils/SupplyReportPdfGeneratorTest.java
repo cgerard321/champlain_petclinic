@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 class SupplyReportPdfGeneratorTest {
 
@@ -51,6 +52,17 @@ class SupplyReportPdfGeneratorTest {
         assertThat(text).contains("Product", "Qty", "Description", "Regular", "Sale", "Profit");
         assertThat(text).contains("Sterile Gauze Pads", "Box of 100", "$12.50", "$18.99", "$6.49");
         assertThat(text).contains("Nitrile Gloves", "Powder-free", "$9.75", "$14.50", "$4.75");
+    }
+
+    @Test
+    void generate_UsesRequestedLanguageForSupplyContent() throws IOException {
+        Product product = supply("Bandage", 1, "Wound dressing", 2, 3);
+        product.setName(Map.of("en", "Bandage", "fr", "Pansement"));
+        product.setDescription(Map.of("en", "Wound dressing", "fr", "Soin des plaies"));
+
+        String frenchPdf = textOfPage(SupplyReportPdfGenerator.generate("inv-1", List.of(product), "fr"), 1);
+        assertThat(frenchPdf).contains("Pansement", "Soin des plaies");
+        assertThat(frenchPdf).doesNotContain("Bandage", "Wound dressing");
     }
 
     @Test

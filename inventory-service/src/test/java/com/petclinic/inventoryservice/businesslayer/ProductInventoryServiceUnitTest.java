@@ -67,6 +67,59 @@ class ProductInventoryServiceUnitTest {
                 .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
     }
 
+    @Test
+    void addInventoryRejectsDuplicateFrenchName() {
+        Inventory existing = Inventory.builder()
+                .inventoryId("existing")
+                .inventoryName("First aid")
+                .name(Map.of("en", "First aid", "fr", "Premiers soins"))
+                .build();
+        InventoryRequestDTO request = InventoryRequestDTO.builder()
+                .inventoryName("Emergency kit")
+                .inventoryDescription("Emergency supplies")
+                .inventoryType("Equipment")
+                .name(Map.of("en", "Emergency kit", "fr", "Premiers soins"))
+                .description(Map.of("en", "Emergency supplies", "fr", "Fournitures d'urgence"))
+                .build();
+        when(inventoryRepository.count()).thenReturn(Mono.just(1L));
+        when(inventoryRepository.findAll()).thenReturn(Flux.just(existing));
+
+        StepVerifier.create(productInventoryService.addInventory(Mono.just(request)))
+                .expectError(UnprocessableEntityException.class)
+                .verify();
+        verify(inventoryRepository, never()).insert(any(Inventory.class));
+    }
+
+    @Test
+    void addSupplyRejectsDuplicateFrenchNameWithinInventory() {
+        Product existing = Product.builder()
+                .inventoryId("inventory-1")
+                .productId("existing")
+                .productName("Gauze")
+                .name(Map.of("en", "Gauze", "fr", "Compresse"))
+                .build();
+        ProductRequestDTO request = ProductRequestDTO.builder()
+                .productName("Dressing")
+                .productDescription("Wound dressing")
+                .name(Map.of("en", "Dressing", "fr", "Compresse"))
+                .description(Map.of("en", "Wound dressing", "fr", "Pansement pour plaie"))
+                .productPrice(1.0)
+                .productQuantity(1)
+                .productSalePrice(2.0)
+                .build();
+        when(inventoryRepository.findInventoryByInventoryId("inventory-1"))
+                .thenReturn(Mono.just(Inventory.builder().inventoryId("inventory-1").build()));
+        when(productRepository.existsByInventoryIdAndProductNameIgnoreCase("inventory-1", "Dressing"))
+                .thenReturn(Mono.just(false));
+        when(productRepository.findAllProductsByInventoryId("inventory-1"))
+                .thenReturn(Flux.just(existing));
+
+        StepVerifier.create(productInventoryService.addSupplyToInventory(Mono.just(request), "inventory-1", "test-user"))
+                .expectError(UnprocessableEntityException.class)
+                .verify();
+        verify(productRepository, never()).save(any(Product.class));
+    }
+
     //    ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
 //            .inventoryId("1")
 //            .productId(UUID.randomUUID().toString())

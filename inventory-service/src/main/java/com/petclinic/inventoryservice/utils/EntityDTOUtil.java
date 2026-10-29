@@ -32,6 +32,8 @@ public class EntityDTOUtil {
                 .productName(product.getProductName())
                 .supplierName(product.getSupplierName())
                 .productDescription(product.getProductDescription())
+                .name(LocalizedContent.stored(product.getName(), product.getProductName()))
+                .description(LocalizedContent.stored(product.getDescription(), product.getProductDescription()))
                 .productPrice(product.getProductPrice())
                 .productQuantity(product.getProductQuantity())
                 .productSalePrice(product.getProductSalePrice())
@@ -52,12 +54,18 @@ public class EntityDTOUtil {
     public static Product toProductEntity(ProductRequestDTO productRequestDTO){
         Product product = new Product();
         BeanUtils.copyProperties(productRequestDTO, product);
+        product.setName(LocalizedContent.complete(productRequestDTO.getName(), productRequestDTO.getProductName()));
+        product.setDescription(LocalizedContent.complete(productRequestDTO.getDescription(), productRequestDTO.getProductDescription()));
+        product.setProductName(product.getName().get("en"));
+        product.setProductDescription(product.getDescription().get("en"));
         return product;
     }
 
     public static InventoryResponseDTO toInventoryResponseDTO(Inventory inventory){
         InventoryResponseDTO inventoryResponseDTO = new InventoryResponseDTO();
         BeanUtils.copyProperties(inventory, inventoryResponseDTO);
+        inventoryResponseDTO.setName(LocalizedContent.stored(inventory.getName(), inventory.getInventoryName()));
+        inventoryResponseDTO.setDescription(LocalizedContent.stored(inventory.getDescription(), inventory.getInventoryDescription()));
         List<ProductResponseDTO> productResponseDTOs = inventory.getProducts().stream()
                 .map(EntityDTOUtil::toProductResponseDTO)
                 .collect(Collectors.toList());
@@ -68,6 +76,10 @@ public class EntityDTOUtil {
     public static Inventory toInventoryEntity(InventoryRequestDTO inventoryResponseDTO){
         Inventory inventory = new Inventory();
         BeanUtils.copyProperties(inventoryResponseDTO, inventory);
+        inventory.setName(LocalizedContent.complete(inventoryResponseDTO.getName(), inventoryResponseDTO.getInventoryName()));
+        inventory.setDescription(LocalizedContent.complete(inventoryResponseDTO.getDescription(), inventoryResponseDTO.getInventoryDescription()));
+        inventory.setInventoryName(inventory.getName().get("en"));
+        inventory.setInventoryDescription(inventory.getDescription().get("en"));
         return inventory;
     }
 

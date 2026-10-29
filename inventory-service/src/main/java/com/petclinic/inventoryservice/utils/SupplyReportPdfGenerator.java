@@ -61,6 +61,10 @@ public final class SupplyReportPdfGenerator {
     }
 
     public static byte[] generate(String inventoryId, List<Product> supplies) throws DocumentException {
+        return generate(inventoryId, supplies, "en");
+    }
+
+    public static byte[] generate(String inventoryId, List<Product> supplies, String language) throws DocumentException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         Document document = new Document(PageSize.A4, 40, 40, BAR_HEIGHT + 28, BAR_HEIGHT + 24);
         PdfWriter writer = PdfWriter.getInstance(document, out);
@@ -74,7 +78,7 @@ public final class SupplyReportPdfGenerator {
         Paragraph meta = new Paragraph("Inventory ID: " + inventoryId + "    Generated " + LocalDate.now(), META);
         meta.setSpacingBefore(2);
         document.add(meta);
-        document.add(buildTable(supplies));
+        document.add(buildTable(supplies, language));
         document.close();
 
         return out.toByteArray();
@@ -95,7 +99,7 @@ public final class SupplyReportPdfGenerator {
         return badge;
     }
 
-    private static PdfPTable buildTable(List<Product> supplies) {
+    private static PdfPTable buildTable(List<Product> supplies, String language) {
         PdfPTable table = new PdfPTable(COLUMN_WIDTHS);
         table.setWidthPercentage(100);
         table.setSpacingBefore(16);
@@ -119,9 +123,9 @@ public final class SupplyReportPdfGenerator {
             totalQuantity += quantity;
             Double profit = profit(supply);
 
-            table.addCell(cell(supply.getProductName(), CELL, background, Element.ALIGN_LEFT));
+            table.addCell(cell(LocalizedContent.get(supply.getName(), language, supply.getProductName()), CELL, background, Element.ALIGN_LEFT));
             table.addCell(cell(String.valueOf(quantity), CELL, background, Element.ALIGN_RIGHT));
-            table.addCell(cell(supply.getProductDescription(), CELL, background, Element.ALIGN_LEFT));
+            table.addCell(cell(LocalizedContent.get(supply.getDescription(), language, supply.getProductDescription()), CELL, background, Element.ALIGN_LEFT));
             table.addCell(cell(money(supply.getProductPrice()), CELL, background, Element.ALIGN_RIGHT));
             table.addCell(cell(money(supply.getProductSalePrice()), CELL, background, Element.ALIGN_RIGHT));
             Font profitFont = profit != null && profit < 0 ? CELL_LOSS : CELL;

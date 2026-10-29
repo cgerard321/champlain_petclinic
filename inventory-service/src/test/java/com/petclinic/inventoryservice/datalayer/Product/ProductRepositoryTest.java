@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,6 +18,27 @@ class ProductRepositoryTest {
 
     Product product1;
     Product product2;
+
+    @Test
+    void bilingualSupplyNameAndDescriptionAreSearchable() {
+        Product localized = buildProduct("inventoryId_4", "localized-product", "Bandage", "Wound care", 10.0, 10, 15.99, Status.RE_ORDER);
+        localized.setName(Map.of("en", "Bandage", "fr", "Pansement"));
+        localized.setDescription(Map.of("en", "Wound care", "fr", "Soin des plaies"));
+        productRepository.save(localized).block();
+
+        StepVerifier.create(productRepository.findAllProductsByInventoryIdAndProductName("inventoryId_4", "Bandage"))
+                .expectNextMatches(found -> "localized-product".equals(found.getProductId()))
+                .verifyComplete();
+        StepVerifier.create(productRepository.findAllProductsByInventoryIdAndProductDescription("inventoryId_4", "Wound care"))
+                .expectNextMatches(found -> "localized-product".equals(found.getProductId()))
+                .verifyComplete();
+        StepVerifier.create(productRepository.findAllProductsByInventoryIdAndProductName("inventoryId_4", "Pansement"))
+                .expectNextMatches(found -> "localized-product".equals(found.getProductId()))
+                .verifyComplete();
+        StepVerifier.create(productRepository.findAllProductsByInventoryIdAndProductDescription("inventoryId_4", "Soin des plaies"))
+                .expectNextMatches(found -> "localized-product".equals(found.getProductId()))
+                .verifyComplete();
+    }
 
     @BeforeEach
     public void setupDB() {

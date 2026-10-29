@@ -7,6 +7,7 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepositor
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.utils.ImageUtil;
+import com.petclinic.inventoryservice.utils.DataBaseLoaderService;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,6 +47,8 @@ class InventoryControllerIntegrationTest {
     ProductRepository productRepository;
     @Autowired
     InventoryTypeRepository inventoryTypeRepository;
+    @Autowired
+    DataBaseLoaderService dataBaseLoaderService;
 
 
     private final Long DB_SIZE = 2L;
@@ -476,6 +479,76 @@ class InventoryControllerIntegrationTest {
 
                 });
 
+    }
+
+    @Test
+    void bilingualInventoryAndSupplyAreReturnedFromCreateEndpoints() {
+        String suffix = UUID.randomUUID().toString();
+        String englishInventoryName = "Medical supplies " + suffix;
+        InventoryRequestDTO inventoryRequest = InventoryRequestDTO.builder()
+                .inventoryName(englishInventoryName)
+                .inventoryType(inventoryType1.getType())
+                .inventoryDescription("Care items")
+                .name(Map.of("en", englishInventoryName, "fr", "Fournitures médicales " + suffix))
+                .description(Map.of("en", "Care items", "fr", "Articles de soins"))
+                .build();
+
+        webTestClient.post().uri("/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryRequest)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(InventoryResponseDTO.class)
+                .value(response -> {
+                    assertEquals(inventoryRequest.getName(), response.getName());
+                    assertEquals(inventoryRequest.getDescription(), response.getDescription());
+                    Inventory stored = inventoryRepository.findInventoryByInventoryId(response.getInventoryId()).block();
+                    assertNotNull(stored);
+                    assertEquals(inventoryRequest.getName(), stored.getName());
+                });
+
+        String englishSupplyName = "Bandages " + suffix;
+        ProductRequestDTO supplyRequest = ProductRequestDTO.builder()
+                .productName(englishSupplyName)
+                .productDescription("For wounds")
+                .name(Map.of("en", englishSupplyName, "fr", "Bandages français " + suffix))
+                .description(Map.of("en", "For wounds", "fr", "Pour les plaies"))
+                .productPrice(10.0)
+                .productQuantity(25)
+                .productSalePrice(12.0)
+                .build();
+
+        webTestClient.post().uri("/inventory/{inventoryId}/products", inventory1.getInventoryId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(supplyRequest)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(ProductResponseDTO.class)
+                .value(response -> {
+                    assertEquals(supplyRequest.getName(), response.getName());
+                    assertEquals(supplyRequest.getDescription(), response.getDescription());
+                    Product stored = productRepository.findProductByProductId(response.getProductId()).block();
+                    assertNotNull(stored);
+                    assertEquals(supplyRequest.getName(), stored.getName());
+                });
+    }
+
+    @Test
+    void existingInventoryAndSupplyAreMigratedIntoBothLanguages() throws Exception {
+        dataBaseLoaderService.run();
+
+        Inventory migratedInventory = inventoryRepository.findInventoryByInventoryId(inventory1.getInventoryId()).block();
+        Product migratedSupply = productRepository.findProductByProductId("productId_1").block();
+        assertNotNull(migratedInventory);
+        assertNotNull(migratedSupply);
+        assertEquals(Map.of("en", inventory1.getInventoryName(), "fr", inventory1.getInventoryName()),
+                migratedInventory.getName());
+        assertEquals(Map.of("en", inventory1.getInventoryDescription(), "fr", inventory1.getInventoryDescription()),
+                migratedInventory.getDescription());
+        assertEquals(Map.of("en", migratedSupply.getProductName(), "fr", migratedSupply.getProductName()),
+                migratedSupply.getName());
+        assertEquals(Map.of("en", migratedSupply.getProductDescription(), "fr", migratedSupply.getProductDescription()),
+                migratedSupply.getDescription());
     }
 
 
