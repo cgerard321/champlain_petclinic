@@ -161,8 +161,8 @@ const ReviewsList: React.FC = (): JSX.Element => {
               <tr>
                 <td colSpan={5} className="text-center">
                   {selectedRating === null
-                    ? 'No reviews available'
-                    : 'No reviews found for this rating'}{' '}
+                    ? t('reviews.noReviews')
+                    : t('reviews.noMatchingReviews')}{' '}
                 </td>
               </tr>
             )}
