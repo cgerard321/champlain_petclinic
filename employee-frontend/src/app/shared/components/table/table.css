@@ -26,6 +26,60 @@ tbody tr:last-child td {
   border-bottom: none;
 }
 
+@media (width <= 1100px) {
+  .stacked {
+    border: none;
+    background: transparent;
+  }
+
+  .stacked thead {
+    display: none;
+  }
+
+  .stacked tr {
+    display: block;
+    margin-bottom: 12px;
+    padding: 8px 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+  }
+
+  .stacked td {
+    display: grid;
+    grid-template-columns: minmax(7rem, 35%) 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 16px;
+    border-bottom: none;
+  }
+
+  .stacked td::before {
+    content: attr(data-label);
+    font-weight: 600;
+  }
+
+  .stacked td:last-child {
+    grid-template-columns: 1fr;
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: 1px solid #e0e0e0;
+  }
+
+  :host-context(.dark-mode) .stacked tr {
+    border-color: #333;
+    background: var(--mat-sys-surface-container-highest);
+  }
+
+  :host-context(.dark-mode) .stacked td {
+    border-bottom: none;
+  }
+
+  :host-context(.dark-mode) .stacked td:last-child {
+    border-top-color: #333;
+  }
+}
+
 /* Dark mode compatibility */
 :host-context(.dark-mode) th {
   background: #1b1b1b;

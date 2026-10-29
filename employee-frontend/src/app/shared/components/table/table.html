@@ -1,4 +1,4 @@
-<div class="table-container">
+<div class="table-container" [class.stacked]="stackOnSmallScreens()">
   <table [attr.aria-label]="label()">
     <thead>
       <tr>
@@ -11,15 +11,17 @@
       @for (row of rows(); track rowId()(row)) {
         <tr>
           @for (column of columns(); track column.id) {
-            <td>
-              @if (column.template; as cellTemplate) {
-                <ng-container
-                  [ngTemplateOutlet]="cellTemplate"
-                  [ngTemplateOutletContext]="{ $implicit: row }"
-                />
-              } @else {
-                {{ column.value?.(row) }}
-              }
+            <td [attr.data-label]="column.header">
+              <div class="cell-content">
+                @if (column.template; as cellTemplate) {
+                  <ng-container
+                    [ngTemplateOutlet]="cellTemplate"
+                    [ngTemplateOutletContext]="{ $implicit: row }"
+                  />
+                } @else {
+                  {{ column.value?.(row) }}
+                }
+              </div>
             </td>
           }
         </tr>
