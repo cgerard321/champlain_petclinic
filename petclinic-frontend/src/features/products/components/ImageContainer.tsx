@@ -20,7 +20,6 @@ interface ImageContainerProps {
 export default function ImageContainer({
   image,
   alt,
-  imageId,
   productId,
   imageUrl,
 }: ImageContainerProps): JSX.Element {
@@ -106,11 +105,13 @@ export default function ImageContainer({
     : imageData
       ? `data:${imageType || 'image/png'};base64,${imageData}`
       : null;
+
   const isFetching =
     loadState === 'loading' &&
     !imageUrl &&
     !image?.fileData &&
     Boolean(productId);
+
   const showingFallback =
     isFallback || loadState === 'error' || (!imageSource && !isFetching);
 
