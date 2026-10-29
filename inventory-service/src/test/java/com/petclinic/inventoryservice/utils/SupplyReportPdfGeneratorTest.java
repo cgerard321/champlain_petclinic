@@ -76,7 +76,7 @@ class SupplyReportPdfGeneratorTest {
                 .replaceAll("\\s+", " ");
 
         assertThat(text).contains("RAPPORT D'INVENTAIRE", "Rapport des articles",
-                "ID de l'inventaire: inv-1", "Généré le", "Portail des employés",
+                "ID de l'inventaire : inv-1", "Généré le", "Portail des employés",
                 "Article", "Qté", "Description", "Prix régulier", "Prix de vente", "Bénéfice",
                 "Total (1 article)", "2,00 $", "3,00 $", "1,00 $");
         assertThat(text).doesNotContain("INVENTORY REPORT", "Supplies Report", "Generated",

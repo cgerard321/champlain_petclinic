@@ -434,9 +434,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
         Flux<Inventory> matchingInventories = inventoryRepository.findAll()
                 .filter(inventory ->
-                        matchesPrefix(inventory.getInventoryName(), nameFilter)
+                        matchesLocalizedPrefix(inventory.getName(), inventory.getInventoryName(), nameFilter)
                                 && (typeFilter == null || typeFilter.equals(inventory.getInventoryType()))
-                                && matchesPrefix(inventory.getInventoryDescription(), descriptionFilter)
+                                && matchesLocalizedPrefix(inventory.getDescription(), inventory.getInventoryDescription(), descriptionFilter)
                                 && (!filterFavorites || Boolean.TRUE.equals(inventory.getImportant())));
 
         Flux<InventoryResponseDTO> results = matchingInventories
@@ -464,6 +464,12 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     private boolean matchesPrefix(String value, String filter) {
         return filter == null || (value != null && value.regionMatches(true, 0, filter, 0, filter.length()));
+    }
+
+    private boolean matchesLocalizedPrefix(Map<String, String> localized, String legacy, String filter) {
+        return matchesPrefix(legacy, filter)
+                || (localized != null && (matchesPrefix(localized.get("en"), filter)
+                || matchesPrefix(localized.get("fr"), filter)));
     }
 
 

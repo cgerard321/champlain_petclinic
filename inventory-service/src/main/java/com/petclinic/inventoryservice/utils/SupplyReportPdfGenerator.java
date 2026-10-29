@@ -82,7 +82,7 @@ public final class SupplyReportPdfGenerator {
         String date = french
                 ? LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(Locale.CANADA_FRENCH))
                 : LocalDate.now().toString();
-        Paragraph meta = new Paragraph((french ? "ID de l'inventaire: " : "Inventory ID: ")
+        Paragraph meta = new Paragraph((french ? "ID de l'inventaire : " : "Inventory ID: ")
                 + inventoryId + (french ? "    Généré le " : "    Generated ") + date, META);
         meta.setSpacingBefore(2);
         document.add(meta);

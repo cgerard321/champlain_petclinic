@@ -5,6 +5,7 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.utils.DataBaseLoaderService;
+import com.petclinic.inventoryservice.utils.LocalizedNameIndexes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,6 +13,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -21,7 +23,6 @@ import java.util.Map;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest(properties = {"spring.data.mongodb.port=0",
         "spring.data.mongodb.database=localized_name_uniqueness_test"})
@@ -35,6 +36,10 @@ class LocalizedNameUniquenessIntegrationTest {
     private ProductRepository products;
     @Autowired
     private DataBaseLoaderService loader;
+    @Autowired
+    private ReactiveMongoTemplate mongoTemplate;
+    @Autowired
+    private LocalizedNameIndexes localizedNameIndexes;
 
     @BeforeEach
     void clearData() {
@@ -153,17 +158,80 @@ class LocalizedNameUniquenessIntegrationTest {
     }
 
     @Test
-    void conflictingLegacyNamesFailMigrationWithoutRemovingRecords() {
+    void existingStarterDataReceivesFrenchTranslationsWithoutOverwritingStaffText() throws Exception {
+        Product embedded = Product.builder().productName("Carprofen")
+                .productDescription("Non-steroidal anti-inflammatory drug").build();
+        Inventory starter = Inventory.builder().inventoryId("starter").inventoryName("Medications")
+                .inventoryDescription("Antibiotics for pet infections").products(List.of(embedded)).build();
+        Inventory customized = Inventory.builder().inventoryId("customized").inventoryName("First-Aid")
+                .name(Map.of("en", "Staff kit", "fr", "Trousse personnalisée"))
+                .inventoryDescription("Custom description").build();
+        Product supply = Product.builder().productId("starter-supply").inventoryId("starter")
+                .productName("Carprofen").productDescription("Non-steroidal anti-inflammatory drug").build();
+        Product customizedSupply = Product.builder().productId("customized-supply").inventoryId("starter")
+                .productName("Gauze Pads").name(Map.of("en", "Staff gauze", "fr", "Gaze personnalisée"))
+                .productDescription("Custom supply description").build();
+
+        StepVerifier.create(inventories.insert(starter).then(inventories.insert(customized))
+                        .then(products.insert(supply)).then(products.insert(customizedSupply)))
+                .expectNextCount(1).expectComplete().verify(TIMEOUT);
+
+        loader.run();
+        loader.run();
+
+        StepVerifier.create(inventories.findInventoryByInventoryId("starter"))
+                .assertNext(saved -> {
+                    assertThat(saved.getName()).isEqualTo(Map.of("en", "Medications", "fr", "Médicaments"));
+                    assertThat(saved.getDescription()).isEqualTo(Map.of("en", "Antibiotics for pet infections",
+                            "fr", "Antibiotiques pour traiter les infections chez les animaux"));
+                    assertThat(saved.getProducts().get(0).getName())
+                            .isEqualTo(Map.of("en", "Carprofen", "fr", "Carprofène"));
+                    assertThat(saved.getProducts().get(0).getDescription())
+                            .isEqualTo(Map.of("en", "Non-steroidal anti-inflammatory drug",
+                                    "fr", "Anti-inflammatoire non stéroïdien"));
+                }).expectComplete().verify(TIMEOUT);
+        StepVerifier.create(products.findProductByProductId("starter-supply"))
+                .assertNext(saved -> {
+                    assertThat(saved.getName()).isEqualTo(Map.of("en", "Carprofen", "fr", "Carprofène"));
+                    assertThat(saved.getDescription()).isEqualTo(Map.of("en", "Non-steroidal anti-inflammatory drug",
+                            "fr", "Anti-inflammatoire non stéroïdien"));
+                })
+                .expectComplete().verify(TIMEOUT);
+        StepVerifier.create(inventories.findInventoryByInventoryId("customized"))
+                .assertNext(saved -> assertThat(saved.getName())
+                        .isEqualTo(Map.of("en", "Staff kit", "fr", "Trousse personnalisée")))
+                .expectComplete().verify(TIMEOUT);
+        StepVerifier.create(products.findProductByProductId("customized-supply"))
+                .assertNext(saved -> assertThat(saved.getName())
+                        .isEqualTo(Map.of("en", "Staff gauze", "fr", "Gaze personnalisée")))
+                .expectComplete().verify(TIMEOUT);
+    }
+
+    @Test
+    void conflictingLegacyNamesAllowStartupWithoutRemovingRecords() throws Exception {
         Inventory first = Inventory.builder().inventoryId("first").inventoryName("Gauze")
                 .inventoryDescription("First description").build();
         Inventory second = Inventory.builder().inventoryId("second").inventoryName("GAUZE")
                 .inventoryDescription("Second description").build();
-        StepVerifier.create(inventories.insert(first).then(inventories.insert(second)))
-                .expectNextCount(1).expectComplete().verify(TIMEOUT);
+        StepVerifier.create(mongoTemplate.indexOps(Inventory.class).dropIndex("inventory_name_en_unique")
+                        .then(mongoTemplate.indexOps(Inventory.class).dropIndex("inventory_name_fr_unique")))
+                .expectComplete().verify(TIMEOUT);
+        try {
+            StepVerifier.create(inventories.insert(first).then(inventories.insert(second)))
+                    .expectNextCount(1).expectComplete().verify(TIMEOUT);
 
-        assertThrows(DuplicateKeyException.class, () -> loader.run());
+            loader.run();
 
-        StepVerifier.create(inventories.count()).expectNext(2L).expectComplete().verify(TIMEOUT);
+            StepVerifier.create(inventories.findAll().collectList())
+                    .assertNext(saved -> {
+                        assertThat(saved).extracting(Inventory::getInventoryId)
+                                .containsExactlyInAnyOrder("first", "second");
+                        assertThat(saved).allSatisfy(inventory ->
+                                assertThat(inventory.getName().get("en")).isEqualTo(inventory.getInventoryName()));
+                    }).expectComplete().verify(TIMEOUT);
+        } finally {
+            inventories.deleteAll().then(localizedNameIndexes.ensureIndexes()).block(TIMEOUT);
+        }
     }
 
     private void assertOneWriteSucceeds(Mono<?> first, Mono<?> second) {
