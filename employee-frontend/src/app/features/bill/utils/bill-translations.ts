@@ -5,6 +5,7 @@ export const VISIT_TYPES_TRANSLATION: Record<string, string> = {
   Dental: $localize`:@@bill.visitTypes.dental:Dentaire`,
   Emergency: $localize`:@@bill.visitTypes.emergency:Urgence`,
   Regular: $localize`:@@bill.visitTypes.regular:Régulier`,
+  CHECKUP: $localize`:@@bill.visitTypes.CHECKUP:EXAMEN VÉTÉRINAIRE`
 };
 
 export function translateVisitType(type: string): string {

@@ -1451,7 +1451,8 @@
         "checkup": "Check-up",
         "vaccine": "Vaccine",
         "regular": "Regular",
-        "emergency": "Emergency"
+        "emergency": "Emergency",
+        "CHECKUP": "CHECKUP"
       },
 
       "lookup": {
