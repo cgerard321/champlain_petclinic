@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, LOCALE_ID, OnInit, signal } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import {
   MatCard,
@@ -25,7 +25,12 @@ import {
 } from '@features/prod/components/product-bundle-update-dialog/product-bundle-update-dialog';
 import { ProductDeleteDialog } from '@features/prod/components/product-delete-dialog/product-delete-dialog';
 import { ProductThumbnail } from '@features/prod/components/product-thumbnail/product-thumbnail';
+import {
+  localizedBundleDescription,
+  localizedBundleName,
+} from '@features/prod/models/bundle-localization';
 import { Bundle } from '@features/prod/models/bundle.model';
+import { localizedProductName } from '@features/prod/models/product-localization';
 import { Product } from '@features/prod/models/product.model';
 import { BundleService } from '@features/prod/services/bundle.service';
 import { ProductService } from '@features/prod/services/product.service';
@@ -54,6 +59,7 @@ export class ProductBundleList implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly bundlesService = inject(BundleService);
   private readonly productService = inject(ProductService);
+  private readonly locale = inject(LOCALE_ID);
   private readonly deletingBundleId = signal<string | null>(null);
   protected readonly products = signal<Product[]>([]);
   protected readonly rawBundles = signal<Bundle[]>([]);
@@ -99,6 +105,18 @@ export class ProductBundleList implements OnInit {
         }
       });
     return;
+  }
+
+  protected bundleName(bundle: Bundle): string {
+    return localizedBundleName(bundle.bundleName);
+  }
+
+  protected bundleDescription(bundle: Bundle): string {
+    return localizedBundleDescription(bundle.bundleDescription);
+  }
+
+  protected productName(product: Product): string {
+    return localizedProductName(product, this.locale);
   }
   protected openUpdateBundle(curBundle: Bundle): void {
     if (!this.canManageBundles()) {

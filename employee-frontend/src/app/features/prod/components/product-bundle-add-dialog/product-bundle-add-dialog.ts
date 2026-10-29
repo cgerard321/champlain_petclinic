@@ -1,5 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, LOCALE_ID, signal, viewChild } from '@angular/core';
 import { form, FormField, required, requiredError, validate } from '@angular/forms/signals';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatChipGrid, MatChipRemove, MatChipRow } from '@angular/material/chips';
@@ -31,6 +31,7 @@ import {
   ProductSelectorDialogData,
 } from '@features/prod/components/product-selector-dialog/product-selector-dialog';
 import { Bundle, BundleRequest } from '@features/prod/models/bundle.model';
+import { localizedProductName } from '@features/prod/models/product-localization';
 import { Product } from '@features/prod/models/product.model';
 import { BundleService } from '@features/prod/services/bundle.service';
 
@@ -79,6 +80,7 @@ export class ProductBundleAddDialog {
   private readonly dialogRef = inject(MatDialogRef<ProductBundleAddDialog, Bundle>);
   private readonly dialog = inject(MatDialog);
   private readonly bundleService = inject(BundleService);
+  private readonly locale = inject(LOCALE_ID);
   private readonly discountPercentage = signal<number>(0);
   private readonly discountManual = signal<number>(0);
   protected readonly usePercentageDiscount = signal<boolean>(false);
@@ -280,6 +282,11 @@ export class ProductBundleAddDialog {
 
   protected getProductByProductId(id: string): Product | undefined {
     return this.data.products.find((product: Product) => product.productId === id);
+  }
+
+  protected productName(productId: string): string {
+    const product = this.getProductByProductId(productId);
+    return product ? localizedProductName(product, this.locale) : '';
   }
 
   protected getBundleOriginalPrice(): number {

@@ -48,7 +48,7 @@
       >
         @for (productId of selectedProductIds(); track productId) {
           <mat-chip-row (removed)="removeProduct(productId)">
-            {{ getProductByProductId(productId)?.productName }}
+            {{ productName(productId) }}
             <button
               matChipRemove
               type="button"

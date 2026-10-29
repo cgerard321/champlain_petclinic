@@ -29,7 +29,7 @@
           [checked]="isSelected(product.productId)"
           (change)="toggleProduct(product.productId, $event.checked)"
         >
-          {{ product.productName }}
+          {{ productName(product) }}
         </mat-checkbox>
       </mat-list-item>
     } @empty {

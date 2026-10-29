@@ -633,6 +633,32 @@
           "originalPrice": "Original price",
           "bundlePrice": "Bundle price"
         },
+        "names": {
+          "dog": "Dog Bundle",
+          "fish": "Fish Bundle",
+          "accessory": "Accessory Bundle",
+          "saddle": "Saddle Special",
+          "aquarium": "Aquarium Starter Kit",
+          "kitten": "New Kitten Bundle",
+          "dogCare": "Dog Walk & Care Bundle",
+          "senior": "Senior Pet Comfort Bundle",
+          "smallAnimal": "Small Animal & Bird Bundle",
+          "homeCare": "Home Vet Care Bundle",
+          "ultimate": "Ultimate Pet Owner Bundle"
+        },
+        "descriptions": {
+          "dog": "Dog Food & Flea Collar",
+          "fish": "Cat Litter & Fish Tank Heater",
+          "accessory": "All Accessories",
+          "saddle": "Horse Saddle on sale",
+          "aquarium": "Filter, heater & fish flakes for a new tank",
+          "kitten": "Everything a new kitten needs at home",
+          "dogCare": "Food, walking gear and grooming for dogs",
+          "senior": "Comfort, health and monitoring for aging pets",
+          "smallAnimal": "Housing, food and accessories for rabbits and birds",
+          "homeCare": "Treatments and tools for at-home pet health care",
+          "ultimate": "Our biggest bundle: food, gear and equipment for every pet"
+        },
         "discount": {
           "title": "Bundle discount",
           "percentage": "Percentage",
