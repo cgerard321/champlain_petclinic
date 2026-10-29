@@ -68,7 +68,7 @@
     >
       @for (vet of filteredVets(); track vet.vetId) {
         <li>
-          <app-vet-profile-card [vet]="vet" />
+          <app-vet-profile-card [vet]="vet" [educations]="educationsByVet()[vet.vetId] ?? []" />
           <a
             class="profile-link"
             [routerLink]="['/vets', vet.vetId]"

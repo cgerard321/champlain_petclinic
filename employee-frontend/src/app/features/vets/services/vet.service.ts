@@ -9,6 +9,7 @@ import {
   VetUpdateRequest,
   VetCreateRequest,
   VetEducationRequest,
+  VetEducationResponse,
 } from '@features/vets/models/vet-api.model';
 
 @Injectable({ providedIn: 'root' })
@@ -42,13 +43,24 @@ export class VetService {
     return this.http.post<VetResponse>(`${this.baseUrl}/users/vets`, request);
   }
 
-  addEducation(vetId: string, request: VetEducationRequest): Observable<unknown> {
-    return this.http.post(`${this.baseUrl}/${encodeURIComponent(vetId)}/educations`, request);
+  addEducation(vetId: string, request: VetEducationRequest): Observable<VetEducationResponse> {
+    return this.http.post<VetEducationResponse>(
+      `${this.baseUrl}/${encodeURIComponent(vetId)}/educations`,
+      request,
+    );
   }
 
   addSpecialty(vetId: string, name: string): Observable<VetResponse> {
     return this.http.post<VetResponse>(`${this.baseUrl}/${encodeURIComponent(vetId)}/specialties`, {
       name,
+    });
+  }
+
+  getEducations(vetId: string): Observable<VetEducationResponse[]> {
+    return this.http.get<VetEducationResponse[]>(`${this.baseUrl}/${vetId}/educations`, {
+      headers: {
+        Accept: 'application/json',
+      },
     });
   }
 }

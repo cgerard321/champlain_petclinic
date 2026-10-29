@@ -1,11 +1,12 @@
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { forkJoin, map, of, Subscription, switchMap } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
 import { VetCreateForm } from '@features/vets/components/vet-create-form/vet-create-form';
 import { VetProfileCard } from '@features/vets/components/vet-profile-card/vet-profile-card';
+import { VetEducationResponse } from '@features/vets/models/vet-api.model';
 import { toVetProfile } from '@features/vets/models/vet-profile.mapper';
 import { VetProfile } from '@features/vets/models/vet-profile.model';
 import { VetService, vetErrorMessage } from '@features/vets/services/vet.service';
@@ -39,6 +40,7 @@ export class VetList {
   protected readonly error = signal('');
   protected readonly searchQuery = signal('');
   protected readonly selectedSpecialty = signal('');
+  protected readonly educationsByVet = signal<Partial<Record<string, VetEducationResponse[]>>>({});
 
   protected readonly specialties = computed(() => {
     return Array.from(new Set(this.vets().flatMap((vet) => vet.specialties))).sort();
@@ -79,12 +81,48 @@ export class VetList {
     this.listRequest?.unsubscribe();
     this.loading.set(true);
     this.error.set('');
+    this.educationsByVet.set({});
     this.listRequest = this.service
       .getVets()
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        switchMap((vets) => {
+          const profiles = vets.map(toVetProfile);
+
+          if (!profiles.length) {
+            return of({
+              profiles,
+              educationsByVetId: {},
+            });
+          }
+          return forkJoin(
+            profiles.map((vet) =>
+              this.service.getEducations(vet.vetId).pipe(
+                map((educations) => ({
+                  vetId: vet.vetId,
+                  educations,
+                })),
+              ),
+            ),
+          ).pipe(
+            map((results) => {
+              const educationsByVetId: Partial<Record<string, VetEducationResponse[]>> = {};
+              for (const result of results) {
+                educationsByVetId[result.vetId] = result.educations;
+              }
+
+              return {
+                profiles,
+                educationsByVetId,
+              };
+            }),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
-        next: (vets) => {
-          this.vets.set(vets.map(toVetProfile));
+        next: ({ profiles, educationsByVetId }) => {
+          this.vets.set(profiles);
+          this.educationsByVet.set(educationsByVetId);
           this.loading.set(false);
         },
         error: (error: unknown) => {

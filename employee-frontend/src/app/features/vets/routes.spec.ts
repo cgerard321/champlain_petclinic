@@ -17,6 +17,7 @@ describe('Veterinarian directory navigation', () => {
         {
           provide: VetService,
           useValue: {
+            getEducations: () => of([]),
             getVets: () =>
               of(
                 ['Alex Morin', 'Julie Lambert', 'Sam Tremblay'].map((name, index): VetResponse => ({
