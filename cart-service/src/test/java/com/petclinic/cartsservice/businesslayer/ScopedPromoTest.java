@@ -194,7 +194,7 @@ class ScopedPromoTest {
                 .productTypes(List.of(" FOOD ", "FOOD")).build();
         when(promos.save(any())).thenAnswer(i -> Mono.just(i.getArgument(0)));
         when(promos.findById("id")).thenReturn(Mono.just(promo));
-        var management = new PromoCodeServiceImpl(promos);
+        var management = new PromoCodeServiceImpl(promos, mock(FilesServiceClient.class));
         var created = management.createPromo(request).block();
         var updated = management.updatePromoCodeById(request, "id").block();
         for (var result : List.of(created, updated)) {

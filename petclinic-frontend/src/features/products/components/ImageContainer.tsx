@@ -10,7 +10,7 @@ type ImageLoadState = 'loading' | 'loaded' | 'error';
 
 interface ImageContainerProps {
   image?: FileDetails | null;
-  // Retained for CART callers; images are resolved through productId, not the legacy endpoint.
+  alt?: string;
   imageId?: string;
   productId?: string;
   imageUrl?: string;
@@ -19,6 +19,8 @@ interface ImageContainerProps {
 
 export default function ImageContainer({
   image,
+  alt,
+  imageId,
   productId,
   imageUrl,
 }: ImageContainerProps): JSX.Element {
@@ -150,8 +152,10 @@ export default function ImageContainer({
         }
         alt={
           showingFallback
-            ? 'Default product image'
-            : imageName || 'Product image'
+            ? alt
+              ? `${alt} (image unavailable)`
+              : 'Default product image'
+            : alt || imageName || 'Product image'
         }
         className={
           loadState === 'loading' && !showingFallback

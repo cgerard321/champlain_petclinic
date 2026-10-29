@@ -10,7 +10,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { isApiError } from '@core/models/api-error';
+import { FileDetails } from '@features/prod/models/image.model';
 import { Product, ProductType } from '@features/prod/models/product.model';
+import { ImageService } from '@features/prod/services/image.service';
 import { ProductService } from '@features/prod/services/product.service';
 import { Promo } from '@features/promo/models/promo.model';
 import { PromoService } from '@features/promo/services/promo.service';
@@ -48,6 +50,7 @@ interface PromoFormModel {
 })
 export class PromoFormDialog implements OnInit {
   private readonly productService = inject(ProductService);
+  private readonly imageService = inject(ImageService);
   protected readonly products = signal<Product[]>([]);
   protected readonly productTypes = signal<ProductType[]>([]);
 
@@ -80,6 +83,11 @@ export class PromoFormDialog implements OnInit {
 
   protected readonly promo = this.data.promo;
   protected readonly isSubmitting = signal(false);
+  protected readonly isReadingImage = signal(false);
+  protected readonly selectedImage = signal<FileDetails | null>(null);
+  protected readonly removeOriginalImage = signal(false);
+  protected readonly fileError = signal<string | null>(null);
+  protected readonly previewFailed = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
   protected readonly model = signal<PromoFormModel>({
@@ -99,13 +107,63 @@ export class PromoFormDialog implements OnInit {
     required(schemaPath.expirationDate, { message: 'Expiration date is required' });
   });
 
+  protected get previewImage(): FileDetails | null {
+    return (
+      this.selectedImage() ?? (this.removeOriginalImage() ? null : (this.promo?.image ?? null))
+    );
+  }
+
+  protected async selectFile(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    input.value = '';
+    this.fileError.set(null);
+    if (!file) return;
+    if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+      this.fileError.set('Only JPEG, JPG, and PNG images are supported.');
+      return;
+    }
+    if (file.size === 0 || file.size > 1024 * 1024) {
+      this.fileError.set('Promotion images must be between 1 byte and 1 MB.');
+      return;
+    }
+    this.isReadingImage.set(true);
+    try {
+      const image = await this.imageService.toFileDetails(file);
+      this.selectedImage.set(image);
+      this.removeOriginalImage.set(false);
+      this.previewFailed.set(false);
+    } catch {
+      this.fileError.set('Could not read the selected image.');
+    } finally {
+      this.isReadingImage.set(false);
+    }
+  }
+
+  protected removeImage(): void {
+    this.selectedImage.set(null);
+    this.removeOriginalImage.set(true);
+    this.previewFailed.set(false);
+    this.fileError.set(null);
+  }
+
+  protected imageFailed(): void {
+    this.previewFailed.set(true);
+    if (this.selectedImage()) this.fileError.set('The selected image is invalid.');
+  }
+
   protected setActive(active: boolean): void {
     this.model.update((current) => ({ ...current, active }));
   }
 
   protected submit(event: Event): void {
     event.preventDefault();
-    if (this.promoForm().invalid()) {
+    if (
+      this.isSubmitting() ||
+      this.isReadingImage() ||
+      this.fileError() ||
+      this.promoForm().invalid()
+    ) {
       return;
     }
     if (this.model().discount <= 0 || this.model().discount > 100) {
@@ -123,7 +181,12 @@ export class PromoFormDialog implements OnInit {
     }
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
-    const request = { ...this.model(), expirationDate: `${this.model().expirationDate}T23:59:59` };
+    const request = {
+      ...this.model(),
+      expirationDate: `${this.model().expirationDate}T23:59:59`,
+      ...(this.selectedImage() ? { image: this.selectedImage()! } : {}),
+      removeImage: this.removeOriginalImage(),
+    };
     const save = this.promo
       ? this.promoService.updatePromo(this.promo.id, request)
       : this.promoService.createPromo(request);

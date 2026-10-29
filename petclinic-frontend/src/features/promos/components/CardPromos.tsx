@@ -1,8 +1,48 @@
 import { useState, useEffect } from 'react';
 import './CardPromos.css';
+import ImageContainer from '@/features/products/components/ImageContainer';
 import { Promo } from '@/features/promos/models/PromoModel.tsx';
 import { PromoApi } from '@/features/promos/api/PromoApi.tsx';
 import { getProduct } from '@/features/products/api/getProduct';
+
+function CopyPromoCode({ code }: { code: string }): JSX.Element {
+  const [feedback, setFeedback] = useState('');
+  const [copying, setCopying] = useState(false);
+
+  const copy = async (): Promise<void> => {
+    setCopying(true);
+    setFeedback('');
+    try {
+      await navigator.clipboard.writeText(code);
+      setFeedback('Promo code copied!');
+    } catch {
+      setFeedback(
+        'Could not copy the code. Please select and copy it manually.'
+      );
+    } finally {
+      setCopying(false);
+    }
+  };
+
+  return (
+    <div className="promo-code-section">
+      <div className="promo-code-row">
+        <code>{code}</code>
+        <button
+          type="button"
+          disabled={copying}
+          onClick={copy}
+          aria-label={`Copy promo code ${code}`}
+        >
+          {copying ? 'Copying...' : 'Copy code'}
+        </button>
+      </div>
+      <p className="promo-copy-feedback" role="status" aria-live="polite">
+        {feedback}
+      </p>
+    </div>
+  );
+}
 
 export default function CardPromos(): JSX.Element {
   const [promos, setPromos] = useState<Promo[]>([]);
@@ -74,10 +114,11 @@ export default function CardPromos(): JSX.Element {
         {promos.length > 0 ? (
           promos.map(promo => (
             <div className="promo-card" key={promo.code}>
+              <div className="promo-card-image">
+                <ImageContainer image={promo.image} alt={promo.name} />
+              </div>
               <h3>{promo.name}</h3>
-              <p>
-                <strong>Code:</strong> {promo.code}
-              </p>
+              <CopyPromoCode code={promo.code} />
               <p>
                 <strong>Discount:</strong> {promo.discount}%
               </p>
