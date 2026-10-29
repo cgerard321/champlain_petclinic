@@ -19,17 +19,15 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
 
   const filteredReviews =
-      selectedRating === null
-          ? reviewList
-          : reviewList.filter(review => review.rating === selectedRating);
+    selectedRating === null
+      ? reviewList
+      : reviewList.filter(review => review.rating === selectedRating);
 
   const navigate = useNavigate();
   const { user } = useUser();
   const isOwner = IsCustomer();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
-
-
 
   useEffect(() => {
     const fetchReviewsData = async (): Promise<void> => {
@@ -80,22 +78,22 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
       <div className="visit-table-section">
         <h1>Reviews</h1>
         <button
-            className="btn btn-warning"
-            onClick={() => navigate(AppRoutePaths.CustomerVisits)}
-            title="Return to visits"
+          className="btn btn-warning"
+          onClick={() => navigate(AppRoutePaths.CustomerVisits)}
+          title="Return to visits"
         >
           Return to visits
         </button>
-        {isOwner && <AddingReview/>}
+        {isOwner && <AddingReview />}
         {showSuccessMessage && successMessage && (
-            <div
-                className="visit-success-message"
-                role="status"
-                aria-live="polite"
-                style={{marginBottom: '0.75rem'}}
-            >
-              {successMessage}
-            </div>
+          <div
+            className="visit-success-message"
+            role="status"
+            aria-live="polite"
+            style={{ marginBottom: '0.75rem' }}
+          >
+            {successMessage}
+          </div>
         )}
 
         <div className="d-flex align-items-center gap-2 my-3">
@@ -103,88 +101,88 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
             Filter by rating:
           </label>
           <select
-              id="customer-review-rating-filter"
-              className="form-select w-auto"
-              value={selectedRating ?? 'all'}
-              onChange={event =>
-                  setSelectedRating(
-                      event.target.value === 'all'
-                          ? null
-                          : Number(event.target.value)
-                  )
-              }
+            id="customer-review-rating-filter"
+            className="form-select w-auto"
+            value={selectedRating ?? 'all'}
+            onChange={event =>
+              setSelectedRating(
+                event.target.value === 'all' ? null : Number(event.target.value)
+              )
+            }
           >
             <option value="all">All ratings</option>
             {[1, 2, 3, 4, 5].map(rating => (
-                <option key={rating} value={rating}>
-                  {rating} {rating === 1 ? 'star' : 'stars'}
-                </option>
+              <option key={rating} value={rating}>
+                {rating} {rating === 1 ? 'star' : 'stars'}
+              </option>
             ))}
           </select>
         </div>
 
         <table className="reviews-table">
           <thead>
-          <tr>
-            <th>Reviewer Name</th>
-            <th>Review</th>
-            <th>Rating</th>
-            <th>Date Submitted</th>
-            <th></th>
-          </tr>
+            <tr>
+              <th>Reviewer Name</th>
+              <th>Review</th>
+              <th>Rating</th>
+              <th>Date Submitted</th>
+              <th></th>
+            </tr>
           </thead>
           <tbody>
-          {filteredReviews.length > 0 ? (
+            {filteredReviews.length > 0 ? (
               filteredReviews.map(review => {
                 const isOwner = user && review.ownerId === user.userId;
 
                 return (
-                    <tr key={review.reviewId}>
-                      <td>{review.reviewerName}</td>
-                      <td>{review.review}</td>
-                      <td>
-                        <StarRating
-                            currentRating={review.rating}
-                            viewOnly={true}
-                        />
-                      </td>
-                      <td>
-                        {new Date(review.dateSubmitted).toLocaleDateString()}
-                      </td>
-                      <td>
-                        {isOwner ? (
-                            <>
-                              <EditingReview
-                                  reviewId={review.reviewId.toString()}
-                                  reviewData={review}
-                              />
-                              <BasicModal
-                                  title="Delete review"
-                                  confirmText="Delete"
-                                  onConfirm={async () =>
-                                      await handleDelete(review.reviewId)
-                                  }
-                                  showButton={
-                                    <a title="Delete">
-                                      <SvgIcon id="trash" className="icon-visits"/>
-                                    </a>
-                                  }
-                              >
-                                <p>Are you sure you want to delete your review?</p>
-                              </BasicModal>
-                            </>
-                        ) : null}
-                      </td>
-                    </tr>
+                  <tr key={review.reviewId}>
+                    <td>{review.reviewerName}</td>
+                    <td>{review.review}</td>
+                    <td>
+                      <StarRating
+                        currentRating={review.rating}
+                        viewOnly={true}
+                      />
+                    </td>
+                    <td>
+                      {new Date(review.dateSubmitted).toLocaleDateString()}
+                    </td>
+                    <td>
+                      {isOwner ? (
+                        <>
+                          <EditingReview
+                            reviewId={review.reviewId.toString()}
+                            reviewData={review}
+                          />
+                          <BasicModal
+                            title="Delete review"
+                            confirmText="Delete"
+                            onConfirm={async () =>
+                              await handleDelete(review.reviewId)
+                            }
+                            showButton={
+                              <a title="Delete">
+                                <SvgIcon id="trash" className="icon-visits" />
+                              </a>
+                            }
+                          >
+                            <p>Are you sure you want to delete your review?</p>
+                          </BasicModal>
+                        </>
+                      ) : null}
+                    </td>
+                  </tr>
                 );
               })
-          ) : (
+            ) : (
               <tr>
                 <td colSpan={5} className="text-center">
-                  {selectedRating === null ? 'No reviews available' : 'No reviews found for this rating'}
+                  {selectedRating === null
+                    ? 'No reviews available'
+                    : 'No reviews found for this rating'}
                 </td>
               </tr>
-          )}
+            )}
           </tbody>
         </table>
       </div>
