@@ -1909,6 +1909,73 @@ public class CartServiceClientTest {
     }
 
     @Test
+    void updateOrderReportStatus_successReturnsReport()
+            throws InterruptedException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody("""
+                        {
+                          "reportId": "RPT-123",
+                          "orderId": "order-123",
+                          "status": "RESOLVED",
+                          "resolutionNote": "Refund sent",
+                          "resolvedAt": "2026-10-28T10:00:00"
+                        }
+                        """));
+
+        OrderReportStatusRequestDTO request = OrderReportStatusRequestDTO.builder()
+                .status("RESOLVED")
+                .resolutionNote("Refund sent")
+                .build();
+
+        StepVerifier.create(mockCartServiceClient.updateOrderReportStatus(
+                        "RPT-123",
+                        request
+                ))
+                .assertNext(report -> {
+                    assertEquals("RESOLVED", report.getStatus());
+                    assertEquals("Refund sent", report.getResolutionNote());
+                })
+                .verifyComplete();
+
+        var recordedRequest = mockWebServer.takeRequest();
+        assertEquals("PATCH", recordedRequest.getMethod());
+        assertEquals("/api/v1/orders/reports/RPT-123/status",
+                recordedRequest.getPath());
+    }
+
+    @Test
+    void updateOrderReportStatus_conflictPreservesServiceMessage() {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(409)
+                .setBody("""
+                        {"message":"This report is already closed"}
+                        """));
+
+        OrderReportStatusRequestDTO request = OrderReportStatusRequestDTO.builder()
+                .status("REJECTED")
+                .resolutionNote("Too late")
+                .build();
+
+        StepVerifier.create(mockCartServiceClient.updateOrderReportStatus(
+                        "RPT-123",
+                        request
+                ))
+                .expectErrorSatisfies(error -> {
+                    assertInstanceOf(GenericHttpException.class, error);
+                    GenericHttpException exception =
+                            (GenericHttpException) error;
+                    assertEquals(HttpStatus.CONFLICT,
+                            exception.getHttpStatus());
+                    assertEquals("This report is already closed",
+                            exception.getMessage());
+                })
+                .verify();
+    }
+
+    @Test
     void removeProductFromCart_serverErrorThrowsServerError() {
         prepareResponse(response -> response.setResponseCode(500));
 

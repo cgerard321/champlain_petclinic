@@ -19,4 +19,6 @@ public interface OrderReportRepository
     );
 
     Flux<OrderReport> findAllByOrderBySubmittedAtDesc();
+
+    Mono<OrderReport> findByReportId(String reportId);
 }

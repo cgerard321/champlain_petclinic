@@ -76,4 +76,17 @@ public class OrderController {
         return orderService.getAllReports();
     }
 
+    @PatchMapping(
+            value = "/reports/{reportId}/status",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<OrderReportResponseModel>> updateReportStatus(
+            @PathVariable String reportId,
+            @RequestBody UpdateOrderReportStatusRequestModel request
+    ) {
+        return orderService.updateReportStatus(reportId, request)
+                .map(ResponseEntity::ok);
+    }
+
 }
