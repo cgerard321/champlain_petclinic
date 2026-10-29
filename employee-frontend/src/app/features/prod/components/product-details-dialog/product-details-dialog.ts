@@ -45,17 +45,6 @@ export class ProductDetailsDialog implements OnInit {
         this.isLoading.set(false);
         if (product.image?.fileData) {
           this.image.set(product.image);
-        } else if (product.imageId) {
-          this.imageService.getImage(product.imageId).subscribe({
-            next: (image) =>
-              this.image.set({
-                fileId: image.imageId,
-                fileName: image.imageName,
-                fileType: image.imageType,
-                fileData: image.imageData,
-              }),
-            error: () => undefined,
-          });
         }
       },
       error: (error: unknown) => {

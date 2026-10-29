@@ -3,13 +3,11 @@ package com.petclinic.products.utils;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductBundle;
 import com.petclinic.products.datalayer.products.ProductTypeDb;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.presentationlayer.images.ImageRequestModel;
-import com.petclinic.products.presentationlayer.images.ImageResponseModel;
 import com.petclinic.products.presentationlayer.products.*;
 import com.petclinic.products.presentationlayer.ratings.RatingRequestModel;
 import com.petclinic.products.presentationlayer.ratings.RatingResponseModel;
@@ -64,21 +62,6 @@ public class EntityModelUtil {
                         requestModel.getPetSatisfactionRating()
                 )
                 .ingredientsRating(requestModel.getIngredientsRating())
-                .build();
-    }
-
-    public static ImageResponseModel toImageResponseModel(Image image) {
-        ImageResponseModel imageResponseModel = new ImageResponseModel();
-        BeanUtils.copyProperties(image, imageResponseModel);
-        return imageResponseModel;
-    }
-
-    public static Image toImageEntity(ImageRequestModel imageRequestModel) {
-        return Image.builder()
-                .imageId(generateUUIDString())
-                .imageName(imageRequestModel.getImageName())
-                .imageType(imageRequestModel.getImageType())
-                .imageData(imageRequestModel.getImageData())
                 .build();
     }
 
