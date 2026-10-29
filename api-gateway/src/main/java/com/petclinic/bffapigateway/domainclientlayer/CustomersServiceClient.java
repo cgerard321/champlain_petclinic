@@ -62,6 +62,14 @@ public class CustomersServiceClient {
                 .bodyToFlux(CustomerResponseDTO.class);
     }
 
+    public Flux<CustomerResponseDTO> getSoftDeletedCustomers() {
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/customers/soft-deleted")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .retrieve()
+                .bodyToFlux(CustomerResponseDTO.class);
+    }
+
     public Flux<CustomerResponseDTO> getCustomersByPagination(Optional<Integer> page, Optional<Integer> size, String customerId, String firstName, String lastName, String phoneNumber, String city) {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/customers/customers-pagination");
@@ -255,6 +263,15 @@ public class CustomersServiceClient {
                 .onStatus(HttpStatus.NOT_FOUND::equals,
                         response -> Mono.error(new NotFoundException("Customer id not found: " + customerId)))
                 .bodyToMono(Void.class);
+    }
+
+    public Mono<CustomerResponseDTO> reactivateCustomer(final String customerId) {
+        return webClientBuilder.build().patch()
+                .uri(customersServiceUrl + "/customers/" + customerId + "/reactivate")
+                .retrieve()
+                .onStatus(HttpStatus.NOT_FOUND::equals,
+                        response -> Mono.error(new NotFoundException("Soft-deleted customer not found: " + customerId)))
+                .bodyToMono(CustomerResponseDTO.class);
     }
 
 

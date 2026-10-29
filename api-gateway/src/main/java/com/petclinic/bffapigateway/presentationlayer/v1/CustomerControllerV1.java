@@ -34,6 +34,12 @@ public class CustomerControllerV1 {
 
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/soft-deleted", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<CustomerResponseDTO> getSoftDeletedCustomers() {
+        return customersServiceClient.getSoftDeletedCustomers();
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<CustomerResponseDTO>> addCustomer(@RequestBody Mono<CustomerRequestDTO> customerRequestDTOMono) {
@@ -137,6 +143,16 @@ public class CustomerControllerV1 {
                         new InvalidInputException("Provided customer id is invalid: " + customerId))))
                 .flatMap(customersServiceClient::softDeleteCustomer)
                 .then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PatchMapping(value = "/{customerId}/reactivate", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<CustomerResponseDTO>> reactivateCustomer(@PathVariable String customerId) {
+        return Mono.just(customerId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided customer id is invalid: " + customerId)))
+                .flatMap(customersServiceClient::reactivateCustomer)
+                .map(ResponseEntity::ok);
     }
 
     @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
