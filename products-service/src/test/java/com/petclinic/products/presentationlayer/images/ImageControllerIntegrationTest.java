@@ -2,6 +2,13 @@ package com.petclinic.products.presentationlayer.images;
 
 import com.petclinic.products.datalayer.images.Image;
 import com.petclinic.products.datalayer.images.ImageRepository;
+import com.petclinic.products.domainclientlayer.FilesServiceClient;
+import com.petclinic.products.domainclientlayer.FileResponseDTO;
+import com.petclinic.products.utils.exceptions.FileNotFoundInFilesServiceException;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import reactor.core.publisher.Mono;
+import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
 import com.petclinic.products.utils.PostgresTestContainerBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,8 +41,12 @@ class ImageControllerIntegrationTest extends PostgresTestContainerBase {
     @Autowired
     private WebTestClient webTestClient;
 
+
+    @MockBean
+    private FilesServiceClient filesServiceClient;
+
     @Autowired
-    private ImageRepository imageRepository;
+    private org.springframework.r2dbc.core.DatabaseClient database;
 
     private String baseURI = "/images";
 
@@ -66,14 +77,52 @@ class ImageControllerIntegrationTest extends PostgresTestContainerBase {
 
     @BeforeEach
     public void setupDB() {
-        Publisher<Image> setupDB = imageRepository.deleteAll()
-                .thenMany(Flux.just(image1, image2)
-                        .flatMap(imageRepository::save));
+        when(filesServiceClient.getFile(anyString())).thenReturn(
+                Mono.error(new FileNotFoundInFilesServiceException("Missing file")));
+        when(filesServiceClient.getFile(image1.getImageId())).thenReturn(Mono.just(FileResponseDTO.builder()
+                .fileId(image1.getImageId()).fileName(image1.getImageName()).fileType(image1.getImageType())
+                .fileData(image1.getImageData()).build()));
+        when(filesServiceClient.addFile(org.mockito.ArgumentMatchers.any())).thenAnswer(call -> {
+            com.petclinic.products.domainclientlayer.FileRequestDTO request = call.getArgument(0);
+            return Mono.just(FileResponseDTO.builder().fileId(UUID.randomUUID().toString())
+                    .fileName(request.getFileName()).fileType(request.getFileType())
+                    .fileData(request.getFileData()).build());
+        });
+    }
 
-        StepVerifier
-                .create(setupDB)
-                .expectNextCount(2)
-                .verifyComplete();
+    @Test
+    void cartLegacyIdResolvesToFilesServiceAndPreservesRequestedId() {
+        String oldId = "48d60181-7ce2-4abe-92db-bef08dbbe655";
+        String newId = "8803a3da-870b-4c0c-a38c-221f71a70402";
+        database.sql("INSERT INTO product_image_migration(legacy_image_id, file_id, state) VALUES (:old, :file, 'VERIFIED')")
+                .bind("old", oldId).bind("file", newId).fetch().rowsUpdated().block();
+        when(filesServiceClient.getFile(newId)).thenReturn(Mono.just(FileResponseDTO.builder()
+                .fileId(newId).fileName("cart-image").fileType("image/png").fileData(imageBytes).build()));
+        try {
+            webTestClient.get().uri(baseURI + "/" + oldId).exchange()
+                    .expectStatus().isOk().expectBody(ImageResponseModel.class)
+                    .value(image -> {
+                        assertEquals(oldId, image.getImageId());
+                        assertArrayEquals(imageBytes, image.getImageData());
+                    });
+            org.mockito.Mockito.verify(filesServiceClient, org.mockito.Mockito.never()).getFile(oldId);
+        } finally {
+            database.sql("DELETE FROM product_image_migration WHERE legacy_image_id = :id")
+                    .bind("id", oldId).fetch().rowsUpdated().block();
+        }
+    }
+
+    @Test
+    void migratedImageKeepsFrontendResponseContract() {
+        when(filesServiceClient.getFile("7ee36f6e-6a01-4a69-a4a7-a02364edbf13")).thenReturn(Mono.just(FileResponseDTO.builder()
+                .fileId("7ee36f6e-6a01-4a69-a4a7-a02364edbf13").fileName("dog food").fileType("image/png").fileData(imageBytes).build()));
+        webTestClient.get().uri(baseURI + "/7ee36f6e-6a01-4a69-a4a7-a02364edbf13").exchange()
+                .expectStatus().isOk().expectBody(ImageResponseModel.class)
+                .value(image -> {
+                    assertEquals("7ee36f6e-6a01-4a69-a4a7-a02364edbf13", image.getImageId());
+                    assertEquals("image/png", image.getImageType());
+                    assertArrayEquals(imageBytes, image.getImageData());
+                });
     }
 
     @Test
@@ -176,7 +225,7 @@ class ImageControllerIntegrationTest extends PostgresTestContainerBase {
                 .value(imageResponseModel -> {
                     assertNotNull(imageResponseModel);
                     assertEquals(imageName, imageResponseModel.getImageName());
-                    assertEquals(imageTypeRequestJPG, imageResponseModel.getImageType());
+                    assertEquals(imageTypeRequestJPEG, imageResponseModel.getImageType());
                     assertArrayEquals(imageBytes, imageResponseModel.getImageData());
                 });
     }
