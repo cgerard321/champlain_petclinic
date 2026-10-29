@@ -25,6 +25,7 @@ import { updateVetProfilePhoto } from '@/features/veterinarians/api/updateVetPro
 import { deleteAlbumPhoto } from '@/features/veterinarians/api/deleteAlbumPhoto';
 import { addSpecialty } from '@/features/veterinarians/api/addSpecialty';
 import { deleteSpecialty } from '@/features/veterinarians/api/deleteSpecialty';
+import Forbidden from '@/pages/Error/Forbidden';
 
 const WORKDAY_DISPLAY_ORDER: string[] = [
   Workday.Monday,
@@ -135,6 +136,7 @@ export default function VetDetails(): JSX.Element {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingPhotoId, setPendingPhotoId] = useState<number | null>(null);
   const canManageVet = isVet || isAdmin; // Only allow Vets and Admins to manage vet details
+  const canSeeInactiveVets = canManageVet;
 
   const [notification, setNotification] = useState<{
     show: boolean;
@@ -516,6 +518,8 @@ export default function VetDetails(): JSX.Element {
   if (loading) return <p>Loading vet details...</p>;
   if (error) return <p>{error}</p>;
   if (!vetId) throw new Error('Vet ID undefined');
+  if (!vet) return <p>Loading vet details...</p>;
+  if (!vet.active && !canSeeInactiveVets) return <Forbidden />;
 
   return (
     <div>
@@ -599,9 +603,8 @@ export default function VetDetails(): JSX.Element {
                   <strong>Rate Date:</strong>{' '}
                   {formatRatingDate(rating.rateDate)}
                 </p>
-                {(currentCustomerName &&
-                  rating.customerName === currentCustomerName) ||
-                isAdmin ? (
+                {currentCustomerName &&
+                rating.customerName === currentCustomerName ? (
                   <button
                     onClick={handleRatingDeleted}
                     className="delete-rating-button"
@@ -616,7 +619,7 @@ export default function VetDetails(): JSX.Element {
                       fontSize: '14px',
                     }}
                   >
-                    {isAdmin ? 'Delete Rating' : 'Delete My Rating'}
+                    Delete My Rating
                   </button>
                 ) : null}
                 <hr />

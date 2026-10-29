@@ -27,13 +27,6 @@ x-healthchecks:
       retries: 10
       start_period: 15s
 
-  nginx: &nginx
-    healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 80"]
-      interval: 10s
-      timeout: 3s
-      retries: 10
-      start_period: 10s
 
   mysql: &mysql
     healthcheck:
@@ -45,7 +38,7 @@ x-healthchecks:
 
   postgres: &postgres
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d images -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d $${POSTGRES_DB} -h localhost"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -98,16 +91,6 @@ services:
     env_file:
       - .env
 
-  janus:
-    <<: *nginx
-    image: nginx
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/njs:/etc/nginx/njs
-    env_file:
-      - .env
 
   visits-service-new:
     <<: *springboot
@@ -214,6 +197,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
+      files-service:
+        condition: service_started
       postgres-products:
         condition: service_healthy
 

@@ -1,0 +1,105 @@
+<h2 mat-dialog-title>
+  {{ data.title }}
+</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content>
+    @if (data.message) {
+      <p class="modal-message">{{ data.message }}</p>
+    }
+
+    <div class="modal-form">
+      @for (field of fields; track field.key) {
+        <div class="form-field">
+          @if (field.type !== 'image') {
+            <label [for]="field.key">
+              {{ field.label }}
+            </label>
+          }
+
+          @if (control(field).touched && control(field).invalid) {
+            <p class="field-error">
+              {{ errorMessage(field) }}
+            </p>
+          }
+
+          @switch (field.type) {
+            @case ('string') {
+              <input
+                [id]="field.key"
+                type="text"
+                [formControlName]="field.key"
+                [placeholder]="field.placeholder ?? ''"
+              />
+            }
+
+            @case ('password') {
+              <input
+                [id]="field.key"
+                type="password"
+                autocomplete="new-password"
+                [formControlName]="field.key"
+                [placeholder]="field.placeholder ?? ''"
+              />
+            }
+            @case ('number') {
+              <input
+                [id]="field.key"
+                type="number"
+                [formControlName]="field.key"
+                [attr.min]="field.min ?? null"
+                [attr.max]="field.max ?? null"
+                [placeholder]="field.placeholder ?? ''"
+                [attr.step]="field.step ?? null"
+              />
+            }
+
+            @case ('enum') {
+              <select [id]="field.key" [formControlName]="field.key">
+                @for (option of options(field); track option.value) {
+                  <option [ngValue]="option.value">
+                    {{ option.label }}
+                  </option>
+                }
+              </select>
+            }
+
+            @case ('image') {
+              <app-image-editor
+                [label]="field.label"
+                [currentImage]="field.currentImageUrl ?? null"
+                [maxSizeBytes]="field.maxImageSizeBytes"
+                [disabled]="control(field).disabled"
+                (imageChange)="onImageChange(field, $event)"
+              />
+            }
+
+            @case ('date') {
+              <input
+                [id]="field.key"
+                type="date"
+                [formControlName]="field.key"
+                [attr.min]="field.minDate ?? null"
+              />
+            }
+          }
+        </div>
+      }
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button type="button" class="dialog-cancel-button" (click)="cancel()">
+      {{ data.cancelLabel ?? cancelLabel }}
+    </button>
+
+    <button
+      type="submit"
+      class="dialog-submit-button"
+      [disabled]="form.invalid"
+      [class.destructive]="data.destructive"
+    >
+      {{ data.submitLabel ?? saveLabel }}
+    </button>
+  </mat-dialog-actions>
+</form>

@@ -20,6 +20,11 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.TemporalAdjusters;
+
 
 /**
  * Application Endpoint for Visit
@@ -34,7 +39,6 @@ public class VisitController {
     private final VisitService visitService;
     private final ReviewService reviewService;
     private final PrescriptionService prescriptionService;
-
     /**
      * Simple Get all Visits
      * Accessible through localhost:8080/visits
@@ -324,6 +328,30 @@ public class VisitController {
     @PatchMapping(value = "/{visitId}/cancel", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<VisitResponseDTO> cancelVisit(@PathVariable String visitId, @RequestBody CancellationRequestDTO cancellationRequestDTO){
         return visitService.cancelVisit(visitId, cancellationRequestDTO);
+    }
+
+    @PatchMapping(value = "/{visitId}/note", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<VisitResponseDTO> addVetNote(@PathVariable String visitId, @RequestBody VetNoteRequestDTO vetNoteRequestDTO){
+        return visitService.addVetNote(visitId, vetNoteRequestDTO);
+    }
+
+    @PostMapping("practitioner/{practitionerId}/weekly-email")
+    public Mono<String> sendWeeklyScheduleEmail(@PathVariable String practitionerId) {
+        LocalDate weekStart = LocalDate.now(ZoneId.of("America/Toronto"))
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        return visitService.sendSchedule(practitionerId, weekStart);
+    }
+
+
+    @PatchMapping(value = "/{visitId}/confirm", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<VisitResponseDTO> confirmFollowUpVisit(@PathVariable String visitId){
+        return visitService.confirmFollowUpVisit(visitId);
+    }
+
+    @PatchMapping(value = "/{visitId}/reschedule", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<VisitResponseDTO> rescheduleFollowUpVisit(@PathVariable String visitId, @RequestBody RescheduleRequestDTO rescheduleRequestDTO){
+        return visitService.rescheduleFollowUpVisit(visitId, rescheduleRequestDTO);
     }
 
 }

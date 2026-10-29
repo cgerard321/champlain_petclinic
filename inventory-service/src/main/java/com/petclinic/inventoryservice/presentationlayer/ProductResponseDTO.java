@@ -3,7 +3,9 @@ package com.petclinic.inventoryservice.presentationlayer;
 import com.petclinic.inventoryservice.datalayer.Product.Status;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -14,7 +16,10 @@ public class ProductResponseDTO {
     private String productId;
     private String inventoryId;
     private String productName;
+    private String supplierName;
     private String productDescription;
+    private Map<String, String> name;
+    private Map<String, String> description;
     private Double productPrice;
     private Integer productQuantity;
     private Double productSalePrice;
@@ -23,4 +28,7 @@ public class ProductResponseDTO {
     private LocalDateTime lastUpdatedAt;
     private byte[] photoData;
     private String photoType;
+
+    private LocalDate expirationDate;
+   
 }

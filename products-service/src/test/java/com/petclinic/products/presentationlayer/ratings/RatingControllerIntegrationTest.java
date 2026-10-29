@@ -4,6 +4,7 @@ import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
+import com.petclinic.products.datalayer.ratings.ReviewLikeRepository;
 import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.PostgresTestContainerBase;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +37,8 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     private RatingRepository ratingRepository;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private ReviewLikeRepository reviewLikeRepository;
 
     private final String INVALID_PRODUCT_ID = "e39286b6-d3cab6222f58";
     private final String UNFOUND_PRODUCT_ID = "828537fe-907d-4ece-8455-c7e483327a68";
@@ -60,6 +63,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     Rating rating1Prod1 = Rating.builder()
             .rating((byte) 2)
             .review("It's not bad neither good")
+            .qualityRating((byte) 5)
+            .valueRating((byte) 4)
+            .petSatisfactionRating((byte) 5)
+            .ingredientsRating((byte) 4)
             .productId("e39286b6-d3ca-4f58-8b6f-30f1f1b9a2f6")
             .customerId("8e599d37-a69a-48d2-880e-1b621abf77b6")
             .build();
@@ -67,6 +74,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     Rating rating2Prod1 = Rating.builder()
             .rating((byte) 4)
             .review("It's good for its value")
+            .qualityRating((byte) 5)
+            .valueRating((byte) 4)
+            .petSatisfactionRating((byte) 5)
+            .ingredientsRating((byte) 4)
             .productId("e39286b6-d3ca-4f58-8b6f-30f1f1b9a2f6")
             .customerId("3a994002-47d9-4dea-9966-9df78050cf09")
             .build();
@@ -74,6 +85,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     Rating rating1Prod2 = Rating.builder()
             .rating((byte) 5)
             .review("It's great")
+            .qualityRating((byte) 5)
+            .valueRating((byte) 4)
+            .petSatisfactionRating((byte) 5)
+            .ingredientsRating((byte) 4)
             .productId("6866ec50-898d-435c-bfec-8ee513c5a6c1")
             .customerId("8e599d37-a69a-48d2-880e-1b621abf77b6")
             .build();
@@ -81,12 +96,19 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     Rating rating2Prod2 = Rating.builder()
             .rating((byte) 3)
             .review("It's not bad")
+            .qualityRating((byte) 5)
+            .valueRating((byte) 4)
+            .petSatisfactionRating((byte) 5)
+            .ingredientsRating((byte) 4)
             .productId("6866ec50-898d-435c-bfec-8ee513c5a6c1")
             .customerId("3a994002-47d9-4dea-9966-9df78050cf09")
             .build();
 
     @BeforeEach
     public void setupDB() {
+        StepVerifier.create(reviewLikeRepository.deleteAll())
+                .verifyComplete();
+
         Publisher<Product> productSetup = productRepository.deleteAll()
                 .thenMany(Flux.just(product1, product2))
                 .flatMap(productRepository::save);
@@ -99,6 +121,113 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
                 .flatMap(ratingRepository::save);
         StepVerifier.create(ratingSetup)
                 .expectNextCount(4)
+                .verifyComplete();
+    }
+
+    @Test
+    void whenSameCustomerLikesReviewTwice_thenSecondClickRemovesLike() {
+        String likingCustomerId = UUID.randomUUID().toString();
+        String path = "/ratings/%s/%s/likes/%s".formatted(
+                product1.getProductId(), rating1Prod1.getCustomerId(), likingCustomerId);
+
+        webClient.post()
+                .uri(path)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.likeCount").isEqualTo(1)
+                .jsonPath("$.likedByCurrentUser").isEqualTo(true);
+
+        webClient.get()
+                .uri("/ratings/%s/for-user/%s".formatted(product1.getProductId(), likingCustomerId))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(RatingResponseModel.class)
+                .value(ratings -> {
+                    RatingResponseModel likedReview = ratings.stream()
+                            .filter(rating -> rating1Prod1.getCustomerId().equals(rating.getCustomerId()))
+                            .findFirst()
+                            .orElseThrow();
+                    assertEquals(1L, likedReview.getLikeCount());
+                    assertEquals(true, likedReview.isLikedByCurrentUser());
+                });
+
+        webClient.post()
+                .uri(path)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.likeCount").isEqualTo(0)
+                .jsonPath("$.likedByCurrentUser").isEqualTo(false);
+
+        webClient.get()
+                .uri("/ratings/%s/for-user/%s".formatted(product1.getProductId(), likingCustomerId))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(RatingResponseModel.class)
+                .value(ratings -> ratings.stream()
+                        .filter(rating -> rating1Prod1.getCustomerId().equals(rating.getCustomerId()))
+                        .forEach(rating -> assertEquals(false, rating.isLikedByCurrentUser())));
+
+        StepVerifier.create(reviewLikeRepository.count())
+                .expectNext(0L)
+                .verifyComplete();
+    }
+
+    @Test
+    void whenCustomerLikesOwnReview_thenReturnUnprocessableEntity() {
+        webClient.post()
+                .uri("/ratings/%s/%s/likes/%s".formatted(
+                        product1.getProductId(), rating1Prod1.getCustomerId(), rating1Prod1.getCustomerId()))
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Customers cannot like their own review");
+
+        StepVerifier.create(reviewLikeRepository.count())
+                .expectNext(0L)
+                .verifyComplete();
+    }
+
+    @Test
+    void whenLikeReviewThatDoesNotExist_thenReturnNotFound() {
+        webClient.post()
+                .uri("/ratings/%s/%s/likes/%s".formatted(
+                        product1.getProductId(), UUID.randomUUID(), UUID.randomUUID()))
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void whenLikeReviewForNotFoundProduct_thenReturnNotFound() {
+        webClient.post()
+                .uri("/ratings/%s/%s/likes/%s".formatted(
+                        UNFOUND_PRODUCT_ID, rating1Prod1.getCustomerId(), UUID.randomUUID()))
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void whenProductDeleted_thenItsReviewLikesAreDeleted() {
+        webClient.post()
+                .uri("/ratings/%s/%s/likes/%s".formatted(
+                        product1.getProductId(), rating1Prod1.getCustomerId(), UUID.randomUUID()))
+                .exchange()
+                .expectStatus().isOk();
+        webClient.post()
+                .uri("/ratings/%s/%s/likes/%s".formatted(
+                        product2.getProductId(), rating1Prod2.getCustomerId(), UUID.randomUUID()))
+                .exchange()
+                .expectStatus().isOk();
+
+        webClient.delete()
+                .uri("/products/%s".formatted(product1.getProductId()))
+                .exchange()
+                .expectStatus().isOk();
+
+        // Only the deleted product's like is removed
+        StepVerifier.create(reviewLikeRepository.count())
+                .expectNext(1L)
                 .verifyComplete();
     }
 
@@ -229,7 +358,7 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
 //    @Test
 //    public void whenAddRatingWithTooLongReview_thenReturnInvalidInput(){
 //        RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
-//                .review("It's great".repeat(200))
+//                .review("It's great".repeat(1001))
 //                .rating((byte) 5)
 //                .build();
 //        String randomCustomer = UUID.randomUUID().toString();
@@ -242,7 +371,7 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
 //                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
 //                .expectHeader().contentType(MediaType.APPLICATION_JSON)
 //                .expectBody()
-//                .jsonPath("$.message").isEqualTo("Review must be less than 2000 characters");
+//                .jsonPath("$.message").isEqualTo("Review cannot exceed 10000 characters");
 //
 //
 //        StepVerifier.create(ratingRepository.findAll())
@@ -328,6 +457,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     public void whenAddRatingForProductWithExistingCustomer_thenReturnRatingAlreadyExists() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         webClient.post()
@@ -428,6 +561,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     public void whenAddRatingForNotFoundProduct_thenReturnNotFoundProduct() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         webClient.post()
@@ -502,7 +639,11 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     public void whenUpdateWithLongReview_thenReturnInvalidInput() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
-                .review("It's great".repeat(200))
+                .review("It's great".repeat(1001))
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         webClient.put()
@@ -513,7 +654,7 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Review must be less than 2000 characters");
+                .jsonPath("$.message").isEqualTo("Review cannot exceed 10000 characters");
 
         StepVerifier.create(ratingRepository.findAll())
                 .expectNextCount(4)
@@ -652,6 +793,10 @@ class RatingControllerIntegrationTest extends PostgresTestContainerBase {
     public void whenUpdateRatingForNotFoundProduct_thenReturnNotFoundProduct() {
         RatingRequestModel ratingRequestModel = RatingRequestModel.builder()
                 .rating((byte) 5)
+                .qualityRating((byte) 5)
+                .valueRating((byte) 4)
+                .petSatisfactionRating((byte) 5)
+                .ingredientsRating((byte) 4)
                 .build();
 
         webClient.put()

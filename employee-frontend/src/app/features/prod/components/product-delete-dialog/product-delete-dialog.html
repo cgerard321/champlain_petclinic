@@ -1,0 +1,26 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title>{{ data.title }}</h2>
+  <button
+    class="dialog-close-button"
+    mat-icon-button
+    mat-dialog-close
+    type="button"
+    aria-label="Fermer la fenêtre de confirmation de suppression"
+    i18n-aria-label="@@products.delete.close"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content>
+  <p>{{ data.message }}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" i18n="@@products.actions.cancel">
+    Annuler
+  </button>
+  <button mat-flat-button color="warn" type="button" (click)="confirm()">
+    {{ data.confirmLabel }}
+  </button>
+</mat-dialog-actions>

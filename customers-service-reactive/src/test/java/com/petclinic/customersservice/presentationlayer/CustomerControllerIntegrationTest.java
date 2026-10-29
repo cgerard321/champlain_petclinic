@@ -2,6 +2,7 @@ package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.data.Customer;
 import com.petclinic.customersservice.data.CustomerRepo;
+import com.petclinic.customersservice.domainclientlayer.CartServiceClient;
 import com.petclinic.customersservice.domainclientlayer.FilesServiceClient;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -32,6 +33,9 @@ class CustomerControllerIntegrationTest {
 
     @MockBean
     private FilesServiceClient filesServiceClient;
+
+    @MockBean
+    private CartServiceClient cartServiceClient;
 
     private Customer buildCustomer() {
         return Customer.builder()
@@ -86,9 +90,11 @@ class CustomerControllerIntegrationTest {
 
         StepVerifier.create(repo.deleteAll()).verifyComplete();
 
+        String testCustomerId = "11111111-1111-4111-8111-111111111111";
+
         Customer customerEntity = Customer.builder()
                 .id("23")
-                .customerId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+                .customerId(testCustomerId)
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")
@@ -98,14 +104,18 @@ class CustomerControllerIntegrationTest {
                 .build();
 
         StepVerifier.create(repo.save(customerEntity))
-                .expectNextMatches(saved -> saved.getCustomerId().equals("a6e0e5b0-5f60-45f0-8ac7-becd8b330486"))
+                .expectNextMatches(saved -> saved.getCustomerId().equals(testCustomerId))
                 .verifyComplete();
 
-        client.delete().uri("/customers/a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+        when(cartServiceClient.deleteCartByCustomerId(customerEntity.getCustomerId())).thenReturn(Mono.empty());
+
+        client.delete().uri("/customers/" + testCustomerId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent()
                 .expectBody();
+
+        verify(cartServiceClient).deleteCartByCustomerId(customerEntity.getCustomerId());
     }
 
     @Test
@@ -127,7 +137,175 @@ class CustomerControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("Customer id not found: " + nonExistentCustomerId);
     }
 
+    @Test
+    void softDeleteCustomerByCustomerId_ShouldReturnNoContentAndKeepCustomerInDatabase() {
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
 
+        String testCustomerId = "22222222-2222-4222-8222-222222222222";
+        String photoId = "photo-999";
+
+        Customer customerEntity = Customer.builder()
+                .id("24")
+                .customerId(testCustomerId)
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .province("province")
+                .telephone("telephone")
+                .photoId(photoId)
+                .isActive(true)
+                .build();
+
+        StepVerifier.create(repo.save(customerEntity))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        when(filesServiceClient.deleteFile(photoId)).thenReturn(Mono.empty());
+        when(cartServiceClient.deleteCartByCustomerId(testCustomerId)).thenReturn(Mono.empty());
+
+        client.delete().uri("/customers/" + testCustomerId + "/soft")
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        StepVerifier.create(repo.findCustomerByCustomerId(testCustomerId))
+                .expectNextMatches(saved -> Boolean.FALSE.equals(saved.getIsActive()) && saved.getPhotoId() == null)
+                .verifyComplete();
+
+        verify(filesServiceClient).deleteFile(photoId);
+        verify(cartServiceClient).deleteCartByCustomerId(testCustomerId);
+    }
+
+    @Test
+    void softDeleteCustomerByCustomerId_WhenAlreadyInactive_ShouldStillReturnNoContent() {
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
+
+        String testCustomerId = "33333333-3333-4333-8333-333333333333";
+
+        Customer inactiveCustomer = Customer.builder()
+                .id("25")
+                .customerId(testCustomerId)
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .province("province")
+                .telephone("telephone")
+                .isActive(false)
+                .build();
+
+        StepVerifier.create(repo.save(inactiveCustomer))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        when(cartServiceClient.deleteCartByCustomerId(testCustomerId)).thenReturn(Mono.empty());
+
+        client.delete().uri("/customers/" + testCustomerId + "/soft")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        StepVerifier.create(repo.findCustomerByCustomerId(testCustomerId))
+                .expectNextMatches(saved -> Boolean.FALSE.equals(saved.getIsActive()))
+                .verifyComplete();
+    }
+
+    @Test
+    void softDeleteCustomerByCustomerId_WhenCustomerDoesNotExist_ShouldReturnNotFound() {
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
+
+        String missingCustomerId = "44444444-4444-4444-8444-444444444444";
+
+        client.delete().uri("/customers/" + missingCustomerId + "/soft")
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Customer id not found: " + missingCustomerId);
+
+        verify(cartServiceClient, never()).deleteCartByCustomerId(missingCustomerId);
+    }
+
+    @Test
+    void softDeleteCustomerByCustomerId_WithInvalidId_ShouldReturnUnprocessableEntity() {
+        String invalidCustomerId = "not-a-valid-id";
+
+        client.delete().uri("/customers/" + invalidCustomerId + "/soft")
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Customer id: " + invalidCustomerId + " is invalid");
+    }
+
+    @Test
+    void getSoftDeletedCustomers_ShouldReturnOnlyInactiveCustomers() {
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
+
+        Customer activeCustomer = buildCustomerId("Active", "55555555-5555-4555-8555-555555555555");
+        activeCustomer.setIsActive(true);
+        Customer inactiveCustomer = buildCustomerId("Inactive", "66666666-6666-4666-8666-666666666666");
+        inactiveCustomer.setIsActive(false);
+
+        StepVerifier.create(repo.save(activeCustomer).then(repo.save(inactiveCustomer)))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.get().uri("/customers/soft-deleted")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(CustomerResponseDTO.class)
+                .value(list -> {
+                    assertEquals(1, list.size());
+                    assertEquals("66666666-6666-4666-8666-666666666666", list.get(0).getCustomerId());
+                });
+    }
+
+    @Test
+    void reactivateCustomerByCustomerId_ShouldReturnOkAndSetCustomerActive() {
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
+
+        String testCustomerId = "77777777-7777-4777-8777-777777777777";
+        Customer inactiveCustomer = buildCustomerId("Inactive", testCustomerId);
+        inactiveCustomer.setIsActive(false);
+
+        StepVerifier.create(repo.save(inactiveCustomer))
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.patch().uri("/customers/" + testCustomerId + "/reactivate")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.customerId").isEqualTo(testCustomerId);
+
+        StepVerifier.create(repo.findCustomerByCustomerId(testCustomerId))
+                .expectNextMatches(saved -> Boolean.TRUE.equals(saved.getIsActive()))
+                .verifyComplete();
+    }
+
+    @Test
+    void reactivateCustomerByCustomerId_WhenCustomerDoesNotExist_ShouldReturnNotFound() {
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
+
+        String missingCustomerId = "88888888-8888-4888-8888-888888888888";
+
+        client.patch().uri("/customers/" + missingCustomerId + "/reactivate")
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Soft-deleted customer not found: " + missingCustomerId);
+    }
+
+    @Test
+    void reactivateCustomerByCustomerId_WithInvalidId_ShouldReturnUnprocessableEntity() {
+        String invalidCustomerId = "not-a-valid-id";
+
+        client.patch().uri("/customers/" + invalidCustomerId + "/reactivate")
+                .exchange()
+                .expectStatus().isEqualTo(422)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Customer id: " + invalidCustomerId + " is invalid");
+    }
 
     @Test
     void getTotalNumberOfCustomers(){
@@ -331,7 +509,7 @@ class CustomerControllerIntegrationTest {
         updateDTO.setLastName("NewLastName");
         updateDTO.setAddress("New Address");
         updateDTO.setCity("New City");
-        updateDTO.setProvince("New Province");
+        updateDTO.setProvince("Ontario");
         updateDTO.setTelephone("9999999999");
         // photoId is left null
 
@@ -359,6 +537,35 @@ class CustomerControllerIntegrationTest {
                         customer.getFirstName().equals("NewFirstName") &&
                                 customer.getCity().equals("New City")
                 )
+                .verifyComplete();
+    }
+
+    @Test
+    void whenUpdateCustomer_withInvalidProvince_thenReturnUnprocessableEntityAndKeepOldData() {
+        String testCustomerId = "2c858ef6-a353-4293-bf03-3c7a48c093b3";
+        Customer existingCustomer = buildCustomerId("OldFirst", testCustomerId);
+        existingCustomer.setId("1");
+
+        Publisher<Customer> setup = repo.deleteAll().then(repo.save(existingCustomer));
+        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
+
+        CustomerRequestDTO updateDTO = new CustomerRequestDTO();
+        updateDTO.setFirstName("NewFirstName");
+        updateDTO.setLastName("NewLastName");
+        updateDTO.setAddress("New Address");
+        updateDTO.setCity("New City");
+        updateDTO.setProvince("Narnia");
+        updateDTO.setTelephone("9999999999");
+
+        client.put()
+                .uri("/customers/" + testCustomerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(updateDTO), CustomerRequestDTO.class)
+                .exchange()
+                .expectStatus().isEqualTo(422);
+
+        StepVerifier.create(repo.findCustomerByCustomerId(testCustomerId))
+                .expectNextMatches(customer -> customer.getFirstName().equals("OldFirst"))
                 .verifyComplete();
     }
 

@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from '@core/guards/auth/auth-guard';
 import { customerRedirectGuard } from '@core/guards/customers/customer-redirect';
 import { employeeGuard } from '@core/guards/employee/employee-guard';
+import { Roles } from '@shared/models/roles';
 
 export const routes: Routes = [
   {
@@ -12,12 +13,6 @@ export const routes: Routes = [
   {
     path: 'error',
     loadChildren: () => import('@features/error/routes'),
-  },
-  {
-    path: 'settings',
-    loadChildren: () => import('@features/settings/routes'),
-    //verify if the user is an employee
-    canActivate: [authGuard(), customerRedirectGuard, employeeGuard],
   },
   {
     path: '',
@@ -31,6 +26,11 @@ export const routes: Routes = [
       },
 
       {
+        path: 'settings',
+        loadChildren: () => import('@features/settings/routes'),
+      },
+
+      {
         path: 'vets',
         loadChildren: () => import('@features/vets/routes'),
       },
@@ -38,6 +38,11 @@ export const routes: Routes = [
       {
         path: 'cust',
         loadChildren: () => import('@features/cust/routes'),
+      },
+
+      {
+        path: 'customerDetails',
+        loadChildren: () => import('@features/cust/pages/customerDetails/routes'),
       },
 
       {
@@ -56,6 +61,12 @@ export const routes: Routes = [
       },
 
       {
+        path: 'users',
+        canActivate: [authGuard([Roles.admin])],
+        loadChildren: () => import('@features/users/routes'),
+      },
+
+      {
         path: 'prod',
         loadChildren: () => import('@features/prod/routes'),
       },
@@ -63,6 +74,10 @@ export const routes: Routes = [
       {
         path: 'promo',
         loadChildren: () => import('@features/promo/routes'),
+      },
+      {
+        path: 'order-reports',
+        loadChildren: () => import('@features/order-reports/routes'),
       },
       {
         path: 'error',

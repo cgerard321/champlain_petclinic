@@ -1,12 +1,13 @@
 package com.petclinic.products.utils;
 
-import com.petclinic.products.datalayer.images.Image;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import com.petclinic.products.datalayer.products.Product;
 import com.petclinic.products.datalayer.products.ProductBundle;
 import com.petclinic.products.datalayer.products.ProductTypeDb;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.presentationlayer.images.ImageRequestModel;
-import com.petclinic.products.presentationlayer.images.ImageResponseModel;
 import com.petclinic.products.presentationlayer.products.*;
 import com.petclinic.products.presentationlayer.ratings.RatingRequestModel;
 import com.petclinic.products.presentationlayer.ratings.RatingResponseModel;
@@ -14,8 +15,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.http.codec.multipart.FilePart;
 import reactor.core.publisher.Mono;
-
-import java.util.UUID;
 
 public class EntityModelUtil {
 
@@ -31,6 +30,8 @@ public class EntityModelUtil {
                 .productId(generateUUIDString())
                 .productName(productRequestModel.getProductName())
                 .productDescription(productRequestModel.getProductDescription())
+                .productNameFr(productRequestModel.getProductNameFr())
+                .productDescriptionFr(productRequestModel.getProductDescriptionFr())
                 .productSalePrice(productRequestModel.getProductSalePrice())
                 //.productType(productRequestModel.getProductType())
                 .productTypeId(productRequestModel.getProductTypeId())
@@ -54,21 +55,13 @@ public class EntityModelUtil {
                 .customerId(customerId)
                 .rating(requestModel.getRating())
                 .review(requestModel.getReview() != null ? requestModel.getReview() : "")
-                .build();
-    }
-
-    public static ImageResponseModel toImageResponseModel(Image image) {
-        ImageResponseModel imageResponseModel = new ImageResponseModel();
-        BeanUtils.copyProperties(image, imageResponseModel);
-        return imageResponseModel;
-    }
-
-    public static Image toImageEntity(ImageRequestModel imageRequestModel) {
-        return Image.builder()
-                .imageId(generateUUIDString())
-                .imageName(imageRequestModel.getImageName())
-                .imageType(imageRequestModel.getImageType())
-                .imageData(imageRequestModel.getImageData())
+                .createdAt(LocalDateTime.now())
+                .qualityRating(requestModel.getQualityRating())
+                .valueRating(requestModel.getValueRating())
+                .petSatisfactionRating(
+                        requestModel.getPetSatisfactionRating()
+                )
+                .ingredientsRating(requestModel.getIngredientsRating())
                 .build();
     }
 

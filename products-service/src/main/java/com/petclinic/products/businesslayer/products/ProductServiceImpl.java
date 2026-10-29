@@ -1,10 +1,9 @@
 package com.petclinic.products.businesslayer.products;
 
-import com.petclinic.products.datalayer.images.Image;
-import com.petclinic.products.datalayer.images.ImageRepository;
 import com.petclinic.products.datalayer.products.*;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
+import com.petclinic.products.datalayer.ratings.ReviewLikeRepository;
 import com.petclinic.products.domainclientlayer.FileRequestDTO;
 import com.petclinic.products.domainclientlayer.FileResponseDTO;
 import com.petclinic.products.domainclientlayer.FilesServiceClient;
@@ -30,27 +29,27 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
     private final RatingRepository ratingRepository;
+    private final ReviewLikeRepository reviewLikeRepository;
     private final ProductBundleRepository productBundleRepository;
     private final ProductBundleService productBundleService;
     private final ProductTypeRepository productTypeRepository;
-    private final ImageRepository imageRepository;
     private final FilesServiceClient filesServiceClient;
 
     @Value("${app.files-service.default-image-ids:}")
     private String defaultImageIds = "";
 
     public ProductServiceImpl(ProductRepository productRepository, RatingRepository ratingRepository,
+                              ReviewLikeRepository reviewLikeRepository,
                               ProductBundleRepository productBundleRepository,
                               ProductBundleService productBundleService,
                               ProductTypeRepository productTypeRepository,
-                              ImageRepository imageRepository,
                               FilesServiceClient filesServiceClient) {
         this.productRepository = productRepository;
         this.ratingRepository = ratingRepository;
+        this.reviewLikeRepository = reviewLikeRepository;
         this.productBundleRepository = productBundleRepository;
         this.productBundleService = productBundleService;
         this.productTypeRepository = productTypeRepository;
-        this.imageRepository = imageRepository;
         this.filesServiceClient = filesServiceClient;
     }
 
@@ -189,35 +188,12 @@ public class ProductServiceImpl implements ProductService {
 
     private Mono<FileResponseDTO> loadProductImage(
             String imageId, String productId) {
-        return imageRepository.findImageByImageId(imageId)
-                .map(this::toFileResponse)
+        return filesServiceClient.getFile(imageId)
                 .onErrorResume(error -> {
-                    log.warn("Unable to check legacy image {} for product {}; "
-                                    + "trying Files Service",
-                            imageId, productId, error);
+                    log.warn("Unable to load image for product {}; returning product without image",
+                            productId, error);
                     return Mono.empty();
-                })
-                .switchIfEmpty(Mono.defer(() ->
-                        filesServiceClient.getFile(imageId)
-                                .switchIfEmpty(Mono.fromRunnable(() ->
-                                        log.warn("Files Service returned no image "
-                                                        + "for product {}",
-                                                productId)))
-                                .onErrorResume(error -> {
-                                    log.warn("Unable to load image for product {}; "
-                                                    + "returning product without image",
-                                            productId, error);
-                                    return Mono.empty();
-                                })));
-    }
-
-    private FileResponseDTO toFileResponse(Image image) {
-        return FileResponseDTO.builder()
-                .fileId(image.getImageId())
-                .fileName(image.getImageName())
-                .fileType(image.getImageType())
-                .fileData(image.getImageData())
-                .build();
+                });
     }
 
     @Override
@@ -283,6 +259,15 @@ public class ProductServiceImpl implements ProductService {
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(found -> productRequestModel
                         .map(EntityModelUtil::toProductEntity)
+                        // Older clients omit translations. Preserve them; an explicit empty string clears them.
+                        .doOnNext(entity -> {
+                            if (entity.getProductNameFr() == null) {
+                                entity.setProductNameFr(found.getProductNameFr());
+                            }
+                            if (entity.getProductDescriptionFr() == null) {
+                                entity.setProductDescriptionFr(found.getProductDescriptionFr());
+                            }
+                        })
                         .doOnNext(entity -> entity.setId(found.getId()))
                         .doOnNext(entity -> entity.setImageId(found.getImageId()))
                         .doOnNext(entity -> entity.setProductId(found.getProductId())))
@@ -325,6 +310,7 @@ public class ProductServiceImpl implements ProductService {
                                             : productBundleService.deleteAllProductBundlesByProductId(found.getProductId()).then();
 
                                     return deleteBundles
+                                            .then(reviewLikeRepository.deleteByProductId(found.getProductId()))
                                             .then(ratingRepository.deleteRatingsByProductId(
                                                     found.getProductId()).then())
                                             // Clean up the owned image before deleting the product.
@@ -381,7 +367,7 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findProductByProductId(productId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(product -> {
-                    product.setRequestCount(product.getProductQuantity() - 1);
+                    product.setProductQuantity(product.getProductQuantity() - 1);
                     return productRepository.save(product).then();
                 });
     }

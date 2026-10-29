@@ -1,0 +1,80 @@
+<article class="profile-card">
+  <header class="profile-header">
+    <div class="avatar" aria-hidden="true">{{ initials() }}</div>
+    <div class="identity">
+      <p class="role" i18n="@@vets.profile.role">Vétérinaire</p>
+      <h2>{{ vet().firstName }} {{ vet().lastName }}</h2>
+      <span class="status" [class.inactive]="!vet().active">
+        <span class="status-dot" aria-hidden="true"></span>
+        @if (vet().active) {
+          <span i18n="@@vets.profile.active">Profil actif</span>
+        } @else {
+          <span i18n="@@vets.profile.inactive">Profil inactif</span>
+        }
+      </span>
+    </div>
+  </header>
+
+  <div class="profile-body">
+    <section>
+      <h3 i18n="@@vets.profile.specialties">Spécialités</h3>
+      @if (vet().specialties.length) {
+        <ul class="specialties">
+          @for (specialty of vet().specialties; track $index) {
+            <li>{{ specialtyLabel(specialty) }}</li>
+          }
+        </ul>
+      } @else {
+        <p class="muted" i18n="@@vets.profile.no_specialties">Aucune spécialité renseignée.</p>
+      }
+    </section>
+
+    <section>
+      <h3 i18n="@@vets.profile.about">À propos</h3>
+      @if (vet().biography) {
+        <p>{{ vet().biography }}</p>
+      } @else {
+        <p class="muted" i18n="@@vets.profile.no_biography">Biographie non renseignée.</p>
+      }
+    </section>
+
+    <section>
+      <h3 i18n="@@vets.profile.contact">Coordonnées</h3>
+      <dl class="contact-details">
+        <div>
+          <dt i18n="@@vets.profile.email">Courriel</dt>
+          <dd>
+            @if (vet().email) {
+              {{ vet().email }}
+            } @else {
+              <span class="muted" i18n="@@vets.profile.no_email">Courriel non renseigné</span>
+            }
+          </dd>
+        </div>
+        <div>
+          <dt i18n="@@vets.profile.phone">Téléphone</dt>
+          <dd>
+            @if (vet().phoneNumber) {
+              {{ vet().phoneNumber }}
+            } @else {
+              <span class="muted" i18n="@@vets.profile.no_phone">Téléphone non renseigné</span>
+            }
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="hours">
+      <h3 i18n="@@vets.profile.hours">Heures de travail</h3>
+      @if (vet().workingHours.length) {
+        <ul>
+          @for (hours of vet().workingHours; track $index) {
+            <li>{{ hours }}</li>
+          }
+        </ul>
+      } @else {
+        <p class="muted" i18n="@@vets.profile.no_hours">Horaire non renseigné.</p>
+      }
+    </section>
+  </div>
+</article>

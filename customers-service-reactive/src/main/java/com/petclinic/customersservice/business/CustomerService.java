@@ -17,10 +17,10 @@ public interface CustomerService {
     Mono<CustomerResponseDTO> addCustomer(Mono<CustomerRequestDTO> customerRequestDTO);
     Mono<CustomerResponseDTO> updateCustomer(Mono<CustomerRequestDTO> customerRequestDTO, String customerId);
     Mono<CustomerResponseDTO> updateCustomerPhoto(String customerId, FileRequestDTO photo);
-    Mono<Void> deleteCustomer(String customerId);
-
-
     Mono<CustomerResponseDTO> deleteCustomerByCustomerId(String customerId);
     Mono<CustomerResponseDTO> deleteCustomerPhoto(String customerId);
+    Mono<CustomerResponseDTO> softDeleteCustomerByCustomerId(String customerId);
+    Flux<CustomerResponseDTO> getSoftDeletedCustomers();
+    Mono<CustomerResponseDTO> reactivateCustomerByCustomerId(String customerId);
 }
 

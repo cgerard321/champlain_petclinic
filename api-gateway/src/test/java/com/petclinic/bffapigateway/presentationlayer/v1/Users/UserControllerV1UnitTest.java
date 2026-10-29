@@ -73,7 +73,7 @@ class UserControllerV1UnitTest {
     private final String EXISTING_USER_ID_1 = "be08dfa1-25d4-4352-92df-5dc37c2464c7";
     private final String EXISTING_USER_ID_2 = "be08dfa1-25d4-4352-92df-5dc37c2464c7";
     private final String NON_EXISTING_USER_ID = "be08dfa1-25d4-4352-92df-5dc37c246md8";
-    private final List<String> ROLES_LIST = List.of("OWNER");
+    private final List<String> ROLES_LIST = List.of("CUST");
 
     private final String UPDATED_USERNAME = "updatedTestUser";
 
@@ -193,7 +193,7 @@ class UserControllerV1UnitTest {
     @Test
     void whenUpdateUsername_thenReturnUpdatedUsername() {
         when(authServiceClient.updateUsername(EXISTING_USER_ID_1, UPDATED_USERNAME, TOKEN))
-                .thenReturn(Mono.just(UPDATED_USERNAME));
+                .thenReturn(Mono.just(ResponseEntity.ok(UPDATED_USERNAME)));
 
         client.patch()
                 .uri("/api/gateway/users/{userId}/username", EXISTING_USER_ID_1)
@@ -205,13 +205,17 @@ class UserControllerV1UnitTest {
                 .expectBody(String.class)
                 .value(username -> assertEquals(UPDATED_USERNAME, username));
 
-        verify(authServiceClient).updateUsername(EXISTING_USER_ID_1, UPDATED_USERNAME, TOKEN);
+        verify(authServiceClient).updateUsername(
+                EXISTING_USER_ID_1,
+                UPDATED_USERNAME,
+                TOKEN);
     }
 
     @Test
     void whenUpdateUsername_thenReturnNotFound() {
-        when(authServiceClient.updateUsername(EXISTING_USER_ID_1, UPDATED_USERNAME, TOKEN))
-                .thenReturn(Mono.empty());
+        doReturn(Mono.empty())
+                .when(authServiceClient)
+                .updateUsername(EXISTING_USER_ID_1, UPDATED_USERNAME, TOKEN);
 
         client.patch()
                 .uri("/api/gateway/users/{userId}/username", EXISTING_USER_ID_1)

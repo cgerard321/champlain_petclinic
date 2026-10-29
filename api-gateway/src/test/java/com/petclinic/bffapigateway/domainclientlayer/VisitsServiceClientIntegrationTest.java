@@ -37,6 +37,7 @@ import java.time.LocalDateTime;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -1309,4 +1310,77 @@ class VisitsServiceClientIntegrationTest {
     }
 
 
+    @Test
+    void confirmFollowUpVisit_thenReturnConfirmedVisit() throws JsonProcessingException {
+        VisitResponseDTO confirmed = VisitResponseDTO.builder().visitId("V002").followUpOfVisitId("V001").status(Status.CONFIRMED).build();
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(confirmed)));
+
+        StepVerifier.create(visitsServiceClient.confirmFollowUpVisit("V002"))
+                .expectNextMatches(visit -> visit.getStatus() == Status.CONFIRMED
+                        && "V001".equals(visit.getFollowUpOfVisitId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void confirmFollowUpVisit_4xx_throwsBadRequestException_withServerMessage() {
+        server.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"A visit can't be changed less than 24 hours before it starts.\"}"));
+
+        StepVerifier.create(visitsServiceClient.confirmFollowUpVisit("V002"))
+                .expectErrorMatches(ex -> ex instanceof BadRequestException
+                        && ex.getMessage().contains("24 hours"))
+                .verify();
+    }
+
+    @Test
+    void rescheduleFollowUpVisit_thenReturnRescheduledVisit() throws JsonProcessingException {
+        LocalDateTime newDate = LocalDateTime.of(2030, 1, 15, 9, 0);
+        VisitResponseDTO rescheduled = VisitResponseDTO.builder().visitId("V002").visitDate(newDate).status(Status.UPCOMING).build();
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(rescheduled)));
+
+        StepVerifier.create(visitsServiceClient.rescheduleFollowUpVisit("V002", RescheduleRequestDTO.builder().visitDate(newDate).build()))
+                .expectNextMatches(visit -> newDate.equals(visit.getVisitDate()) && visit.getStatus() == Status.UPCOMING)
+                .verifyComplete();
+    }
+
+    @Test
+    void rescheduleFollowUpVisit_4xx_throwsBadRequestException_withServerMessage() {
+        server.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":\"The selected time slot is not available.\"}"));
+
+        StepVerifier.create(visitsServiceClient.rescheduleFollowUpVisit("V002",
+                        RescheduleRequestDTO.builder().visitDate(LocalDateTime.of(2030, 1, 15, 9, 0)).build()))
+                .expectErrorMatches(ex -> ex instanceof BadRequestException
+                        && ex.getMessage().contains("not available"))
+                .verify();
+    }
+    @Test
+    void sendWeeklyScheduleEmail_postsToPractitionerScheduleEndpoint() throws Exception {
+        while (server.takeRequest(10, TimeUnit.MILLISECONDS) != null) {
+            // Discard request records left behind by earlier tests using this shared server.
+        }
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("\"Message queued\""));
+
+        StepVerifier.create(visitsServiceClient.sendWeeklyScheduleEmail("vet-1"))
+                .expectNext("\"Message queued\"")
+                .verifyComplete();
+
+        okhttp3.mockwebserver.RecordedRequest request = server.takeRequest();
+        assertEquals("POST", request.getMethod());
+        assertEquals("/visits/practitioner/vet-1/weekly-email", request.getPath());
+    }
 }

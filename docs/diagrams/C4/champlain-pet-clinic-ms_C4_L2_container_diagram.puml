@@ -49,6 +49,7 @@ Person(admin, "Admin", "An employee of the Champlain Pet Clinic responsible for 
 Person(customer, "Customer", "A customer of the Champlain Pet Clinic.")
 
 Container_Ext(minio, "Bucket Storage", "Minio", "Stores uploaded files externally")
+System_Ext(smtp_gmail, "Gmail SMTP", "smtp.gmail.com:587", "Delivers outbound application email")
 
 System_Boundary(c1, "Champlain Pet Clinic System"){
 
@@ -71,11 +72,11 @@ together {
     Container(customers_service, "customers-service", "Java, Spring Boot", "Provides customer functionality which includes owners, pets, and types.", $sprite="spring_original", $tags = "microService-java")
     Container(inventory_service, "inventory-service", "Java, Spring Boot", "Provides medical inventory functionality.", $sprite="spring_original", $tags = "microService-java")
     Container(vets_service, "vets-service", "Java, Spring Boot", "Provides veterinarian functionality.", $sprite="spring_original", $tags = "microService-java")
-    Container(visits_service, "visits-service", "Java, Spring Boot", "Provides appointment booking functionality. Includes its own mail service", $sprite="spring_original", $tags = "microService-java")
+    Container(visits_service, "visits-service", "Java, Spring Boot", "Provides appointment booking functionality and sends manual or scheduled weekly visit schedules by email.", $sprite="spring_original", $tags = "microService-java")
     Container(billing_service, "billing-service", "Java, Spring Boot", "Provides billing functionality.", $sprite="spring_original", $tags = "microService-java")
     Container(products_service, "products-service", "Java, Spring Boot", "Provides product management functionality for the online store.", $sprite="spring_original", $tags = "microService-java")
     Container(cart_service, "cart-service", "Java, Spring Boot", "Provides cart management functionality for the online store.", $sprite="spring_original", $tags = "microService-java")
-    Container(mailer_service, "mailer-service", "Go", "Provides email functionality for the auth-service.", $sprite="go", $tags = "microService-go")
+    Container(mailer_service, "mailer-service", "Go", "Delivers application emails, including weekly visit schedules, through SMTP.", $sprite="go", $tags = "microService-go")
 }
         ContainerDb(auth_db, "auth-db", "MySQL 5.7.x", "Stores user information.", $sprite="mysql" , $tags = "storage-mysql")
         ContainerDb(files_db, "files-db", "MySQL 5.7.x", "Stores files information.", $sprite="mysql" , $tags = "storage-mysql")
@@ -104,22 +105,27 @@ Rel(receptionist, angular_spa, "assists customers with appointment booking")
 Rel(receptionist, angular20_spa, "uses modern Angular 20 interface for customer assistance")
 Rel(veterinarian, angular_spa, "manages their availability")
 Rel(veterinarian, angular20_spa, "manages availability with modern Angular 20 interface")
+Rel(veterinarian, angular20_spa, "Requests this week's schedule by email")
 Rel(inventoryManager, angular_spa, "manages medical inventory")
 Rel(inventoryManager, angular20_spa, "manages inventory with modern Angular 20 interface")
 Rel(customer, react_spa, "views online store, veterinarian and appointment booking functionality")
 Rel(react_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(angular_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(angular20_spa, api_gateway, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(angular20_spa, api_gateway, "POST /api/gateway/visits/weekly-email", "JSON/REST/HTTPS")
 
 
 Rel(customers_service, files_service, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(visits_service, files_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(cart_service, files_service, "Makes API calls to", "JSON/REST/HTTPS")
 
 Rel(files_service, files_db, "Reads from and writes to", "JDCB/SQL/TCP", $tags="blue-line")
 Rel(files_service, minio, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(api_gateway, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(customers_service, customers_db, "Reads from and writes to", "Mongo/MQL/TCP")
+Rel(customers_service, cart_service, "Deletes customer cart when customer is deleted", "JSON/REST/HTTPS", $tags="green-line")
 Rel(api_gateway, inventory_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
+Rel(api_gateway, inventory_service, "Requests supply history: GET /{inventoryId}/products/{productId}/history", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(inventory_service, inventory_db, "Reads from and writes to", "Mongo/MQL/TCP")
 Rel(api_gateway, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(vets_service, vets_vets_db, "Reads from and writes to", "Mongo/MQL/TCP")
@@ -130,6 +136,8 @@ Rel(products_service, products_db, "Reads from and writes to", "Mongo/MQL/TCP")
 
 Rel(api_gateway, auth_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
 Rel(auth_service, mailer_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
+Rel(visits_service, mailer_service, "Submits manual and scheduled weekly schedule emails", "JSON/REST/HTTP", $tags="orange-line")
+Rel(mailer_service, smtp_gmail, "Sends email", "SMTP/587")
 Rel(auth_service, cart_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="blue-line")
 Rel(auth_service, auth_db, "Reads from and writes to", "JDCB/SQL/TCP", $tags="blue-line")
 Rel(api_gateway, billing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
@@ -140,10 +148,10 @@ Rel(api_gateway, cart_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="p
 Rel(cart_service, products_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="green-line")
 Rel(cart_service, cart_db, "Reads from and writes to", "Mongo/MQL/TCP", $tags="green-line")
 Rel(api_gateway, visits_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="purple-line")
-Rel(visits_service, visits_db, "Reads from and writes to", "Mongo/MQL/TCP", $tags="orange-line")
+Rel(visits_service, visits_db, "Reads/writes visits; weekly emails include UPCOMING and CONFIRMED visits", "Mongo/MQL/TCP", $tags="orange-line")
 Rel(visits_service, auth_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 Rel(visits_service, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
-Rel(visits_service, vets_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
+Rel(visits_service, vets_service, "Looks up vet profiles and email recipients for weekly schedules", "JSON/REST/HTTPS", $tags="orange-line")
 Rel(visits_service, billing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 
 

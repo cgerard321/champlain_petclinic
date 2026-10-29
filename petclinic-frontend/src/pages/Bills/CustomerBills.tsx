@@ -3,9 +3,11 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import BillsListTable from '@/features/bills/BillsListTable.tsx';
 import CurrentBalance from '@/features/bills/CurrentBalance';
 import { Currency } from '@/features/bills/utils/convertCurrency';
-import '@/features/bills/AdminBillsListTable.css';
+import './CustomerBills.css';
+import { useTranslation } from 'react-i18next';
 
 export default function CustomerBillingPage(): JSX.Element {
+  const { t } = useTranslation('bills');
   const [currency, setCurrency] = useState<Currency>('CAD');
   const [currencyOpen, setCurrencyOpen] = useState(false);
 
@@ -13,35 +15,42 @@ export default function CustomerBillingPage(): JSX.Element {
     try {
       window.dispatchEvent(new CustomEvent(name));
     } catch (e) {
-      // ignore in non-browser envs
+      // Ignore in non-browser environments.
     }
   };
 
   return (
     <div className="customer-bills-page">
       <NavBar />
-      <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start' }}>
-        <aside className="modern-sidebar">
-          <div className="sidebar-title">Options</div>
+
+      <div className="customer-bills-layout">
+        <aside className="modern-sidebar" aria-label={t('sidebar.ariaLabel')}>
+          <div className="sidebar-title">{t('sidebar.title')}</div>
+
           <div className="sidebar-button-container">
             <button
+              type="button"
               onClick={() => dispatchSidebarEvent('customerToggleStatusFilter')}
             >
-              Filter by Status
+              {t('buttons.filterStatus')}
             </button>
+
             <button
+              type="button"
               onClick={() => dispatchSidebarEvent('customerToggleAmountFilter')}
             >
-              Filter by Amount
+              {t('buttons.filterAmount')}
             </button>
+
             <button
+              type="button"
               onClick={() => dispatchSidebarEvent('customerToggleDateFilter')}
             >
-              Filter by Date
+              {t('buttons.filterDate')}
             </button>
           </div>
 
-          <div style={{ marginTop: '12px' }}>
+          <div className="customer-bills-currency">
             <div
               className="currency-dropdown"
               tabIndex={0}
@@ -52,11 +61,13 @@ export default function CustomerBillingPage(): JSX.Element {
                 className="currency-btn"
                 aria-haspopup="true"
                 aria-expanded={currencyOpen}
-                aria-label="Select currency"
+                aria-label={t('currency.ariaLabel')}
                 onClick={() => setCurrencyOpen(prev => !prev)}
               >
                 <span className="currency-label">
-                  <span className="currency-prefix">Currency:</span>
+                  <span className="currency-prefix">
+                    {t('buttons.currency')}
+                  </span>
                   <span className="currency-value">{currency}</span>
                 </span>
                 <span className="caret">▾</span>
@@ -76,6 +87,7 @@ export default function CustomerBillingPage(): JSX.Element {
                       CAD
                     </button>
                   </li>
+
                   <li>
                     <button
                       type="button"
@@ -94,19 +106,15 @@ export default function CustomerBillingPage(): JSX.Element {
           </div>
         </aside>
 
-        <main style={{ flex: 1 }}>
-          <div style={{ maxWidth: 820, marginLeft: '200px', width: '100%' }}>
-            <h1 style={{ textAlign: 'center' }}>Your Bills</h1>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                width: '100%',
-              }}
-            >
+        <main className="customer-bills-main">
+          <div className="customer-bills-content">
+            <h1 className="customer-bills-title">{t('title')}</h1>
+
+            <div className="customer-bills-balance">
               <CurrentBalance currency={currency} />
             </div>
-            <div style={{ marginTop: 18 }}>
+
+            <div className="customer-bills-list">
               <BillsListTable currency={currency} setCurrency={setCurrency} />
             </div>
           </div>

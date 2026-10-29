@@ -1,0 +1,51 @@
+{
+  "followUp": {
+    "label": "Follow-up",
+    "confirm": "Confirm",
+    "reschedule": "Reschedule",
+    "rescheduleTitle": "Reschedule Follow-up Visit",
+    "confirmReschedule": "Confirm New Time",
+    "noSlots": "No available times for this date.",
+    "confirmed": "Your follow-up visit is confirmed.",
+    "rescheduled": "Your follow-up visit has been rescheduled.",
+    "error": "This visit could not be updated. Please try again.",
+    "tooLate": "This follow-up visit can no longer be confirmed or rescheduled because it starts in less than 24 hours.",
+    "confirmedNote": "You confirmed this follow-up visit. See you then!",
+    "pet": "Pet",
+    "veterinarian": "Veterinarian",
+    "date": "Date",
+    "time": "Available time",
+    "loadingSlots": "Loading times...",
+    "slotsError": "Unable to load the available times.",
+    "dateRequired": "Date is required",
+    "timeRequired": "Time is required"
+  },
+  "calendar": {
+    "backToList": "Back to My Visits",
+    "title": "My Appointments",
+    "year": "Year",
+    "month": "Month",
+    "week": "Week",
+    "today": "Today",
+    "loading": "Loading your appointments...",
+    "retry": "Retry",
+    "userNotFound": "User not found. Please log in.",
+    "loadError": "Failed to load your visits. Please try again.",
+    "visitCount_one": "{{count}} visit",
+    "visitCount_other": "{{count}} visits",
+    "more_one": "+{{count}} more",
+    "more_other": "+{{count}} more",
+    "noAppointments": "No appointments",
+    "unknownPet": "Unknown Pet",
+    "vetName": "Dr. {{firstName}} {{lastName}}",
+    "emergency": "Emergency",
+    "vetNote": "Vet Note:",
+    "status": {
+      "UPCOMING": "Upcoming",
+      "CONFIRMED": "Confirmed",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled",
+      "ARCHIVED": "Archived"
+    }
+  }
+}

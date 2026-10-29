@@ -1,0 +1,40 @@
+.reviews-search-result-count {
+  font-size: 13px;
+  color: gray;
+}
+
+.search-input {
+  width: 100%;
+  margin-top: 12px;
+  min-width: 600px;
+  min-height: 45px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  text-align: left;
+}
+
+.review-category-ratings {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.review-category-rating {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) auto 35px;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-category-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.review-category-value {
+  font-size: 13px;
+  text-align: right;
+}

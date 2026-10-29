@@ -1,0 +1,73 @@
+<section class="vet-list-page">
+  <a class="back-link" routerLink="/vets" i18n="@@vets.list.back">Retour aux vétérinaires</a>
+
+  <header class="page-heading">
+    <p class="eyebrow" i18n="@@vets.eyebrow">Équipe vétérinaire</p>
+    <h1 i18n="@@vets.list.title">Répertoire des vétérinaires</h1>
+    <p class="page-description" i18n="@@vets.list.description">
+      Découvrez les profils, les spécialités et les horaires de notre équipe.
+    </p>
+  </header>
+
+  @if (loading()) {
+    <p role="status" i18n="@@vets.list.loading">Chargement des vétérinaires…</p>
+  } @else if (error()) {
+    <div class="empty-state">
+      <p role="alert">{{ error() }}</p>
+      <button type="button" (click)="load()" i18n="@@vets.actions.retry">Réessayer</button>
+    </div>
+  } @else {
+    <div class="search-container">
+      <input
+        type="search"
+        [value]="searchQuery()"
+        (input)="onSearch($event)"
+        placeholder="Rechercher par nom"
+        i18n-placeholder="@@vets.list.search_placeholder"
+        aria-label="Rechercher un vétérinaire par nom"
+        i18n-aria-label="@@vets.list.search_label"
+      />
+
+      <select
+        [value]="selectedSpecialty()"
+        (change)="onSpecialtyChange($event)"
+        aria-label="Filtrer par spécialité"
+        i18n-aria-label="@@vets.list.specialty_label"
+      >
+        <option value="" i18n="@@vets.list.all_specialties">Toutes les spécialités</option>
+        @for (name of specialties(); track name) {
+          <option [value]="name" [selected]="name === selectedSpecialty()">{{ name }}</option>
+        }
+      </select>
+
+      <button type="button" (click)="clearFilters()" i18n="@@vets.list.clear">
+        Effacer les filtres
+      </button>
+    </div>
+    <ul
+      class="profile-grid"
+      aria-label="Profils vétérinaires"
+      i18n-aria-label="@@vets.list.live_profiles_label"
+    >
+      @for (vet of filteredVets(); track vet.vetId) {
+        <li>
+          <app-vet-profile-card [vet]="vet" />
+          <a
+            class="profile-link"
+            [routerLink]="['/vets', vet.vetId]"
+            i18n="@@vets.actions.open_profile"
+            >Voir le profil de {{ vet.firstName }} {{ vet.lastName }}</a
+          >
+        </li>
+      } @empty {
+        @if (hasActiveFilters()) {
+          <li class="empty-state" role="status" i18n="@@vets.list.no_results">
+            Aucun vétérinaire trouvé
+          </li>
+        } @else {
+          <li class="empty-state" i18n="@@vets.list.empty">Aucun profil à afficher.</li>
+        }
+      }
+    </ul>
+  }
+</section>

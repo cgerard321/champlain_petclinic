@@ -1,7 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import {
   IsAdmin,
-  IsInventoryManager,
   IsCustomer,
   IsReceptionist,
   IsVet,
@@ -18,13 +17,14 @@ import { LanguageSwitcher } from '@/shared/components/language/LanguageSwitcher'
 // Uses centralized cart context
 import { useCart } from '@/context/CartContext';
 import { clinic } from '@/shared/content';
+import { useTranslation } from 'react-i18next';
 
 export function NavBar(): JSX.Element {
+  const { t } = useTranslation('home');
   const { user, logout } = useUser();
   const { cartCount, refreshFromAPI } = useCart();
   const navigate = useNavigate();
   const isAdmin = IsAdmin();
-  const isInventoryManager = IsInventoryManager();
   const isReceptionist = IsReceptionist();
   const isVet = IsVet();
   const isCustomer = IsCustomer();
@@ -85,10 +85,10 @@ export function NavBar(): JSX.Element {
         >
           <Nav className="me-auto">
             <Nav.Link as={Link} to={AppRoutePaths.Home}>
-              Home
+              {t('nav.home')}
             </Nav.Link>
             <Nav.Link as={Link} to={AppRoutePaths.Products}>
-              Shop
+              {t('nav.shop')}
             </Nav.Link>
             {
               // check if user is logged in
@@ -97,17 +97,20 @@ export function NavBar(): JSX.Element {
               <>
                 {(isAdmin || isVet) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Vet}>
-                    Veterinarians
+                    {t('nav.vets')}
                   </Nav.Link>
                 )}
                 {(isAdmin || isVet || isReceptionist) && (
-                  <NavDropdown title="Customers" id="customers-dropdown">
+                  <NavDropdown
+                    title={t('nav.customers')}
+                    id="customers-dropdown"
+                  >
                     {(isAdmin || isVet) && (
                       <NavDropdown.Item
                         as={Link}
                         to={AppRoutePaths.AllCustomers}
                       >
-                        Customers List
+                        {t('nav.customersList')}
                       </NavDropdown.Item>
                     )}
                     {(isAdmin || isReceptionist) && (
@@ -115,101 +118,89 @@ export function NavBar(): JSX.Element {
                         as={Link}
                         to={AppRoutePaths.AddingCustomer}
                       >
-                        Add Customer
+                        {t('nav.addCustomer')}
                       </NavDropdown.Item>
                     )}
                   </NavDropdown>
                 )}
-                {isAdmin && (
-                  <NavDropdown title="Users" id="users-dropdown">
-                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllUsers}>
-                      Users List
-                    </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllRoles}>
-                      Roles List
-                    </NavDropdown.Item>
-                  </NavDropdown>
-                )}
-                {!isAdmin &&
-                  !isInventoryManager &&
-                  !isVet &&
-                  !isReceptionist && (
-                    <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
-                      Bills
-                    </Nav.Link>
-                  )}
                 {isCustomer && !hasStaffVisits && (
-                  <NavDropdown title="Visits" id="customer-visits-dropdown">
+                  <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
+                    {t('nav.bills')}
+                  </Nav.Link>
+                )}
+                {isCustomer && !hasStaffVisits && (
+                  <NavDropdown
+                    title={t('nav.visits')}
+                    id="customer-visits-dropdown"
+                  >
                     <NavDropdown.Item
                       as={Link}
                       to={AppRoutePaths.CustomerVisits}
                     >
-                      List View
+                      {t('nav.listView')}
                     </NavDropdown.Item>
                     <NavDropdown.Item
                       as={Link}
                       to={AppRoutePaths.CustomerVisitsCalendar}
                     >
-                      Calendar View
+                      {t('nav.calendarView')}
                     </NavDropdown.Item>
                   </NavDropdown>
                 )}
                 {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.AdminBills}>
-                    Bills
+                    {t('nav.bills')}
                   </Nav.Link>
                 )}
                 {(isAdmin || isReceptionist) && (
-                  <NavDropdown title="Visits" id="staff-visits-dropdown">
+                  <NavDropdown
+                    title={t('nav.visits')}
+                    id="staff-visits-dropdown"
+                  >
                     <NavDropdown.Item as={Link} to={AppRoutePaths.Visits}>
-                      List View
+                      {t('nav.listView')}
                     </NavDropdown.Item>
                     <NavDropdown.Item
                       as={Link}
                       to={AppRoutePaths.VisitsCalendar}
                     >
-                      Calendar View
+                      {t('nav.calendarView')}
                     </NavDropdown.Item>
                   </NavDropdown>
                 )}
                 {isVet && (
-                  <NavDropdown title="Visits" id="vet-visits-dropdown">
+                  <NavDropdown title={t('nav.visits')} id="vet-visits-dropdown">
                     <NavDropdown.Item as={Link} to={AppRoutePaths.Visits}>
-                      List View
+                      {t('nav.listView')}
                     </NavDropdown.Item>
                     <NavDropdown.Item
                       as={Link}
                       to={AppRoutePaths.VisitsCalendar}
                     >
-                      Calendar View
+                      {t('nav.calendarView')}
                     </NavDropdown.Item>
                     <NavDropdown.Divider />
                     <NavDropdown.Item
                       as={Link}
                       to={AppRoutePaths.CustomerVisits}
                     >
-                      My Schedule
+                      {t('nav.mySchedule')}
                     </NavDropdown.Item>
                   </NavDropdown>
                 )}
-                {(isInventoryManager || isAdmin) && (
-                  <Nav.Link as={Link} to={AppRoutePaths.Inventories}>
-                    Inventories
-                  </Nav.Link>
-                )}
                 {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.Promos}>
-                    Promos
+                    {t('nav.promos')}
                   </Nav.Link>
                 )}
                 {!isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerPromos}>
-                    Promos
+                    {t('nav.promos')}
                   </Nav.Link>
                 )}
                 {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.Carts}>
-                    Carts
+                    {t('nav.carts')}
                   </Nav.Link>
                 )}
                 {isCustomer && (
@@ -221,13 +212,15 @@ export function NavBar(): JSX.Element {
                     }}
                     aria-busy={cartLoading}
                     className={`cart-link${cartCount === 0 ? ' cart-empty' : ''}`}
-                    title={cartLoading ? 'Loading cart...' : 'View Cart'}
+                    title={
+                      cartLoading ? t('nav.loadingCart') : t('nav.viewCart')
+                    }
                   >
-                    <FaShoppingCart aria-label="Shopping Cart" />
+                    <FaShoppingCart aria-label={t('nav.shoppingCart')} />
                     {cartCount > 0 && (
                       <span
                         className="cart-badge"
-                        aria-label={`Cart has ${cartCount} items`}
+                        aria-label={t('nav.cartHasItems', { count: cartCount })}
                       >
                         {cartCount}
                       </span>
@@ -242,45 +235,46 @@ export function NavBar(): JSX.Element {
             {user.userId ? (
               <NavDropdown title={user.username} id="user-dropdown">
                 {isCustomer && (
-                  <NavDropdown.Item
-                    as={Link}
-                    to={AppRoutePaths.CustomerProfile}
-                  >
-                    Profile
-                  </NavDropdown.Item>
-                )}
-                {isCustomer && (
-                  <NavDropdown.Item
-                    as={Link}
-                    to={AppRoutePaths.CustomerProfileEdit}
-                  >
-                    Edit Profile
-                  </NavDropdown.Item>
+                  <>
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.CustomerProfile}
+                    >
+                      {t('nav.profile')}
+                    </NavDropdown.Item>
+
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.CustomerOrderHistory}
+                    >
+                      {t('nav.orderHistory')}
+                    </NavDropdown.Item>
+                  </>
                 )}
                 {isAdmin && (
                   <NavDropdown.Item as={Link} to={AppRoutePaths.Home}>
-                    Admin Panel
+                    {t('nav.adminPanel')}
                   </NavDropdown.Item>
                 )}
                 {isReceptionist && (
                   <NavDropdown.Item as={Link} to={AppRoutePaths.AddingCustomer}>
-                    Receptionist Panel
+                    {t('nav.receptionistPanel')}
                   </NavDropdown.Item>
                 )}
                 <NavDropdown.Item
                   onClick={() => void logoutUser()}
                   style={{ cursor: 'pointer' }}
                 >
-                  Logout
+                  {t('nav.logout')}
                 </NavDropdown.Item>
               </NavDropdown>
             ) : (
               <>
                 <Nav.Link as={Link} to={AppRoutePaths.SignUp}>
-                  Signup
+                  {t('nav.signup')}
                 </Nav.Link>
                 <Nav.Link as={Link} to={AppRoutePaths.Login}>
-                  Login
+                  {t('nav.login')}
                 </Nav.Link>
               </>
             )}

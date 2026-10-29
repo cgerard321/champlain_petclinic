@@ -1,131 +1,68 @@
 <div class="inventory-page">
-  <h1>Inventory</h1>
-
-  <section class="inventory-filters" aria-label="Filter inventories">
-    <div class="filter-heading">
-      <div>
-        <h2>Find an inventory</h2>
-        <p>Filter by name, type, or description.</p>
-      </div>
-
+  <div class="page-header">
+    <h1 i18n="@@inventory.title">Inventaire</h1>
+    @if (can().canCreateInventory) {
       <button
-        class="clear-filters-button"
         type="button"
-        (click)="clearFilters()"
-        [disabled]="!hasActiveFilters()"
+        class="add-inventory-button"
+        [disabled]="savingInventory() || inventoryTypesLoading()"
+        (click)="openAddDialog()"
       >
-        Clear filters
+        {{ savingInventory() ? savingLabel : addInventoryLabel }}
       </button>
-    </div>
+    }
+  </div>
 
-    <div class="inventory-filter-grid">
-      <label class="filter-field">
-        <span>Inventory name</span>
-        <input
-          type="search"
-          placeholder="Search by name"
-          [value]="filters().inventoryName"
-          (input)="setTextFilter('inventoryName', $event)"
-        />
-      </label>
-
-      <label class="filter-field">
-        <span>Inventory type</span>
-        <select
-          [value]="filters().inventoryType"
-          [disabled]="inventoryTypesLoading() || !!inventoryTypesError()"
-          (change)="setInventoryTypeFilter($event)"
-        >
-          <option value="">
-            {{ inventoryTypesLoading() ? 'Loading types…' : 'All types' }}
-          </option>
-
-          @for (type of inventoryTypes(); track type.typeId) {
-            <option [value]="type.type">{{ type.type }}</option>
-          }
-        </select>
-
-        @if (inventoryTypesError(); as typeError) {
-          <span class="filter-error" role="status">{{ typeError }}</span>
-        }
-      </label>
-
-      <label class="filter-field">
-        <span>Description</span>
-        <input
-          type="search"
-          placeholder="Search by description"
-          [value]="filters().inventoryDescription"
-          (input)="setTextFilter('inventoryDescription', $event)"
-        />
-      </label>
-    </div>
-
-    <div class="filter-footer">
-      <label class="important-filter">
-        <input
-          type="checkbox"
-          [checked]="filters().importantOnly"
-          [disabled]="isSavingAnyFavorite()"
-          (change)="setImportantOnly($event)"
-        />
-        <span>Favorites only</span>
-      </label>
-    </div>
-  </section>
-
-  @if (favoriteError(); as saveError) {
-    <p class="favorite-error" role="alert">{{ saveError }}</p>
+  @if (formError(); as error) {
+    <p class="field-error" role="alert">{{ error }}</p>
   }
 
-  @if (isLoading()) {
+  @if (!can().hasAnyAccess) {
     <div class="state-container">
-      <mat-spinner diameter="40" />
-      <p>Loading inventories…</p>
-    </div>
-  } @else if (errorMessage(); as err) {
-    <div class="state-container">
-      <mat-icon color="warn">error_outline</mat-icon>
-      <p>{{ err.message }}</p>
-    </div>
-  } @else if (noResultsMessage(); as message) {
-    <div class="state-container no-results-state" role="status">
-      <div class="no-results-icon">
-        <mat-icon>search_off</mat-icon>
-      </div>
-      <h2>No matching inventory</h2>
-      <p>{{ message }}</p>
-      <button class="clear-filters-button" type="button" (click)="clearFilters()">
-        Clear filters
-      </button>
-    </div>
-  } @else if (inventories().length === 0) {
-    <div class="state-container">
-      <mat-icon>inventory_2</mat-icon>
-      <h2>No inventories available</h2>
-      <p>
-        {{
-          filters().importantOnly
-            ? 'No favorite inventories found.'
-            : 'There are no inventories to display right now.'
-        }}
+      <mat-icon color="warn">block</mat-icon>
+      <p i18n="@@inventory.access.denied">
+        L'accès à l'inventaire n'est pas disponible pour votre rôle.
       </p>
     </div>
   } @else {
-    <div class="inventory-grid">
-      @for (inventory of inventories(); track inventory.inventoryId) {
-        <div class="inventory-card-wrapper">
-          <a
-            class="inventory-card-link"
-            [routerLink]="['/invt', inventory.inventoryId, 'supplies']"
+    <section
+      class="inventory-filters"
+      aria-label="Filtrer les inventaires"
+      i18n-aria-label="@@inventory.filters.aria"
+    >
+      <div class="filter-heading">
+        <div>
+          <h2 i18n="@@inventory.filters.heading">Trouver un inventaire</h2>
+          <p i18n="@@inventory.filters.help">Filtrer par nom, type ou description.</p>
+        </div>
+        <button
+          class="clear-filters-button"
+          type="button"
+          (click)="clearFilters()"
+          [disabled]="!hasActiveFilters()"
+        >
+          <ng-container i18n="@@inventory.filters.clear">Effacer les filtres</ng-container>
+        </button>
+      </div>
+
+      <div class="inventory-filter-grid">
+        <label class="filter-field">
+          <span i18n="@@inventory.fields.name">Nom de l'inventaire</span>
+          <input
+            type="search"
+            placeholder="Rechercher par nom"
+            i18n-placeholder="@@inventory.filters.namePlaceholder"
+            [value]="filters().inventoryName"
+            (input)="setTextFilter('inventoryName', $event)"
+          />
+        </label>
+        <label class="filter-field">
+          <span i18n="@@inventory.fields.type">Type d'inventaire</span>
+          <select
+            [value]="filters().inventoryType"
+            [disabled]="inventoryTypesLoading() || !!inventoryTypesError()"
+            (change)="setInventoryTypeFilter($event)"
           >
-<<<<<<< Updated upstream
-            <mat-card appearance="outlined" class="inventory-card">
-              <mat-card-header>
-                <mat-card-title>{{ inventory.inventoryName }}</mat-card-title>
-                <mat-card-subtitle>{{ inventory.inventoryType }}</mat-card-subtitle>
-              </mat-card-header>
-=======
             <option value="">
               {{ inventoryTypesLoading() ? loadingTypesLabel : allTypesLabel }}
             </option>
@@ -148,6 +85,7 @@
           />
         </label>
       </div>
+
       <div class="filter-footer">
         <label class="important-filter">
           <input
@@ -171,18 +109,14 @@
         </label>
       </div>
     </section>
->>>>>>> Stashed changes
 
-              <mat-card-content>
-                <p>{{ inventory.inventoryDescription }}</p>
+    @if (favoriteError(); as saveError) {
+      <p class="favorite-error" role="alert">{{ saveError }}</p>
+    }
+    @if (deleteError(); as delErr) {
+      <p class="field-error" role="alert">{{ delErr }}</p>
+    }
 
-<<<<<<< Updated upstream
-                <p class="quantity">
-                  @if (quantityFor(inventory.inventoryId) !== null) {
-                    {{ quantityFor(inventory.inventoryId) }} items in stock
-                  } @else {
-                    Quantity unavailable
-=======
     @if (isLoading()) {
       <div class="state-container">
         <mat-spinner diameter="40" />
@@ -238,15 +172,13 @@
             >
               <mat-card appearance="outlined" class="inventory-card">
                 <mat-card-header>
-                  <mat-card-title>{{
-                    localizedInventoryName(inventory.inventoryName)
-                  }}</mat-card-title>
+                  <mat-card-title>{{ localizedInventoryName(inventory) }}</mat-card-title>
                   <mat-card-subtitle>{{
                     localizedInventoryType(inventory.inventoryType)
                   }}</mat-card-subtitle>
                 </mat-card-header>
                 <mat-card-content>
-                  <p>{{ localizedInventoryDescription(inventory.inventoryDescription) }}</p>
+                  <p>{{ localizedInventoryDescription(inventory) }}</p>
                   <p class="quantity">
                     @if (quantityFor(inventory.inventoryId) !== null) {
                       {{ stockQuantityLabel(inventory.inventoryId) }}
@@ -285,61 +217,52 @@
                         </button>
                       }
                     </div>
->>>>>>> Stashed changes
                   }
-                </p>
-              </mat-card-content>
-            </mat-card>
-          </a>
+                </mat-card-content>
+              </mat-card>
+            </a>
+            <button
+              type="button"
+              class="favorite-button"
+              [class.is-favorite]="inventory.important"
+              [disabled]="
+                !canManageFavorites() || isLoading() || isSavingFavorite(inventory.inventoryId)
+              "
+              [attr.aria-pressed]="!!inventory.important"
+              [attr.aria-label]="favoriteAriaLabel(inventory)"
+              (click)="toggleFavorite(inventory)"
+            >
+              <mat-icon aria-hidden="true">{{
+                inventory.important ? 'star' : 'star_border'
+              }}</mat-icon>
+            </button>
+          </div>
+        }
+      </div>
+    }
 
-          <button
-            type="button"
-            class="favorite-button"
-            [class.is-favorite]="inventory.important"
-            [disabled]="
-              !canManageFavorites() || isLoading() || isSavingFavorite(inventory.inventoryId)
-            "
-            [attr.aria-pressed]="!!inventory.important"
-            [attr.aria-label]="
-              (inventory.important ? 'Remove favorite: ' : 'Add favorite: ') +
-              inventory.inventoryName
-            "
-            (click)="toggleFavorite(inventory)"
-          >
-            <mat-icon aria-hidden="true">
-              {{ inventory.important ? 'star' : 'star_border' }}
-            </mat-icon>
-          </button>
-        </div>
-      }
-    </div>
-
-    <nav class="inventory-pagination" aria-label="Inventory pages">
+    <nav
+      class="inventory-pagination"
+      aria-label="Pages de l'inventaire"
+      i18n-aria-label="@@inventory.pagination.aria"
+    >
       <button
         class="pagination-button"
         type="button"
-<<<<<<< Updated upstream
-        aria-label="Previous page"
-        [disabled]="currentPage() === 0 || isLoading()"
-=======
         aria-label="Page précédente"
         i18n-aria-label="@@inventory.pagination.previous"
         [disabled]="currentPage() === 0 || isLoading() || countSortBlocked()"
->>>>>>> Stashed changes
         (click)="goToPreviousPage()"
       >
         &lt;
       </button>
-
-      <span class="pagination-current" aria-current="page">
-        {{ currentPage() + 1 }}
-      </span>
-
+      <span class="pagination-current" aria-current="page">{{ currentPage() + 1 }}</span>
       <button
         class="pagination-button"
         type="button"
-        aria-label="Next page"
-        [disabled]="!canGoToNextPage() || isLoading()"
+        aria-label="Page suivante"
+        i18n-aria-label="@@inventory.pagination.next"
+        [disabled]="!canGoToNextPage() || isLoading() || countSortBlocked()"
         (click)="goToNextPage()"
       >
         &gt;

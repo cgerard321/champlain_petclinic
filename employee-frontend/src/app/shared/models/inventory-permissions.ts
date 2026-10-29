@@ -1,6 +1,5 @@
 import { Roles } from '@shared/models/roles';
 
-
 export interface InventoryPermissions {
   hasAnyAccess: boolean;
 
@@ -74,8 +73,10 @@ export function getInventoryPermissions(roles: readonly string[]): InventoryPerm
   if (roles.includes(Roles.admin) || roles.includes(Roles.inventoryManager)) {
     return FULL_ACCESS;
   }
+
   if (roles.includes(Roles.vet)) {
     return VET_ACCESS;
   }
+
   return NO_ACCESS;
 }

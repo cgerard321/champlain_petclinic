@@ -12,6 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -728,6 +729,71 @@ public class CustomerServiceClientIntegrationTest {
         RecordedRequest request = server.takeRequest();
         assertEquals("/customers/" + CUSTOMER_ID, request.getPath());
         assertEquals("DELETE", request.getMethod());
+    }
+
+    @Test
+    void whenSoftDeleteCustomer_thenCallSoftEndpointAndComplete() throws Exception {
+        server.enqueue(new MockResponse().setResponseCode(204));
+
+        StepVerifier.create(customersServiceClient.softDeleteCustomer(CUSTOMER_ID))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/customers/" + CUSTOMER_ID + "/soft", request.getPath());
+        assertEquals("DELETE", request.getMethod());
+    }
+
+    @Test
+    void whenSoftDeleteCustomer_withCustomerNotFound_thenThrowNotFoundException() {
+        server.enqueue(new MockResponse().setResponseCode(404));
+
+        StepVerifier.create(customersServiceClient.softDeleteCustomer(CUSTOMER_ID))
+                .expectErrorMatches(error -> error instanceof NotFoundException &&
+                        error.getMessage().equals("Customer id not found: " + CUSTOMER_ID))
+                .verify();
+    }
+
+    @Test
+    void whenGetSoftDeletedCustomers_thenCallSoftDeletedEndpointAndReturnCustomers() throws Exception {
+        final String body = mapper.writeValueAsString(List.of(TEST_CUSTOMER_RESPONSE));
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        StepVerifier.create(customersServiceClient.getSoftDeletedCustomers())
+                .expectNextMatches(customer -> customer.getCustomerId().equals(CUSTOMER_ID))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/customers/soft-deleted", request.getPath());
+        assertEquals("GET", request.getMethod());
+    }
+
+    @Test
+    void whenReactivateCustomer_thenCallReactivateEndpointAndReturnCustomer() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(TEST_CUSTOMER_RESPONSE)));
+
+        StepVerifier.create(customersServiceClient.reactivateCustomer(CUSTOMER_ID))
+                .expectNextMatches(customer -> customer.getCustomerId().equals(CUSTOMER_ID))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/customers/" + CUSTOMER_ID + "/reactivate", request.getPath());
+        assertEquals("PATCH", request.getMethod());
+    }
+
+    @Test
+    void whenReactivateCustomer_withCustomerNotFound_thenThrowNotFoundException() {
+        server.enqueue(new MockResponse().setResponseCode(404));
+
+        StepVerifier.create(customersServiceClient.reactivateCustomer(CUSTOMER_ID))
+                .expectErrorMatches(error -> error instanceof NotFoundException &&
+                        error.getMessage().equals("Soft-deleted customer not found: " + CUSTOMER_ID))
+                .verify();
     }
 
     @Test

@@ -1,3 +1,11 @@
+:host {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .dialog-header {
   display: flex;
   align-items: center;
@@ -9,26 +17,75 @@
   margin: 0;
 }
 
+.dialog-close-button {
+  align-items: center;
+  background-color: transparent;
+  border-radius: 50%;
+  border: 0;
+  box-sizing: border-box;
+  color: inherit;
+  display: flex;
+  height: 48px;
+  justify-content: center;
+  padding: 0;
+  width: 48px;
+}
+
 .promo-form {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  width: 100%;
 }
 
 mat-dialog-content {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-height: min(68vh, 680px);
+  min-width: 0;
+  overflow: hidden auto;
   padding: 8px 24px 20px;
+  width: 100%;
 }
 
 .two-column {
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
+  min-width: 0;
+  width: 100%;
+}
+
+mat-form-field,
+.file-input {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+}
+
+.file-input {
+  max-width: 100%;
+}
+
+.file-label {
+  font-weight: 500;
+  margin-top: 8px;
 }
 
 mat-dialog-actions {
+  box-sizing: border-box;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  min-height: 68px;
   padding: 12px 24px 20px;
+  background: var(--mat-sys-surface, #fff);
+  border-top: 1px solid var(--mat-sys-outline-variant, #ddd);
+  width: 100%;
 }
 
 .error-message {
@@ -36,7 +93,49 @@ mat-dialog-actions {
 }
 
 @media (width <= 560px) {
+  :host {
+    width: 100%;
+  }
+
+  .dialog-header,
+  mat-dialog-content,
+  mat-dialog-actions {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   .two-column {
     grid-template-columns: 1fr;
   }
+}
+
+:host-context(.dark-mode) mat-dialog-actions {
+  background: var(--mat-sys-surface-container-high);
+}
+
+.image-editor {
+  box-sizing: border-box;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+.image-preview,
+.image-placeholder {
+  display: block;
+  width: 100%;
+  height: 180px;
+  border-radius: 8px;
+  background: var(--mat-sys-surface-container-low, #f5f5f5);
+}
+
+.image-preview {
+  object-fit: contain;
+}
+
+.image-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--mat-sys-on-surface-variant, #666);
 }

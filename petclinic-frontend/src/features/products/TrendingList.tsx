@@ -1,10 +1,13 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import Product from './components/Product';
 import { useUser } from '@/context/UserContext';
+import { addProductToRecentlyViewed } from './utils/recentlyViewed';
 
 export default function TrendingList(): JSX.Element {
+  const { t } = useTranslation('products');
   const [trendingList, setTrendingList] = useState<ProductModel[]>([]);
   const { user } = useUser();
 
@@ -17,30 +20,8 @@ export default function TrendingList(): JSX.Element {
   useEffect(() => {
     fetchProducts();
   }, []);
-  const addToRecentlyViewed = (product: ProductModel): void => {
-    if (!user?.userId) return;
-
-    const savedProducts = localStorage.getItem(
-      `recentlyClickedProducts_${user.userId}`
-    );
-    const currentProducts = savedProducts ? JSON.parse(savedProducts) : [];
-    const updatedProducts = currentProducts.filter(
-      (p: ProductModel) => p.productId !== product.productId
-    );
-
-    updatedProducts.unshift(product);
-
-    if (updatedProducts.length > 5) {
-      updatedProducts.pop();
-    }
-    localStorage.setItem(
-      `recentlyClickedProducts_${user.userId}`,
-      JSON.stringify(updatedProducts)
-    );
-  };
-
   const handleProductClick = (product: ProductModel): void => {
-    addToRecentlyViewed(product);
+    addProductToRecentlyViewed(product, user?.userId);
   };
 
   const topFourTrending = [...trendingList]
@@ -48,8 +29,13 @@ export default function TrendingList(): JSX.Element {
     .slice(0, 4);
 
   return (
-    <div className="products-section-container ">
-      <h2 className="section-title category-title">Trending</h2>
+    <div className="products-section-container shop-trending-section">
+      <div className="shop-section-heading">
+        <div>
+          <h2 className="section-title category-title">{t('trending')}</h2>
+          <p>{t('trendingHint')}</p>
+        </div>
+      </div>
       <div className="grid">
         {topFourTrending.map((product: ProductModel) => (
           <div

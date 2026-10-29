@@ -87,18 +87,18 @@ public class BFFApiGatewayController {
                 .onErrorResume(e -> Mono.just(ResponseEntity.badRequest().build()));
     }
 
-    //not for me to mess with
-    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN})
+    // Receptionists need customer bill lookup access for CPC-2181.
+    @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN, Roles.RECEPTIONIST})
     @GetMapping(value = "bills/customer/{customerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getBillsByOwnerId(final @PathVariable String customerId)
+    public Flux<BillResponseDTO> getBillsByCustomerId(final @PathVariable String customerId)
     {
-        return billServiceClient.getBillsByOwnerId(customerId);
+        return billServiceClient.getBillsByCustomerId(customerId);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "bills/owner/{ownerFirstName}/{ownerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getAllBillsByOwnerName(@PathVariable String ownerFirstName, @PathVariable String ownerLastName) {
-        return billServiceClient.getBillsByOwnerName(ownerFirstName, ownerLastName);
+    @GetMapping(value = "bills/customer/{customerFirstName}/{customerLastName}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllBillsByCustomerName(@PathVariable String customerFirstName, @PathVariable String customerLastName) {
+        return billServiceClient.getBillsByCustomerName(customerFirstName, customerLastName);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -122,7 +122,7 @@ public class BFFApiGatewayController {
 //        return visitsServiceClient.getAllVisits(description);
 //    }
 //
-//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.OWNER})
+//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.CUST})
 //    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
 //    @GetMapping(value = "visits/owners/{ownerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
 //    public Flux<VisitResponseDTO> getVisitsByOwnerId(@PathVariable String ownerId){
@@ -131,7 +131,7 @@ public class BFFApiGatewayController {
 //    }
 //
 //
-//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.OWNER})
+//    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.CUST})
 //    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
 //    @GetMapping(value = "visits/emergency/owners/{ownerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
 //    public Flux<EmergencyResponseDTO> getEmergencyVisitsByOwnerId(@PathVariable String ownerId){
@@ -354,7 +354,7 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.CUST})
     @DeleteMapping(value = "vets/{vetId}/ratings/{ratingId}")
     public Mono<ResponseEntity<Void>> deleteRatingByRatingId(@PathVariable String vetId,
                                                              @PathVariable String ratingId,
@@ -364,7 +364,7 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @DeleteMapping(value = "vets/{vetId}/ratings/customer")
     public Mono<ResponseEntity<Void>> deleteRatingByCustomer(@PathVariable String vetId,
                                                              @CookieValue("Bearer") String jwt){

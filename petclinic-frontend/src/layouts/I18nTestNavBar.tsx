@@ -112,16 +112,6 @@ export function I18nTestNavBar(): JSX.Element {
                     )}
                   </NavDropdown>
                 )}
-                {isAdmin && (
-                  <NavDropdown title={t('nav.users')} id="users-dropdown">
-                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllUsers}>
-                      {t('nav.usersList')}
-                    </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllRoles}>
-                      {t('nav.rolesList')}
-                    </NavDropdown.Item>
-                  </NavDropdown>
-                )}
                 {!isAdmin &&
                   !isInventoryManager &&
                   !isVet &&
@@ -189,11 +179,6 @@ export function I18nTestNavBar(): JSX.Element {
                       {t('nav.mySchedule')}
                     </NavDropdown.Item>
                   </NavDropdown>
-                )}
-                {(isInventoryManager || isAdmin) && (
-                  <Nav.Link as={Link} to={AppRoutePaths.Inventories}>
-                    {t('nav.inventories')}
-                  </Nav.Link>
                 )}
                 {isAdmin && (
                   <Nav.Link as={Link} to={AppRoutePaths.Promos}>

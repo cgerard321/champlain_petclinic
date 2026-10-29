@@ -88,10 +88,12 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
 
         if (userIDLessDTO.getDefaultRole() == null || userIDLessDTO.getDefaultRole().isEmpty()) {
-            log.info("No default role provided, setting default role to OWNER");
-            Optional<Role> role = roleRepo.findById(3L);
+            log.info("No default role provided, setting default role to CUST");
+            Role role = roleRepo.findRoleByName("CUST");
             Set<Role> roleSet = new HashSet<>();
-            role.ifPresent(roleSet::add);
+            if (role == null)
+                throw new NotFoundException("No role with name: CUST");
+            roleSet.add(role);
             user.setRoles(roleSet);
         } else {
             log.info("Default role provided, setting default role to {}", userIDLessDTO.getDefaultRole());
@@ -441,6 +443,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserPasswordLessDTO updateUserRole(String userId, RolesChangeRequestDTO roles, String token) {
+        if (!jwtService.getRolesFromToken(token).contains("ADMIN")) {
+            throw new ForbiddenException("Only administrators can change user roles");
+        }
+
         User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
 
         if (existingUser == null) {
@@ -492,7 +498,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String updateUserUsername(String userId, String username, String token) {
+    public User updateUserUsername(String userId, String username, String token) {
         User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
 
         if (existingUser == null) {
@@ -501,8 +507,8 @@ public class UserServiceImpl implements UserService {
         username = username.replace("{\"username\":\"", "");
         username = username.replace("\"}", "");
         existingUser.setUsername(username);
-        userRepo.save(existingUser);
-        return existingUser.getUsername();
+
+        return userRepo.save(existingUser);
     }
 
     @Override

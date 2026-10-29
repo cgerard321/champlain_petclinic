@@ -16,6 +16,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import java.util.UUID;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest
@@ -50,7 +51,7 @@ class RatingControllerV1IntegrationTest {
         String customerId = UUID.randomUUID().toString();
 
         ratingMock.stubFor(get(urlEqualTo("/ratings/%s".formatted(productId)))
-                .willReturn(okForContentType("text/event-stream;charset=UTF-8", "data:{\"rating\": 5, \"review\": \"It's great\"}\n\ndata: {\"rating\": 1, \"review\": \"Horrible\"}\n\n"))
+                .willReturn(okForContentType("text/event-stream;charset=UTF-8", "data:{\"rating\": 5, \"review\": \"It's great\", \"qualityRating\": 5, \"valueRating\": 4, \"petSatisfactionRating\": 5, \"ingredientsRating\": 4}\n\ndata: {\"rating\": 1, \"review\": \"Horrible\", \"qualityRating\": 2, \"valueRating\": 1, \"petSatisfactionRating\": 1, \"ingredientsRating\": 2}\n\n"))
         );
 
         authMock.stubFor(post(urlEqualTo("/users/validate-token"))
@@ -73,9 +74,49 @@ class RatingControllerV1IntegrationTest {
                 .expectBodyList(RatingResponseModel.class)
                 .value(ratingResponseModels -> {
                     assertNotNull(ratingResponseModels);
+                    assertEquals((byte) 5, ratingResponseModels.get(0).getQualityRating());
+                    assertEquals((byte) 4, ratingResponseModels.get(0).getValueRating());
+                    assertEquals((byte) 5, ratingResponseModels.get(0).getPetSatisfactionRating());
+                    assertEquals((byte) 4, ratingResponseModels.get(0).getIngredientsRating());
+                    assertEquals((byte) 2, ratingResponseModels.get(1).getQualityRating());
+                    assertEquals((byte) 1, ratingResponseModels.get(1).getValueRating());
+                    assertEquals((byte) 1, ratingResponseModels.get(1).getPetSatisfactionRating());
+                    assertEquals((byte) 2, ratingResponseModels.get(1).getIngredientsRating());
                 })
                 .hasSize(2);
 
+    }
+
+    @Test
+    void whenGetPersonalizedRatings_thenLikedStateIsReturned() {
+        String productId = UUID.randomUUID().toString();
+        String customerId = UUID.randomUUID().toString();
+
+        ratingMock.stubFor(get(urlEqualTo("/ratings/%s/for-user/%s".formatted(productId, customerId)))
+                .willReturn(okForContentType("text/event-stream;charset=UTF-8",
+                        "data:{\"rating\":5,\"review\":\"Great\",\"likeCount\":2," +
+                                "\"likedByCurrentUser\":true}\n\n")));
+
+        authMock.stubFor(post(urlEqualTo("/users/validate-token"))
+                .withCookie("Bearer", equalTo(jwtToken))
+                .willReturn(okForContentType("application/json", "{" +
+                        "\"token\": \"" + jwtToken + "\"" +
+                        ",\"userId\": \"" + customerId + "\"" +
+                        ",\"email\": \"some-email@example.com\"" +
+                        ",\"roles\": [\"ALL\"]" +
+                        "}")));
+
+        webTestClient.get()
+                .uri("/api/gateway/ratings/product/{productId}/personalized", productId)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .cookie("Bearer", jwtToken)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(RatingResponseModel.class)
+                .value(ratings -> {
+                    assertEquals(2L, ratings.get(0).getLikeCount());
+                    assertEquals(true, ratings.get(0).isLikedByCurrentUser());
+                });
     }
 
     @Test
@@ -84,7 +125,7 @@ class RatingControllerV1IntegrationTest {
         String customerId = UUID.randomUUID().toString();
 
         ratingMock.stubFor(get(urlEqualTo("/ratings/%s/%s".formatted(productId, customerId)))
-                .willReturn(okForContentType("application/json", "{\"rating\": 5, \"review\": \"It's great\"}"))
+                .willReturn(okForContentType("application/json", "{\"rating\": 5, \"review\": \"It's great\", \"qualityRating\": 5, \"valueRating\": 4, \"petSatisfactionRating\": 5, \"ingredientsRating\": 4}"))
         );
 
         authMock.stubFor(post(urlEqualTo("/users/validate-token"))
@@ -105,7 +146,11 @@ class RatingControllerV1IntegrationTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.rating").isEqualTo(5)
-                .jsonPath("$.review").isEqualTo("It's great");
+                .jsonPath("$.review").isEqualTo("It's great")
+                .jsonPath("$.qualityRating").isEqualTo(5)
+                .jsonPath("$.valueRating").isEqualTo(4)
+                .jsonPath("$.petSatisfactionRating").isEqualTo(5)
+                .jsonPath("$.ingredientsRating").isEqualTo(4);
     }
 
     @Test
@@ -137,9 +182,12 @@ class RatingControllerV1IntegrationTest {
         String customerId = UUID.randomUUID().toString();
 
         ratingMock.stubFor(post(urlEqualTo("/ratings/%s/%s".formatted(productId, customerId)))
-
-                .withRequestBody(matchingJsonSchema("{\"rating\": 3}"))
-                .willReturn(okForContentType("application/json", "{\"rating\": 3, \"review\": \"It's not bad neither good\"}"))
+                .withRequestBody(matchingJsonPath("$.rating", equalTo("3")))
+                .withRequestBody(matchingJsonPath("$.qualityRating", equalTo("5")))
+                .withRequestBody(matchingJsonPath("$.valueRating", equalTo("4")))
+                .withRequestBody(matchingJsonPath("$.petSatisfactionRating", equalTo("5")))
+                .withRequestBody(matchingJsonPath("$.ingredientsRating", equalTo("4")))
+                .willReturn(okForContentType("application/json", "{\"rating\": 3, \"review\": \"It's not bad neither good\", \"qualityRating\": 5, \"valueRating\": 4, \"petSatisfactionRating\": 5, \"ingredientsRating\": 4}"))
         );
 
         authMock.stubFor(post(urlEqualTo("/users/validate-token"))
@@ -159,12 +207,137 @@ class RatingControllerV1IntegrationTest {
                 .cookie("Bearer", jwtToken)
                 .cookie("XSRF-TOKEN", CSRF_TOKEN)
                 .header("X-XSRF-TOKEN", CSRF_TOKEN)
-                .bodyValue("{\"rating\": 3}")
+                .bodyValue("{\"rating\": 3, \"qualityRating\": 5, \"valueRating\": 4, \"petSatisfactionRating\": 5, \"ingredientsRating\": 4}")
                 .exchange()
                 .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.rating").isEqualTo(3)
-                .jsonPath("$.review").isEqualTo("It's not bad neither good");
+                .jsonPath("$.review").isEqualTo("It's not bad neither good")
+                .jsonPath("$.qualityRating").isEqualTo(5)
+                .jsonPath("$.valueRating").isEqualTo(4)
+                .jsonPath("$.petSatisfactionRating").isEqualTo(5)
+                .jsonPath("$.ingredientsRating").isEqualTo(4);
+    }
+
+    @Test
+    void whenLikeReview_thenAuthenticatedCustomerIsForwarded() {
+        String productId = UUID.randomUUID().toString();
+        String reviewCustomerId = UUID.randomUUID().toString();
+        String likingCustomerId = UUID.randomUUID().toString();
+
+        authMock.stubFor(post(urlEqualTo("/users/validate-token"))
+                .withCookie("Bearer", equalTo(jwtToken))
+                .willReturn(okForContentType("application/json", "{" +
+                        "\"token\": \"" + jwtToken + "\"" +
+                        ",\"userId\": \"" + likingCustomerId + "\"" +
+                        ",\"email\": \"some-email@example.com\"" +
+                        ",\"roles\": [\"ALL\"]" +
+                        "}")));
+
+        ratingMock.stubFor(post(urlEqualTo("/ratings/%s/%s/likes/%s".formatted(
+                        productId, reviewCustomerId, likingCustomerId)))
+                .willReturn(okForContentType("application/json",
+                        "{\"likeCount\":1,\"likedByCurrentUser\":true}")));
+
+        webTestClient.post()
+                .uri("/api/gateway/ratings/{productId}/{reviewCustomerId}/likes",
+                        productId, reviewCustomerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", jwtToken)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.likeCount").isEqualTo(1)
+                .jsonPath("$.likedByCurrentUser").isEqualTo(true);
+
+        ratingMock.verify(postRequestedFor(urlEqualTo("/ratings/%s/%s/likes/%s".formatted(
+                productId, reviewCustomerId, likingCustomerId))));
+    }
+
+    @Test
+    void whenLikeReviewWithInvalidToken_thenReturnUnauthorized() {
+        String productId = UUID.randomUUID().toString();
+        String reviewCustomerId = UUID.randomUUID().toString();
+
+        authMock.stubFor(post(urlEqualTo("/users/validate-token"))
+                .withCookie("Bearer", equalTo(jwtToken))
+                .willReturn(unauthorized())
+        );
+
+        webTestClient.post()
+                .uri("/api/gateway/ratings/{productId}/{reviewCustomerId}/likes",
+                        productId, reviewCustomerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", jwtToken)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
+                .exchange()
+                .expectStatus().isUnauthorized();
+
+        ratingMock.verify(0, postRequestedFor(urlPathMatching("/ratings/.*/likes/.*")));
+    }
+
+    @Test
+    void whenLikeReviewNotFound_thenReturnNotFound() {
+        String productId = UUID.randomUUID().toString();
+        String reviewCustomerId = UUID.randomUUID().toString();
+        String likingCustomerId = UUID.randomUUID().toString();
+
+        authMock.stubFor(post(urlEqualTo("/users/validate-token"))
+                .withCookie("Bearer", equalTo(jwtToken))
+                .willReturn(okForContentType("application/json", "{" +
+                        "\"token\": \"" + jwtToken + "\"" +
+                        ",\"userId\": \"" + likingCustomerId + "\"" +
+                        ",\"email\": \"some-email@example.com\"" +
+                        ",\"roles\": [\"ALL\"]" +
+                        "}")));
+
+        ratingMock.stubFor(post(urlEqualTo("/ratings/%s/%s/likes/%s".formatted(
+                        productId, reviewCustomerId, likingCustomerId)))
+                .willReturn(notFound()));
+
+        webTestClient.post()
+                .uri("/api/gateway/ratings/{productId}/{reviewCustomerId}/likes",
+                        productId, reviewCustomerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", jwtToken)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Review not found");
+    }
+
+    @Test
+    void whenLikeOwnReview_thenReturnUnprocessableEntity() {
+        String productId = UUID.randomUUID().toString();
+        String customerId = UUID.randomUUID().toString();
+
+        authMock.stubFor(post(urlEqualTo("/users/validate-token"))
+                .withCookie("Bearer", equalTo(jwtToken))
+                .willReturn(okForContentType("application/json", "{" +
+                        "\"token\": \"" + jwtToken + "\"" +
+                        ",\"userId\": \"" + customerId + "\"" +
+                        ",\"email\": \"some-email@example.com\"" +
+                        ",\"roles\": [\"ALL\"]" +
+                        "}")));
+
+        ratingMock.stubFor(post(urlEqualTo("/ratings/%s/%s/likes/%s".formatted(
+                        productId, customerId, customerId)))
+                .willReturn(aResponse().withStatus(422)));
+
+        webTestClient.post()
+                .uri("/api/gateway/ratings/{productId}/{reviewCustomerId}/likes",
+                        productId, customerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", jwtToken)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
+                .exchange()
+                .expectStatus().isEqualTo(422);
     }
 
     @Test
@@ -173,8 +346,12 @@ class RatingControllerV1IntegrationTest {
         String customerId = UUID.randomUUID().toString();
 
         ratingMock.stubFor(put(urlEqualTo("/ratings/%s/%s".formatted(productId, customerId)))
-                .withRequestBody(matchingJsonSchema("{\"rating\": 4}"))
-                .willReturn(okForContentType("application/json", "{\"rating\": 4, \"review\": \"It's alright\"}"))
+                .withRequestBody(matchingJsonPath("$.rating", equalTo("4")))
+                .withRequestBody(matchingJsonPath("$.qualityRating", equalTo("4")))
+                .withRequestBody(matchingJsonPath("$.valueRating", equalTo("3")))
+                .withRequestBody(matchingJsonPath("$.petSatisfactionRating", equalTo("5")))
+                .withRequestBody(matchingJsonPath("$.ingredientsRating", equalTo("2")))
+                .willReturn(okForContentType("application/json", "{\"rating\": 4, \"review\": \"It's alright\", \"qualityRating\": 4, \"valueRating\": 3, \"petSatisfactionRating\": 5, \"ingredientsRating\": 2}"))
         );
 
         authMock.stubFor(post(urlEqualTo("/users/validate-token"))
@@ -194,12 +371,16 @@ class RatingControllerV1IntegrationTest {
                 .cookie("Bearer", jwtToken)
                 .cookie("XSRF-TOKEN", CSRF_TOKEN)
                 .header("X-XSRF-TOKEN", CSRF_TOKEN)
-                .bodyValue("{\"rating\": 4}")
+                .bodyValue("{\"rating\": 4, \"qualityRating\": 4, \"valueRating\": 3, \"petSatisfactionRating\": 5, \"ingredientsRating\": 2}")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.rating").isEqualTo(4)
-                .jsonPath("$.review").isEqualTo("It's alright");
+                .jsonPath("$.review").isEqualTo("It's alright")
+                .jsonPath("$.qualityRating").isEqualTo(4)
+                .jsonPath("$.valueRating").isEqualTo(3)
+                .jsonPath("$.petSatisfactionRating").isEqualTo(5)
+                .jsonPath("$.ingredientsRating").isEqualTo(2);
 
     }
 

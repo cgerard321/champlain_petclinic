@@ -1,0 +1,214 @@
+<form [formGroup]="form" (ngSubmit)="save()" aria-labelledby="edit-title">
+  <h2 id="edit-title" i18n="@@vets.edit.title">Modifier le profil</h2>
+  <p i18n="@@vets.edit.description">
+    Tous les champs sont obligatoires. Les spécialités et le statut sont conservés.
+  </p>
+  <fieldset [disabled]="saving()">
+    <legend class="visually-hidden" i18n="@@vets.edit.legend">Informations du vétérinaire</legend>
+    @for (field of fields; track field.key) {
+      <div class="field">
+        <label [for]="field.key">{{ field.label }}</label>
+        @if (field.type === 'textarea') {
+          <textarea
+            [id]="field.key"
+            [formControlName]="field.key"
+            rows="5"
+            required
+            [attr.aria-describedby]="field.key + '-hint'"
+            [attr.aria-invalid]="
+              form.controls[field.key].touched && form.controls[field.key].invalid
+            "
+          ></textarea>
+        } @else {
+          <input
+            [id]="field.key"
+            [type]="field.type"
+            [formControlName]="field.key"
+            required
+            [attr.aria-describedby]="field.key + '-hint'"
+            [attr.aria-invalid]="
+              form.controls[field.key].touched && form.controls[field.key].invalid
+            "
+          />
+        }
+        <p
+          class="hint"
+          [id]="field.key + '-hint'"
+          [class.invalid]="form.controls[field.key].touched && form.controls[field.key].invalid"
+        >
+          {{ field.hint }}
+        </p>
+      </div>
+    }
+    <section class="availability" aria-labelledby="availability-title">
+      <h3 id="availability-title" tabindex="-1" i18n="@@vets.availability.title">Disponibilités</h3>
+      <p class="hint" i18n="@@vets.availability.description">
+        Ajoutez ou retirez des plages horaires. Les modifications prennent effet à l’enregistrement.
+      </p>
+      <div class="availability-actions">
+        <button
+          type="button"
+          class="secondary toggle-button"
+          (click)="toggleShowAllAvailabilities()"
+        >
+          @if (showAllAvailabilities()) {
+            <span i18n="@@vets.availability.show_active_only"
+              >Afficher uniquement les créneaux actifs</span
+            >
+          } @else {
+            <span i18n="@@vets.availability.show_all">Afficher tous les créneaux</span>
+          }
+        </button>
+        <button
+          type="button"
+          class="secondary reset-button"
+          (click)="resetSchedule()"
+          [disabled]="saving()"
+          i18n="@@vets.availability.reset_button"
+        >
+          Réinitialiser l'horaire
+        </button>
+      </div>
+      <p class="visually-hidden" role="status" aria-live="polite">{{ announcement() }}</p>
+
+      <ul class="day-list">
+        @for (
+          entry of showAllAvailabilities() ? allAvailabilities() : availability();
+          track entry.day
+        ) {
+          <li
+            class="day"
+            [class.inactive]="!entry.selected && !entry.hours.some((h) => h.selected)"
+          >
+            <div class="day-header">
+              <span class="day-label">{{ entry.label }}</span>
+              @if (entry.selected) {
+                <button
+                  class="remove-day"
+                  type="button"
+                  [id]="'remove-day-' + entry.day"
+                  (click)="removeDay(entry.day)"
+                >
+                  <span i18n="@@vets.availability.remove_day">Retirer la journée</span>
+                  <span class="visually-hidden">{{ entry.label }}</span>
+                </button>
+              } @else {
+                <button
+                  class="add-day"
+                  type="button"
+                  [id]="'add-day-' + entry.day"
+                  (click)="addDay(entry.day)"
+                >
+                  <span aria-hidden="true"></span>
+                  <span i18n="@@vets.availability.add_day">Ajouter la journée</span>
+                  <span class="visually-hidden">{{ entry.label }}</span>
+                </button>
+              }
+            </div>
+
+            <ul class="hour-list">
+              @for (hour of entry.hours; track hour.value) {
+                <li class="hour" [class.unselected]="!hour.selected">
+                  <span>{{ hour.label }}</span>
+                  @if (hour.selected) {
+                    <button
+                      class="remove-hour"
+                      type="button"
+                      [id]="'remove-hour-' + entry.day + '-' + hour.value"
+                      (click)="removeHour(entry.day, hour.value)"
+                    >
+                      <span aria-hidden="true">×</span>
+                      <span class="visually-hidden" i18n="@@vets.availability.remove_hour"
+                        >Retirer</span
+                      >
+                      <span class="visually-hidden">{{ entry.label }} {{ hour.label }}</span>
+                    </button>
+                  } @else {
+                    <button
+                      class="add-hour"
+                      type="button"
+                      [id]="'add-hour-' + entry.day + '-' + hour.value"
+                      (click)="addHour(entry.day, hour.value)"
+                    >
+                      <span aria-hidden="true">+ </span>
+                      <span class="visually-hidden" i18n="@@vets.availability.add_hour"
+                        >Ajouter</span
+                      >
+                      <span class="visually-hidden">{{ entry.label }} {{ hour.label }}</span>
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          </li>
+        }
+      </ul>
+    </section>
+
+    <div class="specialty-section">
+      <h3 i18n="@@vets.edit.available_specialties">Spécialités disponibles</h3>
+
+      <ul class="available-specialty-list">
+        @for (name of remainingSpecialties(); track name) {
+          <li>
+            <span>{{ specialtyLabel(name) }}</span>
+
+            <button type="button" [disabled]="saving()" (click)="addSpecialtyByName(name)">
+              <span i18n="@@vets.edit.add">Ajouter</span>
+              <span class="visually-hidden">: {{ specialtyLabel(name) }}</span>
+            </button>
+          </li>
+        } @empty {
+          <li i18n="@@vets.edit.all_specialties_selected">
+            Toutes les spécialités disponibles ont été ajoutées.
+          </li>
+        }
+      </ul>
+
+      <div class="custom-specialty">
+        <label for="custom-specialty" i18n="@@vets.edit.custom_specialty">Autre spécialité</label>
+
+        <input
+          id="custom-specialty"
+          type="text"
+          [formControl]="customSpecialty"
+          (keydown.enter)="$event.preventDefault(); addCustomSpecialty()"
+        />
+
+        <button
+          type="button"
+          [disabled]="saving() || !customSpecialty.value.trim()"
+          (click)="addCustomSpecialty()"
+          i18n="@@vets.edit.add_custom_specialty"
+        >
+          Ajouter la spécialité
+        </button>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="submit" [disabled]="saving()">
+        @if (saving()) {
+          <span i18n="@@vets.edit.saving">Enregistrement…</span>
+        } @else {
+          <span i18n="@@vets.actions.save">Enregistrer</span>
+        }
+      </button>
+      <button
+        class="secondary"
+        type="button"
+        (click)="cancelled.emit()"
+        [disabled]="saving()"
+        i18n="@@vets.actions.cancel"
+      >
+        Annuler
+      </button>
+    </div>
+  </fieldset>
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  @if (saving()) {
+    <p role="status" i18n="@@vets.edit.saving">Enregistrement…</p>
+  }
+</form>

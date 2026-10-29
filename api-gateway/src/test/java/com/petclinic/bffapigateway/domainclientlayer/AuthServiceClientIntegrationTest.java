@@ -608,7 +608,7 @@ public class AuthServiceClientIntegrationTest {
     @Test
     @DisplayName("Should get all roles")
     void shouldGetAllRoles() throws Exception {
-        Role role1 = Role.builder().name("OWNER").build();
+        Role role1 = Role.builder().name("CUST").build();
         Role role2 = Role.builder().name("ADMIN").build();
 
 
@@ -755,10 +755,13 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        Mono<String> result = authServiceClient.updateUsername(userId, newUsername, jwtToken);
+        Mono<ResponseEntity<String>> result =
+                authServiceClient.updateUsername(userId, newUsername, jwtToken);
 
         StepVerifier.create(result)
-                .expectNextMatches(response -> response.contains("Username updated successfully"))
+                .expectNextMatches(response ->
+                        response.getBody() != null &&
+                                response.getBody().contains("Username updated successfully"))
                 .verifyComplete();
     }
 
@@ -1454,9 +1457,13 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Username already exists", HttpStatus.BAD_REQUEST));
+        when(rethrower.rethrow(any(ClientResponse.class), any()))
+                .thenThrow(new GenericHttpException(
+                        "Username already exists",
+                        HttpStatus.BAD_REQUEST));
 
-        Mono<String> result = authServiceClient.updateUsername(userId, newUsername, jwtToken);
+        Mono<ResponseEntity<String>> result =
+                authServiceClient.updateUsername(userId, newUsername, jwtToken);
 
         StepVerifier.create(result)
                 .verifyError(GenericHttpException.class);
@@ -1675,14 +1682,20 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
-            ClientResponse response = invocation.getArgument(0);
-            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
-            Map<String, Object> errorMap = Map.of("message", "Username already exists");
-            return Mono.error(lambda.apply(errorMap));
-        });
+        when(rethrower.rethrow(any(ClientResponse.class), any()))
+                .thenAnswer(invocation -> {
+                    ClientResponse response = invocation.getArgument(0);
+                    Function<Map, ? extends Throwable> lambda =
+                            invocation.getArgument(1);
 
-        Mono<String> result = authServiceClient.updateUsername(userId, newUsername, jwtToken);
+                    Map<String, Object> errorMap =
+                            Map.of("message", "Username already exists");
+
+                    return Mono.error(lambda.apply(errorMap));
+                });
+
+        Mono<ResponseEntity<String>> result =
+                authServiceClient.updateUsername(userId, newUsername, jwtToken);
 
         StepVerifier.create(result)
                 .verifyError(GenericHttpException.class);

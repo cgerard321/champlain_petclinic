@@ -1,56 +1,308 @@
 import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, signal, TemplateRef, viewChild } from '@angular/core';
-import { FormField, form, min, required, submit } from '@angular/forms/signals';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  LOCALE_ID,
+  signal,
+  TemplateRef,
+  viewChild,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormField, form, max, min, required } from '@angular/forms/signals';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 
+import { isApiError } from '@core/models/api-error';
 import { AuthState } from '@core/services/auth-state';
-import { SupplyImageEditor } from '@features/supplies/components/supply-image-editor/supply-image-editor';
-import { Supply } from '@features/supplies/models/supply';
+import { Status } from '@features/supplies/models/status';
+import { Supply, SupplyRequest } from '@features/supplies/models/supply';
+import {
+  SupplyHistoryDialog,
+  SupplyHistoryDialogData,
+} from '@features/supplies/pages/supply-history-dialog';
 import { SupplyService } from '@features/supplies/services/supply-service';
+import { ALLOWED_IMAGE_TYPES, ImageAction } from '@shared/components/image-editor/image-editor';
+import { ModalForm } from '@shared/components/modal-form/modal-form';
+import {
+  ModalFormData,
+  ModalFormField,
+  ModalFormResult,
+} from '@shared/components/modal-form/modal-form-models';
+import {
+  SupplySummaryAction,
+  SupplySummaryDialog,
+  SupplySummaryDialogData,
+} from '@shared/components/supply-summary-dialog/supply-summary-dialog';
 import { Table, TableColumn } from '@shared/components/table/table';
 import { Roles } from '@shared/models/roles';
 
+// The shape of the modal's form: the editable Supply fields plus the photo control.
+interface SupplyFormValue {
+  productNameEn: string;
+  productNameFr: string;
+  supplierName: string;
+  productDescriptionEn: string;
+  productDescriptionFr: string;
+  productPrice: number;
+  productQuantity: number;
+  productSalePrice: number;
+  expirationDate: string;
+  photo: ImageAction;
+}
+
 @Component({
-  imports: [CurrencyPipe, FormField, MatDialogModule, MatIconModule, Table, SupplyImageEditor],
+  imports: [
+    CurrencyPipe,
+    FormField,
+    MatDialogModule,
+    MatIconModule,
+    MatMenuModule,
+    Table,
+    MatTooltipModule,
+  ],
   selector: 'app-supply',
-  styleUrl: './supply-page.css',
+  styleUrls: ['./inventories.css', './supply-page.css'],
   templateUrl: './supply-page.html',
 })
 export class SupplyPage {
   private readonly route = inject(ActivatedRoute);
   private readonly supplyService = inject(SupplyService);
+  private readonly destroyRef = inject(DestroyRef);
+  private supplyLoadSubscription?: Subscription;
   private readonly auth = inject(AuthState);
   private readonly dialog = inject(MatDialog);
-  private readonly deleteDialogTemplate = viewChild.required<TemplateRef<unknown>>('deleteDialog');
+  private readonly restockDialogTemplate =
+    viewChild.required<TemplateRef<unknown>>('restockDialog');
+  private restockDialogRef: MatDialogRef<unknown> | null = null;
+  protected readonly restockingSupply = signal<Supply | null>(null);
+  protected readonly restockAddingLabel = $localize`:@@supply.restock.adding:Ajout en cours…`;
+  protected readonly restockAddLabel = $localize`:@@supply.restock.add:Ajouter au stock`;
+  protected readonly restockPending = signal(false);
+  protected readonly restockError = signal('');
+  protected readonly uncertainRestocks = signal<ReadonlySet<string>>(new Set());
+  protected readonly restockModel = signal<{ quantity: number | null }>({ quantity: null });
+  protected readonly restockForm = form(this.restockModel, (path) => {
+    required(path.quantity, {
+      message: $localize`:@@supply.restock.quantityRequired:La quantité est obligatoire.`,
+    });
+    min(path.quantity, 1, {
+      message: $localize`:@@supply.restock.quantityPositive:Saisissez un entier supérieur à 0.`,
+    });
+    max(path.quantity, 2147483647, {
+      message: $localize`:@@supply.restock.quantityMax:La quantité ne doit pas dépasser 2147483647.`,
+    });
+  });
+
+  protected canRestock(supply: Supply): boolean {
+    return (
+      this.canManageSupplies() &&
+      !this.uncertainRestocks().has(supply.productId) &&
+      (supply.status === Status.RE_ORDER || supply.status === Status.OUT_OF_STOCK)
+    );
+  }
+
+  protected openRestock(supply: Supply): void {
+    if (!this.inventoryId || !this.canRestock(supply) || this.restockDialogRef) return;
+
+    this.restockingSupply.set(supply);
+    this.restockForm().reset({ quantity: null });
+    this.restockError.set('');
+    const dialogRef = this.dialog.open(this.restockDialogTemplate(), {
+      ariaLabel: $localize`:@@supply.restock.ariaLabel:Réapprovisionner ${this.localizedSupplyName(supply)}:name:`,
+    });
+    this.restockDialogRef = dialogRef;
+    dialogRef.afterClosed().subscribe(() => {
+      this.restockDialogRef = null;
+      this.restockingSupply.set(null);
+      this.restockPending.set(false);
+    });
+  }
+
+  protected cancelRestock(): void {
+    if (!this.restockPending()) this.restockDialogRef?.close();
+  }
+
+  protected submitRestock(event: Event): void {
+    event.preventDefault();
+    if (this.restockPending()) return;
+    if (this.uncertainRestocks().has(this.restockingSupply()?.productId ?? '')) return;
+
+    const supply = this.restockingSupply();
+    const inventoryId = this.inventoryId;
+    if (!supply || !inventoryId || !this.canRestock(supply)) {
+      this.restockError.set(
+        $localize`:@@supply.restock.permission:Vous n’avez plus la permission de réapprovisionner cet article.`,
+      );
+      return;
+    }
+
+    const quantity = this.restockModel().quantity;
+    if (
+      quantity === null ||
+      !Number.isInteger(quantity) ||
+      quantity <= 0 ||
+      quantity > 2147483647
+    ) {
+      this.restockError.set(
+        $localize`:@@supply.restock.quantityInteger:Saisissez un entier entre 1 et 2147483647.`,
+      );
+      return;
+    }
+
+    this.restockPending.set(true);
+    this.restockError.set('');
+    const dialogRef = this.restockDialogRef;
+    if (dialogRef) dialogRef.disableClose = true;
+    this.supplyService.restockSupply(inventoryId, supply.productId, quantity).subscribe({
+      next: (updated) => {
+        // Use the authoritative response. No refresh can turn a successful addition into an error.
+        this.supplies.update((supplies) =>
+          supplies.map((row) => (row.productId === updated.productId ? updated : row)),
+        );
+        // Keep submission blocked through the dialog's closing animation.
+        dialogRef?.close();
+      },
+      error: (error: unknown) => {
+        this.restockPending.set(false);
+        if (dialogRef) dialogRef.disableClose = false;
+        const code = isApiError(error) ? Number(error.code) : 0;
+        if (!code || code >= 500) {
+          // Stock may have changed before an audit write or the response failed. A second
+          // additive request could duplicate it; require reconciliation by reloading the page.
+          this.uncertainRestocks.update((ids) => new Set([...ids, supply.productId]));
+          this.restockError.set(
+            $localize`:@@supply.restock.uncertain:Impossible de confirmer le réapprovisionnement. Le stock a peut-être changé. Rechargez la page pour vérifier les quantités avant de réessayer.`,
+          );
+        } else {
+          this.restockError.set(
+            isApiError(error)
+              ? error.message
+              : $localize`:@@supply.restock.failed:Impossible de réapprovisionner l’article.`,
+          );
+        }
+      },
+    });
+  }
+  private readonly locale = inject(LOCALE_ID);
+
+  protected readonly isFrench = this.locale.startsWith('fr');
+  protected readonly tableLabel = $localize`:@@supply.table.label:Articles dans cet inventaire`;
+  protected readonly downloadLabel = $localize`:@@supply.actions.download:Télécharger PDF`;
+  protected readonly downloadingLabel = $localize`:@@supply.actions.downloading:Téléchargement…`;
+  protected readonly consumeLabel = $localize`:@@supply.actions.consume:Utiliser l'article`;
+  protected readonly cannotConsumeStockLabel = $localize`:@@supply.actions.cannotConsumeStock:Impossible d'utiliser l'article : rupture de stock`;
+  protected readonly cannotConsumeExpiredLabel = $localize`:@@supply.actions.cannotConsumeExpired:Impossible d'utiliser l'article : produit périmé`;
+  protected readonly consumingLabel = $localize`:@@supply.actions.consuming:Utilisation…`;
+  protected readonly consumeButtonLabel = $localize`:@@supply.actions.consumeButton:Utiliser`;
 
   protected readonly inventoryId = this.route.snapshot.paramMap.get('inventoryId');
 
   protected readonly supplies = signal<Supply[]>([]);
-  protected readonly filters = signal({ productName: '', productDescription: '', status: '' });
+  protected readonly filters = signal({
+    productName: '',
+    supplierName: '',
+    productDescription: '',
+    status: '',
+  });
   protected readonly hasActiveFilters = computed(() =>
     Object.values(this.filters()).some((value) => value.trim().length > 0),
   );
+
   protected readonly filteredSupplies = computed(() => {
-    const { productName, productDescription, status } = this.filters();
+    const { productName, supplierName, productDescription, status } = this.filters();
+    const nameQuery = productName.trim().toLowerCase();
+    const descriptionQuery = productDescription.trim().toLowerCase();
+    const supplierQuery = supplierName.trim().toLowerCase();
     return this.supplies().filter(
       (supply) =>
-        supply.productName.toLowerCase().includes(productName.trim().toLowerCase()) &&
-        supply.productDescription.toLowerCase().includes(productDescription.trim().toLowerCase()) &&
-        (!status || supply.status === status),
+        [supply.name?.en, supply.name?.fr, supply.productName].some((text) =>
+          (text ?? '').toLowerCase().includes(nameQuery),
+        ) &&
+        this.supplierLabel(supply).toLowerCase().includes(supplierQuery) &&
+        [supply.description?.en, supply.description?.fr, supply.productDescription].some((text) =>
+          (text ?? '').toLowerCase().includes(descriptionQuery),
+        ) &&
+        (!status || this.effectiveStatus(supply) === status),
     );
   });
 
-  protected setFilter(field: 'productName' | 'productDescription' | 'status', event: Event): void {
+  protected openSupplyHistory(supply: Supply): void {
+    if (!this.canManageSupplies() || !this.inventoryId) {
+      return;
+    }
+
+    this.dialog.open<SupplyHistoryDialog, SupplyHistoryDialogData>(SupplyHistoryDialog, {
+      data: {
+        inventoryId: this.inventoryId,
+        productId: supply.productId,
+        supplyName: this.localizedSupplyName(supply),
+      },
+      ariaLabel: $localize`:@@supply.history.ariaLabel:Historique de l'article ${this.localizedSupplyName(supply)}:name:`,
+      width: '640px',
+      maxWidth: '95vw',
+    });
+  }
+
+  protected openSupplySummary(supply: Supply): void {
+    const canConsume = this.canConsumeSupplies();
+    const dialogRef = this.dialog.open<
+      SupplySummaryDialog,
+      SupplySummaryDialogData,
+      SupplySummaryAction
+    >(SupplySummaryDialog, {
+      data: {
+        supply,
+        displayName: this.localizedSupplyName(supply),
+        displayDescription: this.localizedSupplyDescription(supply),
+        statusLabel: this.formatStatus(this.effectiveStatus(supply)),
+        photoUrl: this.supplyPhotoUrl(supply),
+        canManage: this.canManageSupplies(),
+        canConsume,
+        consumeDisabled:
+          supply.productQuantity <= 0 ||
+          this.expirationState(supply) === 'expired' ||
+          this.consumingSupplyId() === supply.productId,
+      },
+      ariaLabel: $localize`:@@supply.summary.ariaLabel:Résumé de l'article ${this.localizedSupplyName(supply)}:name:`,
+      width: '640px',
+      maxWidth: '95vw',
+    });
+
+    dialogRef.afterClosed().subscribe((action) => {
+      switch (action) {
+        case 'edit':
+          this.editSupply(supply);
+          break;
+        case 'delete':
+          this.deleteSupply(supply);
+          break;
+        case 'history':
+          this.openSupplyHistory(supply);
+          break;
+        case 'consume':
+          this.consumeSupply(supply);
+          break;
+      }
+    });
+  }
+
+  protected setFilter(
+    field: 'productName' | 'supplierName' | 'productDescription' | 'status',
+    event: Event,
+  ): void {
     const value = (event.target as HTMLInputElement | HTMLSelectElement).value;
     this.filters.update((filters) => ({ ...filters, [field]: value }));
   }
 
   protected clearFilters(): void {
-    this.filters.set({ productName: '', productDescription: '', status: '' });
+    this.filters.set({ productName: '', supplierName: '', productDescription: '', status: '' });
   }
 
   // Only the initial fetch replaces the table; refreshes keep existing rows visible.
@@ -61,81 +313,78 @@ export class SupplyPage {
   protected readonly deleteError = signal('');
   protected readonly downloadingPdf = signal(false);
   protected readonly downloadError = signal('');
-  protected readonly showAddForm = signal(false);
-  protected readonly editingSupplyId = signal<string | null>(null);
-  protected readonly newSupply = signal({
-    productName: '',
-    productDescription: '',
-    productPrice: 0,
-    productQuantity: 1,
-    productSalePrice: 0,
-  });
+  protected readonly consumingSupplyId = signal<string | null>(null);
 
   protected readonly nameCell = viewChild<TemplateRef<{ $implicit: Supply }>>('nameCell');
   protected readonly priceCell = viewChild<TemplateRef<{ $implicit: Supply }>>('priceCell');
   protected readonly statusCell = viewChild<TemplateRef<{ $implicit: Supply }>>('statusCell');
   protected readonly actionsCell = viewChild<TemplateRef<{ $implicit: Supply }>>('actionsCell');
-
+  protected readonly expirationCell =
+    viewChild<TemplateRef<{ $implicit: Supply }>>('expirationCell');
   protected readonly supplyRowId = (supply: Supply): string => supply.productId;
 
   // Formatting and actions stay here so the shared table has no supply-specific logic.
   protected readonly columns = computed<TableColumn<Supply>[]>(() => [
-    { id: 'name', header: 'Name', template: this.nameCell() },
-    { id: 'description', header: 'Description', value: (supply) => supply.productDescription },
-    { id: 'price', header: 'Cost Price', template: this.priceCell() },
-    { id: 'quantity', header: 'Quantity', value: (supply) => supply.productQuantity },
-    { id: 'status', header: 'Status', template: this.statusCell() },
-    ...(this.canManageSupplies()
-      ? [{ id: 'actions', header: 'Actions', template: this.actionsCell() }]
-      : []),
+    { id: 'name', header: $localize`:@@supply.fields.name:Nom`, template: this.nameCell() },
+    {
+      id: 'supplier',
+      header: $localize`:@@supply.fields.supplier:Fournisseur`,
+      value: (supply) => this.supplierLabel(supply),
+    },
+    {
+      id: 'description',
+      header: $localize`:@@supply.fields.description:Description`,
+      value: (supply) => this.localizedSupplyDescription(supply),
+    },
+    {
+      id: 'price',
+      header: $localize`:@@supply.fields.costPrice:Prix coûtant (CAD)`,
+      template: this.priceCell(),
+    },
+    {
+      id: 'quantity',
+      header: $localize`:@@supply.fields.quantity:Quantité`,
+      value: (supply) => supply.productQuantity,
+    },
+    {
+      id: 'expiration',
+      header: $localize`:@@supply.fields.expiration:Date d'expiration`,
+      template: this.expirationCell(),
+    },
+    {
+      id: 'status',
+      header: $localize`:@@supply.fields.status:État`,
+      template: this.statusCell(),
+    },
+    {
+      id: 'actions',
+      header: $localize`:@@supply.fields.actions:Actions`,
+      template: this.actionsCell(),
+    },
   ]);
 
-  protected readonly selectedImage = signal<File | null>(null);
-  protected readonly currentImage = signal<string | null>(null);
-  protected readonly imageChanged = signal(false);
-
-  protected onImageChange(file: File | null): void {
-    this.selectedImage.set(file);
-    this.imageChanged.set(true);
+  protected localizedSupplyName(supply: Supply): string {
+    return (this.isFrench ? supply.name?.fr : supply.name?.en) ?? supply.productName;
   }
 
-  protected readonly supplyForm = form(this.newSupply, (path) => {
-    required(path.productName, {
-      message: 'Name is required',
-    });
+  protected localizedSupplyDescription(supply: Supply): string {
+    return (
+      (this.isFrench ? supply.description?.fr : supply.description?.en) ?? supply.productDescription
+    );
+  }
 
-    required(path.productDescription, {
-      message: 'Description is required',
-    });
-
-    required(path.productPrice, {
-      message: 'Cost price is required',
-    });
-
-    min(path.productPrice, 0.01, {
-      message: 'Cost price must be greater than 0',
-    });
-
-    required(path.productQuantity, {
-      message: 'Quantity is required',
-    });
-
-    min(path.productQuantity, 1, {
-      message: 'Quantity must be at least 1',
-    });
-
-    required(path.productSalePrice, {
-      message: 'Sale price is required',
-    });
-
-    min(path.productSalePrice, 0.01, {
-      message: 'Sale price must be greater than 0',
-    });
-  });
+  private supplierLabel(supply: Supply): string {
+    return supply.supplierName?.trim() || $localize`:@@supply.supplier.notRecorded:Non indiqué`;
+  }
 
   protected readonly canManageSupplies = computed(() => {
     const roles = this.auth.roles();
     return roles.includes(Roles.admin) || roles.includes(Roles.inventoryManager);
+  });
+
+  protected readonly canConsumeSupplies = computed(() => {
+    const roles = this.auth.roles();
+    return roles.includes(Roles.vet);
   });
 
   constructor() {
@@ -143,98 +392,259 @@ export class SupplyPage {
   }
 
   private loadSupplies(): void {
+    this.supplyLoadSubscription?.unsubscribe();
+    this.supplies.set([]);
+    this.loading.set(true);
+    this.error.set(false);
+
     if (!this.inventoryId) {
       this.loading.set(false);
       this.error.set(true);
       return;
     }
 
-    this.error.set(false);
+    this.supplyLoadSubscription = this.supplyService
+      .getSupplies(this.inventoryId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (supply) => {
+          this.supplies.update((current) => {
+            const index = current.findIndex((item) => item.productId === supply.productId);
+            if (index === -1) return [...current, supply];
 
-    this.supplyService.getSupplies(this.inventoryId).subscribe({
-      next: (supplies) => {
-        this.supplies.set(supplies);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set(true);
-        this.loading.set(false);
-      },
-    });
+            const updated = [...current];
+            updated[index] = supply;
+            return updated;
+          });
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set(true);
+          this.loading.set(false);
+        },
+        complete: () => this.loading.set(false),
+      });
   }
 
-  protected addSupply(event: Event): void {
-    event.preventDefault();
-
-    if (this.addingSupply()) return;
-
-    void submit(this.supplyForm, async () => {
-      const inventoryId = this.inventoryId;
-
-      if (!inventoryId || !this.canManageSupplies()) return;
-
-      this.addingSupply.set(true);
-      this.addError.set('');
-
-      const editingId = this.editingSupplyId();
-
-      try {
-        const photo: {
-          photoData?: string;
-          photoType?: string | null;
-        } = {};
-
-        if (this.imageChanged()) {
-          const file = this.selectedImage();
-
-          // Empty Base64 decodes to an empty byte array: remove the photo.
-          photo.photoData = file ? await this.readPhoto(file) : '';
-          photo.photoType = file ? file.type : null;
-        }
-
-        const supply = { ...this.newSupply(), ...photo };
-
-        const request$ = editingId
-          ? this.supplyService.updateSupply(inventoryId, editingId, supply)
-          : this.supplyService.createSupply(inventoryId, supply);
-
-        await firstValueFrom(request$);
-
-        this.cancelAddForm();
-        this.loadSupplies();
-      } catch {
-        this.addError.set(
-          editingId ? 'Unable to update supply or photo.' : 'Unable to add supply or photo.',
-        );
-      } finally {
-        this.addingSupply.set(false);
-      }
-    });
-  }
-
-  protected editSupply(supply: Supply): void {
-    this.selectedImage.set(null);
+  protected openAddDialog(): void {
     if (!this.canManageSupplies()) {
       return;
     }
-    this.selectedImage.set(null);
-    this.imageChanged.set(false);
-    this.currentImage.set(this.supplyPhotoUrl(supply));
 
-    this.editingSupplyId.set(supply.productId);
+    void this.openSupplyDialog();
+  }
+
+  protected editSupply(supply: Supply): void {
+    if (!this.canManageSupplies()) {
+      return;
+    }
+
+    void this.openSupplyDialog(supply);
+  }
+
+  private supplyFields(supply?: Supply): readonly ModalFormField[] {
+    const currentImageUrl = supply ? this.supplyPhotoUrl(supply) : null;
+
+    return [
+      {
+        key: 'productNameEn',
+        label: $localize`:@@supply.fields.nameEn:Nom (anglais)`,
+        type: 'string',
+        required: true,
+      },
+      {
+        key: 'productNameFr',
+        label: $localize`:@@supply.fields.nameFr:Nom (français)`,
+        type: 'string',
+        required: true,
+      },
+      {
+        key: 'supplierName',
+        label: $localize`:@@supply.fields.supplierName:Nom du fournisseur`,
+        type: 'string',
+        required: !supply || Boolean(supply.supplierName?.trim()),
+        validators: [
+          (control) =>
+            typeof control.value === 'string' &&
+            control.value.length > 0 &&
+            control.value.trim().length === 0
+              ? { whitespace: true }
+              : null,
+        ],
+        errorMessages: {
+          whitespace: $localize`:@@supply.validation.supplierWhitespace:Le nom du fournisseur ne peut pas contenir seulement des espaces.`,
+        },
+      },
+      {
+        key: 'productDescriptionEn',
+        label: $localize`:@@supply.fields.descriptionEn:Description (anglais)`,
+        type: 'string',
+        required: true,
+      },
+      {
+        key: 'productDescriptionFr',
+        label: $localize`:@@supply.fields.descriptionFr:Description (français)`,
+        type: 'string',
+        required: true,
+      },
+      {
+        key: 'productPrice',
+        label: $localize`:@@supply.fields.costPrice:Prix coûtant (CAD)`,
+        type: 'number',
+        required: true,
+        min: 0.01,
+        step: 0.01,
+      },
+      {
+        key: 'productQuantity',
+        label: $localize`:@@supply.fields.quantity:Quantité`,
+        type: 'number',
+        required: true,
+        min: 1,
+        step: 1,
+      },
+      {
+        key: 'productSalePrice',
+        label: $localize`:@@supply.fields.salePrice:Prix de vente (CAD)`,
+        type: 'number',
+        required: true,
+        min: 0.01,
+        step: 0.01,
+      },
+      {
+        key: 'expirationDate',
+        label: $localize`:@@supply.fields.expiration:Date d'expiration`,
+        type: 'date',
+        // Only reject past expiry dates when creating new supplies
+        minDate: supply ? undefined : this.todayAsText(),
+        errorMessages: {
+          minDate: $localize`:@@supply.validation.expirationPast:La date d'expiration ne peut pas être dans le passé.`,
+        },
+      },
+      {
+        key: 'photo',
+        label: $localize`:@@supply.fields.photo:Photo de l'article`,
+        type: 'image',
+        currentImageUrl,
+      },
+    ];
+  }
+
+  private async openSupplyDialog(supply?: Supply): Promise<void> {
     this.addError.set('');
 
-    // reset() clears touched and dirty state from the previous edit as it loads this supply.
-    this.supplyForm().reset({
-      productName: supply.productName,
-      productDescription: supply.productDescription,
-      productPrice: supply.productPrice,
-      productQuantity: supply.productQuantity,
-      productSalePrice: supply.productSalePrice,
+    const dialogRef = this.dialog.open<
+      ModalForm<SupplyFormValue>,
+      ModalFormData<SupplyFormValue>,
+      ModalFormResult<SupplyFormValue>
+    >(ModalForm, {
+      data: {
+        title: supply
+          ? $localize`:@@supply.actions.editTitle:Modifier l'article`
+          : $localize`:@@supply.actions.add:Ajouter un article`,
+        submitLabel: supply
+          ? $localize`:@@supply.actions.saveChanges:Enregistrer les modifications`
+          : $localize`:@@supply.actions.add:Ajouter un article`,
+        cancelLabel: $localize`:@@supply.actions.cancel:Annuler`,
+        fields: this.supplyFields(supply),
+        initialValue: supply
+          ? {
+              productNameEn: supply.name?.en ?? supply.productName,
+              productNameFr: supply.name?.fr ?? supply.productName,
+              supplierName: supply.supplierName ?? '',
+              productDescriptionEn: supply.description?.en ?? supply.productDescription,
+              productDescriptionFr: supply.description?.fr ?? supply.productDescription,
+              productPrice: supply.productPrice,
+              productQuantity: supply.productQuantity,
+              productSalePrice: supply.productSalePrice,
+              expirationDate: supply.expirationDate ?? '',
+            }
+          : {
+              productNameEn: '',
+              productNameFr: '',
+              supplierName: '',
+              productDescriptionEn: '',
+              productDescriptionFr: '',
+              productPrice: 0,
+              productQuantity: 1,
+              productSalePrice: 0,
+              expirationDate: '',
+            },
+      },
+      ariaLabel: supply
+        ? $localize`:@@supply.actions.editTitle:Modifier l'article`
+        : $localize`:@@supply.actions.add:Ajouter un article`,
+      width: '560px',
+      maxWidth: '95vw',
     });
 
-    this.showAddForm.set(true);
+    // The dialog closes with undefined when the user cancels.
+    const result = await firstValueFrom(dialogRef.afterClosed());
+
+    if (!result || !this.canManageSupplies()) {
+      return;
+    }
+
+    await this.saveSupply(result.value, supply ?? null);
   }
+
+  private async saveSupply(value: SupplyFormValue, original: Supply | null): Promise<void> {
+    const inventoryId = this.inventoryId;
+    const editingId = original?.productId ?? null;
+
+    if (!inventoryId || this.addingSupply()) {
+      return;
+    }
+
+    this.addingSupply.set(true);
+    this.addError.set('');
+
+    try {
+      const payload = await this.buildSupplyRequest(value);
+
+      const request$ = editingId
+        ? this.supplyService.updateSupply(inventoryId, editingId, payload)
+        : this.supplyService.createSupply(inventoryId, payload);
+
+      await firstValueFrom(request$);
+
+      this.loadSupplies();
+    } catch {
+      this.addError.set(
+        editingId
+          ? $localize`:@@supply.errors.update:Impossible de modifier l'article ou la photo.`
+          : $localize`:@@supply.errors.create:Impossible d'ajouter l'article ou la photo.`,
+      );
+    } finally {
+      this.addingSupply.set(false);
+    }
+  }
+
+  protected consumeSupply(supply: Supply): void {
+    if (!this.canConsumeSupplies() || !this.inventoryId) {
+      return;
+    }
+
+    // Prevent consuming if quantity is already 0 or if the supply is expired
+    if (supply.productQuantity <= 0 || this.expirationState(supply) === 'expired') {
+      return;
+    }
+    this.deleteError.set('');
+
+    this.consumingSupplyId.set(supply.productId);
+
+    this.supplyService.consumeSupply(this.inventoryId, supply.productId).subscribe({
+      next: () => {
+        this.consumingSupplyId.set(null);
+        this.loadSupplies();
+      },
+      error: () => {
+        this.consumingSupplyId.set(null);
+        this.deleteError.set($localize`:@@supply.errors.consume:Impossible d'utiliser l'article.`);
+      },
+    });
+  }
+
   protected deleteSupply(supply: Supply): void {
     if (!this.canManageSupplies()) {
       return;
@@ -245,17 +655,33 @@ export class SupplyPage {
     const inventoryId = this.inventoryId;
 
     if (!inventoryId) {
-      this.deleteError.set('Unable to delete supply: the inventory ID is missing.');
+      this.deleteError.set(
+        $localize`:@@supply.errors.missingInventory:Impossible de supprimer l'article : identifiant d'inventaire manquant.`,
+      );
       return;
     }
 
-    const dialogRef = this.dialog.open<unknown, Supply, boolean>(this.deleteDialogTemplate(), {
-      data: supply,
-      ariaLabel: 'Delete supply',
+    const dialogRef = this.dialog.open<
+      ModalForm<Record<string, never>>,
+      ModalFormData<Record<string, never>>,
+      ModalFormResult<Record<string, never>>
+    >(ModalForm, {
+      data: {
+        title: $localize`:@@supply.actions.deleteTitle:Supprimer l'article`,
+        message: $localize`:@@supply.actions.deleteConfirm:Voulez-vous vraiment supprimer ${this.localizedSupplyName(supply)}:name: ?`,
+        fields: [],
+        initialValue: {},
+        submitLabel: $localize`:@@supply.actions.delete:Supprimer`,
+        cancelLabel: $localize`:@@supply.actions.cancel:Annuler`,
+        destructive: true,
+      },
+      ariaLabel: $localize`:@@supply.actions.deleteTitle:Supprimer l'article`,
+      width: '440px',
+      maxWidth: '95vw',
     });
 
-    dialogRef.afterClosed().subscribe((confirmed) => {
-      if (confirmed !== true || !this.canManageSupplies()) {
+    dialogRef.afterClosed().subscribe((result) => {
+      if (!result || !this.canManageSupplies()) {
         return;
       }
 
@@ -264,37 +690,12 @@ export class SupplyPage {
           this.loadSupplies();
         },
         error: () => {
-          this.deleteError.set('Unable to delete supply.');
+          this.deleteError.set(
+            $localize`:@@supply.errors.delete:Impossible de supprimer l'article.`,
+          );
         },
       });
     });
-  }
-  protected openAddForm(): void {
-    if (!this.canManageSupplies()) {
-      return;
-    }
-
-    this.selectedImage.set(null);
-    this.imageChanged.set(false);
-    this.currentImage.set(null);
-
-    this.showAddForm.set(true);
-  }
-  protected cancelAddForm(): void {
-    this.selectedImage.set(null);
-    this.supplyForm().reset({
-      productName: '',
-      productDescription: '',
-      productPrice: 0,
-      productQuantity: 1,
-      productSalePrice: 0,
-    });
-    this.editingSupplyId.set(null);
-    this.addError.set('');
-    this.showAddForm.set(false);
-    this.selectedImage.set(null);
-    this.imageChanged.set(false);
-    this.currentImage.set(null);
   }
 
   protected downloadPdf(): void {
@@ -307,16 +708,19 @@ export class SupplyPage {
     this.downloadingPdf.set(true);
     this.downloadError.set('');
 
-    this.supplyService.downloadSupplyPdf(inventoryId).subscribe({
-      next: (blob) => {
-        this.saveFile(blob, `supply-report-${inventoryId}.pdf`);
-        this.downloadingPdf.set(false);
-      },
-      error: async (err: unknown) => {
-        this.downloadError.set(await this.readDownloadError(err));
-        this.downloadingPdf.set(false);
-      },
-    });
+    this.supplyService
+      .downloadSupplyPdf(inventoryId, this.isFrench ? 'fr' : 'en')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.saveFile(blob, `supply-report-${inventoryId}.pdf`);
+          this.downloadingPdf.set(false);
+        },
+        error: async (err: unknown) => {
+          this.downloadError.set(await this.readDownloadError(err));
+          this.downloadingPdf.set(false);
+        },
+      });
   }
 
   private saveFile(blob: Blob, fileName: string): void {
@@ -333,26 +737,77 @@ export class SupplyPage {
     if (err instanceof HttpErrorResponse && err.error instanceof Blob) {
       try {
         const body = JSON.parse(await err.error.text());
-        if (typeof body?.message === 'string') {
+        if (typeof body?.message === 'string' && !this.isFrench) {
           return body.message;
         }
       } catch {
         // Not JSON, fall back to the generic message
       }
     }
-    return 'Unable to download PDF.';
+    return $localize`:@@supply.errors.download:Impossible de télécharger le PDF.`;
+  }
+
+  // ------ Helpers ------
+
+  // Supplies expiring within this many days are flagged as "expiring soon".
+  private readonly expiringSoonDays = 30;
+
+  protected effectiveStatus(supply: Supply): string {
+    if (this.expirationState(supply) === 'expired') {
+      return 'OUT_OF_STOCK';
+    }
+    return supply.status;
+  }
+
+  protected expirationState(supply: Supply): 'none' | 'expired' | 'soon' | 'ok' {
+    if (!supply.expirationDate) {
+      return 'none';
+    }
+
+    // Adding T00:00:00 makes the date local. Without it, "2026-10-20" is read as UTC,
+    // which is the evening of the 19th in Montreal and would be off by one day.
+    const expiration = new Date(`${supply.expirationDate}T00:00:00`);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const daysLeft = Math.round((expiration.getTime() - today.getTime()) / 86_400_000);
+
+    if (daysLeft < 0) {
+      return 'expired';
+    }
+
+    return daysLeft <= this.expiringSoonDays ? 'soon' : 'ok';
+  }
+
+  private todayAsText(): string {
+    const now = new Date();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+
+    return `${now.getFullYear()}-${month}-${day}`;
   }
 
   protected formatStatus(status: string): string {
-    return status.replaceAll('_', ' ');
+    switch (status) {
+      case 'AVAILABLE':
+        return $localize`:@@supply.status.available:Disponible`;
+      case 'RE_ORDER':
+        return $localize`:@@supply.status.reOrder:À commander`;
+      case 'OUT_OF_STOCK':
+        return $localize`:@@supply.status.outOfStock:Rupture de stock`;
+      default:
+        return status.replaceAll('_', ' ');
+    }
   }
 
   protected supplyPhotoUrl(supply: Supply): string | null {
-    if (!supply.photoData || !['image/jpeg', 'image/png'].includes(supply.photoType ?? '')) {
+    const type = supply.photoType ?? '';
+
+    if (!supply.photoData || !(ALLOWED_IMAGE_TYPES as readonly string[]).includes(type)) {
       return null;
     }
 
-    return `data:${supply.photoType};base64,${supply.photoData}`;
+    return `data:${type};base64,${supply.photoData}`;
   }
 
   private readPhoto(file: File): Promise<string> {
@@ -374,5 +829,39 @@ export class SupplyPage {
       reader.onabort = () => reject(new Error('Photo reading cancelled.'));
       reader.readAsDataURL(file);
     });
+  }
+
+  private async buildSupplyRequest(value: SupplyFormValue): Promise<SupplyRequest> {
+    const { photo, expirationDate, supplierName, ...fields } = value;
+    const normalizedSupplierName = supplierName.trim();
+    const request: SupplyRequest = {
+      productName: fields.productNameEn.trim(),
+      productDescription: fields.productDescriptionEn.trim(),
+      productPrice: fields.productPrice,
+      productQuantity: fields.productQuantity,
+      productSalePrice: fields.productSalePrice,
+      name: { en: fields.productNameEn.trim(), fr: fields.productNameFr.trim() },
+      description: {
+        en: fields.productDescriptionEn.trim(),
+        fr: fields.productDescriptionFr.trim(),
+      },
+      expirationDate: expirationDate || null,
+      ...(normalizedSupplierName ? { supplierName: normalizedSupplierName } : {}),
+    };
+
+    switch (photo.action) {
+      case 'replace':
+        request.photoData = await this.readPhoto(photo.file);
+        request.photoType = photo.file.type;
+        break;
+      case 'remove':
+        request.photoData = '';
+        request.photoType = null;
+        break;
+      case 'keep':
+        break; // Nothing changes in the backend
+    }
+
+    return request;
   }
 }

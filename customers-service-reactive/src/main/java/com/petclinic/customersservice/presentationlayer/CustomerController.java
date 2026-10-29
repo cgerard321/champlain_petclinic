@@ -30,6 +30,11 @@ public class CustomerController {
         return customerService.getAllCustomers();
     }
 
+    @GetMapping("/soft-deleted")
+    public Flux<CustomerResponseDTO> getSoftDeletedCustomers() {
+        return customerService.getSoftDeletedCustomers();
+    }
+
     @GetMapping("/customers-count")
     public Mono<ResponseEntity<Long>> getTotalNumberOfCustomers(){
         return customerService.getAllCustomers().count()
@@ -84,6 +89,24 @@ public class CustomerController {
                 .flatMap(customerService::deleteCustomerByCustomerId)
                 .map(v -> ResponseEntity.noContent().<Void>build())
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @DeleteMapping(value = "/{customerId}/soft")
+    public Mono<ResponseEntity<Void>> softDeleteCustomerByCustomerId(@PathVariable String customerId) {
+        return Mono.just(customerId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidCustomerId(customerId))
+                .flatMap(customerService::softDeleteCustomerByCustomerId)
+                .map(v -> ResponseEntity.noContent().<Void>build());
+    }
+
+    @PatchMapping("/{customerId}/reactivate")
+    public Mono<ResponseEntity<CustomerResponseDTO>> reactivateCustomerByCustomerId(@PathVariable String customerId) {
+        return Mono.just(customerId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(ApplicationExceptions.invalidCustomerId(customerId))
+                .flatMap(customerService::reactivateCustomerByCustomerId)
+                .map(ResponseEntity::ok);
     }
 
     @PutMapping("/{customerId}")
