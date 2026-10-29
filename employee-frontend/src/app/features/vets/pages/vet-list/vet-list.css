@@ -217,3 +217,58 @@ app-vet-profile-card {
   border-color: rgb(255 255 255 / 20%);
   color: #e0e0e0;
 }
+
+.remove-vet-button {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #b42318;
+  border-radius: 8px;
+  background: transparent;
+  color: #b42318;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.remove-vet-button:hover:not(:disabled) {
+  background: #fef3f2;
+}
+
+.remove-vet-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.remove-vet-button:focus-visible {
+  outline: 3px solid #b42318;
+  outline-offset: 3px;
+}
+
+.delete-message {
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  border-radius: 8px;
+}
+
+.delete-error {
+  border: 1px solid #f4b4ae;
+  background: #fef3f2;
+  color: #912018;
+}
+
+.delete-success {
+  border: 1px solid #b7dfc5;
+  background: #edf8f0;
+  color: #205c36;
+}
+
+:host-context(.dark-mode) .remove-vet-button {
+  color: #ffaaa3;
+  border-color: #ffaaa3;
+}
+
+:host-context(.dark-mode) .remove-vet-button:hover:not(:disabled) {
+  background: rgb(180 35 24 / 18%);
+}

@@ -9,6 +9,18 @@
     </p>
   </header>
 
+  @if (deleteError()) {
+    <p class="delete-message delete-error" role="alert">
+      {{ deleteError() }}
+    </p>
+  }
+
+  @if (deleteSuccess()) {
+    <p class="delete-message delete-success" role="status">
+      {{ deleteSuccess() }}
+    </p>
+  }
+
   @if (loading()) {
     <p role="status" i18n="@@vets.list.loading">Chargement des vétérinaires…</p>
   } @else if (error()) {
@@ -58,6 +70,17 @@
             i18n="@@vets.actions.open_profile"
             >Voir le profil de {{ vet.firstName }} {{ vet.lastName }}</a
           >
+          @if (isAdmin()) {
+            <button
+              type="button"
+              class="remove-vet-button"
+              [disabled]="deletingVetId() !== null"
+              (click)="removeVet(vet)"
+              i18n="@@vets.remove.button"
+            >
+              Supprimer
+            </button>
+          }
         </li>
       } @empty {
         @if (hasActiveFilters()) {

@@ -33,6 +33,12 @@ export class VetService {
     return this.http.put<VetResponse>(`${this.baseUrl}/${encodeURIComponent(vetId)}`, request);
   }
 
+  deleteVet(vetId: string): Observable<VetResponse> {
+    return this.http.delete<VetResponse>(
+      `${this.baseUrl}/${encodeURIComponent(vetId)}`,
+    );
+  }
+
   addSpecialty(vetId: string, name: string): Observable<VetResponse> {
     return this.http.post<VetResponse>(`${this.baseUrl}/${encodeURIComponent(vetId)}/specialties`, {
       name,
