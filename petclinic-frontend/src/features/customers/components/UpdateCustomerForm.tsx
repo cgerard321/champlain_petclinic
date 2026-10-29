@@ -16,6 +16,8 @@ import './UpdateCustomerForm.css';
 import { validateTelephone } from '../utils/validation';
 import { useToast } from '@/shared/components/toast/ToastProvider';
 import { provincesOfCanada } from '../utils/provinces';
+import AddressAutocomplete from './AddressAutocomplete';
+import { AddressSuggestionModel } from '../models/AddressSuggestionModel';
 
 const UpdateCustomerForm: React.FC = (): JSX.Element => {
   const { t } = useTranslation('customers');
@@ -78,6 +80,15 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
   ): void => {
     const { name, value } = e.target;
     setCustomer({ ...customer, [name]: value });
+  };
+
+  const handleAddressSelect = (suggestion: AddressSuggestionModel): void => {
+    setCustomer({
+      ...customer,
+      address: suggestion.address,
+      city: suggestion.city,
+      province: suggestion.province,
+    });
   };
 
   const handleUsernameChange = (
@@ -170,11 +181,10 @@ const UpdateCustomerForm: React.FC = (): JSX.Element => {
         {errors.lastName && <span className="error">{t(errors.lastName)}</span>}
         <br />
         <label>{t('fields.address')} </label>
-        <input
-          type="text"
-          name="address"
+        <AddressAutocomplete
           value={customer.address}
           onChange={handleChange}
+          onSelect={handleAddressSelect}
         />
         {errors.address && <span className="error">{t(errors.address)}</span>}
         <br />
