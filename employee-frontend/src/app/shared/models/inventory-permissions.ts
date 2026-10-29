@@ -1,43 +1,23 @@
 import { Roles } from '@shared/models/roles';
 
-/**
- * Capability map for inventory CRUD, one entry per role.
- *
- *
- * - ADMIN / INVENTORY_MANAGER: full CRUD on inventories and products,
- *   no divergence between the two roles anywhere.
- * - VET: can list inventories (`GET ""`) and list products in an
- *   inventory (`GET /{id}/products`), and can consume a product —
- *   but CANNOT fetch a single inventory by ID (`GET /{id}`) or a
- *   single product by ID (`GET /{id}/products/{pid}`). Those two
- *   single-item endpoints only allow ADMIN/INVENTORY_MANAGER, even
- *   though their list level equivalents allow VET. So a Vet-facing
- *   UI must get inventory/product details from the list response,
- *   not from a fresh single item fetch.
- * - RECEPTIONIST: not in any allowedRoles list. No access.
- */
+
 export interface InventoryPermissions {
   hasAnyAccess: boolean;
 
-  // List level reads
   canListInventories: boolean;
   canListProducts: boolean;
 
-  // Single item reads. NOTE: false for Vet, even though list reads are true
   canViewInventoryDetail: boolean;
   canViewProductDetail: boolean;
 
-  // Inventory CRUD
   canCreateInventory: boolean;
   canUpdateInventory: boolean;
   canDeleteInventory: boolean;
 
-  // Product CRUD
   canAddProduct: boolean;
   canUpdateProduct: boolean;
   canDeleteProduct: boolean;
 
-  // Not strictly CRUD, but tied to the same product level access rule
   canConsumeProduct: boolean;
   canViewProductQuantity: boolean;
 }
@@ -62,8 +42,8 @@ const VET_ACCESS: InventoryPermissions = {
   hasAnyAccess: true,
   canListInventories: true,
   canListProducts: true,
-  canViewInventoryDetail: false, // GET /{id} excludes VET
-  canViewProductDetail: false, // GET /{id}/products/{pid} excludes VET
+  canViewInventoryDetail: false,
+  canViewProductDetail: false,
   canCreateInventory: false,
   canUpdateInventory: false,
   canDeleteInventory: false,
@@ -97,6 +77,5 @@ export function getInventoryPermissions(roles: readonly string[]): InventoryPerm
   if (roles.includes(Roles.vet)) {
     return VET_ACCESS;
   }
-  // Receptionist (for now): no live gateway access today.
   return NO_ACCESS;
 }
