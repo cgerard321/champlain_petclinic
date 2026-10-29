@@ -9,9 +9,28 @@ import { FileDetails } from '@features/prod/models/image.model';
 })
 export class ProductThumbnail {
   readonly image = input<FileDetails | null | undefined>();
-  readonly alt = input('Product image');
-  protected readonly imageSrc = computed(() => {
-    const image = this.image();
-    return image?.fileData ? `data:${image.fileType};base64,${image.fileData}` : null;
-  });
+  readonly alt = input($localize`:@@products.image.alt:Image du produit`);
+  protected readonly imageSrc = signal<string | null>(null);
+
+  constructor() {
+    effect(() => {
+      const imageId = this.imageId();
+      const image = this.image();
+      this.imageSrc.set(null);
+
+      if (image?.fileData) {
+        this.imageSrc.set(`data:${image.fileType};base64,${image.fileData}`);
+        return;
+      }
+
+      if (!imageId) {
+        return;
+      }
+
+      this.imageService.getImage(imageId).subscribe({
+        next: (image) => this.imageSrc.set(`data:${image.imageType};base64,${image.imageData}`),
+        error: () => this.imageSrc.set(null),
+      });
+    });
+  }
 }
