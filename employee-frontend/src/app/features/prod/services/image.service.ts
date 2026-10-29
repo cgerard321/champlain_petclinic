@@ -30,8 +30,6 @@ export class ImageService {
   }
 
   getImage(imageId: string): Observable<ImageResponse> {
-    return this.http.get<ImageResponse>(
-      `/api/gateway/images/${imageId}`
-    );
+    return this.http.get<ImageResponse>(`/api/gateway/images/${imageId}`);
   }
 }
