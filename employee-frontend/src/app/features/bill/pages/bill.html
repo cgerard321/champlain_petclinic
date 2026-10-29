@@ -238,6 +238,9 @@
                 [ngModel]="filters().customerId"
                 (ngModelChange)="updateFilter('customerId', $event)"
               />
+              <button class="bill-secondary-action" type="button" (click)="addFilter('customerId')">
+                Add
+              </button>
             </label>
 
             <label>
@@ -247,6 +250,13 @@
                 [ngModel]="filters().customerName"
                 (ngModelChange)="updateFilter('customerName', $event)"
               />
+              <button
+                class="bill-secondary-action"
+                type="button"
+                (click)="addFilter('customerName')"
+              >
+                Add
+              </button>
             </label>
 
             <label>
@@ -256,6 +266,9 @@
                 [ngModel]="filters().vetName"
                 (ngModelChange)="updateFilter('vetName', $event)"
               />
+              <button class="bill-secondary-action" type="button" (click)="addFilter('vetName')">
+                Add
+              </button>
             </label>
 
             <label>
@@ -269,6 +282,9 @@
                   <option [value]="visitType">{{ translateVisit(visitType) }}</option>
                 }
               </select>
+              <button class="bill-secondary-action" type="button" (click)="addFilter('visitType')">
+                Add
+              </button>
             </label>
 
             <label>
@@ -279,6 +295,9 @@
                 <option value="UNPAID" i18n="@@bill.statusTypes.unpaid">IMPAYÉE</option>
                 <option value="OVERDUE" i18n="@@bill.statusTypes.overdue">EN RETARD</option>
               </select>
+              <button class="bill-secondary-action" type="button" (click)="addFilter('status')">
+                Add
+              </button>
             </label>
 
             <label>
@@ -291,6 +310,9 @@
                 [value]="filters().year"
                 (input)="updateFilter('year', yearFilter.value)"
               />
+              <button class="bill-secondary-action" type="button" (click)="addFilter('year')">
+                Add
+              </button>
             </label>
 
             <label>
@@ -310,6 +332,9 @@
                 <option value="11" i18n="@@bill.month.nov">Novembre</option>
                 <option value="12" i18n="@@bill.month.dec">Décembre</option>
               </select>
+              <button class="bill-secondary-action" type="button" (click)="addFilter('month')">
+                Add
+              </button>
             </label>
 
             <label>
@@ -328,6 +353,21 @@
             >
               Effaçer les filtres
             </button>
+            <div class="bill-filter-tags" aria-label="Selected filters">
+              @for (field of filterFields; track field.key) {
+                @for (value of savedFilters()[field.key]; track value) {
+                  <button
+                    class="bill-filter-tag"
+                    type="button"
+                    [attr.aria-label]="'Remove ' + field.label + ': ' + value"
+                    (click)="removeFilter(field.key, value)"
+                  >
+                    {{ field.label }}: {{ value }}
+                    <span aria-hidden="true">×</span>
+                  </button>
+                }
+              }
+            </div>
           </div>
         </div>
       }

@@ -79,4 +79,8 @@ export class CustomerService {
   addPet(customerId: string, pet: PetRequest): Observable<Pet> {
     return this.http.post<Pet>(`${this.apiUrl}/pets/customers/${customerId}/pets`, pet);
   }
+
+  softDeleteCustomer(customerId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/customers/${customerId}/soft`);
+  }
 }

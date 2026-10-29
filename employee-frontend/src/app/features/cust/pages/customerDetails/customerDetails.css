@@ -162,6 +162,20 @@ button {
   background: var(--detail-sage);
 }
 
+.danger-button {
+  border-color: #b3261e;
+  color: #fff;
+  background: #b3261e;
+}
+
+.danger-button:hover {
+  background: #8c1d18;
+}
+
+.deactivate-button {
+  flex-shrink: 0;
+}
+
 button:disabled {
   opacity: 0.6;
   cursor: wait;
