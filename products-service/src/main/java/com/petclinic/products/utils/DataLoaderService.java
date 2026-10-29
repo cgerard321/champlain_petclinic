@@ -1,12 +1,14 @@
 package com.petclinic.products.utils;
 
 import com.petclinic.products.datalayer.images.Image;
-import com.petclinic.products.datalayer.images.ImageRepository;
+import com.petclinic.products.migration.LegacyImageMigration;
 import com.petclinic.products.datalayer.products.*;
 import com.petclinic.products.datalayer.ratings.Rating;
 import com.petclinic.products.datalayer.ratings.RatingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -29,7 +31,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@Order(0)
 public class DataLoaderService implements CommandLineRunner {
+
+    @Value("${app.seed-data.enabled:true}")
+    private boolean seedDataEnabled = true;
 
     private static final Logger log = LoggerFactory.getLogger(DataLoaderService.class);
 
@@ -40,7 +46,7 @@ public class DataLoaderService implements CommandLineRunner {
     ProductBundleRepository productBundleRepository;
 
     @Autowired
-    ImageRepository imageRepository;
+    LegacyImageMigration imagePublisher;
 
     @Autowired
     RatingRepository ratingRepository;
@@ -50,6 +56,7 @@ public class DataLoaderService implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        if (!seedDataEnabled) return;
         SeededProduct seededProduct1 = seedProduct("06a7d573-bcab-4db3-956f-773324b92a80", "Dog Food", "Premium dry food for adult dogs", 45.99, 44, "586d0700-57db-4312-b6f1-413b79dd018c", DeliveryType.DELIVERY, ProductStatus.AVAILABLE, "2002-09-26", "dog_food.png", "08a5af6b-3501-4157-9a99-1aa82387b9e4");
         SeededProduct seededProduct2 = seedProduct("98f7b33a-d62a-420a-a84a-05a27c85fc91", "Cat Litter", "Clumping cat litter with odor control", 12.99, 3, "6a247af0-52d9-4179-a5b4-ad4b92e686b1", DeliveryType.PICKUP, ProductStatus.AVAILABLE, "2020-06-30", "cat_litter.png", "36b06c01-10f3-4645-9c45-900afc5a8b8a");
         SeededProduct seededProduct3 = seedProduct("baee7cd2-b67a-449f-b262-91f45dde8a6d", "Flea Collar", "Flea and tick prevention for small dogs", 9.99, 53, "86627454-970e-41a9-baa6-71ab759bf66c", DeliveryType.DELIVERY, ProductStatus.AVAILABLE, "2019-09-29", "flea_collar.png", "be4e60a4-2369-46e8-abee-20c1a8dce3e5");
@@ -1009,11 +1016,7 @@ public class DataLoaderService implements CommandLineRunner {
 
         seedData(seededProductTypes, seededImages, seededProducts, seededRatings, seededBundles)
                 .then(backfillSeedTranslations())
-                .then(restoreMissingReferencedLegacyImages())
-                .subscribe(
-                        ignored -> { },
-                        error -> log.error("Error loading product seed data", error),
-                        () -> log.info("Product seed data loading completed"));
+                .block(java.time.Duration.ofMinutes(10));
     }
 
     // Only missing translations of unchanged seed text are filled on existing databases.
@@ -1079,8 +1082,7 @@ public class DataLoaderService implements CommandLineRunner {
             List<Rating> ratings,
             List<ProductBundle> bundles) {
         return saveSeededProductTypes(productTypes)
-                .then(saveSeededImages(images))
-                .then(saveSeededProducts(products))
+                .then(saveSeededProducts(products, images))
                 .then(saveSeededRatings(ratings))
                 .thenMany(saveSeededBundles(bundles));
     }
@@ -1096,41 +1098,20 @@ public class DataLoaderService implements CommandLineRunner {
                 .then();
     }
 
-    private Mono<Void> saveSeededImages(List<Image> images) {
-        return Flux.fromIterable(images)
-                .filter(Objects::nonNull)
-                .concatMap(image -> safeMono(imageRepository.findImageByImageId(image.getImageId()))
-                        .hasElement()
-                        .flatMap(exists -> exists
-                                ? Mono.empty()
-                                : loadAndSaveSeedImage(image)))
-                .then();
-    }
-
-    private Mono<Void> loadAndSaveSeedImage(Image image) {
-        return Mono.defer(() -> {
-            try {
-                byte[] imageData = loadImageData("images/" + image.getImageName());
-                Image loadedImage = Image.builder()
-                        .imageId(image.getImageId())
-                        .imageName(image.getImageName())
-                        .imageType(image.getImageType())
-                        .imageData(imageData)
-                        .build();
-                return safeMono(imageRepository.save(loadedImage)).then();
-            } catch (Exception error) {
-                log.warn("Unable to load seed image {}; skipping it", image.getImageName(), error);
-                return Mono.empty();
-            }
-        });
-    }
-
-    private Mono<Void> saveSeededProducts(List<Product> products) {
+    private Mono<Void> saveSeededProducts(List<Product> products, List<Image> images) {
+        Map<String, Image> seedImages = images.stream().filter(Objects::nonNull)
+                .collect(java.util.stream.Collectors.toMap(Image::getImageId, image -> image));
         return Flux.fromIterable(products)
-                .concatMap(product -> productExists(product)
-                        .flatMap(exists -> exists
-                                ? Mono.empty()
-                                : safeMono(productRepository.save(product)).then()))
+                .concatMap(product -> productExists(product).flatMap(exists -> {
+                    if (exists) return Mono.empty();
+                    Image seed = seedImages.get(product.getImageId());
+                    Mono<Product> prepared = seed == null ? Mono.just(product)
+                            : imagePublisher.publishSeed(seed).map(fileId -> {
+                                product.setImageId(fileId);
+                                return product;
+                            });
+                    return prepared.flatMap(productRepository::save).then();
+                }))
                 .then();
     }
 
@@ -1198,43 +1179,12 @@ public class DataLoaderService implements CommandLineRunner {
                                         .hasElements());
     }
 
-    private Mono<Void> restoreMissingReferencedLegacyImages() {
-        return safeFlux(productRepository.findAll())
-                .map(Product::getImageId)
-                .filter(imageId -> imageId != null && !imageId.isBlank())
-                .collect(Collectors.toSet())
-                .flatMapMany(referencedImageIds -> Flux.fromIterable(legacyImageSeeds())
-                        .filter(seed -> referencedImageIds.contains(seed.imageId())))
-                .concatMap(seed -> imageRepository.findImageByImageId(seed.imageId())
-                        .switchIfEmpty(Mono.defer(() -> saveLegacyImage(seed))))
-                .then();
-    }
-
     private <T> Mono<T> safeMono(Mono<T> publisher) {
         return publisher == null ? Mono.empty() : publisher;
     }
 
     private <T> Flux<T> safeFlux(Flux<T> publisher) {
         return publisher == null ? Flux.empty() : publisher;
-    }
-
-    private Mono<Image> saveLegacyImage(LegacyImageSeed seed) {
-        try {
-            byte[] imageData = loadImageData(seed.resourcePath());
-            Image image = Image.builder()
-                    .imageId(seed.imageId())
-                    .imageName(seed.imageName())
-                    .imageType(seed.imageType())
-                    .imageData(imageData)
-                    .build();
-            return imageRepository.save(image);
-        } catch (Exception error) {
-            return Mono.error(error);
-        }
-    }
-
-    byte[] loadImageData(String resourcePath) throws IOException {
-        return new ClassPathResource(resourcePath).getContentAsByteArray();
     }
 
     private Rating seedRating(
@@ -1250,36 +1200,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .review(review)
                 .createdAt(LocalDateTime.parse(createdAt))
                 .build();
-    }
-
-    private List<LegacyImageSeed> legacyImageSeeds() {
-        return List.of(
-                new LegacyImageSeed(
-                        "08a5af6b-3501-4157-9a99-1aa82387b9e4",
-                        "dog_food.jpg", "image/jpeg", "images/dog_food.png"),
-                new LegacyImageSeed(
-                        "36b06c01-10f3-4645-9c45-900afc5a8b8a",
-                        "cat_litter.png", "image/png", "images/cat_litter.png"),
-                new LegacyImageSeed(
-                        "be4e60a4-2369-46e8-abee-20c1a8dce3e5",
-                        "flea_collar.jpg", "image/jpeg", "images/flea_collar.png"),
-                new LegacyImageSeed(
-                        "7074e0ef-d041-452f-8a0f-cb9ab20d1fed",
-                        "bird_cage.jpg", "image/jpeg", "images/bird_cage.png"),
-                new LegacyImageSeed(
-                        "392c42d9-9505-4c27-b82e-20351b25d33f",
-                        "aquarium_filter.png", "image/png",
-                        "images/aquarium_filter.png"),
-                new LegacyImageSeed(
-                        "664aa14b-db66-4b25-9d05-f3a9164eb401",
-                        "horse_saddle.jpg", "image/jpeg", "images/horse_saddle.png"),
-                new LegacyImageSeed(
-                        "3377a03f-8105-47d7-8d8a-d89fd170c7e6",
-                        "rabbit_hutch.jpg", "image/jpeg", "images/rabbit_hutch.png"),
-                new LegacyImageSeed(
-                        "c76ed4c1-fc5d-4868-8b39-1bca6b0be368",
-                        "fish_tank_heater.jpg", "image/jpeg",
-                        "images/fish_tank_heater.png"));
     }
 
     private ProductBundle seedBundle(
@@ -1301,7 +1221,6 @@ public class DataLoaderService implements CommandLineRunner {
                 .bundlePrice(bundlePrice)
                 .build();
     }
-
     private SeededProduct seedProduct(
             String productId,
             String productName,
@@ -1365,10 +1284,5 @@ public class DataLoaderService implements CommandLineRunner {
     private record SeededProduct(Product product, Image image) {
     }
 
-    private record LegacyImageSeed(
-            String imageId,
-            String imageName,
-            String imageType,
-            String resourcePath) {
-    }
+
 }

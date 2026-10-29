@@ -334,6 +334,88 @@ class CustomerServiceImplTest {
     }
 
     @Test
+    void getSoftDeletedCustomers_ShouldReturnOnlyInactiveCustomers() {
+        Customer activeCustomer = buildCustomer();
+        activeCustomer.setCustomerId("customerId-active");
+        activeCustomer.setIsActive(true);
+
+        Customer legacyCustomer = buildCustomer();
+        legacyCustomer.setCustomerId("customerId-legacy");
+        legacyCustomer.setIsActive(null);
+
+        Customer deletedCustomer = buildCustomer();
+        deletedCustomer.setCustomerId("customerId-deleted");
+        deletedCustomer.setIsActive(false);
+
+        when(repo.findAll()).thenReturn(Flux.just(activeCustomer, legacyCustomer, deletedCustomer));
+
+        StepVerifier.create(customerService.getSoftDeletedCustomers())
+                .expectNextMatches(dto -> dto.getCustomerId().equals("customerId-deleted"))
+                .verifyComplete();
+    }
+
+    @Test
+    void reactivateCustomerByCustomerId_WhenInactive_ShouldSetActiveAndSave() {
+        String customerId = "customerId-123";
+        Customer inactiveCustomer = buildCustomer();
+        inactiveCustomer.setIsActive(false);
+
+        when(repo.findCustomerByCustomerId(customerId)).thenReturn(Mono.just(inactiveCustomer));
+        when(repo.save(any(Customer.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(customerService.reactivateCustomerByCustomerId(customerId))
+                .consumeNextWith(response -> assertEquals(customerId, response.getCustomerId()))
+                .verifyComplete();
+
+        verify(repo).save(argThat(customer -> Boolean.TRUE.equals(customer.getIsActive())));
+    }
+
+    @Test
+    void reactivateCustomerByCustomerId_WhenCustomerDoesNotExist_ShouldThrowNotFound() {
+        String customerId = "customerId-123";
+
+        when(repo.findCustomerByCustomerId(customerId)).thenReturn(Mono.empty());
+
+        StepVerifier.create(customerService.reactivateCustomerByCustomerId(customerId))
+                .expectErrorMatches(error -> error instanceof NotFoundException &&
+                        error.getMessage().equals("Soft-deleted customer not found: " + customerId))
+                .verify();
+
+        verify(repo, never()).save(any(Customer.class));
+    }
+
+    @Test
+    void reactivateCustomerByCustomerId_WhenAlreadyActive_ShouldThrowNotFound() {
+        String customerId = "customerId-123";
+        Customer activeCustomer = buildCustomer();
+        activeCustomer.setIsActive(true);
+
+        when(repo.findCustomerByCustomerId(customerId)).thenReturn(Mono.just(activeCustomer));
+
+        StepVerifier.create(customerService.reactivateCustomerByCustomerId(customerId))
+                .expectError(NotFoundException.class)
+                .verify();
+
+        verify(repo, never()).save(any(Customer.class));
+    }
+
+    @Test
+    void reactivateCustomerByCustomerId_ThenGetAllCustomers_ShouldIncludeCustomerAgain() {
+        String customerId = "customerId-123";
+        Customer customer = buildCustomer();
+        customer.setIsActive(false);
+
+        when(repo.findCustomerByCustomerId(customerId)).thenReturn(Mono.just(customer));
+        when(repo.save(any(Customer.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+        when(repo.findAll()).thenAnswer(invocation -> Flux.just(customer));
+
+        StepVerifier.create(customerService.reactivateCustomerByCustomerId(customerId)
+                        .thenMany(customerService.getAllCustomers()))
+                .expectNextMatches(dto -> dto.getCustomerId().equals(customerId))
+                .verifyComplete();
+    }
+
+    @Test
     void updateCustomer_ShouldSucceed() {
         // Define input data
         String customerId = "customerId-123";

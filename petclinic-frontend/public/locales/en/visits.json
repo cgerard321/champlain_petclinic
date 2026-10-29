@@ -47,5 +47,13 @@
       "CANCELLED": "Cancelled",
       "ARCHIVED": "Archived"
     }
+  },
+  "reviews": {
+    "filterByRating": "Filter by rating:",
+    "allRatings": "All ratings",
+    "stars_one": "{{count}} star",
+    "stars_other": "{{count}} stars",
+    "noReviews": "No reviews available",
+    "noMatchingReviews": "No reviews found for this rating"
   }
 }

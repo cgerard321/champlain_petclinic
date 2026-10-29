@@ -18,6 +18,8 @@ import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +41,7 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -52,6 +55,33 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port:0"})
 @AutoConfigureWebTestClient
 class InventoryControllerIntegrationTest {
+    @ParameterizedTest
+    @CsvSource({"name,en", "name,fr", "description,en", "description,fr"})
+    void creatingInventoryRejectsEachBlankTranslation(String field, String language) {
+        Map<String, String> name = new HashMap<>(Map.of("en", "New inventory", "fr", "Nouvel inventaire"));
+        Map<String, String> description = new HashMap<>(Map.of("en", "Wound care", "fr", "Soins des plaies"));
+        (field.equals("name") ? name : description).put(language, " ");
+        InventoryRequestDTO request = InventoryRequestDTO.builder()
+                .inventoryType("Internal").name(name).description(description).build();
+
+        webTestClient.post().uri("/inventory").contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request).exchange().expectStatus().isBadRequest();
+    }
+
+    @ParameterizedTest
+    @CsvSource({"name,en", "name,fr", "description,en", "description,fr"})
+    void creatingSupplyRejectsEachBlankTranslation(String field, String language) {
+        Map<String, String> name = new HashMap<>(Map.of("en", "New supply", "fr", "Nouvel article"));
+        Map<String, String> description = new HashMap<>(Map.of("en", "Wound care", "fr", "Soins des plaies"));
+        (field.equals("name") ? name : description).put(language, " ");
+        ProductRequestDTO request = ProductRequestDTO.builder().name(name).description(description)
+                .productPrice(2.0).productSalePrice(3.0).productQuantity(10).build();
+
+        webTestClient.post().uri("/inventory/{inventoryId}/products", inventory1.getInventoryId())
+                .contentType(MediaType.APPLICATION_JSON).bodyValue(request)
+                .exchange().expectStatus().isBadRequest();
+    }
+
     @Autowired
     ProductInventoryService productInventoryService;
     @SpyBean
@@ -663,6 +693,58 @@ class InventoryControllerIntegrationTest {
 
                 });
 
+    }
+
+    @Test
+    void bilingualInventoryAndSupplyAreReturnedFromCreateEndpoints() {
+        String suffix = UUID.randomUUID().toString();
+        String englishInventoryName = "Medical supplies " + suffix;
+        InventoryRequestDTO inventoryRequest = InventoryRequestDTO.builder()
+                .inventoryName(englishInventoryName)
+                .inventoryType(inventoryType1.getType())
+                .inventoryDescription("Care items")
+                .name(Map.of("en", englishInventoryName, "fr", "Fournitures médicales " + suffix))
+                .description(Map.of("en", "Care items", "fr", "Articles de soins"))
+                .build();
+
+        webTestClient.post().uri("/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryRequest)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(InventoryResponseDTO.class)
+                .value(response -> {
+                    assertEquals(inventoryRequest.getName(), response.getName());
+                    assertEquals(inventoryRequest.getDescription(), response.getDescription());
+                    Inventory stored = inventoryRepository.findInventoryByInventoryId(response.getInventoryId()).block();
+                    assertNotNull(stored);
+                    assertEquals(inventoryRequest.getName(), stored.getName());
+                });
+
+        String englishSupplyName = "Bandages " + suffix;
+        ProductRequestDTO supplyRequest = ProductRequestDTO.builder()
+                .productName(englishSupplyName)
+                .productDescription("For wounds")
+                .name(Map.of("en", englishSupplyName, "fr", "Bandages français " + suffix))
+                .description(Map.of("en", "For wounds", "fr", "Pour les plaies"))
+                .productPrice(10.0)
+                .productQuantity(25)
+                .productSalePrice(12.0)
+                .build();
+
+        webTestClient.post().uri("/inventory/{inventoryId}/products", inventory1.getInventoryId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(supplyRequest)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(ProductResponseDTO.class)
+                .value(response -> {
+                    assertEquals(supplyRequest.getName(), response.getName());
+                    assertEquals(supplyRequest.getDescription(), response.getDescription());
+                    Product stored = productRepository.findProductByProductId(response.getProductId()).block();
+                    assertNotNull(stored);
+                    assertEquals(supplyRequest.getName(), stored.getName());
+                });
     }
 
 

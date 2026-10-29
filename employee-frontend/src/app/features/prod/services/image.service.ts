@@ -11,20 +11,20 @@ export class ImageService {
   toFileDetails(file: File): Promise<FileDetails> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
+
       reader.onload = () => {
-        const dataUrl = reader.result;
-        if (typeof dataUrl !== 'string' || !dataUrl.includes(',')) {
-          reject(new Error('Could not read the selected image.'));
-          return;
-        }
+        const result = reader.result as string;
+        const base64 = result.split(',')[1];
 
         resolve({
           fileName: file.name,
           fileType: file.type,
-          fileData: dataUrl.slice(dataUrl.indexOf(',') + 1),
-        });
+          fileData: base64,
+        } as FileDetails);
       };
-      reader.onerror = () => reject(new Error('Could not read the selected image.'));
+
+      reader.onerror = () => reject(reader.error);
+
       reader.readAsDataURL(file);
     });
   }

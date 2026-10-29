@@ -47,6 +47,13 @@ export class CustomerService {
     );
   }
 
+  getSoftDeletedCustomers(): Observable<Customer> {
+    return this.sse.stream(`${this.apiUrl}/customers/soft-deleted`, { keepAlive: false }).pipe(
+      filter((event): event is MessageEvent<string> => event.type !== 'error'),
+      map((event) => JSON.parse(event.data) as Customer),
+    );
+  }
+
   getPetDetails(customerId: string): Observable<Pet> {
     return this.sse
       .stream(`${this.apiUrl}/pets/customers/${customerId}/pets`, {
@@ -74,6 +81,10 @@ export class CustomerService {
 
   addCustomer(customer: CustomerRequest): Observable<Customer> {
     return this.http.post<Customer>(`${this.apiUrl}/customers`, customer);
+  }
+
+  reactivateCustomer(customerId: string): Observable<Customer> {
+    return this.http.patch<Customer>(`${this.apiUrl}/customers/${customerId}/reactivate`, {});
   }
 
   addPet(customerId: string, pet: PetRequest): Observable<Pet> {

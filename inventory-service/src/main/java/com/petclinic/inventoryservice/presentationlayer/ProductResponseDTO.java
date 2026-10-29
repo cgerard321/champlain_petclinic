@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -17,6 +18,8 @@ public class ProductResponseDTO {
     private String productName;
     private String supplierName;
     private String productDescription;
+    private Map<String, String> name;
+    private Map<String, String> description;
     private Double productPrice;
     private Integer productQuantity;
     private Double productSalePrice;
