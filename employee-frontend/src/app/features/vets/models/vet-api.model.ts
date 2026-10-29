@@ -47,3 +47,18 @@ export interface VetEditSubmission {
   request: VetUpdateRequest;
   newSpecialtyNames: string[];
 }
+
+export interface VetCreateRequest {
+  username: string;
+  password: string;
+  email: string;
+  vet: Omit<VetUpdateRequest, 'vetId' | 'vetBillId'>;
+}
+
+export interface VetEducationRequest {
+  schoolName: string;
+  degree: string;
+  fieldOfStudy: string;
+  startDate: string;
+  endDate: string;
+}

@@ -4,7 +4,12 @@ import { map, Observable, toArray } from 'rxjs';
 
 import { isApiError } from '@core/models/api-error';
 import { SseClient } from '@core/services/sse-client';
-import { VetResponse, VetUpdateRequest } from '@features/vets/models/vet-api.model';
+import {
+  VetResponse,
+  VetUpdateRequest,
+  VetCreateRequest,
+  VetEducationRequest,
+} from '@features/vets/models/vet-api.model';
 
 @Injectable({ providedIn: 'root' })
 export class VetService {
@@ -31,6 +36,14 @@ export class VetService {
 
   updateVet(vetId: string, request: VetUpdateRequest): Observable<VetResponse> {
     return this.http.put<VetResponse>(`${this.baseUrl}/${encodeURIComponent(vetId)}`, request);
+  }
+
+  createVet(request: VetCreateRequest): Observable<VetResponse> {
+    return this.http.post<VetResponse>(`${this.baseUrl}/users/vets`, request);
+  }
+
+  addEducation(vetId: string, request: VetEducationRequest): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/${encodeURIComponent(vetId)}/educations`, request);
   }
 
   addSpecialty(vetId: string, name: string): Observable<VetResponse> {
