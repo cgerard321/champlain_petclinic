@@ -436,6 +436,11 @@
       },
       "education":{
         "education": "Educatiion",
+        "school": "School or institution",
+        "degree": "DegreeDiploma or qualification;",
+        "field": "Field of study",
+        "start_date": "Start date",
+        "end_date": "End date",
         "add_education": "Add education",
         "new_education": "New education",
         "required_info": "Please enter a valid value in this field.",
