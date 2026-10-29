@@ -238,8 +238,13 @@
                 [ngModel]="filters().customerId"
                 (ngModelChange)="updateFilter('customerId', $event)"
               />
-              <button class="bill-secondary-action" type="button" (click)="addFilter('customerId')">
-                Add
+              <button
+                class="bill-secondary-action"
+                i18n="@@bill.add"
+                type="button"
+                (click)="addFilter('customerId')"
+              >
+                Ajouter
               </button>
             </label>
 
@@ -252,10 +257,11 @@
               />
               <button
                 class="bill-secondary-action"
+                i18n="@@bill.add"
                 type="button"
                 (click)="addFilter('customerName')"
               >
-                Add
+                Ajouter
               </button>
             </label>
 
@@ -266,8 +272,13 @@
                 [ngModel]="filters().vetName"
                 (ngModelChange)="updateFilter('vetName', $event)"
               />
-              <button class="bill-secondary-action" type="button" (click)="addFilter('vetName')">
-                Add
+              <button
+                class="bill-secondary-action"
+                i18n="@@bill.add"
+                type="button"
+                (click)="addFilter('vetName')"
+              >
+                Ajouter
               </button>
             </label>
 
@@ -282,8 +293,13 @@
                   <option [value]="visitType">{{ translateVisit(visitType) }}</option>
                 }
               </select>
-              <button class="bill-secondary-action" type="button" (click)="addFilter('visitType')">
-                Add
+              <button
+                class="bill-secondary-action"
+                i18n="@@bill.add"
+                type="button"
+                (click)="addFilter('visitType')"
+              >
+                Ajouter
               </button>
             </label>
 
@@ -295,8 +311,13 @@
                 <option value="UNPAID" i18n="@@bill.statusTypes.unpaid">IMPAYÉE</option>
                 <option value="OVERDUE" i18n="@@bill.statusTypes.overdue">EN RETARD</option>
               </select>
-              <button class="bill-secondary-action" type="button" (click)="addFilter('status')">
-                Add
+              <button
+                class="bill-secondary-action"
+                i18n="@@bill.add"
+                type="button"
+                (click)="addFilter('status')"
+              >
+                Ajouter
               </button>
             </label>
 
@@ -310,8 +331,13 @@
                 [value]="filters().year"
                 (input)="updateFilter('year', yearFilter.value)"
               />
-              <button class="bill-secondary-action" type="button" (click)="addFilter('year')">
-                Add
+              <button
+                class="bill-secondary-action"
+                i18n="@@bill.add"
+                type="button"
+                (click)="addFilter('year')"
+              >
+                Ajouter
               </button>
             </label>
 
@@ -332,8 +358,13 @@
                 <option value="11" i18n="@@bill.month.nov">Novembre</option>
                 <option value="12" i18n="@@bill.month.dec">Décembre</option>
               </select>
-              <button class="bill-secondary-action" type="button" (click)="addFilter('month')">
-                Add
+              <button
+                class="bill-secondary-action"
+                i18n="@@bill.add"
+                type="button"
+                (click)="addFilter('month')"
+              >
+                Ajouter
               </button>
             </label>
 
@@ -362,7 +393,7 @@
                     [attr.aria-label]="'Remove ' + field.label + ': ' + value"
                     (click)="removeFilter(field.key, value)"
                   >
-                    {{ field.label }}: {{ value }}
+                    {{ field.label }}: {{ translateStatus(translateVisit(value)) }}
                     <span aria-hidden="true">×</span>
                   </button>
                 }
@@ -537,7 +568,9 @@
         }
 
         @if (isLoading()) {
-          <div class="bill-empty-state" role="status">Loading bills...</div>
+          <div class="bill-empty-state" role="status" i18n="@@bill.lookup.loadBills">
+            Chargement des factures...
+          </div>
         } @else if (displayedBills().length === 0) {
           <div class="bill-empty-state" role="status">
             @if (billSearchQuery()) {

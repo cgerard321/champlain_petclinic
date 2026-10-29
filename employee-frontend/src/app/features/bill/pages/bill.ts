@@ -116,13 +116,13 @@ export class Bill implements OnInit {
   });
 
   protected readonly filterFields: { key: keyof BillFilters; label: string }[] = [
-    { key: 'customerId', label: 'Customer ID' },
-    { key: 'customerName', label: 'Customer name' },
-    { key: 'vetName', label: 'Veterinarian name' },
-    { key: 'visitType', label: 'Visit type' },
-    { key: 'status', label: 'Status' },
-    { key: 'year', label: 'Creation year' },
-    { key: 'month', label: 'Creation month' },
+    { key: 'customerId', label: $localize`:@@bill.custId:N° du client(e)` },
+    { key: 'customerName', label: $localize`:@@bill.custName:Nom du client(e)` },
+    { key: 'vetName', label: $localize`:@@bill.vetName:Nom du vétérinaire` },
+    { key: 'visitType', label: $localize`:@@bill.visitType:Type de visite` },
+    { key: 'status', label: $localize`:@@bill.status:Statut` },
+    { key: 'year', label: $localize`:@@bill.creationYear:Année de création` },
+    { key: 'month', label: $localize`:@@bill.creationMonth:Mois de création` },
   ];
 
   protected readonly updatingInterestId = signal<string | null>(null);

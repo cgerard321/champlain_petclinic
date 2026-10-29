@@ -1288,6 +1288,7 @@
       "notPermitted": "You do not have permission to access billing records",
       "detailLoading": "Loading bill details...",
 
+      "add": "Add",
       "confirm": "Confirm",
       "update": "Save Changes",
       "submit": "Submit",
@@ -1405,6 +1406,7 @@
       },
 
       "updateBill": {
+        "title": "Update Bill",
         "noPerm": "You do not have permission to update this bill",
         "notFound": "Bill not found",
         "reject": "The update was rejected. Cjeck the bill information",
