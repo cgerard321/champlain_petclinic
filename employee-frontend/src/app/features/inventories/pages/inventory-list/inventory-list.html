@@ -140,15 +140,13 @@
             >
               <mat-card appearance="outlined" class="inventory-card">
                 <mat-card-header>
-                  <mat-card-title>{{
-                    localizedInventoryName(inventory.inventoryName)
-                  }}</mat-card-title>
+                  <mat-card-title>{{ localizedInventoryName(inventory) }}</mat-card-title>
                   <mat-card-subtitle>{{
                     localizedInventoryType(inventory.inventoryType)
                   }}</mat-card-subtitle>
                 </mat-card-header>
                 <mat-card-content>
-                  <p>{{ localizedInventoryDescription(inventory.inventoryDescription) }}</p>
+                  <p>{{ localizedInventoryDescription(inventory) }}</p>
                   <p class="quantity">
                     @if (quantityFor(inventory.inventoryId) !== null) {
                       {{ stockQuantityLabel(inventory.inventoryId) }}

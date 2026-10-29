@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -23,6 +24,8 @@ public class Inventory {
     private String inventoryName;
     private String inventoryType;
     private String inventoryDescription;
+    private Map<String, String> name;
+    private Map<String, String> description;
     private String inventoryImage;
     private String inventoryBackupImage;
 
