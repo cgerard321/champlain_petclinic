@@ -1328,6 +1328,28 @@ class InventoryServiceClientIntegrationTest {
     }
 
     @Test
+    void createSupplyPdf_ForwardsRequestedLanguage() throws IOException, InterruptedException {
+        MockWebServer languageServer = new MockWebServer();
+        languageServer.start();
+        try {
+        InventoryServiceClient client = new InventoryServiceClient("localhost", String.valueOf(languageServer.getPort()));
+        ReflectionTestUtils.setField(client, "rethrower", new Rethrower(new ObjectMapper()));
+        byte[] pdf = new byte[] {37, 80, 68, 70};
+        languageServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
+                .setBody(new okio.Buffer().write(pdf)));
+
+        StepVerifier.create(client.createSupplyPdf("inv1", "fr"))
+                .expectNextMatches(bytes -> bytes.length == 4)
+                .verifyComplete();
+
+        assertEquals("/inventory/inv1/products/download?lang=fr", languageServer.takeRequest().getPath());
+        } finally {
+            languageServer.shutdown();
+        }
+    }
+
+    @Test
     void getInventoryById_404_ShouldMapToInventoryNotFoundException() {
         enqueueError(404, "Inventory not found");
         StepVerifier.create(inventoryServiceClient.getInventoryById("inv-404"))

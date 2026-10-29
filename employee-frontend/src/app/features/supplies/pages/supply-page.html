@@ -135,10 +135,10 @@
 <ng-template #nameCell let-supply>
   <div class="supply-details">
     @if (supplyPhotoUrl(supply); as photo) {
-      <img class="supply-photo" [src]="photo" [alt]="localizedSupplyName(supply.productName)" />
+      <img class="supply-photo" [src]="photo" [alt]="localizedSupplyName(supply)" />
     }
 
-    <span class="supply-name">{{ localizedSupplyName(supply.productName) }}</span>
+    <span class="supply-name">{{ localizedSupplyName(supply) }}</span>
   </div>
 </ng-template>
 
@@ -292,7 +292,7 @@
     <mat-dialog-content>
       @if (restockingSupply(); as supply) {
         <p i18n="@@supply.restock.currentQuantity">
-          {{ localizedSupplyName(supply.productName) }} — Quantité actuelle :
+          {{ localizedSupplyName(supply) }} — Quantité actuelle :
           {{ supply.productQuantity }}
         </p>
       }
