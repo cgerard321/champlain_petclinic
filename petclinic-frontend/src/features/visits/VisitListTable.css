@@ -254,3 +254,6 @@ main {
     transform: translateY(0);
   }
 }
+tr.emergency-visit > td {
+  background-color: #ffb3b3 !important;
+}

@@ -3,3 +3,32 @@ input {
   margin-top: 10px;
   margin-bottom: 20px;
 }
+.emergency-date-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 20px;
+  padding: 16px;
+  border: 1px solid #dc2626;
+  border-radius: 8px;
+  background: #fef2f2;
+}
+
+.emergency-date-title {
+  display: flex;
+  flex: 0 0 115px;
+  flex-direction: column;
+  gap: 4px;
+  color: #b91c1c;
+  white-space: nowrap;
+}
+
+.emergency-date-title strong {
+  font-size: 16px;
+}
+
+.emergency-calendar-input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+}

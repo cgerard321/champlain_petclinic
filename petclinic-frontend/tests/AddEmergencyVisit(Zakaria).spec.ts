@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 
+// eslint-disable-next-line playwright/valid-title, playwright/require-top-level-describe
 test('test', async ({ page }) => {
   //test
   await page.goto('http://localhost:3000/users/login');
@@ -11,13 +12,19 @@ test('test', async ({ page }) => {
   await page.getByRole('link', { name: 'Emergency' }).click();
   await page.getByRole('button', { name: 'Create Emergency visit' }).click();
   await page.locator('input[name="petName"]').click();
-  await page.locator('input[name="petName"]').fill('ham');
+  await page.locator('input[name="petName"]').fill('basil');
   await page.locator('textarea[name="description"]').click();
   await page.locator('textarea[name="description"]').fill('c');
+
   await page.getByText('c', { exact: true }).fill('cast');
-  await page.locator('input[name="emergencyType"]').click();
-  await page.locator('input[name="emergencyType"]').fill('death');
-  await page.getByRole('combobox').selectOption('MEDIUM');
+  const emergencyType = page.locator('select[name="emergencyType"]');
+
+  await emergencyType.selectOption('surgical');
+
+  await expect(emergencyType).toHaveValue('surgical');
+  await expect(emergencyType.locator('option:checked')).toHaveText(
+    'Surgical emergency'
+  );
   await page.locator('input[name="petId"]').click();
   await page.locator('input[name="petId"]').click();
   await page
@@ -28,5 +35,5 @@ test('test', async ({ page }) => {
   await page
     .locator('input[name="practitionerId"]')
     .fill('69f85d2e-625b-11ee-8c99-0242ac120002');
-  await page.getByRole('button', { name: 'Submit Emergency' }).click();
+  await page.getByRole('button', { name: 'Add' }).click();
 });

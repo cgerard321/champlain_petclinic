@@ -8,6 +8,7 @@ import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.EmergencyAvailabilityDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.TimeSlotDTO;
 import com.petclinic.visits.visitsservicenew.Utils.WorkHourParser;
 import lombok.RequiredArgsConstructor;
@@ -163,4 +164,125 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         return !visitTime.isBefore(slot.getStartTime()) &&
                 visitTime.isBefore(slot.getEndTime());
     }
+
+    @Override
+    public Flux<VetDTO> getVetsGeneralEmergency() {
+        return vetsClient.getAllVets()
+                .filter(vet ->
+                        vet.getSpecialties() != null && vet.getSpecialties().stream().anyMatch(speciality -> "general".equalsIgnoreCase(speciality.getName())));
+    }
+
+    @Override
+    public Flux<VetDTO> getVetsDentalEmergency() {
+        return vetsClient.getAllVets()
+                .filter(vet ->
+                        vet.getSpecialties() != null && vet.getSpecialties().stream()
+                                .anyMatch(speciality -> "dentistry".equalsIgnoreCase(speciality.getName())));
+    }
+
+    @Override
+    public Flux<VetDTO> getVetsSurgicalEmergency() {
+        return vetsClient.getAllVets()
+                .filter(vet ->
+                        vet.getSpecialties() != null && vet.getSpecialties().stream()
+                                .anyMatch(speciality -> "surgery".equalsIgnoreCase(speciality.getName())));
+    }
+    @Override
+    public Flux<VetDTO> getVetsRadiologyEmergency() {
+        return vetsClient.getAllVets()
+                .filter(vet ->
+                        vet.getSpecialties() != null && vet.getSpecialties().stream()
+                                .anyMatch(speciality -> "radiology".equalsIgnoreCase(speciality.getName())));
+    }
+
+    //AVAILABILITIES FOR VETS
+    @Override
+    public Flux<EmergencyAvailabilityDTO> getVetsAvailabilitiesGeneralEmergency() {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(3);
+        return getVetsGeneralEmergency()
+                .flatMap(vet ->
+                        Flux.fromStream(
+                                        startDate.datesUntil(endDate.plusDays(1))
+                                )
+                                .flatMap(date ->
+                                        getAvailableTimeSlotsForDate(vet.getVetId(), date)
+                                                .filter(TimeSlotDTO::isAvailable)
+                                )
+                                .collectList()
+                                .filter(slots -> !slots.isEmpty())
+                                .map(slots -> EmergencyAvailabilityDTO.builder()
+                                        .veterinarian(vet)
+                                        .availableSlots(slots)
+                                        .build())
+                );
+    }
+
+    @Override
+    public Flux<EmergencyAvailabilityDTO> getVetsAvailabilitiesSurgicalEmergency() {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(3);
+        return getVetsSurgicalEmergency()
+                .flatMap(vet ->
+                        Flux.fromStream(
+                                        startDate.datesUntil(endDate.plusDays(1))
+                                )
+                                .flatMap(date ->
+                                        getAvailableTimeSlotsForDate(vet.getVetId(), date)
+                                                .filter(TimeSlotDTO::isAvailable)
+                                )
+                                .collectList()
+                                .filter(slots -> !slots.isEmpty())
+                                .map(slots -> EmergencyAvailabilityDTO.builder()
+                                        .veterinarian(vet)
+                                        .availableSlots(slots)
+                                        .build())
+                );
+    }
+
+    @Override
+    public Flux<EmergencyAvailabilityDTO> getVetsAvailabilitiesDentalEmergency() {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(3);
+        return getVetsDentalEmergency()
+                .flatMap(vet ->
+                        Flux.fromStream(
+                                        startDate.datesUntil(endDate.plusDays(1))
+                                )
+                                .flatMap(date ->
+                                        getAvailableTimeSlotsForDate(vet.getVetId(), date)
+                                                .filter(TimeSlotDTO::isAvailable)
+                                )
+                                .collectList()
+                                .filter(slots -> !slots.isEmpty())
+                                .map(slots -> EmergencyAvailabilityDTO.builder()
+                                        .veterinarian(vet)
+                                        .availableSlots(slots)
+                                        .build())
+                );
+    }
+
+    @Override
+    public Flux<EmergencyAvailabilityDTO> getVetsAvailabilitiesRadiologyEmergency() {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(3);
+        return getVetsRadiologyEmergency()
+                .flatMap(vet ->
+                        Flux.fromStream(
+                                        startDate.datesUntil(endDate.plusDays(1))
+                                )
+                                .flatMap(date ->
+                                        getAvailableTimeSlotsForDate(vet.getVetId(), date)
+                                                .filter(TimeSlotDTO::isAvailable)
+                                )
+                                .collectList()
+                                .filter(slots -> !slots.isEmpty())
+                                .map(slots -> EmergencyAvailabilityDTO.builder()
+                                        .veterinarian(vet)
+                                        .availableSlots(slots)
+                                        .build())
+                );
+    }
+
+
 }

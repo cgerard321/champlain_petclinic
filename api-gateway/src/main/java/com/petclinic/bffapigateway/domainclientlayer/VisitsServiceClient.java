@@ -488,7 +488,37 @@ public class VisitsServiceClient {
     }
 
 
+    public Flux<EmergencyAvailabilityDTO> getGeneralEmergencyAvailability() {
+        return availabilityWebClient
+                .get()
+                .uri("/api/v1/availability/emergency/general")
+                .retrieve()
+                .bodyToFlux(EmergencyAvailabilityDTO.class);
+    }
 
+    public Flux<EmergencyAvailabilityDTO> getDentalEmergencyAvailability() {
+        return availabilityWebClient
+                .get()
+                .uri("/api/v1/availability/emergency/dental")
+                .retrieve()
+                .bodyToFlux(EmergencyAvailabilityDTO.class);
+    }
+
+    public Flux<EmergencyAvailabilityDTO> getSurgicalEmergencyAvailability() {
+        return availabilityWebClient
+                .get()
+                .uri("/api/v1/availability/emergency/surgical")
+                .retrieve()
+                .bodyToFlux(EmergencyAvailabilityDTO.class);
+    }
+
+    public Flux<EmergencyAvailabilityDTO> getRadiologyEmergencyAvailability() {
+        return availabilityWebClient
+                .get()
+                .uri("/api/v1/availability/emergency/radiology")
+                .retrieve()
+                .bodyToFlux(EmergencyAvailabilityDTO.class);
+    }
 
 
 

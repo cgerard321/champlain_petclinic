@@ -2,6 +2,8 @@ import { Workday } from './Workday.ts';
 import { Speciality } from './Speciality.ts';
 
 export interface VetResponseModel {
+  [x: string]: number;
+  size: number;
   vetId: string;
   vetBillId: string;
   firstName: string;

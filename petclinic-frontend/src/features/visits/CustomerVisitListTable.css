@@ -46,3 +46,6 @@
   font-size: 0.75rem;
   font-weight: bold;
 }
+tr.emergency-visit > td {
+  background-color: #ffb3b3 !important;
+}

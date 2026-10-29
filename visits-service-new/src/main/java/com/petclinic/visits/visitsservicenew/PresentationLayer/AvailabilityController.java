@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.EmergencyAvailabilityDTO;
 
 import java.time.LocalDate;
 
@@ -46,5 +47,22 @@ public class AvailabilityController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         return availabilityService.getAvailableDatesForVet(vetId, startDate, endDate);
+    }
+    @GetMapping(value = "/emergency/general",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<EmergencyAvailabilityDTO> getGeneralEmergencyAvailability() {
+        return availabilityService.getVetsAvailabilitiesGeneralEmergency();
+    }
+
+    @GetMapping(value = "/emergency/dental",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<EmergencyAvailabilityDTO> getDentalEmergencyAvailability() {
+        return availabilityService.getVetsAvailabilitiesDentalEmergency();
+    }
+
+    @GetMapping(value = "/emergency/surgical",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<EmergencyAvailabilityDTO> getSurgicalEmergencyAvailability() {
+        return availabilityService.getVetsAvailabilitiesSurgicalEmergency();
     }
 }

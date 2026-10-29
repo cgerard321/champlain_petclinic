@@ -4,13 +4,8 @@ import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Visits.CancellationRequestDTO;
+import com.petclinic.bffapigateway.dtos.Visits.*;
 import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionResponseDTO;
-import com.petclinic.bffapigateway.dtos.Visits.RescheduleRequestDTO;
-import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
-import com.petclinic.bffapigateway.dtos.Visits.VetNoteRequestDTO;
-import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
-import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingPrescriptionNotFoundException;
@@ -428,5 +423,31 @@ public class VisitsControllerV1 {
                         .thenReturn(visit));
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "/availability/emergency/general",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<EmergencyAvailabilityDTO> getGeneralEmergencyAvailability() {
+        return visitsServiceClient.getGeneralEmergencyAvailability();
+    }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "/availability/emergency/dental",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<EmergencyAvailabilityDTO> getDentalEmergencyAvailability() {
+        return visitsServiceClient.getDentalEmergencyAvailability();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "/availability/emergency/surgical",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<EmergencyAvailabilityDTO> getSurgicalEmergencyAvailability() {
+        return visitsServiceClient.getSurgicalEmergencyAvailability();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "/availability/emergency/radiology",
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<EmergencyAvailabilityDTO> getRadiologyEmergencyAvailability() {
+        return visitsServiceClient.getRadiologyEmergencyAvailability();
+    }
 }
