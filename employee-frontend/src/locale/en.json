@@ -1058,6 +1058,16 @@
     },
     "inventory": {
       "title": "Inventory",
+      "sort": {
+        "label": "Sort by",
+        "nameAsc": "Name A–Z",
+        "nameDesc": "Name Z–A",
+        "type": "Type",
+        "countDesc": "Number of supplies (most first)",
+        "countError": "Could not load supply counts. Try again or choose another sort.",
+        "retry": "Try again",
+        "loadingCounts": "Loading supply counts…"
+      },
       "data": {
         "names": {
           "medicalEquipment": "Medical equipment",

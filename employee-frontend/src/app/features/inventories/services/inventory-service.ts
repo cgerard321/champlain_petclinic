@@ -68,8 +68,9 @@ export class InventoryService {
       );
   }
 
+  // Counts supply records, not total stock units.
   getQuantity(inventoryId: string): Observable<number> {
-    return this.http.get<number>(`${this.baseUrl}/${inventoryId}/productquantity`);
+    return this.http.get<number>(`${this.baseUrl}/${inventoryId}/products-count`);
   }
 
   createInventory(body: InventoryRequest): Observable<Inventory> {

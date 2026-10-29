@@ -1,4 +1,3 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   computed,
@@ -23,7 +22,10 @@ import {
   expand,
   finalize,
   reduce,
-  switchMap,
+  catchError,
+  map,
+  mergeMap,
+  of,
   toArray,
   firstValueFrom,
 } from 'rxjs';
@@ -45,6 +47,10 @@ import {
 } from '@shared/components/modal-form/modal-form-models';
 import { getInventoryPermissions } from '@shared/models/inventory-permissions';
 import { Roles } from '@shared/models/roles';
+
+const INVENTORY_SORTS = ['name-asc', 'name-desc', 'type', 'count-desc'] as const;
+type InventorySort = (typeof INVENTORY_SORTS)[number];
+const SORT_STORAGE_KEY = 'inventorySort';
 
 interface InventoryFormValue {
   inventoryNameEn: string;
@@ -77,21 +83,94 @@ export class InventoryList implements OnInit, OnDestroy {
 
   private inventorySubscription?: Subscription;
   private inventoryTypesSubscription?: Subscription;
-  private readonly quantitySubscriptions = new Set<Subscription>();
-  private filterTimer?: ReturnType<typeof setTimeout>;
+  private quantitySubscription?: Subscription;
 
   protected readonly can = computed(() => getInventoryPermissions(this.auth.roles()));
 
   protected readonly currentPage = signal(0);
   protected readonly pageSize = 8;
-  protected readonly inventories = signal<Inventory[]>([]);
+  protected readonly sourceInventories = signal<Inventory[]>([]);
+  protected readonly sort = signal<InventorySort>(this.restoreSort());
+  protected readonly quantityErrors = signal<Record<string, boolean>>({});
+  protected readonly quantities = signal<Record<string, number | null>>({});
+
+  protected readonly filters = signal<InventoryFilters>({
+    inventoryName: '',
+    inventoryType: '',
+    inventoryDescription: '',
+    importantOnly: false,
+  });
+
+  protected readonly filteredInventories = computed(() =>
+    this.sourceInventories().filter((inventory) =>
+      this.matchesLocalizedFilters(inventory, this.filters()),
+    ),
+  );
+
+  protected readonly countSortBlocked = computed(
+    () =>
+      this.sort() === 'count-desc' &&
+      this.filteredInventories().some(
+        (inventory) => this.quantityFor(inventory.inventoryId) === null,
+      ),
+  );
+
+  protected readonly countSortError = computed(
+    () =>
+      this.countSortBlocked() &&
+      this.filteredInventories().some((inventory) => this.quantityErrors()[inventory.inventoryId]),
+  );
+
+  protected readonly sortedInventories = computed(() => {
+    if (this.countSortBlocked()) return [];
+
+    const compareName = (a: Inventory, b: Inventory): number =>
+      this.localizedInventoryName(a).localeCompare(this.localizedInventoryName(b), this.locale);
+
+    return [...this.filteredInventories()].sort((a, b) => {
+      let comparison = 0;
+
+      switch (this.sort()) {
+        case 'name-asc':
+          comparison = compareName(a, b);
+          break;
+        case 'name-desc':
+          comparison = compareName(b, a);
+          break;
+        case 'type':
+          comparison = this.localizedInventoryType(a.inventoryType).localeCompare(
+            this.localizedInventoryType(b.inventoryType),
+            this.locale,
+          );
+          break;
+        case 'count-desc':
+          comparison = this.quantities()[b.inventoryId]! - this.quantities()[a.inventoryId]!;
+          break;
+      }
+
+      return comparison || compareName(a, b) || a.inventoryId.localeCompare(b.inventoryId);
+    });
+  });
+
+  protected readonly inventories = computed(() =>
+    this.sortedInventories().slice(
+      this.currentPage() * this.pageSize,
+      (this.currentPage() + 1) * this.pageSize,
+    ),
+  );
+
   protected readonly inventoryTypes = signal<InventoryType[]>([]);
   protected readonly inventoryTypesLoading = signal(false);
   protected readonly inventoryTypesError = signal<string | null>(null);
-  protected readonly quantities = signal<Record<string, number | null>>({});
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<ApiError | null>(null);
-  protected readonly noResultsMessage = signal<string | null>(null);
+
+  protected readonly noResultsMessage = computed(() =>
+    !this.isLoading() && this.filteredInventories().length === 0 && this.hasActiveFilters()
+      ? this.emptyFilteredMessage()
+      : null,
+  );
+
   protected readonly savingFavorites = signal<Record<string, boolean>>({});
   protected readonly favoriteError = signal<string | null>(null);
   protected readonly loadingTypesLabel = $localize`:@@inventory.filters.loadingTypes:Chargement des types…`;
@@ -100,13 +179,6 @@ export class InventoryList implements OnInit, OnDestroy {
   protected readonly emptyLabel = $localize`:@@inventory.empty.message:Aucun inventaire à afficher pour le moment.`;
   protected readonly savingLabel = $localize`:@@inventory.actions.saving:Enregistrement…`;
   protected readonly addInventoryLabel = $localize`:@@inventory.actions.add:Ajouter un inventaire`;
-
-  protected readonly filters = signal<InventoryFilters>({
-    inventoryName: '',
-    inventoryType: '',
-    inventoryDescription: '',
-    importantOnly: false,
-  });
 
   protected readonly canManageFavorites = computed(
     () =>
@@ -120,7 +192,7 @@ export class InventoryList implements OnInit, OnDestroy {
   );
 
   protected get inventoryTypesDropdown(): string[] {
-    return this.inventoryTypes().map((t) => t.type);
+    return this.inventoryTypes().map((type) => type.type);
   }
 
   protected readonly savingInventory = signal(false);
@@ -133,13 +205,9 @@ export class InventoryList implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.filterTimer) {
-      clearTimeout(this.filterTimer);
-    }
-
     this.inventorySubscription?.unsubscribe();
     this.inventoryTypesSubscription?.unsubscribe();
-    this.cancelQuantityRequests();
+    this.quantitySubscription?.unsubscribe();
   }
 
   protected quantityFor(inventoryId: string): number | null {
@@ -190,20 +258,26 @@ export class InventoryList implements OnInit, OnDestroy {
     );
   }
 
-  private inventoryResults(page: number): Observable<Inventory> {
-    const filters = this.filters();
-    if (
-      !filters.inventoryName.trim() &&
-      !filters.inventoryDescription.trim() &&
-      !filters.inventoryType &&
-      !filters.importantOnly
-    ) {
-      return this.inventoryService.getInventories(filters, page, this.pageSize);
-    }
+  private restoreSort(): InventorySort {
+    const saved = sessionStorage.getItem(SORT_STORAGE_KEY);
+    return INVENTORY_SORTS.find((sort) => sort === saved) ?? 'name-asc';
+  }
 
-    // Read the stored records and apply every active filter to the display values locally.
-    // This keeps translated text searches, the type dropdown, and favorites consistent.
+  protected setSort(event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) return;
+
+    const sort = INVENTORY_SORTS.find((value) => value === target.value);
+    if (!sort) return;
+
+    this.sort.set(sort);
+    sessionStorage.setItem(SORT_STORAGE_KEY, sort);
+    this.currentPage.set(0);
+  }
+
+  private inventoryResults(): Observable<Inventory[]> {
     const batchSize = 50;
+
     return this.inventoryService.getInventories({}, 0, batchSize).pipe(
       toArray(),
       expand((batch, index) =>
@@ -212,18 +286,12 @@ export class InventoryList implements OnInit, OnDestroy {
           : EMPTY,
       ),
       reduce((all, batch) => all.concat(batch), [] as Inventory[]),
-      switchMap((all) =>
-        from(
-          all
-            .filter((inventory) => this.matchesLocalizedFilters(inventory, filters))
-            .slice(page * this.pageSize, (page + 1) * this.pageSize),
-        ),
-      ),
     );
   }
 
   protected stockQuantityLabel(inventoryId: string): string {
     const count = this.quantityFor(inventoryId) ?? 0;
+
     return count === 1
       ? $localize`:@@inventory.quantity.one:${count}:count: article en stock`
       : $localize`:@@inventory.quantity.other:${count}:count: articles en stock`;
@@ -231,6 +299,7 @@ export class InventoryList implements OnInit, OnDestroy {
 
   protected favoriteAriaLabel(inventory: Inventory): string {
     const name = this.localizedInventoryName(inventory);
+
     return inventory.important
       ? $localize`:@@inventory.favorite.remove:Retirer ${name}:name: des favoris`
       : $localize`:@@inventory.favorite.add:Ajouter ${name}:name: aux favoris`;
@@ -241,7 +310,7 @@ export class InventoryList implements OnInit, OnDestroy {
     if (!(target instanceof HTMLInputElement)) return;
 
     this.filters.update((current) => ({ ...current, [field]: target.value }));
-    this.scheduleFilteredLoad();
+    this.currentPage.set(0);
   }
 
   protected setInventoryTypeFilter(event: Event): void {
@@ -249,7 +318,7 @@ export class InventoryList implements OnInit, OnDestroy {
     if (!(target instanceof HTMLSelectElement)) return;
 
     this.filters.update((current) => ({ ...current, inventoryType: target.value }));
-    this.scheduleFilteredLoad();
+    this.currentPage.set(0);
   }
 
   protected setImportantOnly(event: Event): void {
@@ -257,7 +326,7 @@ export class InventoryList implements OnInit, OnDestroy {
     if (!(target instanceof HTMLInputElement) || this.isSavingAnyFavorite()) return;
 
     this.filters.update((current) => ({ ...current, importantOnly: target.checked }));
-    this.scheduleFilteredLoad();
+    this.currentPage.set(0);
   }
 
   protected clearFilters(): void {
@@ -267,7 +336,7 @@ export class InventoryList implements OnInit, OnDestroy {
       inventoryDescription: '',
       importantOnly: false,
     });
-    this.scheduleFilteredLoad();
+    this.currentPage.set(0);
   }
 
   protected hasActiveFilters(): boolean {
@@ -283,6 +352,7 @@ export class InventoryList implements OnInit, OnDestroy {
 
   private emptyFilteredMessage(): string {
     const filters = this.filters();
+
     if (
       filters.importantOnly &&
       !filters.inventoryName.trim() &&
@@ -296,23 +366,22 @@ export class InventoryList implements OnInit, OnDestroy {
   }
 
   protected canGoToNextPage(): boolean {
-    return this.inventories().length === this.pageSize;
+    return (
+      !this.countSortBlocked() &&
+      (this.currentPage() + 1) * this.pageSize < this.filteredInventories().length
+    );
   }
 
   protected goToPreviousPage(): void {
-    if (this.currentPage() === 0 || this.isLoading()) return;
+    if (this.currentPage() === 0 || this.isLoading() || this.countSortBlocked()) return;
 
-    const page = this.currentPage() - 1;
-    this.currentPage.set(page);
-    this.loadInventories(page);
+    this.currentPage.update((page) => page - 1);
   }
 
   protected goToNextPage(): void {
     if (!this.canGoToNextPage() || this.isLoading()) return;
 
-    const page = this.currentPage() + 1;
-    this.currentPage.set(page);
-    this.loadInventories(page);
+    this.currentPage.update((page) => page + 1);
   }
 
   protected isSavingFavorite(inventoryId: string): boolean {
@@ -340,16 +409,12 @@ export class InventoryList implements OnInit, OnDestroy {
       )
       .subscribe({
         next: () => {
-          if (this.filters().importantOnly && !nextValue) {
-            this.loadInventories();
-            return;
-          }
-
-          this.inventories.update((current) =>
+          this.sourceInventories.update((current) =>
             current.map((item) =>
               item.inventoryId === id ? { ...item, important: nextValue } : item,
             ),
           );
+          this.clampPage();
         },
         error: () => {
           const name = this.localizedInventoryName(inventory);
@@ -468,9 +533,7 @@ export class InventoryList implements OnInit, OnDestroy {
       maxWidth: '95vw',
     });
 
-    // The dialog closes with undefined when the user cancels.
     const result = await firstValueFrom(dialogRef.afterClosed());
-
     const allowed = inventory ? this.can().canUpdateInventory : this.can().canCreateInventory;
 
     if (!result || !allowed) return;
@@ -497,7 +560,7 @@ export class InventoryList implements OnInit, OnDestroy {
           : this.inventoryService.createInventory(body),
       );
 
-      this.loadInventories(this.currentPage());
+      this.loadInventories();
     } catch {
       this.formError.set(
         editingId
@@ -514,7 +577,10 @@ export class InventoryList implements OnInit, OnDestroy {
       inventoryName: value.inventoryNameEn.trim(),
       inventoryType: value.inventoryType,
       inventoryDescription: value.inventoryDescriptionEn.trim(),
-      name: { en: value.inventoryNameEn.trim(), fr: value.inventoryNameFr.trim() },
+      name: {
+        en: value.inventoryNameEn.trim(),
+        fr: value.inventoryNameFr.trim(),
+      },
       description: {
         en: value.inventoryDescriptionEn.trim(),
         fr: value.inventoryDescriptionFr.trim(),
@@ -546,22 +612,29 @@ export class InventoryList implements OnInit, OnDestroy {
       maxWidth: '95vw',
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (!result || !this.can().canDeleteInventory) return;
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((result) => {
+        if (!result || !this.can().canDeleteInventory) return;
 
-      this.inventoryService.deleteInventory(inventory.inventoryId).subscribe({
-        next: () => {
-          this.inventories.update((current) =>
-            current.filter((inv) => inv.inventoryId !== inventory.inventoryId),
-          );
-        },
-        error: () => {
-          this.deleteError.set(
-            $localize`:@@inventory.errors.delete:Impossible de supprimer l'inventaire.`,
-          );
-        },
+        this.inventoryService
+          .deleteInventory(inventory.inventoryId)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.sourceInventories.update((current) =>
+                current.filter((item) => item.inventoryId !== inventory.inventoryId),
+              );
+              this.clampPage();
+            },
+            error: () => {
+              this.deleteError.set(
+                $localize`:@@inventory.errors.delete:Impossible de supprimer l'inventaire.`,
+              );
+            },
+          });
       });
-    });
   }
 
   private loadInventoryTypes(): void {
@@ -583,6 +656,7 @@ export class InventoryList implements OnInit, OnDestroy {
       },
       complete: () => {
         this.inventoryTypesLoading.set(false);
+
         if (this.inventoryTypes().length === 0) {
           this.inventoryTypesError.set(
             $localize`:@@inventory.errors.noTypes:Aucun type d'inventaire disponible.`,
@@ -592,134 +666,78 @@ export class InventoryList implements OnInit, OnDestroy {
     });
   }
 
-  private scheduleFilteredLoad(): void {
-    if (this.filterTimer) clearTimeout(this.filterTimer);
-
-    this.currentPage.set(0);
-    this.inventorySubscription?.unsubscribe();
-    this.cancelQuantityRequests();
-    this.inventories.set([]);
-    this.quantities.set({});
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
-    this.noResultsMessage.set(null);
-    this.favoriteError.set(null);
-
-    this.filterTimer = setTimeout(() => {
-      this.filterTimer = undefined;
-      this.loadInventories(0);
-    }, 300);
+  private clampPage(): void {
+    const lastPage = Math.max(0, Math.ceil(this.filteredInventories().length / this.pageSize) - 1);
+    this.currentPage.update((page) => Math.min(page, lastPage));
   }
 
-  private loadInventories(page = this.currentPage()): void {
+  private loadInventories(): void {
     if (!this.can().hasAnyAccess) {
       this.isLoading.set(false);
       return;
     }
 
-    const requestedPage = page;
-
     this.inventorySubscription?.unsubscribe();
-    this.cancelQuantityRequests();
-    this.inventories.set([]);
-    this.quantities.set({});
+    this.quantitySubscription?.unsubscribe();
     this.isLoading.set(true);
     this.errorMessage.set(null);
-    this.noResultsMessage.set(null);
     this.favoriteError.set(null);
+    this.quantities.set({});
+    this.quantityErrors.set({});
 
-    this.inventorySubscription = this.inventoryResults(requestedPage).subscribe({
-      next: (item) => {
+    this.inventorySubscription = this.inventoryResults().subscribe({
+      next: (inventories) => {
+        this.sourceInventories.set([
+          ...new Map(inventories.map((inventory) => [inventory.inventoryId, inventory])).values(),
+        ]);
+        this.clampPage();
         this.isLoading.set(false);
-        this.errorMessage.set(null);
-        this.noResultsMessage.set(null);
-
-        this.inventories.update((current) => {
-          const index = current.findIndex(
-            (inventory) => inventory.inventoryId === item.inventoryId,
-          );
-
-          if (index === -1) return [...current, item];
-
-          const updated = [...current];
-          updated[index] = item;
-          return updated;
-        });
-
-        this.loadQuantities(item.inventoryId);
+        this.retryQuantities();
       },
       error: (err: unknown) => {
         this.isLoading.set(false);
-
-        if (err instanceof HttpErrorResponse && err.status === 404 && requestedPage > 0) {
-          const previousPage = requestedPage - 1;
-          this.currentPage.set(previousPage);
-          this.loadInventories(previousPage);
-          return;
-        }
-
-        if (err instanceof HttpErrorResponse && err.status === 404 && this.hasActiveFilters()) {
-          this.noResultsMessage.set(this.emptyFilteredMessage());
-          this.errorMessage.set(null);
-          return;
-        }
-
-        this.noResultsMessage.set(null);
         this.errorMessage.set({
           code: isApiError(err) ? err.code : 'UNKNOWN',
           message: $localize`:@@inventory.errors.load:Impossible de charger les inventaires.`,
         });
       },
-      complete: () => {
-        this.isLoading.set(false);
-
-        if (this.inventories().length === 0 && requestedPage > 0) {
-          const previousPage = requestedPage - 1;
-          this.currentPage.set(previousPage);
-          this.loadInventories(previousPage);
-          return;
-        }
-
-        if (this.inventories().length === 0 && this.hasActiveFilters()) {
-          this.noResultsMessage.set(this.emptyFilteredMessage());
-        }
-      },
     });
   }
 
-  private loadQuantities(inventoryId: string): void {
-    if (!(inventoryId in this.quantities())) {
-      this.quantities.update((current) => ({ ...current, [inventoryId]: null }));
-    }
+  protected retryQuantities(): void {
+    this.quantitySubscription?.unsubscribe();
+    this.quantityErrors.set({});
 
-    let subscription = Subscription.EMPTY;
-    const removeSubscription = (): void => {
-      this.quantitySubscriptions.delete(subscription);
-    };
+    const missing = this.sourceInventories().filter(
+      (inventory) => this.quantityFor(inventory.inventoryId) === null,
+    );
 
-    subscription = this.inventoryService
-      .getQuantity(inventoryId)
-      .pipe(finalize(removeSubscription))
-      .subscribe({
-        next: (quantity) => {
-          this.quantities.update((current) => ({ ...current, [inventoryId]: quantity }));
-        },
-        error: () => {
-          if (!(inventoryId in this.quantities())) {
-            this.quantities.update((current) => ({ ...current, [inventoryId]: null }));
-          }
-        },
+    this.quantitySubscription = from(missing)
+      .pipe(
+        mergeMap(
+          (inventory) =>
+            this.inventoryService.getQuantity(inventory.inventoryId).pipe(
+              map((quantity) => {
+                if (!Number.isSafeInteger(quantity) || quantity < 0) {
+                  throw new Error('Invalid supply count');
+                }
+
+                return { id: inventory.inventoryId, quantity };
+              }),
+              catchError(() => {
+                this.quantityErrors.update((errors) => ({
+                  ...errors,
+                  [inventory.inventoryId]: true,
+                }));
+
+                return of({ id: inventory.inventoryId, quantity: null });
+              }),
+            ),
+          4,
+        ),
+      )
+      .subscribe(({ id, quantity }) => {
+        this.quantities.update((quantities) => ({ ...quantities, [id]: quantity }));
       });
-
-    if (subscription.closed) {
-      removeSubscription();
-    } else {
-      this.quantitySubscriptions.add(subscription);
-    }
-  }
-
-  private cancelQuantityRequests(): void {
-    this.quantitySubscriptions.forEach((subscription) => subscription.unsubscribe());
-    this.quantitySubscriptions.clear();
   }
 }
