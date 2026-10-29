@@ -3,7 +3,6 @@ import {
   IsAdmin,
   IsCustomer,
   IsReceptionist,
-  IsInventoryManager,
   IsVet,
   useUser,
 } from '@/context/UserContext';
@@ -31,7 +30,7 @@ export function NavBar(): JSX.Element {
   const isCustomer = IsCustomer();
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
-  const isInventoryManager = IsInventoryManager();
+
   const hasStaffVisits = isAdmin || isVet || isReceptionist;
   //  const showVetVisitsDropdown = isVet;
 
@@ -124,14 +123,11 @@ export function NavBar(): JSX.Element {
                     )}
                   </NavDropdown>
                 )}
-                {!isAdmin &&
-                  !isInventoryManager &&
-                  !isVet &&
-                  !isReceptionist && (
-                    <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
-                      {t('nav.bills')}
-                    </Nav.Link>
-                  )}
+                {isCustomer && !hasStaffVisits && (
+                  <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
+                    {t('nav.bills')}
+                  </Nav.Link>
+                )}
                 {isCustomer && !hasStaffVisits && (
                   <NavDropdown
                     title={t('nav.visits')}
