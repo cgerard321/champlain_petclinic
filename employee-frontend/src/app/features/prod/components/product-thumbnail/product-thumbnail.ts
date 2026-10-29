@@ -13,7 +13,7 @@ export class ProductThumbnail {
 
   readonly imageId = input<string | undefined>();
   readonly image = input<FileDetails | null | undefined>();
-  readonly alt = input('Product image');
+  readonly alt = input($localize`:@@products.image.alt:Image du produit`);
   protected readonly imageSrc = signal<string | null>(null);
 
   constructor() {

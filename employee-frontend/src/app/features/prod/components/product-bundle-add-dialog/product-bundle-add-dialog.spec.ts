@@ -124,7 +124,9 @@ describe('ProductBundleAddDialog', () => {
     component['submit'](new Event('submit'));
 
     expect(createBundle).not.toHaveBeenCalled();
-    expect(component['errorMessage']()).toBe('Bundle price must be less than the original price.');
+    expect(component['errorMessage']()).toBe(
+      "Le prix de l'ensemble doit être inférieur au prix original.",
+    );
   });
 
   it('rejects a bundle price that is not a number', () => {
@@ -133,7 +135,7 @@ describe('ProductBundleAddDialog', () => {
     component['model'].update((current) => ({ ...current, bundlePrice: NaN }));
 
     expect(component['validateBusinessRules']()).toBe(false);
-    expect(component['errorMessage']()).toBe('Bundle price must be a valid number.');
+    expect(component['errorMessage']()).toBe("Le prix de l'ensemble doit être un nombre valide.");
   });
 
   it('does not submit without any products', () => {
