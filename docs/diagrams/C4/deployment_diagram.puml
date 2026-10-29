@@ -40,6 +40,7 @@ Deployment_Node(internet_dns, "Synology DDNS", "DNS + Dynamic IP updates") {
 }
 
 System_Ext(smtp_srv, "smtp.gmail.com", "SMTP server", "Sends email (via Mailer Service)")
+System_Ext(stripe, "Stripe", "External payment platform providing hosted checkout and payment processing.")
 
 ' ==========================================
 ' HOME NETWORK
@@ -241,6 +242,9 @@ Rel(visits_svc,    files_svc, "Store/Fetch prescription PDFs", "HTTP/REST", $tag
 
 Rel(visits_svc,  auth_svc, "Validate tokens", "HTTP/REST", $tags="http")
 Rel(billing_svc, auth_svc, "Validate tokens", "HTTP/REST", $tags="http")
+
+Rel(cart_svc, stripe, "Create checkout session", "HTTP/Stripe API", $tags="http")
+Rel(stripe, cart_svc, "Send webhook events", "HTTP", $tags="http")
 
 ' Services -> Databases & Storage
 Rel_D(auth_svc,  mysql_auth,  "JDBC", "", $tags="jdbc-mysql")
