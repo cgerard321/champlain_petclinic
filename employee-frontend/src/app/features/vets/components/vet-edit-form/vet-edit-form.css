@@ -423,6 +423,7 @@ h3:focus-visible {
   form {
     padding: 16px;
   }
+
   .education-section button {
     width: 100%;
     white-space: normal;
@@ -529,10 +530,12 @@ h3:focus-visible {
   .education-list p:last-child {
     color: #a3b8ac;
   }
+
   .education-section .hint.invalid,
   .education-section .error {
    color: #ff9c9c !important;
   }
+
   .education-section input[aria-invalid='true'] {
     border-color: #ff9c9c !important;
   }
