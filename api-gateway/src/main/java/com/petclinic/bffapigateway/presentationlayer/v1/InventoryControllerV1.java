@@ -329,9 +329,11 @@ public class InventoryControllerV1 {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @GetMapping("/{inventoryId}/products/download")
     public Mono<ResponseEntity<byte[]>> createSupplyPdf(
-            @PathVariable String inventoryId
+            @PathVariable String inventoryId,
+            @RequestParam(required = false) String lang
     ) {
-        return inventoryServiceClient.createSupplyPdf(inventoryId)
+        return (lang == null ? inventoryServiceClient.createSupplyPdf(inventoryId)
+                : inventoryServiceClient.createSupplyPdf(inventoryId, lang))
                 .map(pdfContent -> {
                     HttpHeaders headers = new HttpHeaders();
                     headers.add(

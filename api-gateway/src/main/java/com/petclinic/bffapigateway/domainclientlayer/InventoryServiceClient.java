@@ -504,8 +504,16 @@ public class InventoryServiceClient {
     }
 
     public Mono<byte[]> createSupplyPdf(String inventoryId) {
+        return createSupplyPdf(inventoryId, null);
+    }
+
+    public Mono<byte[]> createSupplyPdf(String inventoryId, String language) {
         return webClient.get()
-                .uri("/{inventoryId}/products/download", inventoryId)
+                .uri(builder -> {
+                    builder.path("/{inventoryId}/products/download");
+                    if (language != null) builder.queryParam("lang", language);
+                    return builder.build(inventoryId);
+                })
                 .accept(MediaType.APPLICATION_PDF) // Expect PDF response
                 .retrieve()
                 .onStatus(status -> status.value() == 422,
