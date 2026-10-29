@@ -483,10 +483,14 @@
       "supplier": { "notRecorded": "Not recorded" },
       "fields": {
         "name": "Name",
+        "nameEn": "Name (English)",
+        "nameFr": "Name (French)",
         "supplyName": "Supply name",
         "supplier": "Supplier",
         "supplierName": "Supplier name",
         "description": "Description",
+        "descriptionEn": "Description (English)",
+        "descriptionFr": "Description (French)",
         "costPrice": "Cost Price (CAD)",
         "salePrice": "Sale Price (CAD)",
         "quantity": "Quantity",
@@ -598,8 +602,12 @@
       },
       "fields": {
         "name": "Inventory name",
+        "nameEn": "Inventory name (English)",
+        "nameFr": "Inventory name (French)",
         "type": "Inventory type",
-        "description": "Description"
+        "description": "Description",
+        "descriptionEn": "Description (English)",
+        "descriptionFr": "Description (French)"
       },
       "filters": {
         "aria": "Filter inventories",

@@ -50,9 +50,10 @@ export class SupplyService {
     );
   }
 
-  downloadSupplyPdf(inventoryId: string): Observable<Blob> {
+  downloadSupplyPdf(inventoryId: string, language = 'en'): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/${inventoryId}/products/download`, {
       responseType: 'blob',
+      params: { lang: language },
     });
   }
 }

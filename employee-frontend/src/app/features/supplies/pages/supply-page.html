@@ -135,10 +135,10 @@
 <ng-template #nameCell let-supply>
   <div class="supply-details">
     @if (supplyPhotoUrl(supply); as photo) {
-      <img class="supply-photo" [src]="photo" [alt]="localizedSupplyName(supply.productName)" />
+      <img class="supply-photo" [src]="photo" [alt]="localizedSupplyName(supply)" />
     }
 
-    <span class="supply-name">{{ localizedSupplyName(supply.productName) }}</span>
+    <span class="supply-name">{{ localizedSupplyName(supply) }}</span>
   </div>
 </ng-template>
 

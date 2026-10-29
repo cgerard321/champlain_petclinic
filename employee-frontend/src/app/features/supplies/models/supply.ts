@@ -5,6 +5,8 @@ export interface Supply {
   inventoryId: string;
   productName: string;
   productDescription: string;
+  name?: { en: string; fr: string };
+  description?: { en: string; fr: string };
   productPrice: number;
   productQuantity: number;
   productSalePrice: number;
@@ -35,6 +37,8 @@ export interface SupplyRequest {
   productName: string;
   supplierName?: string;
   productDescription: string;
+  name?: { en: string; fr: string };
+  description?: { en: string; fr: string };
   productPrice: number;
   productQuantity: number;
   productSalePrice: number;
