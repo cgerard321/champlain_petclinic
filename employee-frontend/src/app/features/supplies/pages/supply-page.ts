@@ -88,21 +88,18 @@ export class SupplyPage {
 
   protected readonly filteredSupplies = computed(() => {
     const { productName, supplierName, productDescription, status } = this.filters();
+    const nameQuery = productName.trim().toLowerCase();
+    const descriptionQuery = productDescription.trim().toLowerCase();
+    const supplierQuery = supplierName.trim().toLowerCase();
     return this.supplies().filter(
       (supply) =>
-        (this.localizedSupplyName(supply)
-          .toLowerCase()
-          .includes(productName.trim().toLowerCase()) ||
-          [supply.name?.en, supply.name?.fr, supply.productName].some((text) =>
-            (text ?? '').toLowerCase().includes(productName.trim().toLowerCase()),
-          )) &&
-        this.supplierLabel(supply).toLowerCase().includes(supplierName.trim().toLowerCase()) &&
-        (this.localizedSupplyDescription(supply)
-          .toLowerCase()
-          .includes(productDescription.trim().toLowerCase()) ||
-          [supply.description?.en, supply.description?.fr, supply.productDescription].some((text) =>
-            (text ?? '').toLowerCase().includes(productDescription.trim().toLowerCase()),
-          )) &&
+        [supply.name?.en, supply.name?.fr, supply.productName].some((text) =>
+          (text ?? '').toLowerCase().includes(nameQuery),
+        ) &&
+        this.supplierLabel(supply).toLowerCase().includes(supplierQuery) &&
+        [supply.description?.en, supply.description?.fr, supply.productDescription].some((text) =>
+          (text ?? '').toLowerCase().includes(descriptionQuery),
+        ) &&
         (!status || this.effectiveStatus(supply) === status),
     );
   });
@@ -543,16 +540,19 @@ export class SupplyPage {
     this.downloadingPdf.set(true);
     this.downloadError.set('');
 
-    this.supplyService.downloadSupplyPdf(inventoryId, this.isFrench ? 'fr' : 'en').subscribe({
-      next: (blob) => {
-        this.saveFile(blob, `supply-report-${inventoryId}.pdf`);
-        this.downloadingPdf.set(false);
-      },
-      error: async (err: unknown) => {
-        this.downloadError.set(await this.readDownloadError(err));
-        this.downloadingPdf.set(false);
-      },
-    });
+    this.supplyService
+      .downloadSupplyPdf(inventoryId, this.isFrench ? 'fr' : 'en')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.saveFile(blob, `supply-report-${inventoryId}.pdf`);
+          this.downloadingPdf.set(false);
+        },
+        error: async (err: unknown) => {
+          this.downloadError.set(await this.readDownloadError(err));
+          this.downloadingPdf.set(false);
+        },
+      });
   }
 
   private saveFile(blob: Blob, fileName: string): void {

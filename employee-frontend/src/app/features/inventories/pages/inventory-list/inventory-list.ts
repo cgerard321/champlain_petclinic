@@ -172,17 +172,13 @@ export class InventoryList implements OnInit, OnDestroy {
   private matchesLocalizedFilters(inventory: Inventory, filters: InventoryFilters): boolean {
     const nameQuery = this.normalizeSearchText(filters.inventoryName);
     const descriptionQuery = this.normalizeSearchText(filters.inventoryDescription);
-    const name = this.normalizeSearchText(this.localizedInventoryName(inventory));
-    const description = this.normalizeSearchText(this.localizedInventoryDescription(inventory));
 
     return (
       (!nameQuery ||
-        name.startsWith(nameQuery) ||
         [inventory.name?.en, inventory.name?.fr, inventory.inventoryName].some((text) =>
           this.normalizeSearchText(text ?? '').startsWith(nameQuery),
         )) &&
       (!descriptionQuery ||
-        description.startsWith(descriptionQuery) ||
         [inventory.description?.en, inventory.description?.fr, inventory.inventoryDescription].some(
           (text) => this.normalizeSearchText(text ?? '').startsWith(descriptionQuery),
         )) &&
