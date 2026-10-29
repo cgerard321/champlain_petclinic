@@ -3,6 +3,7 @@ import {
   IsAdmin,
   IsCustomer,
   IsReceptionist,
+  IsInventoryManager,
   IsVet,
   useUser,
 } from '@/context/UserContext';
@@ -30,7 +31,7 @@ export function NavBar(): JSX.Element {
   const isCustomer = IsCustomer();
   const [navbarOpen, setNavbarOpen] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
-
+  const isInventoryManager = IsInventoryManager();
   const hasStaffVisits = isAdmin || isVet || isReceptionist;
   //  const showVetVisitsDropdown = isVet;
 
