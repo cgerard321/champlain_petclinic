@@ -117,6 +117,7 @@ Rel(angular20_spa, api_gateway, "POST /api/gateway/visits/weekly-email", "JSON/R
 
 Rel(customers_service, files_service, "Makes API calls to", "JSON/REST/HTTPS")
 Rel(visits_service, files_service, "Makes API calls to", "JSON/REST/HTTPS")
+Rel(cart_service, files_service, "Makes API calls to", "JSON/REST/HTTPS")
 
 Rel(files_service, files_db, "Reads from and writes to", "JDCB/SQL/TCP", $tags="blue-line")
 Rel(files_service, minio, "Makes API calls to", "JSON/REST/HTTPS")
