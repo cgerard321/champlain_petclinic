@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -16,6 +16,7 @@ import { PromoService } from '@features/promo/services/promo.service';
 @Component({
   imports: [
     DatePipe,
+    CurrencyPipe,
     MatButtonModule,
     MatDialogModule,
     MatIconModule,

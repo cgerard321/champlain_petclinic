@@ -1,4 +1,11 @@
 {
+  "automaticDiscount": {
+    "summaryLabel": "Automatic discount ({{percent}}%):",
+    "offer": "Spend {{minimum}} on products to get {{percent}}% off automatically.",
+    "remaining": "Add {{amount}} more in products to qualify.",
+    "applied": "Automatic discount applied. You save {{amount}}.",
+    "bestDiscount": "The best available discount is included in your total."
+  },
   "buttons": {
     "addToCart": "Add to Cart",
     "apply": "Apply",

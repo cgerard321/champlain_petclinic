@@ -64,13 +64,24 @@
       }
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Code</mat-label>
-      <input matInput type="text" [formField]="promoForm.code" />
-      @if (promoForm.code().touched() && promoForm.code().invalid()) {
-        <mat-error>{{ promoForm.code().errors()[0]?.message }}</mat-error>
-      }
-    </mat-form-field>
+    <mat-slide-toggle
+      [checked]="model().automatic"
+      [disabled]="isSubmitting()"
+      (change)="setAutomatic($event.checked)"
+      i18n="@@promo.automatic.toggle"
+    >
+      Réduction automatique
+    </mat-slide-toggle>
+
+    @if (!model().automatic) {
+      <mat-form-field appearance="outline">
+        <mat-label>Code</mat-label>
+        <input matInput type="text" [formField]="promoForm.code" />
+        @if (promoForm.code().touched() && promoForm.code().invalid()) {
+          <mat-error>{{ promoForm.code().errors()[0]?.message }}</mat-error>
+        }
+      </mat-form-field>
+    }
 
     <div class="two-column">
       <mat-form-field appearance="outline">
@@ -86,9 +97,20 @@
       </mat-form-field>
     </div>
 
+    @if (model().automatic) {
+      <mat-form-field appearance="outline">
+        <mat-label i18n="@@promo.automatic.minimumLabel">Montant minimum (CAD)</mat-label>
+        <input matInput type="number" step="0.01" [formField]="promoForm.minimumPurchaseAmount" />
+      </mat-form-field>
+    }
+
     <mat-form-field appearance="outline">
       <mat-label>Applies to</mat-label>
-      <mat-select [value]="model().scope" (selectionChange)="setScope($event.value)">
+      <mat-select
+        [disabled]="model().automatic"
+        [value]="model().scope"
+        (selectionChange)="setScope($event.value)"
+      >
         <mat-option value="CART">Full cart</mat-option>
         <mat-option value="PRODUCT">Selected products</mat-option>
         <mat-option value="PRODUCT_TYPE">Selected product types</mat-option>
