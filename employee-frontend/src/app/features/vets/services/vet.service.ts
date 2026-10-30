@@ -7,7 +7,8 @@ import { SseClient } from '@core/services/sse-client';
 import {
   VetResponse,
   VetUpdateRequest,
-  VetEducation,
+  VetCreateRequest,
+  VetEducationRequest,
   VetEducationResponse,
 } from '@features/vets/models/vet-api.model';
 
@@ -38,6 +39,17 @@ export class VetService {
     return this.http.put<VetResponse>(`${this.baseUrl}/${encodeURIComponent(vetId)}`, request);
   }
 
+  createVet(request: VetCreateRequest): Observable<VetResponse> {
+    return this.http.post<VetResponse>(`${this.baseUrl}/users/vets`, request);
+  }
+
+  addEducation(vetId: string, request: VetEducationRequest): Observable<VetEducationResponse> {
+    return this.http.post<VetEducationResponse>(
+      `${this.baseUrl}/${encodeURIComponent(vetId)}/educations`,
+      request,
+    );
+  }
+
   addSpecialty(vetId: string, name: string): Observable<VetResponse> {
     return this.http.post<VetResponse>(`${this.baseUrl}/${encodeURIComponent(vetId)}/specialties`, {
       name,
@@ -50,10 +62,6 @@ export class VetService {
         Accept: 'application/json',
       },
     });
-  }
-
-  addEducation(vetId: string, education: VetEducation): Observable<VetEducationResponse> {
-    return this.http.post<VetEducationResponse>(`${this.baseUrl}/${vetId}/educations`, education);
   }
 }
 

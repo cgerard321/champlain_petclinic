@@ -161,8 +161,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                                     Mono<Void> uniqueNames = requestDTO.getName() == null
                                                             ? Mono.empty()
                                                             : ensureUniqueProductNames(existingProduct, inventoryId, productId);
-                                                    return uniqueNames.then(Mono.<Product>defer(() -> validator
-                                                            .validateProductForUpdate(existingProduct, inventoryId, productId)))
+                                                    Mono<Product> validatedProduct = Mono.defer(() -> validator
+                                                            .validateProductForUpdate(existingProduct, inventoryId, productId));
+                                                    return uniqueNames.then(validatedProduct)
                                                             .flatMap(this::saveSupply)
                                                             .flatMap(saved -> {
                                                                 if (previousQuantity == saved.getProductQuantity()) {
@@ -716,7 +717,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         for (String language : List.of("en", "fr")) {
             String left = LocalizedContent.get(first, language, firstLegacy);
             String right = LocalizedContent.get(second, language, secondLegacy);
-            if (left != null && right != null && left.equalsIgnoreCase(right)) {
+            if (left != null && left.equalsIgnoreCase(right)) {
                 return true;
             }
         }
