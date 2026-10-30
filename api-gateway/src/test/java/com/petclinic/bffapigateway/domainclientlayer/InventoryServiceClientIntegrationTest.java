@@ -343,6 +343,58 @@ class InventoryServiceClientIntegrationTest {
                 .verify();
     }
 
+    @Test
+    void restockLowStockProduct_preservesEligibilityErrorInsteadOfReportingNotFound() {
+        enqueueError(400, "Only RE ORDER or OUT OF STOCK supplies can be restocked.");
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", 5))
+                .expectErrorMatches(error -> error instanceof InvalidInputsInventoryException
+                        && error.getMessage().contains("Only RE ORDER"))
+                .verify();
+    }
+
+    @Test
+    void restockLowStockProduct_usesFallbackWhenMessageIsMissing() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{}"));
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", 5))
+                .expectErrorMatches(error -> error instanceof InvalidInputsInventoryException
+                        && error.getMessage().equals("Unable to restock supply."))
+                .verify();
+    }
+
+    @Test
+    void restockLowStockProduct_preservesExplicitNullMessageHandling() {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody("{\"message\":null}"));
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", 5))
+                .expectError(NullPointerException.class)
+                .verify();
+    }
+
+    @Test
+    void restockLowStockProduct_preservesServerFailureAsUncertainOutcome() {
+        enqueueError(500, "Audit unavailable");
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", 5))
+                .expectErrorMatches(error -> error instanceof
+                        org.springframework.web.reactive.function.client.WebClientResponseException response
+                        && response.getStatusCode().value() == 500
+                        && response.getResponseBodyAsString().contains("Audit unavailable"))
+                .verify();
+    }
+
+    @Test
+    void restockLowStockProduct_preservesOverflowErrorInsteadOfReportingNotFound() {
+        enqueueError(400, "The restock quantity would exceed the maximum stock quantity.");
+        StepVerifier.create(inventoryServiceClient.restockLowStockProduct("inventory", "supply", Integer.MAX_VALUE))
+                .expectErrorMatches(error -> error instanceof InvalidInputsInventoryException
+                        && error.getMessage().contains("maximum stock"))
+                .verify();
+    }
+
 
 
 
@@ -1273,6 +1325,28 @@ class InventoryServiceClientIntegrationTest {
         StepVerifier.create(inventoryServiceClient.createSupplyPdf("inv1"))
                 .expectNextMatches(bytes -> bytes.length == 4 && bytes[0] == 37)
                 .verifyComplete();
+    }
+
+    @Test
+    void createSupplyPdf_ForwardsRequestedLanguage() throws IOException, InterruptedException {
+        MockWebServer languageServer = new MockWebServer();
+        languageServer.start();
+        try {
+        InventoryServiceClient client = new InventoryServiceClient("localhost", String.valueOf(languageServer.getPort()));
+        ReflectionTestUtils.setField(client, "rethrower", new Rethrower(new ObjectMapper()));
+        byte[] pdf = new byte[] {37, 80, 68, 70};
+        languageServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
+                .setBody(new okio.Buffer().write(pdf)));
+
+        StepVerifier.create(client.createSupplyPdf("inv1", "fr"))
+                .expectNextMatches(bytes -> bytes.length == 4)
+                .verifyComplete();
+
+        assertEquals("/inventory/inv1/products/download?lang=fr", languageServer.takeRequest().getPath());
+        } finally {
+            languageServer.shutdown();
+        }
     }
 
     @Test

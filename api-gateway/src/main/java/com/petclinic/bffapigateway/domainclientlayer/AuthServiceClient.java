@@ -179,6 +179,24 @@ public class AuthServiceClient {
     }
 
 
+    public Mono<UserPasswordLessDTO> createReceptionistUser(Mono<RegisterReceptionist> registerReceptionistMono) {
+        String uuid = UUID.randomUUID().toString();
+        return registerReceptionistMono.flatMap(registerReceptionist -> {
+            registerReceptionist.setUserId(uuid);
+            return webClientBuilder.build().post()
+                    .uri(authServiceUrl + "/users")
+                    .body(Mono.just(registerReceptionist), RegisterReceptionist.class)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError,
+                            n -> rethrower.rethrow(n,
+                                    x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                    )
+                    .bodyToMono(UserPasswordLessDTO.class);
+        });
+    }
+
+
     public Mono<VetResponseDTO> createVetUser(Mono<RegisterVet> model) {
 
         String uuid = UUID.randomUUID().toString();
@@ -499,7 +517,11 @@ public class AuthServiceClient {
                 .retrieve()
                 .bodyToMono(Role.class);
     }
-    public Mono<String> updateUsername (final String userId, String username, String jwToken) {
+    public Mono<ResponseEntity<String>> updateUsername(
+            final String userId,
+            String username,
+            String jwToken) {
+
         return webClientBuilder.build()
                 .patch()
                 .uri(authServiceUrl + "/users/{userId}/username", userId)
@@ -507,10 +529,13 @@ public class AuthServiceClient {
                 .cookie("Bearer", jwToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
-                        x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
-                .bodyToMono(String.class);
-
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        n -> rethrower.rethrow(
+                                n,
+                                x -> new GenericHttpException(
+                                        x.get("message").toString(),
+                                        (HttpStatus) n.statusCode())))
+                .toEntity(String.class);
     }
 
     public Mono<Boolean> checkUsernameAvailability(String username, String jwtToken) {

@@ -1,12 +1,18 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.CancellationRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.RescheduleRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VetNoteRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import org.springframework.core.io.InputStreamResource;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Simple interface for all the request controller. Implemented in VisitServiceImpl
@@ -45,6 +51,14 @@ public interface VisitService {
     Mono<VisitResponseDTO> cancelVisit(String visitId, CancellationRequestDTO request);
 
     Mono<VisitResponseDTO> addVetNote(String visitId, VetNoteRequestDTO request);
+
+    Mono<String> sendSchedule(String vetId, LocalDate weekStart);
+
+    Mono<String> sendEmail(VetDTO vet, List<Visit> visits, LocalDate weekStart);
+
+    Mono<VisitResponseDTO> confirmFollowUpVisit(String visitId);
+
+    Mono<VisitResponseDTO> rescheduleFollowUpVisit(String visitId, RescheduleRequestDTO request);
 
 //    Mono<VetDTO> testingGetVetDTO(String vetId);
 //    Mono<PetResponseDTO> testingGetPetDTO(int petId);

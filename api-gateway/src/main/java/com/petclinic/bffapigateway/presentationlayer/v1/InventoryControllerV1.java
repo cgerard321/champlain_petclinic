@@ -329,9 +329,11 @@ public class InventoryControllerV1 {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @GetMapping("/{inventoryId}/products/download")
     public Mono<ResponseEntity<byte[]>> createSupplyPdf(
-            @PathVariable String inventoryId
+            @PathVariable String inventoryId,
+            @RequestParam(required = false) String lang
     ) {
-        return inventoryServiceClient.createSupplyPdf(inventoryId)
+        return (lang == null ? inventoryServiceClient.createSupplyPdf(inventoryId)
+                : inventoryServiceClient.createSupplyPdf(inventoryId, lang))
                 .map(pdfContent -> {
                     HttpHeaders headers = new HttpHeaders();
                     headers.add(
@@ -369,7 +371,8 @@ public class InventoryControllerV1 {
             ServerWebExchange exchange
     ) {
         if (productQuantity == null || productQuantity <= 0) {
-            return Mono.just(ResponseEntity.badRequest().body(null));
+            return Mono.error(new com.petclinic.bffapigateway.exceptions.InvalidInputsInventoryException(
+                    "The restock quantity must be greater than 0.", HttpStatus.BAD_REQUEST));
         }
 
         return inventoryServiceClient.restockLowStockProduct(
@@ -391,7 +394,7 @@ public class InventoryControllerV1 {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
     @PatchMapping("/{inventoryId}/important")
     public Mono<ResponseEntity<Object>> updateImportantStatus(
             @PathVariable String inventoryId,

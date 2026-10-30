@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useUser, IsVet } from '@/context/UserContext';
 import { Visit } from '@/features/visits/models/Visit.ts';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +21,7 @@ import AddingVisit from './components/AddingVisit';
 export default function CustomerVisitListTable(): JSX.Element {
   const { user } = useUser();
   const isVet = IsVet();
+  const { t } = useTranslation('visits');
   const [visits, setVisits] = useState<Visit[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -230,7 +232,14 @@ export default function CustomerVisitListTable(): JSX.Element {
                     <a href={`/visits/${visit.visitId}`}>{visit.visitId}</a>
                   </td>
                   <td>{visit.petName}</td>
-                  <td>{visit.description}</td>
+                  <td>
+                    {visit.description}
+                    {visit.followUpOfVisitId && (
+                      <span className="follow-up-label">
+                        {t('followUp.label')}
+                      </span>
+                    )}
+                  </td>
                   <td>
                     {visit.vetFirstName} {visit.vetLastName}
                   </td>

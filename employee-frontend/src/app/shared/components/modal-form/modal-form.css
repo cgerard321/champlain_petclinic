@@ -9,6 +9,7 @@
   --forest-900: #16332b;
   --cream: #fffdf8;
   --white: #fff;
+  --destructive: #b3261e;
   --text-primary: #263832;
   --text-secondary: #66766d;
   --text-muted: #7d8982;
@@ -155,13 +156,14 @@ mat-dialog-actions {
 }
 
 .dialog-cancel-button {
-  border: 1px solid var(--forest-700);
-  background: transparent;
-  color: var(--forest-700);
+  border: 1px solid var(--sage-400);
+  background: var(--sage-400);
+  color: var(--text-primary);
 }
 
 .dialog-cancel-button:hover {
-  background: var(--sage-50);
+  border-color: color-mix(in srgb, var(--sage-400) 85%, black);
+  background: color-mix(in srgb, var(--sage-400) 85%, black);
   box-shadow: var(--shadow-sm);
 }
 
@@ -203,13 +205,16 @@ mat-dialog-actions {
 
 /* Any destructive action gets a red submit button */
 .dialog-submit-button.destructive {
-  border-color: rgb(142 0 0 / 100%);
-  background: rgb(183 28 28 / 100%);
+  background: var(--destructive);
+  color: var(--white);
 }
 
 .dialog-submit-button.destructive:hover:not(:disabled) {
-  border-color: rgb(183 28 28 / 100%);
-  background: rgb(142 0 0 / 100%);
+  background: color-mix(in srgb, var(--destructive) 85%, black);
+}
+
+.dialog-submit-button.destructive:active:not(:disabled) {
+  background: color-mix(in srgb, var(--destructive) 70%, black);
 }
 
 @media (width <= 600px) {

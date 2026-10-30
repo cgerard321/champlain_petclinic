@@ -48,4 +48,6 @@ public class Visit {
 
     private String vetNote;
 
+    private String followUpOfVisitId;
+
 }

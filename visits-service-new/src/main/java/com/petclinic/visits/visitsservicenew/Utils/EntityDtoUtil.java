@@ -62,6 +62,7 @@ public class EntityDtoUtil {
                             .cancellationReason(visit.getCancellationReason())
                             .cancellationReasonDetails(visit.getCancellationReasonDetails())
                             .vetNote(visit.getVetNote())
+                            .followUpOfVisitId(visit.getFollowUpOfVisitId())
                             .build());
                 });
     }

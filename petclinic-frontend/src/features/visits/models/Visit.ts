@@ -7,6 +7,7 @@ export interface Visit {
   description: string;
   petId: string;
   petName: string;
+  practitionerId: string;
   vetFirstName: string;
   vetLastName: string;
   vetEmail: string;
@@ -19,4 +20,5 @@ export interface Visit {
   prescription?: FileDetails;
   prescription2?: FileDetails;
   vetNote?: string;
+  followUpOfVisitId?: string;
 }

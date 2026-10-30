@@ -4,6 +4,8 @@ import Login from '@/pages/User/Login';
 import SignUp from '@/pages/User/SignUp';
 import Home from '@/pages/Home/Home.tsx';
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
+import OrderHistoryPage from '@/features/customers/components/OrderHistoryPage.tsx';
+import OrderDetailsPage from '@/features/customers/components/OrderDetailsPage.tsx';
 import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
 import Products from '@/pages/Product/Products.tsx';
 import Vet from '@/pages/Vet/Vet.tsx';
@@ -31,7 +33,6 @@ import VisitDetails from './features/visits/components/VisitByVisitId';
 import CustomerVisits from '@/pages/Visit/CustomerVisits.tsx';
 import VisitsCalendar from '@/pages/Visit/VisitsCalendar.tsx';
 
-import AllUsers from '@/pages/Users/AllUsers.tsx';
 import ProductDetails from '@/features/products/components/ProductDetails';
 import AddPetPage from '@/pages/Customer/AddPetPage.tsx';
 import ForgotPassword from '@/pages/User/ForgotPassword.tsx';
@@ -42,9 +43,6 @@ import UpdatePromoPage from '@/pages/Promos/UpdatePromoPage.tsx';
 import ReviewsCustomer from '@/pages/Review/CustomerReviews.tsx';
 import AddReviewsCustomer from '@/pages/Review/CustomerAddReviewForm.tsx';
 import CustomerPromoPage from '@/pages/Promos/CustomerPromoPage.tsx';
-import UserDetailsPage from './pages/Users/UserDetailsPage';
-import UpdateUserPage from './pages/Users/UpdateUserPage';
-import AllRoles from '@/pages/Users/AllRoles.tsx';
 import OwnerBookAppointment from '@/pages/Visit/OwnerBookAppointment.tsx';
 import FAQ from './pages/FAQ/FAQ';
 import ContactPage from './pages/Contact/Contact';
@@ -119,7 +117,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerBills,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['CUST']}>
             <CustomerBillingPage />
           </ProtectedRoute>
         ),
@@ -281,34 +279,18 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: AppRoutePaths.AllUsers,
+        path: AppRoutePaths.CustomerOrderHistory,
         element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <AllUsers />
+          <ProtectedRoute roles={['CUST']}>
+            <OrderHistoryPage />
           </ProtectedRoute>
         ),
       },
       {
-        path: AppRoutePaths.UserDetailsPage,
+        path: AppRoutePaths.CustomerOrderDetails,
         element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <UserDetailsPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.UpdateUserPage,
-        element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <UpdateUserPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.AllRoles,
-        element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <AllRoles />
+          <ProtectedRoute roles={['CUST']}>
+            <OrderDetailsPage />
           </ProtectedRoute>
         ),
       },

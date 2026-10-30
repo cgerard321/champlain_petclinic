@@ -3,12 +3,17 @@ import { NavBar } from '@/layouts/AppNavBar';
 import { AppFooter } from '@/layouts/AppFooter';
 import useFaqSearch from '@/features/faq/hooks/useFaqSearch';
 
+import { getLocalizedFaqItems } from '@/features/faq/data/FaqItems';
+
 import './FAQ.css';
+import { useTranslation } from 'react-i18next';
 
 import { Reveal } from '@/shared/components';
 
 export default function FAQ(): JSX.Element {
-  const { query, setQuery, results } = useFaqSearch();
+  const { t } = useTranslation(['faq', 'home']);
+  const items = getLocalizedFaqItems(t);
+  const { query, setQuery, results } = useFaqSearch('', { items });
 
   return (
     <div className="faq-root">
@@ -16,15 +21,13 @@ export default function FAQ(): JSX.Element {
 
       <header className="faq-intro">
         <div className="faq-intro-inner">
-          <h1 className="faq-title">Frequently Asked Questions</h1>
-          <p className="faq-sub">
-            Quick answers to the questions we hear most often.
-          </p>
+          <h1 className="faq-title">{t('title')}</h1>
+          <p className="faq-sub">{t('subtitle')}</p>
 
           <Form className="faq-search" onSubmit={e => e.preventDefault()}>
             <Form.Control
               type="search"
-              placeholder="Search FAQs…"
+              placeholder={t('barPlaceholder')}
               value={query}
               onChange={e => setQuery(e.target.value)}
               aria-label="Search FAQs"
@@ -52,14 +55,14 @@ export default function FAQ(): JSX.Element {
               ))}
               {results.length === 0 && (
                 <div className="text-center text-muted py-4">
-                  No results. Try a different search.
+                  {t('noResults')}
                 </div>
               )}
             </Accordion>
 
             <div className="text-center mt-3">
               <Button variant="outline-secondary" href="/contact">
-                Still need help? Contact us
+                {t('contactPrompt')}
               </Button>
             </div>
           </Col>

@@ -34,6 +34,9 @@ app:
   emailing-service:
     host: localhost
     port: 5115
+  geoapify:
+    base-url: https://api.geoapify.com
+    api-key: ${GEOAPIFY_API_KEY:}
 
 logging:
   level:

@@ -44,4 +44,5 @@ public class VisitResponseDTO {
     private CancellationReason cancellationReason;
     private String cancellationReasonDetails;
     private String vetNote;
+    private String followUpOfVisitId;
 }

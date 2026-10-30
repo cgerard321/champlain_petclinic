@@ -45,10 +45,25 @@ public class UserControllerV1 {
     @PatchMapping("/{userId}/username")
     public Mono<ResponseEntity<String>> updateUsername(
             @PathVariable String userId,
-            @RequestBody @NotBlank @Size(min = 3, max = 30) @Pattern(regexp = "^(?=.*[a-zA-Z])[a-zA-Z0-9_]+$", message = "Username must contain at least one letter and can only contain letters, numbers, and underscores") String username,
+            @RequestBody @NotBlank @Size(min = 3, max = 30)
+            @Pattern(
+                    regexp = "^(?=.*[a-zA-Z])[a-zA-Z0-9_]+$",
+                    message = "Username must contain at least one letter and can only contain letters, numbers, and underscores"
+            ) String username,
             @CookieValue("Bearer") String token) {
+
         return authServiceClient.updateUsername(userId, username, token)
-                .map(ResponseEntity::ok)
+                .map(authResponse -> {
+                    ResponseEntity.BodyBuilder response =
+                            ResponseEntity.status(authResponse.getStatusCode());
+
+                    authResponse.getHeaders()
+                            .getOrEmpty(HttpHeaders.SET_COOKIE)
+                            .forEach(cookie ->
+                                    response.header(HttpHeaders.SET_COOKIE, cookie));
+
+                    return response.body(authResponse.getBody());
+                })
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
@@ -107,6 +122,13 @@ public class UserControllerV1 {
         return authServiceClient.deleteUser(auth, userId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(value = "/receptionist", consumes = "application/json", produces = "application/json")
+    public Mono<ResponseEntity<UserPasswordLessDTO>> createReceptionist(@RequestBody @Valid Mono<RegisterReceptionist> model) {
+        return authServiceClient.createReceptionistUser(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @Operation()

@@ -1,37 +1,54 @@
+@if (showCustomerBillLookup()) {
+  <div class="bill-page">
+    <app-customer-bill-lookup />
+  </div>
+}
 <div class="bill-page">
   <header class="bill-header">
     <div class="bill-header__copy">
-      <span class="bill-eyebrow">Billing</span>
-      <h1>Bills</h1>
-      <p>Review and manage billing records.</p>
+      <span class="bill-eyebrow" i18n="@@bill.header">Facturation</span>
+      <h1 i18n="@@bill.subheader">Factures</h1>
+      <p i18n="@@bill.description">Examiner et gérer les dossiers de facturation</p>
     </div>
 
     @if (canCreateBill()) {
-      <button class="bill-primary-action" type="button" (click)="openCreateBill()">
-        Create Bill
+      <button
+        class="bill-primary-action"
+        i18n="@@bill.createBillButton"
+        type="button"
+        (click)="openCreateBill()"
+      >
+        Créer une facture
       </button>
     }
   </header>
+
   @if (paymentMessage()) {
     <p role="status">{{ paymentMessage() }}</p>
   }
 
   @if (canViewDetails()) {
     <form class="bill-lookup" (submit)="searchForBill($event)">
-      <label for="bill-id-lookup">Find a bill by ID</label>
+      <label for="bill-id-lookup" i18n="@@bill.findBillById">Rechercher une facture par ID</label>
 
       <div class="bill-lookup__controls">
         <input
           #billIdSearch
           id="bill-id-lookup"
           type="text"
-          placeholder="Enter Bill ID"
+          placeholder="Saisissez le numéro de la facture"
+          i18n-placeholder="@@bill.searchPlaceholder"
           [value]="billIdInput()"
           (input)="billIdInput.set(billIdSearch.value)"
         />
 
-        <button class="bill-secondary-action" type="submit" [disabled]="isDetailsLoading()">
-          Find Bill
+        <button
+          class="bill-secondary-action"
+          i18n="@@bill.searchButton"
+          type="submit"
+          [disabled]="isDetailsLoading()"
+        >
+          Rechercher la facture
         </button>
       </div>
     </form>
@@ -41,15 +58,27 @@
     <section class="bill-card">
       <div class="bill-card__header">
         <div>
-          <h2>{{ canViewOwnBills() ? 'My Bills' : 'Bill Overview' }}</h2>
+          <h2>
+            @if (canViewOwnBills()) {
+              <ng-container i18n="@@bill.myBills">Mes factures</ng-container>
+            } @else {
+              <ng-container i18n="@@bill.adminBills">Aperçu des factures</ng-container>
+            }
+          </h2>
           <p>
-            {{
-              canPayBill()
-                ? 'Select an unpaid bill to process a payment.'
-                : canViewBills()
-                  ? 'View, update, and archive billing records.'
-                  : 'View bills associated with your veterinarian account.'
-            }}
+            @if (canPayBill()) {
+              <ng-container i18n="@@bill.selectUnpaidBill"
+                >Sélectionnez une facture impayée pour effectuer le paiement</ng-container
+              >
+            } @else if (canViewBills()) {
+              <ng-container i18n="@@bill.adminViewBills"
+                >Consulter, modifier et archiver les dossiers de facturation</ng-container
+              >
+            } @else {
+              <ng-container i18n="@@bill.vetViewBills"
+                >Consultez les factures associées à votre compte vétérinaire</ng-container
+              >
+            }
           </p>
         </div>
 
@@ -60,7 +89,13 @@
             [disabled]="isArchiving() || isLoading()"
             (click)="openArchiveBills()"
           >
-            {{ isArchiving() ? 'Archiving...' : 'Archive Eligible Bills' }}
+            @if (isArchiving()) {
+              <ng-container i18n="@@bill.archiving">Archivage en cours...</ng-container>
+            } @else {
+              <ng-container i18n="@@bill.archiveBill"
+                >Archiver les factures admissibles</ng-container
+              >
+            }
           </button>
         }
       </div>
@@ -81,28 +116,104 @@
         <div class="bill-view-actions" role="group" aria-label="Bill archive views">
           <button
             type="button"
+            i18n="@@bill.activeButton"
             class="bill-view-action"
             [class.bill-view-action--selected]="!showArchivedBills()"
             [attr.aria-pressed]="!showArchivedBills()"
             (click)="showArchivedBills.set(false)"
           >
-            Active Bills
+            Factures actives
           </button>
 
           <button
             type="button"
+            i18n="@@bill.archivedButton"
             class="bill-view-action"
             [class.bill-view-action--selected]="showArchivedBills()"
             [attr.aria-pressed]="showArchivedBills()"
             (click)="showArchivedBills.set(true)"
           >
-            Archived Bills
+            Factures archivées
           </button>
         </div>
       }
 
+      <form class="bill-smart-search" (submit)="submitBillSearch($event)">
+        <label for="bill-smart-search-input" i18n="@@bills.smartSearch.label">
+          Rechercher par nom de client ou de vétérinaire
+        </label>
+
+        <div class="bill-smart-search__controls">
+          <div class="bill-smart-search__input-wrap">
+            <input
+              #billSearch
+              id="bill-smart-search-input"
+              type="search"
+              autocomplete="off"
+              placeholder="Saisir au moins 3 caractères"
+              i18n-placeholder="@@bills.smartSearch.placeholder"
+              [value]="billSearchInput()"
+              (input)="updateBillSearch(billSearch.value)"
+              (focus)="showBillSearchSuggestions.set(true)"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-controls="bill-search-suggestions"
+              [attr.aria-expanded]="
+                showBillSearchSuggestions() && billSearchSuggestions().length > 0
+              "
+            />
+
+            @if (billSearchInput()) {
+              <button
+                type="button"
+                class="bill-smart-search__clear"
+                aria-label="Effacer la recherche de factures"
+                i18n-aria-label="@@bills.smartSearch.clearLabel"
+                (click)="clearBillSearch()"
+              >
+                <span i18n="@@bills.smartSearch.clear">Effacer</span>
+              </button>
+            }
+
+            @if (showBillSearchSuggestions() && billSearchSuggestions().length > 0) {
+              <ul id="bill-search-suggestions" class="bill-search-suggestions" role="listbox">
+                @for (
+                  suggestion of billSearchSuggestions();
+                  track suggestion.type + suggestion.label
+                ) {
+                  <li role="option" aria-selected="false">
+                    <button
+                      type="button"
+                      class="bill-search-suggestion"
+                      (click)="selectBillSearchSuggestion(suggestion)"
+                    >
+                      <span>{{ suggestion.label }}</span>
+                      @if (suggestion.type === 'customer') {
+                        <small i18n="@@bills.smartSearch.customerSuggestion">Client</small>
+                      } @else {
+                        <small i18n="@@bills.smartSearch.veterinarianSuggestion">
+                          Vétérinaire
+                        </small>
+                      }
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+
+          <button
+            class="bill-secondary-action"
+            type="submit"
+            [disabled]="!billSearchInput().trim()"
+          >
+            <span i18n="@@bills.smartSearch.submit">Rechercher des factures</span>
+          </button>
+        </div>
+      </form>
+
       @if (canViewBills()) {
-        <!-- The control is rendered only for admins. CSS shows it in phone portrait. -->
+        <!-- Mobile filter controls -->
         <div #filtersRegion class="bill-filters-region">
           <button
             type="button"
@@ -111,67 +222,107 @@
             [attr.aria-expanded]="filtersRegion.classList.contains('bill-filters-region--open')"
             (click)="filtersRegion.classList.toggle('bill-filters-region--open')"
           >
-            {{
-              filtersRegion.classList.contains('bill-filters-region--open')
-                ? 'Hide Filters'
-                : 'Show Filters'
-            }}
+            @if (filtersRegion.classList.contains('bill-filters-region--open')) {
+              <ng-container i18n="@@bill.hideFilter">Masquer les filtres</ng-container>
+            } @else {
+              <ng-container i18n="@@bill.showFilter">Afficher les filtres</ng-container>
+            }
             <span aria-hidden="true" class="bill-filter-chevron">▾</span>
           </button>
 
           <div id="bill-filter-panel" class="bill-filters">
             <label>
-              Customer ID
+              <ng-container i18n="@@bill.custId">N° du client(e)</ng-container>
               <input
                 type="text"
                 [ngModel]="filters().customerId"
                 (ngModelChange)="updateFilter('customerId', $event)"
               />
+              <button
+                class="bill-secondary-action"
+                i18n="@@bill.add"
+                type="button"
+                (click)="addFilter('customerId')"
+              >
+                Ajouter
+              </button>
             </label>
 
             <label>
-              Customer name
+              <ng-container i18n="@@bill.custName">Nom du client(e)</ng-container>
               <input
                 type="text"
                 [ngModel]="filters().customerName"
                 (ngModelChange)="updateFilter('customerName', $event)"
               />
+              <button
+                class="bill-secondary-action"
+                i18n="@@bill.add"
+                type="button"
+                (click)="addFilter('customerName')"
+              >
+                Ajouter
+              </button>
             </label>
 
             <label>
-              Veterinarian name
+              <ng-container i18n="@@bill.vetName">Nom du vétérinaire</ng-container>
               <input
                 type="text"
                 [ngModel]="filters().vetName"
                 (ngModelChange)="updateFilter('vetName', $event)"
               />
+              <button
+                class="bill-secondary-action"
+                i18n="@@bill.add"
+                type="button"
+                (click)="addFilter('vetName')"
+              >
+                Ajouter
+              </button>
             </label>
 
             <label>
-              Visit type
+              <ng-container i18n="@@bill.visitType">Type de visite</ng-container>
               <select
                 [ngModel]="filters().visitType"
                 (ngModelChange)="updateFilter('visitType', $event)"
               >
-                <option value="">All visit types</option>
+                <option value="" i18n="@@bill.visitTypes.allTypes">Tous les types de visite</option>
                 @for (visitType of visitTypes(); track visitType) {
-                  <option [value]="visitType">{{ visitType }}</option>
+                  <option [value]="visitType">{{ translateVisit(visitType) }}</option>
                 }
               </select>
+              <button
+                class="bill-secondary-action"
+                i18n="@@bill.add"
+                type="button"
+                (click)="addFilter('visitType')"
+              >
+                Ajouter
+              </button>
             </label>
 
             <label>
-              Status
+              <ng-container i18n="@@bill.status"> Statut</ng-container>
               <select [ngModel]="filters().status" (ngModelChange)="updateFilter('status', $event)">
-                <option value="">All statuses</option>
-                <option value="PAID">Paid</option>
-                <option value="UNPAID">Unpaid</option>
-                <option value="OVERDUE">Overdue</option>
+                <option value="" i18n="@@bill.statusTypes.allStatus">Tout les statuts</option>
+                <option value="PAID" i18n="@@bill.statusTypes.paid">PAYÉE</option>
+                <option value="UNPAID" i18n="@@bill.statusTypes.unpaid">IMPAYÉE</option>
+                <option value="OVERDUE" i18n="@@bill.statusTypes.overdue">EN RETARD</option>
               </select>
+              <button
+                class="bill-secondary-action"
+                i18n="@@bill.add"
+                type="button"
+                (click)="addFilter('status')"
+              >
+                Ajouter
+              </button>
             </label>
 
             <label>
-              Creation year
+              <ng-container i18n="@@bill.creationYear">Année de création</ng-container>
               <input
                 #yearFilter
                 type="number"
@@ -180,38 +331,74 @@
                 [value]="filters().year"
                 (input)="updateFilter('year', yearFilter.value)"
               />
+              <button
+                class="bill-secondary-action"
+                i18n="@@bill.add"
+                type="button"
+                (click)="addFilter('year')"
+              >
+                Ajouter
+              </button>
             </label>
 
             <label>
-              Creation month
+              <ng-container i18n="@@bill.creationMonth">Mois de création</ng-container>
               <select [ngModel]="filters().month" (ngModelChange)="updateFilter('month', $event)">
-                <option value="">All months</option>
-                <option value="1">January</option>
-                <option value="2">February</option>
-                <option value="3">March</option>
-                <option value="4">April</option>
-                <option value="5">May</option>
-                <option value="6">June</option>
-                <option value="7">July</option>
-                <option value="8">August</option>
-                <option value="9">September</option>
-                <option value="10">October</option>
-                <option value="11">November</option>
-                <option value="12">December</option>
+                <option value="" i18n="@@bill.month.months">Tous les mois</option>
+                <option value="1" i18n="@@bill.month.jan">Janvier</option>
+                <option value="2" i18n="@@bill.month.feb">Février</option>
+                <option value="3" i18n="@@bill.month.mar">Mars</option>
+                <option value="4" i18n="@@bill.month.apr">Avril</option>
+                <option value="5" i18n="@@bill.month.may">Mai</option>
+                <option value="6" i18n="@@bill.month.june">Juin</option>
+                <option value="7" i18n="@@bill.month.july">Juillet</option>
+                <option value="8" i18n="@@bill.month.aug">Août</option>
+                <option value="9" i18n="@@bill.month.sept">Septembre</option>
+                <option value="10" i18n="@@bill.month.oct">Octobre</option>
+                <option value="11" i18n="@@bill.month.nov">Novembre</option>
+                <option value="12" i18n="@@bill.month.dec">Décembre</option>
               </select>
+              <button
+                class="bill-secondary-action"
+                i18n="@@bill.add"
+                type="button"
+                (click)="addFilter('month')"
+              >
+                Ajouter
+              </button>
             </label>
 
             <label>
-              Currency
+              <ng-container i18n="@@bill.currency">Devise</ng-container>
               <select [ngModel]="currency()" (ngModelChange)="setCurrency($event)">
                 <option value="CAD">CAD</option>
                 <option value="USD">USD</option>
               </select>
             </label>
 
-            <button class="bill-secondary-action" type="button" (click)="clearFilters()">
-              Clear Filters
+            <button
+              class="bill-secondary-action"
+              i18n="@@bill.clearFilters"
+              type="button"
+              (click)="clearFilters()"
+            >
+              Effaçer les filtres
             </button>
+            <div class="bill-filter-tags" aria-label="Selected filters">
+              @for (field of filterFields; track field.key) {
+                @for (value of savedFilters()[field.key]; track value) {
+                  <button
+                    class="bill-filter-tag"
+                    type="button"
+                    [attr.aria-label]="'Remove ' + field.label + ': ' + value"
+                    (click)="removeFilter(field.key, value)"
+                  >
+                    {{ field.label }}: {{ translateStatus(translateVisit(value)) }}
+                    <span aria-hidden="true">×</span>
+                  </button>
+                }
+              }
+            </div>
           </div>
         </div>
       }
@@ -235,14 +422,14 @@
             <table class="bill-table">
               <thead>
                 <tr>
-                  <th scope="col">Bill ID</th>
-                  <th scope="col">Customer</th>
-                  <th scope="col">Veterinarian</th>
-                  <th scope="col">Amount</th>
-                  <th scope="col">Interest</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Archived</th>
-                  <th scope="col">Actions</th>
+                  <th scope="col" i18n="@@bill.tableBill.billId">N° de la facture</th>
+                  <th scope="col" i18n="@@bill.tableBill.cust">Client(e)</th>
+                  <th scope="col" i18n="@@bill.tableBill.vet">Vétérinaire</th>
+                  <th scope="col" i18n="@@bill.tableBill.amount">Montant</th>
+                  <th scope="col" i18n="@@bill.tableBill.interest">Interêt</th>
+                  <th scope="col" i18n="@@bill.tableBill.status">Statut</th>
+                  <th scope="col" i18n="@@bill.tableBill.archived">Archivée</th>
+                  <th scope="col" i18n="@@bill.tableBill.actions">Actions</th>
                 </tr>
               </thead>
 
@@ -256,7 +443,7 @@
                         {{ bill.customerFirstName }}
                         {{ bill.customerLastName }}
                       } @else {
-                        Not available
+                        <span i18n="@@bill.notAvailable">Non disponible</span>
                       }
                     </td>
 
@@ -276,19 +463,24 @@
                       {{
                         convertAmount(bill.interest ?? 0) | currency: currency() : 'code' : '1.2-2'
                       }}
+
                       @if (bill.interestExempt) {
-                        <span> (Exempt)</span>
+                        <span> (<ng-container i18n="@@bill.exempt">Exempte</ng-container>)</span>
                       }
                     </td>
 
-                    <td data-label="Status">{{ bill.billStatus }}</td>
+                    <td data-label="Status">{{ translateStatus(bill.billStatus) }}</td>
 
                     <td data-label="Archived">
                       <span
                         class="bill-archive-status"
                         [class.bill-archive-status--archived]="bill.archive"
                       >
-                        {{ bill.archive ? 'Archived' : 'Active' }}
+                        @if (bill.archive) {
+                          <ng-container i18n="@@bill.tableBill.archived">Archivée</ng-container>
+                        } @else {
+                          <ng-container i18n="@@bill.tableBill.active">Active</ng-container>
+                        }
                       </span>
                     </td>
 
@@ -297,55 +489,73 @@
                         @if (canViewDetails()) {
                           <button
                             type="button"
+                            i18n="@@bill.detailButton"
                             class="bill-table-button bill-table-button--outline"
                             (click)="openBillDetails(bill.billId)"
                           >
-                            Details
+                            Détails
                           </button>
                         }
+
                         <button
                           type="button"
                           class="bill-table-button bill-table-button--outline"
                           [disabled]="downloadingPdfId() !== null"
                           (click)="downloadPdf(bill)"
                         >
-                          {{
-                            downloadingPdfId() === bill.billId ? 'Downloading...' : 'Download PDF'
-                          }}
+                          @if (downloadingPdfId() === bill.billId) {
+                            <ng-container i18n="@@bill.downloading"
+                              >Téléchargement en cours...</ng-container
+                            >
+                          } @else {
+                            <ng-container i18n="@@bill.download">Télécharger le PDF</ng-container>
+                          }
                         </button>
 
                         @if (canViewBills()) {
                           <button
                             type="button"
+                            i18n="@@bill.updateButton"
                             class="bill-table-button bill-table-button--primary"
                             (click)="openBillUpdate(bill)"
                           >
-                            Update
+                            Mettre à jour
                           </button>
-                          <button
-                            type="button"
-                            class="bill-table-button bill-table-button--outline"
-                            [disabled]="updatingInterestId() !== null"
-                            [attr.aria-pressed]="bill.interestExempt === true"
-                            (click)="toggleInterestExemption(bill)"
-                          >
-                            {{
-                              updatingInterestId() === bill.billId
-                                ? 'Saving...'
-                                : bill.interestExempt
-                                  ? 'Remove Interest Exemption'
-                                  : 'Exempt Interest'
-                            }}
-                          </button>
+                          <!-- CPC-2135: Interest exemption is overdue-only -->
+                          @if (bill.billStatus === 'OVERDUE') {
+                            <button
+                              type="button"
+                              class="bill-table-button bill-table-button--outline"
+                              [disabled]="updatingInterestId() !== null"
+                              [attr.aria-pressed]="bill.interestExempt === true"
+                              (click)="toggleInterestExemption(bill)"
+                            >
+                              @if (updatingInterestId() === bill.billId) {
+                                <ng-container i18n="@@bill.interestOpt.saving"
+                                  >Enregistrement en cours...</ng-container
+                                >
+                              } @else if (bill.interestExempt) {
+                                <ng-container i18n="@@bill.interestOpt.remove"
+                                  >Enlever l'exemption d'intérêts</ng-container
+                                >
+                              } @else {
+                                <ng-container i18n="@@bill.interestOpt.exempt">
+                                  Exempter les intérêts</ng-container
+                                >
+                              }
+                            </button>
+                          }
                         }
+
                         @if (canPayBill() && bill.billStatus === 'UNPAID' && !bill.archive) {
                           <button
                             type="button"
+                            i18n="@@bill.payment.payBill"
                             class="bill-table-button bill-table-button--primary"
                             (click)="openPayment(bill, paymentTemplate)"
                             [disabled]="paying()"
                           >
-                            Pay Bill
+                            Payer la facture
                           </button>
                         }
                       </div>
@@ -358,29 +568,47 @@
         }
 
         @if (isLoading()) {
-          <div class="bill-empty-state" role="status">Loading bills...</div>
+          <div class="bill-empty-state" role="status" i18n="@@bill.lookup.loadBill">
+            Chargement des factures...
+          </div>
         } @else if (displayedBills().length === 0) {
           <div class="bill-empty-state" role="status">
-            @if (canViewBills()) {
+            @if (billSearchQuery()) {
+              <h3 i18n="@@bills.smartSearch.noResultsTitle">Aucune facture correspondante</h3>
+              <p i18n="@@bills.smartSearch.noResultsMessage">
+                Aucune facture ne correspond à « {{ billSearchQuery() }} ». Essayez un autre nom de
+                client ou de vétérinaire.
+              </p>
+            } @else if (canViewBills()) {
               <h3>
-                {{ showArchivedBills() ? 'No archived bills' : 'No active bills' }}
+                @if (showArchivedBills()) {
+                  <ng-container i18n="@@bill.noArchive">Aucune facture archivée</ng-container>
+                } @else {
+                  <ng-container i18n="@@bill.noActive">Aucune facture active</ng-container>
+                }
               </h3>
 
               <p>
-                {{
-                  showArchivedBills()
-                    ? 'There are no archived billing records.'
-                    : 'There are no active billing records.'
-                }}
+                @if (showArchivedBills()) {
+                  <ng-container i18n="@@bill.noArchiveRecord"
+                    >Aucun dossier de facturation archivé</ng-container
+                  >
+                } @else {
+                  <ng-container i18n="@@bill.noActiveRecord"
+                    >Aucun dossier de facturation actif</ng-container
+                  >
+                }
               </p>
             } @else {
-              <h3>No bills found</h3>
+              <h3 i18n="@@bill.noBillsFound">Aucune facture trouvée</h3>
               <p>
-                {{
-                  canPayBill()
-                    ? 'There are no bills to display.'
-                    : 'There are no bills associated with your veterinarian account.'
-                }}
+                @if (canPayBill()) {
+                  <ng-container i18n="@@bill.noBills">Aucune facture à afficher</ng-container>
+                } @else {
+                  <ng-container i18n="@@bill.noVetBills"
+                    >Aucune facture associée à votre compte vétérinaire</ng-container
+                  >
+                }
               </p>
             }
           </div>
@@ -388,11 +616,15 @@
       }
     </section>
   } @else {
-    <p role="alert">You do not have permission to access billing records.</p>
+    <p role="alert" i18n="@@bill.notPermitted">
+      Vous n'avez pas la permission d'accéder aux dossiers de facturation
+    </p>
   }
 
   @if (isDetailsLoading()) {
-    <div class="bill-empty-state" role="status">Loading bill details...</div>
+    <div class="bill-empty-state" role="status" i18n="@@bill.detailLoading">
+      Chargement des détails en cours...
+    </div>
   }
 
   @if (detailsError(); as message) {
@@ -404,17 +636,21 @@
   <ng-template #paymentTemplate>
     @if (selectedBill(); as bill) {
       <section class="bill-payment" aria-labelledby="payment-title">
-        <h2 id="payment-title">Pay Bill</h2>
+        <h2 id="payment-title" i18n="@@bill.payment.payBill">Payer la facture</h2>
 
         <p>
           {{ bill.customerFirstName }} {{ bill.customerLastName }} —
           {{ bill.totalAmount ?? bill.amount | currency: 'CAD' }}
         </p>
+
         @if (paymentError()) {
-          <p class="bill-details-error" role="alert">{{ paymentError() }}</p>
+          <p class="bill-details-error" role="alert">
+            {{ paymentError() }}
+          </p>
         }
+
         <form #paymentForm="ngForm" (ngSubmit)="payBill()">
-          <label for="cardNumber">Card number</label>
+          <label for="cardNumber" i18n="@@bill.payment.cardNumber">Numéro de la carte</label>
           <input
             id="cardNumber"
             name="cardNumber"
@@ -427,7 +663,7 @@
             [disabled]="paying()"
           />
 
-          <label for="cvv">CVV</label>
+          <label for="cvv" i18n="@@bill.payment.cvv">CVC</label>
           <input
             id="cvv"
             name="cvv"
@@ -441,7 +677,9 @@
             [disabled]="paying()"
           />
 
-          <label for="expirationDate">Expiration date (MM/YY)</label>
+          <label for="expirationDate" i18n="@@bill.payment.expDate"
+            >Date d'expiration (MM/YY)</label
+          >
           <input
             id="expirationDate"
             name="expirationDate"
@@ -459,16 +697,21 @@
             type="submit"
             [disabled]="paymentForm.invalid || paying()"
           >
-            {{ paying() ? 'Processing...' : 'Confirm Payment' }}
+            @if (paying()) {
+              <ng-container i18n="@@bill.payment.process">Traitement En cours...</ng-container>
+            } @else {
+              <ng-container i18n="@@bill.payment.confirm">Confirmer le paiement</ng-container>
+            }
           </button>
 
           <button
             class="bill-secondary-action"
+            i18n="@@bill.cancel"
             type="button"
             (click)="closePayment()"
             [disabled]="paying()"
           >
-            Cancel
+            Annuler
           </button>
         </form>
       </section>

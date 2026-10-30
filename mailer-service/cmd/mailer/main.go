@@ -18,10 +18,10 @@ import (
 )
 
 const (
-	MAX_RETRIES = 3
-	RETRY_DELAY = 5 * time.Second
+	MAX_RETRIES          = 3
+	RETRY_DELAY          = 5 * time.Second
 	EMAIL_QUEUE_CAPACITY = 100 //buffer size
-	NUM_WORKERS = 5 
+	NUM_WORKERS          = 5
 )
 
 // @title Mailer Service API
@@ -37,6 +37,7 @@ func main() {
 	host := util.Getenv("SMTP_SERVER")
 	user := util.Getenv("SMTP_USER")
 	pass := util.Getenv("SMTP_PASS")
+	from := util.Getenv("SMTP_EMAIL")
 
 	dialer := mailsvc.NewDialer(mailsvc.Config{
 		Host:               host,
@@ -47,7 +48,7 @@ func main() {
 	})
 
 	emailJobChannel := make(chan mailsvc.EmailJob, EMAIL_QUEUE_CAPACITY)
-	svc := mailsvc.NewService(dialer, user, emailJobChannel)
+	svc := mailsvc.NewService(dialer, from, emailJobChannel)
 
 	h := handlers.NewMailHandler(svc)
 	g := r.Group("/mail")
