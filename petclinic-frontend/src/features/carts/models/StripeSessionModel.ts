@@ -1,6 +1,7 @@
 export interface StripeSessionRequestModel {
   cartId: string;
   frontendType: 'react';
+  frontendOrigin: string;
 }
 
 export interface StripeSessionResponseModel {

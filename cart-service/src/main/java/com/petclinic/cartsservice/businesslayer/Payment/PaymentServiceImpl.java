@@ -55,6 +55,10 @@ public class PaymentServiceImpl implements PaymentService {
     @Value("${frontend.employee-url:http://localhost:4200}")
     private String employeeFrontendUrl;
 
+    // Frontend addresses Stripe is allowed to send the customer back to (regex)
+    @Value("${frontend.allowed-return-origins:http://localhost:(3000|4200)}")
+    private String allowedReturnOrigins;
+
     @Override
     public Mono<StripeResponseModel> createStripeCheckoutSession(StripeProductRequestModel sessionRequestModel, String cartId) {
 
@@ -138,14 +142,8 @@ public class PaymentServiceImpl implements PaymentService {
                                     stripeSumCents += tvcInCents;
                                 }
 
-                                String frontendType = sessionRequestModel.getFrontendType();
-                                String frontendUrl;
-                                if (frontendType == null || frontendType.isBlank()
-                                        || "react".equalsIgnoreCase(frontendType)) {
-                                    frontendUrl = customerFrontendUrl;
-                                } else if ("angular".equalsIgnoreCase(frontendType)) {
-                                    frontendUrl = employeeFrontendUrl;
-                                } else {
+                                String frontendUrl = resolveReturnUrl(sessionRequestModel);
+                                if (frontendUrl == null) {
                                     return Mono.error(new InvalidInputException("Invalid frontend type"));
                                 }
 
@@ -179,6 +177,25 @@ public class PaymentServiceImpl implements PaymentService {
                             });
 
                 });
+    }
+
+    // Send the customer back to the site they paid from (localhost, a PR preview or production),
+    // but only if it is on the allowlist so the checkout cannot redirect to someone else's site.
+    // Otherwise fall back to the configured frontend URL.
+    private String resolveReturnUrl(StripeProductRequestModel request) {
+        String origin = request.getFrontendOrigin();
+        if (origin != null && allowedReturnOrigins != null && origin.matches(allowedReturnOrigins)) {
+            return origin;
+        }
+
+        String frontendType = request.getFrontendType();
+        if (frontendType == null || frontendType.isBlank() || "react".equalsIgnoreCase(frontendType)) {
+            return customerFrontendUrl;
+        }
+        if ("angular".equalsIgnoreCase(frontendType)) {
+            return employeeFrontendUrl;
+        }
+        return null;
     }
 
     // One coupon per discount amount, reused across checkouts instead of creating a new one every time

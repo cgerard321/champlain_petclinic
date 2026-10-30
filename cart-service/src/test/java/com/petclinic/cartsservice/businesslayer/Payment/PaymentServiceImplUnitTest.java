@@ -97,10 +97,30 @@ class PaymentServiceImplUnitTest {
             Double tvq,
             Double tvc,
             Long expectedDiscountCents) {
+        return executeCheckout(frontend, null, total, shipping, tvq, tvc, expectedDiscountCents);
+    }
+
+    // same pattern as frontend.allowed-return-origins in application.properties
+    private static final String ALLOWED_RETURN_ORIGINS =
+            "http://localhost:(3000|4200)"
+                    + "|https://petclinic(-emp-portal)?\\.benmusicgeek\\.synology\\.me"
+                    + "|https://petdev-[0-9]+(-employee)?\\.benmusicgeek\\.synology\\.me";
+
+    private SessionCreateParams executeCheckout(
+            String frontend,
+            String frontendOrigin,
+            Double total,
+            Double shipping,
+            Double tvq,
+            Double tvc,
+            Long expectedDiscountCents) {
 
         Cart cart = createCart(List.of(createCartProduct(20.00, 2)));
         StripeProductRequestModel request = createRequest(CART_ID);
         request.setFrontendType(frontend);
+        request.setFrontendOrigin(frontendOrigin);
+        ReflectionTestUtils.setField(
+                paymentService, "allowedReturnOrigins", ALLOWED_RETURN_ORIGINS);
 
         ReflectionTestUtils.setField(
                 paymentService, "customerFrontendUrl", "http://localhost:3000");
@@ -894,6 +914,49 @@ class PaymentServiceImplUnitTest {
             assertEquals(
                     baseUrl + "/carts/" + CART_ID + "?payment=cancelled",
                     params.getCancelUrl());
+        }
+    }
+
+    @Test
+    void createStripeCheckoutSession_allowedOrigin_returnsCustomerToThatSite() {
+        for (String origin : new String[]{
+                "https://petdev-1746.benmusicgeek.synology.me",
+                "https://petdev-1746-employee.benmusicgeek.synology.me",
+                "https://petclinic.benmusicgeek.synology.me",
+                "https://petclinic-emp-portal.benmusicgeek.synology.me",
+                "http://localhost:3000"}) {
+
+            SessionCreateParams params =
+                    executeCheckout("react", origin, 40.0, 0.0, 0.0, 0.0, null);
+
+            assertEquals(
+                    origin + "/carts/" + CART_ID
+                            + "?payment=success&session_id={CHECKOUT_SESSION_ID}",
+                    params.getSuccessUrl());
+            assertEquals(
+                    origin + "/carts/" + CART_ID + "?payment=cancelled",
+                    params.getCancelUrl());
+        }
+    }
+
+    @Test
+    void createStripeCheckoutSession_unknownOrigin_fallsBackToConfiguredUrl() {
+        for (String origin : new String[]{
+                "https://evil.example.com",
+                "https://petdev-1746.benmusicgeek.synology.me.evil.com",
+                "https://petdevX1746.benmusicgeek.synology.me",
+                "https://petdev-abc.benmusicgeek.synology.me",
+                "https://petclinic.benmusicgeek.synology.me/carts",
+                "javascript:alert(1)",
+                ""}) {
+
+            SessionCreateParams params =
+                    executeCheckout("react", origin, 40.0, 0.0, 0.0, 0.0, null);
+
+            assertEquals(
+                    "http://localhost:3000/carts/" + CART_ID + "?payment=cancelled",
+                    params.getCancelUrl(),
+                    "origin should be rejected: " + origin);
         }
     }
 

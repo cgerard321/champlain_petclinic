@@ -11,6 +11,7 @@
     "apply": "Apply",
     "browseProducts": "Browse Products",
     "cancel": "Cancel",
+    "checkoutStripe": "Pay with Stripe",
     "checkout": "Checkout",
     "clear": "Clear",
     "clearCart": "Clear Cart",

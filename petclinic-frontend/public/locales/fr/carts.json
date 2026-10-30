@@ -11,6 +11,7 @@
     "apply": "Appliquer",
     "browseProducts": "Parcourir les produits",
     "cancel": "Annuler",
+    "checkoutStripe": "Payer avec Stripe",
     "checkout": "Passer à la caisse",
     "clear": "Effacer",
     "clearCart": "Vider le panier",

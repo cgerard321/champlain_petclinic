@@ -1080,6 +1080,17 @@ const UserCart: React.FC = () => {
     }
   };
 
+  // Original checkout: the customer fills in the billing form, no Stripe payment
+  const handleBillingCheckoutClick = (): void => {
+    if (isStaff) {
+      navigate(AppRoutePaths.Unauthorized, {
+        state: { message: t('toasts.staffCheckout') },
+      });
+      return;
+    }
+    setShowBillingForm(true);
+  };
+
   const handleViewOrderReceipt = (order: OrderModel): void => {
     const itemsSubtotal = roundToCents(
       order.products.reduce(
@@ -1558,8 +1569,16 @@ const UserCart: React.FC = () => {
               </div>
 
               <button
-                className="checkout-btn cart-button cart-button--brand cart-button--block cart-button--disabled-muted"
+                className="checkout-btn cart-button cart-button--purple cart-button--block cart-button--disabled-muted"
                 onClick={handleCheckoutConfirmation}
+                disabled={cartItems.length === 0}
+              >
+                {t('buttons.checkoutStripe')}
+              </button>
+
+              <button
+                className="checkout-btn cart-button cart-button--accent cart-button--block cart-button--disabled-muted"
+                onClick={handleBillingCheckoutClick}
                 disabled={cartItems.length === 0}
               >
                 {t('buttons.checkout')}

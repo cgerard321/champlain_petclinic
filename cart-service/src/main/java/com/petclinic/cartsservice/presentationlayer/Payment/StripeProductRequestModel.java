@@ -14,5 +14,6 @@ public class StripeProductRequestModel {
 
     private String cartId;
     private String frontendType;
+    private String frontendOrigin;
 
 }

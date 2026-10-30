@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 public class StripeProductRequestDTO {
     private String cartId;
     private String frontendType;
+    private String frontendOrigin;
 }

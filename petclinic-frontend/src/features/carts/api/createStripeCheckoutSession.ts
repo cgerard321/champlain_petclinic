@@ -29,6 +29,8 @@ export function useCreateStripeCheckoutSession(): UseCreateStripeCheckoutSession
       const request: StripeSessionRequestModel = {
         cartId: cartId,
         frontendType: 'react',
+        // so Stripe sends the customer back to this same site after paying
+        frontendOrigin: window.location.origin,
       };
 
       const { data } = await axiosInstance.post<StripeSessionResponseModel>(

@@ -983,3 +983,8 @@
     width: 100%;
   }
 }
+
+/* space between the Stripe and the billing form checkout buttons */
+.checkout-btn + .checkout-btn {
+  margin-top: 0.75rem;
+}

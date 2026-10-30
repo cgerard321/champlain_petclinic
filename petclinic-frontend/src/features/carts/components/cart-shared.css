@@ -139,6 +139,17 @@
   box-shadow: 0 14px 30px rgba(34, 197, 94, 0.28);
 }
 
+.cart-button--purple {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(139, 92, 246, 0.22);
+}
+
+.cart-button--purple:hover {
+  filter: brightness(1.03);
+  box-shadow: 0 14px 30px rgba(139, 92, 246, 0.28);
+}
+
 .cart-button--danger {
   background: linear-gradient(135deg, #fb7185, #ef4444);
   color: #ffffff;
