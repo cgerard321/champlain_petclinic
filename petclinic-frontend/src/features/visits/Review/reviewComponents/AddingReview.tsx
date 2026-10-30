@@ -56,6 +56,7 @@ const AddingReview: React.FC<AddingReviewProps> = ({
           setReview(prev => ({
             ...prev,
             ownerId: data.customerId,
+            reviewerId: data.customerId,
             reviewerName: `${data.firstName} ${data.lastName}`,
           }));
         })

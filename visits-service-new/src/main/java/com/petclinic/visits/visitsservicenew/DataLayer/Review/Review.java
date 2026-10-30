@@ -18,7 +18,7 @@ public class Review {
     private String ownerId;
     private String reviewId;
     private int rating;
-    private String reviewerName;
+    private String reviewerId;
     private String review;
     private LocalDateTime dateSubmitted;
 

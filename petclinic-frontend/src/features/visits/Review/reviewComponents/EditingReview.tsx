@@ -51,6 +51,7 @@ const EditingReview: React.FC<EditingReviewProps> = ({
       setReview(prev => ({
         ...prev,
         ownerId: reviewData.ownerId,
+        reviewerId: reviewData.reviewerId,
         reviewerName: reviewData.reviewerName,
         dateSubmitted: reviewData.dateSubmitted,
         rating: reviewData.rating,
