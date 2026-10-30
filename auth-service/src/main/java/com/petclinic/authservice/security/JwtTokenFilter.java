@@ -23,11 +23,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-
 @Component
 @Slf4j
 @Generated
 public class JwtTokenFilter extends OncePerRequestFilter {
+
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
@@ -43,63 +43,59 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
-    // Skip processing for public paths
     @Override
     protected boolean shouldNotFilter(@NotNull HttpServletRequest request) {
         return excludedPaths.stream().anyMatch(p -> p.matches(request));
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
+    protected void doFilterInternal(@NotNull HttpServletRequest request,
                                     @NotNull HttpServletResponse response,
                                     @NotNull FilterChain chain)
             throws ServletException, IOException {
 
-        final Cookie[] cookies = request.getCookies();
+        String token = extractToken(request);
 
-        if (cookies == null) {
-            log.debug("No cookies found");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        if (token == null) {
+            log.debug("No token found");
             chain.doFilter(request, response);
             return;
         }
 
-        Cookie sessionCookie = null;
-        for (Cookie cookie : cookies) {
-            if ((securityConst.getTOKEN_PREFIX()).equals(cookie.getName())) {
-                sessionCookie = cookie;
-                break;
-            }
-        }
-
-        if (sessionCookie == null) {
-            log.debug("No token found");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            resolver.resolveException(request, response, null, new InvalidBearerTokenException("Unauthorized"));
-            return;
-        }
-
-        final String token = sessionCookie.getValue();
-
         try {
             if (!jwtTokenUtil.validateToken(token)) {
                 log.debug("Token is invalid or expired");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                resolver.resolveException(request, response, null, new InvalidBearerTokenException("Token is expired"));
+                reject(request, response);
                 return;
             }
 
             String email = jwtTokenUtil.getUsernameFromToken(token);
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(email, null, List.of());
-            authentication.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
-
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
             chain.doFilter(request, response);
         } catch (Exception ex) {
             resolver.resolveException(request, response, null, ex);
         }
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            if (securityConst.getTOKEN_PREFIX().equals(cookie.getName())) {
+                return cookie.getValue();
+            }
+        }
+        return null;
+    }
+
+    private void reject(HttpServletRequest request, HttpServletResponse response) {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        resolver.resolveException(request, response, null, new InvalidBearerTokenException("Token is invalid or expired"));
     }
 }
