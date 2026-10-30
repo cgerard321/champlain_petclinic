@@ -7,6 +7,7 @@ import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.Exceptions.UnprocessableEntityException;
+import com.petclinic.visits.visitsservicenew.Exceptions.PrescriptionLimitExceededException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
@@ -301,6 +302,8 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .onErrorResume(NotFoundException.class, e ->
                         Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build()))
+                .onErrorResume(PrescriptionLimitExceededException.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.CONFLICT).build()))
                 .onErrorResume(BadRequestException.class, e ->
                         Mono.just(ResponseEntity.status(HttpStatus.BAD_REQUEST).build()))
                 .onErrorResume(InvalidInputException.class, e ->
@@ -316,6 +319,22 @@ public class VisitController {
             @PathVariable String visitId) {
 
         return prescriptionService.getPrescriptionPdf(visitId)
+                .map(pdf -> ResponseEntity.ok().body(pdf))
+                .onErrorResume(NotFoundException.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build()))
+                .onErrorResume(UnprocessableEntityException.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build()))
+                .onErrorResume(Exception.class, e ->
+                        Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));
+    }
+
+    @GetMapping(
+            value = "/{visitId}/prescription/2/pdf",
+            produces = MediaType.APPLICATION_PDF_VALUE)
+    public Mono<ResponseEntity<byte[]>> downloadSecondPrescriptionPdf(
+            @PathVariable String visitId) {
+
+        return prescriptionService.getSecondPrescriptionPdf(visitId)
                 .map(pdf -> ResponseEntity.ok().body(pdf))
                 .onErrorResume(NotFoundException.class, e ->
                         Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND).build()))

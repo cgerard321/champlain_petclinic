@@ -42,6 +42,7 @@ public class Visit {
 
     private String prescriptionFileId;
 
+    private String prescriptionFileId2;
     private CancellationReason cancellationReason;
     private String cancellationReasonDetails;
 
