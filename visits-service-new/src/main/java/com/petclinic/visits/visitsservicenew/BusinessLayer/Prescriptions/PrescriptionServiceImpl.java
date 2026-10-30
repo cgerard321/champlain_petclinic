@@ -2,11 +2,11 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions;
 
 import com.lowagie.text.DocumentException;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileRequestDTO;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
+import com.petclinic.visits.visitsservicenew.Exceptions.PrescriptionLimitExceededException;
 import com.petclinic.visits.visitsservicenew.Exceptions.UnprocessableEntityException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.PrescriptionPdfGenerator;
@@ -23,18 +23,25 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     private final VisitRepo visitRepository;
     private final FilesServiceClient filesServiceClient;
 
-    public PrescriptionServiceImpl(VisitRepo visitRepository, FilesServiceClient filesServiceClient) {
+    public PrescriptionServiceImpl(
+            VisitRepo visitRepository,
+            FilesServiceClient filesServiceClient) {
         this.visitRepository = visitRepository;
         this.filesServiceClient = filesServiceClient;
     }
 
     @Override
-    public Mono<PrescriptionResponseDTO> createPrescription(String visitId, PrescriptionResponseDTO request) {
+    public Mono<PrescriptionResponseDTO> createPrescription(
+            String visitId,
+            PrescriptionResponseDTO request) {
+
         if (request == null) {
-            return Mono.error(new InvalidInputException("Request body is required"));
+            return Mono.error(
+                    new InvalidInputException("Request body is required"));
         }
 
         String prescriptionId = request.getPrescriptionId();
+
         if (prescriptionId == null || prescriptionId.isBlank()) {
             prescriptionId = UUID.randomUUID().toString();
             request.setPrescriptionId(prescriptionId);
@@ -45,43 +52,82 @@ public class PrescriptionServiceImpl implements PrescriptionService {
         }
 
         final String finalPrescriptionId = prescriptionId;
-        byte[] pdf;
-
-        try {
-            pdf = PrescriptionPdfGenerator.generatePrescriptionPdf(request);
-        } catch (DocumentException e) {
-            return Mono.error(new UnprocessableEntityException("Failed to generate prescription PDF"));
-        }
-
-        FileRequestDTO fileRequest = new FileRequestDTO();
-        fileRequest.setFileName("prescription-" + finalPrescriptionId + ".pdf");
-        fileRequest.setFileType(MediaType.APPLICATION_PDF_VALUE);
-        fileRequest.setFileData(pdf);
 
         return visitRepository.findByVisitId(visitId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Visit not found: " + visitId)))
-                .flatMap(visit ->
-                        filesServiceClient.addFile(fileRequest)
-                                .switchIfEmpty(Mono.error(new UnprocessableEntityException("File service returned empty response")))
-                                .flatMap(fileDetails -> {
-                                    if (fileDetails == null || fileDetails.getFileId() == null) {
-                                        return Mono.error(new UnprocessableEntityException("File service did not return a fileId"));
-                                    }
-                                    visit.setPrescriptionFileId(fileDetails.getFileId());
-                                    return visitRepository.save(visit);
-                                })
-                                .onErrorMap(e -> {
-                                    if (e instanceof NotFoundException) return e;
-                                    if (e instanceof UnprocessableEntityException) return e;
-                                    return new UnprocessableEntityException("Failed to upload prescription file");
-                                })
-                                .thenReturn(request)
-                )
+                .switchIfEmpty(Mono.error(
+                        new NotFoundException("Visit not found: " + visitId)))
+                .flatMap(visit -> {
+                    boolean firstSlotAvailable =
+                            visit.getPrescriptionFileId() == null;
+
+                    boolean secondSlotAvailable =
+                            visit.getPrescriptionFileId2() == null;
+
+                    if (!firstSlotAvailable && !secondSlotAvailable) {
+                        return Mono.error(
+                                new PrescriptionLimitExceededException(
+                                        "An appointment cannot have more than two prescriptions"));
+                    }
+
+                    byte[] pdf;
+
+                    try {
+                        pdf = PrescriptionPdfGenerator
+                                .generatePrescriptionPdf(request);
+                    } catch (DocumentException e) {
+                        return Mono.error(
+                                new UnprocessableEntityException(
+                                        "Failed to generate prescription PDF"));
+                    }
+
+                    FileRequestDTO fileRequest = new FileRequestDTO();
+                    fileRequest.setFileName(
+                            "prescription-" + finalPrescriptionId + ".pdf");
+                    fileRequest.setFileType(MediaType.APPLICATION_PDF_VALUE);
+                    fileRequest.setFileData(pdf);
+
+                    return filesServiceClient.addFile(fileRequest)
+                            .switchIfEmpty(Mono.error(
+                                    new UnprocessableEntityException(
+                                            "File service returned empty response")))
+                            .flatMap(fileDetails -> {
+                                if (fileDetails == null
+                                        || fileDetails.getFileId() == null) {
+                                    return Mono.error(
+                                            new UnprocessableEntityException(
+                                                    "File service did not return a fileId"));
+                                }
+
+                                if (firstSlotAvailable) {
+                                    visit.setPrescriptionFileId(
+                                            fileDetails.getFileId());
+                                } else {
+                                    visit.setPrescriptionFileId2(
+                                            fileDetails.getFileId());
+                                }
+
+                                return visitRepository.save(visit);
+                            })
+                            .thenReturn(request)
+                            .onErrorMap(e -> {
+                                if (e instanceof UnprocessableEntityException) {
+                                    return e;
+                                }
+
+                                return new UnprocessableEntityException(
+                                        "Failed to upload prescription file");
+                            });
+                })
                 .onErrorMap(e -> {
-                    if (e instanceof NotFoundException) return e;
-                    if (e instanceof InvalidInputException) return e;
-                    if (e instanceof UnprocessableEntityException) return e;
-                    return new UnprocessableEntityException("Failed to create prescription");
+                    if (e instanceof NotFoundException
+                            || e instanceof InvalidInputException
+                            || e instanceof PrescriptionLimitExceededException
+                            || e instanceof UnprocessableEntityException) {
+                        return e;
+                    }
+
+                    return new UnprocessableEntityException(
+                            "Failed to create prescription");
                 });
     }
 
@@ -89,27 +135,64 @@ public class PrescriptionServiceImpl implements PrescriptionService {
     @Override
     public Mono<byte[]> getPrescriptionPdf(String visitId) {
         return visitRepository.findByVisitId(visitId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Visit not found: " + visitId)))
+                .switchIfEmpty(Mono.error(
+                        new NotFoundException("Visit not found: " + visitId)))
                 .flatMap(visit -> {
-                    if (visit.getPrescriptionFileId() == null) {
-                        return Mono.error(new NotFoundException("No prescription file linked to visit: " + visitId));
+                    String fileId = visit.getPrescriptionFileId();
+
+                    if (fileId == null) {
+                        return Mono.error(
+                                new NotFoundException(
+                                        "No prescription file linked to visit: "
+                                                + visitId));
                     }
 
-                    return filesServiceClient.getFile(visit.getPrescriptionFileId())
-                            .switchIfEmpty(Mono.error(new NotFoundException("Prescription file not found: " + visit.getPrescriptionFileId())))
-                            .flatMap(fileResponse -> {
-                                if (fileResponse == null || fileResponse.getFileData() == null) {
-                                    return Mono.error(new UnprocessableEntityException("File service returned empty file data"));
-                                }
-                                return Mono.just(fileResponse.getFileData());
-                            })
-                            .onErrorMap(e -> {
-                                if (e instanceof NotFoundException) return e;
-                                if (e instanceof UnprocessableEntityException) return e;
-                                return new UnprocessableEntityException("Failed to retrieve prescription file");
-                            });
+                    return getPdfFromFile(fileId);
                 });
     }
 
+    @Override
+    public Mono<byte[]> getSecondPrescriptionPdf(String visitId) {
+        return visitRepository.findByVisitId(visitId)
+                .switchIfEmpty(Mono.error(
+                        new NotFoundException("Visit not found: " + visitId)))
+                .flatMap(visit -> {
+                    String fileId = visit.getPrescriptionFileId2();
 
+                    if (fileId == null) {
+                        return Mono.error(
+                                new NotFoundException(
+                                        "No second prescription linked to visit: "
+                                                + visitId));
+                    }
+
+                    return getPdfFromFile(fileId);
+                });
+    }
+
+    private Mono<byte[]> getPdfFromFile(String fileId) {
+        return filesServiceClient.getFile(fileId)
+                .switchIfEmpty(Mono.error(
+                        new NotFoundException(
+                                "Prescription file not found: " + fileId)))
+                .flatMap(fileResponse -> {
+                    if (fileResponse == null
+                            || fileResponse.getFileData() == null) {
+                        return Mono.error(
+                                new UnprocessableEntityException(
+                                        "File service returned empty file data"));
+                    }
+
+                    return Mono.just(fileResponse.getFileData());
+                })
+                .onErrorMap(e -> {
+                    if (e instanceof NotFoundException
+                            || e instanceof UnprocessableEntityException) {
+                        return e;
+                    }
+
+                    return new UnprocessableEntityException(
+                            "Failed to retrieve prescription file");
+                });
+    }
 }
