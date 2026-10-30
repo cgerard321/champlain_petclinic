@@ -11,6 +11,7 @@ import { NavBar } from '@/layouts/AppNavBar';
 import { JSX, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getProduct } from '../api/getProduct';
+import { addProductToRecentlyViewed } from '../utils/recentlyViewed';
 import './ProductDetails.css';
 import StarRating from './StarRating';
 import { AppRoutePaths } from '@/shared/models/path.routes';
@@ -34,7 +35,7 @@ export default function ProductDetails(): JSX.Element {
   const { t, i18n } = useTranslation('products');
   const language = i18n.resolvedLanguage || i18n.language || 'en';
   const isAdmin = IsAdmin();
-  const { isAuthenticated } = useUser();
+  const { user, isAuthenticated } = useUser();
   const isInventoryManager = IsInventoryManager();
   const isVet = IsVet();
   const isReceptionist = IsReceptionist();
@@ -94,6 +95,10 @@ export default function ProductDetails(): JSX.Element {
     getProduct(productId)
       .then(res => {
         setCurrentProduct(res);
+        if (!res.isUnlisted) {
+          addProductToRecentlyViewed(res, user.userId);
+        }
+
         setIsLoading(false);
       })
       .catch((err: AxiosError) => {
@@ -149,10 +154,7 @@ export default function ProductDetails(): JSX.Element {
             ) : (
               <>
                 <div className="productimage-container">
-                  <ImageContainer
-                    image={currentProduct.image}
-                    imageId={currentProduct.imageId}
-                  />
+                  <ImageContainer image={currentProduct.image} />
                 </div>
                 <div className="productdetails-container">
                   <div
@@ -281,7 +283,6 @@ export default function ProductDetails(): JSX.Element {
                     setCurrentProduct(resRefresh);
                   }}
                   onModifyReviews={setReviewCount}
-                  currentProduct={currentProduct}
                 />
               </>
             )}

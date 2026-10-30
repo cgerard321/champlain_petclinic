@@ -3,19 +3,25 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   computed,
+  DestroyRef,
   inject,
   LOCALE_ID,
   signal,
   TemplateRef,
   viewChild,
 } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormField, form, max, min, required } from '@angular/forms/signals';
+import { MatDialog, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 
+import { isApiError } from '@core/models/api-error';
 import { AuthState } from '@core/services/auth-state';
+import { Status } from '@features/supplies/models/status';
 import { Supply, SupplyRequest } from '@features/supplies/models/supply';
 import {
   SupplyHistoryDialog,
@@ -29,14 +35,21 @@ import {
   ModalFormField,
   ModalFormResult,
 } from '@shared/components/modal-form/modal-form-models';
+import {
+  SupplySummaryAction,
+  SupplySummaryDialog,
+  SupplySummaryDialogData,
+} from '@shared/components/supply-summary-dialog/supply-summary-dialog';
 import { Table, TableColumn } from '@shared/components/table/table';
 import { Roles } from '@shared/models/roles';
 
 // The shape of the modal's form: the editable Supply fields plus the photo control.
 interface SupplyFormValue {
-  productName: string;
+  productNameEn: string;
+  productNameFr: string;
   supplierName: string;
-  productDescription: string;
+  productDescriptionEn: string;
+  productDescriptionFr: string;
   productPrice: number;
   productQuantity: number;
   productSalePrice: number;
@@ -45,85 +58,139 @@ interface SupplyFormValue {
 }
 
 @Component({
-  imports: [CurrencyPipe, MatIconModule, MatMenuModule, Table],
+  imports: [
+    CurrencyPipe,
+    FormField,
+    MatDialogModule,
+    MatIconModule,
+    MatMenuModule,
+    Table,
+    MatTooltipModule,
+  ],
   selector: 'app-supply',
-  styleUrl: './supply-page.css',
+  styleUrls: ['./inventories.css', './supply-page.css'],
   templateUrl: './supply-page.html',
 })
 export class SupplyPage {
   private readonly route = inject(ActivatedRoute);
   private readonly supplyService = inject(SupplyService);
+  private readonly destroyRef = inject(DestroyRef);
+  private supplyLoadSubscription?: Subscription;
   private readonly auth = inject(AuthState);
   private readonly dialog = inject(MatDialog);
-  private readonly locale = inject(LOCALE_ID);
+  private readonly restockDialogTemplate =
+    viewChild.required<TemplateRef<unknown>>('restockDialog');
+  private restockDialogRef: MatDialogRef<unknown> | null = null;
+  protected readonly restockingSupply = signal<Supply | null>(null);
+  protected readonly restockAddingLabel = $localize`:@@supply.restock.adding:Ajout en cours…`;
+  protected readonly restockAddLabel = $localize`:@@supply.restock.add:Ajouter au stock`;
+  protected readonly restockPending = signal(false);
+  protected readonly restockError = signal('');
+  protected readonly uncertainRestocks = signal<ReadonlySet<string>>(new Set());
+  protected readonly restockModel = signal<{ quantity: number | null }>({ quantity: null });
+  protected readonly restockForm = form(this.restockModel, (path) => {
+    required(path.quantity, {
+      message: $localize`:@@supply.restock.quantityRequired:La quantité est obligatoire.`,
+    });
+    min(path.quantity, 1, {
+      message: $localize`:@@supply.restock.quantityPositive:Saisissez un entier supérieur à 0.`,
+    });
+    max(path.quantity, 2147483647, {
+      message: $localize`:@@supply.restock.quantityMax:La quantité ne doit pas dépasser 2147483647.`,
+    });
+  });
 
-  // Translate the seeded records for display while keeping their stored API values unchanged.
-  private readonly starterSupplyNames: Record<string, string> = {
-    Benzodiazepines: $localize`:@@supply.data.names.benzodiazepines:Benzodiazépines`,
-    Trazodone: $localize`:@@supply.data.names.trazodone:Trazodone`,
-    Carprofen: $localize`:@@supply.data.names.carprofen:Carprofène`,
-    'Self-adhesive Bandages': $localize`:@@supply.data.names.selfAdhesiveBandages:Bandages auto-adhésifs`,
-    'Gauze Pads': $localize`:@@supply.data.names.gauzePads:Compresses de gaze`,
-    'Hydrogen Peroxide': $localize`:@@supply.data.names.hydrogenPeroxide:Peroxyde d'hydrogène`,
-    'MRI Machine': $localize`:@@supply.data.names.mriMachine:Appareil d'IRM`,
-    'Rabies Vaccine': $localize`:@@supply.data.names.rabiesVaccine:Vaccin contre la rage`,
-    Endoscope: $localize`:@@supply.data.names.endoscope:Endoscope`,
-    'Ultrasound Machine': $localize`:@@supply.data.names.ultrasoundMachine:Appareil d'échographie`,
-    'Elastic Bandage': $localize`:@@supply.data.names.elasticBandage:Bandage élastique`,
-    'Antiseptic Wipes': $localize`:@@supply.data.names.antisepticWipes:Lingettes antiseptiques`,
-    'Insulin Syringes': $localize`:@@supply.data.names.insulinSyringes:Seringues à insuline`,
-    'IV Catheters': $localize`:@@supply.data.names.ivCatheters:Cathéters intraveineux`,
-    Antihistamines: $localize`:@@supply.data.names.antihistamines:Antihistaminiques`,
-    'Antibiotic Ointment': $localize`:@@supply.data.names.antibioticOintment:Onguent antibiotique`,
-    'Blood Glucose Test Kits': $localize`:@@supply.data.names.bloodGlucoseTestKits:Trousses de mesure de la glycémie`,
-    'Urinalysis Test Kits': $localize`:@@supply.data.names.urinalysisTestKits:Trousses d'analyse d'urine`,
-    'Hydrogel Dressing': $localize`:@@supply.data.names.hydrogelDressing:Pansement hydrogel`,
-    'Sutures Kit': $localize`:@@supply.data.names.suturesKit:Trousse de sutures`,
-    'Anesthesia Machines': $localize`:@@supply.data.names.anesthesiaMachines:Appareils d'anesthésie`,
-    'Anesthetic Masks': $localize`:@@supply.data.names.anestheticMasks:Masques d'anesthésie`,
-    'Surgical Scissors': $localize`:@@supply.data.names.surgicalScissors:Ciseaux chirurgicaux`,
-    Hemostats: $localize`:@@supply.data.names.hemostats:Pinces hémostatiques`,
-    'Needle Holders': $localize`:@@supply.data.names.needleHolders:Porte-aiguilles`,
-    'Pet Carrier Accessories': $localize`:@@supply.data.names.petCarrierAccessories:Accessoires pour cages de transport`,
-    'Carrier Cleaning Supplies': $localize`:@@supply.data.names.carrierCleaningSupplies:Produits de nettoyage pour cages de transport`,
-    'Comfort Pads': $localize`:@@supply.data.names.comfortPads:Coussinets de confort`,
-    'Parvovirus Test Kits': $localize`:@@supply.data.names.parvovirusTestKits:Trousses de dépistage du parvovirus`,
-    'Feline Leukemia Test Kits': $localize`:@@supply.data.names.felineLeukemiaTestKits:Trousses de dépistage de la leucémie féline`,
-    'Heartworm Test Kits': $localize`:@@supply.data.names.heartwormTestKits:Trousses de dépistage du ver du cœur`,
-  };
-  private readonly starterSupplyDescriptions: Record<string, string> = {
-    'Drugs for sleep': $localize`:@@supply.data.descriptions.benzodiazepines:Médicaments pour le sommeil`,
-    'Drugs for anxiety/stress': $localize`:@@supply.data.descriptions.trazodone:Médicaments pour l'anxiété et le stress`,
-    'Non-steroidal anti-inflammatory drug': $localize`:@@supply.data.descriptions.carprofen:Anti-inflammatoire non stéroïdien`,
-    'Bandages for wound care': $localize`:@@supply.data.descriptions.selfAdhesiveBandages:Bandages pour le soin des plaies`,
-    'Absorbent pads for wound care': $localize`:@@supply.data.descriptions.gauzePads:Compresses absorbantes pour le soin des plaies`,
-    'Antiseptic for wound cleaning': $localize`:@@supply.data.descriptions.hydrogenPeroxide:Antiseptique pour nettoyer les plaies`,
-    'Imaging machine for diagnostics': $localize`:@@supply.data.descriptions.mriMachine:Appareil d'imagerie pour le diagnostic`,
-    'Core vaccine for rabies prevention': $localize`:@@supply.data.descriptions.rabiesVaccine:Vaccin essentiel pour prévenir la rage`,
-    'Endoscope for internal examinations': $localize`:@@supply.data.descriptions.endoscope:Endoscope pour les examens internes`,
-    'Ultrasound machine for diagnostic imaging': $localize`:@@supply.data.descriptions.ultrasoundMachine:Appareil d'échographie pour l'imagerie diagnostique`,
-    'Elastic bandage for flexible wound support': $localize`:@@supply.data.descriptions.elasticBandage:Bandage élastique pour soutenir les plaies avec souplesse`,
-    'Antiseptic wipes for cleaning wounds': $localize`:@@supply.data.descriptions.antisepticWipes:Lingettes antiseptiques pour nettoyer les plaies`,
-    'Syringes for administering insulin': $localize`:@@supply.data.descriptions.insulinSyringes:Seringues pour administrer l'insuline`,
-    'Intravenous catheters for fluid administration': $localize`:@@supply.data.descriptions.ivCatheters:Cathéters intraveineux pour administrer des liquides`,
-    'Antihistamines for allergic reactions': $localize`:@@supply.data.descriptions.antihistamines:Antihistaminiques pour les réactions allergiques`,
-    'Topical antibiotic ointment for wound care': $localize`:@@supply.data.descriptions.antibioticOintment:Onguent antibiotique topique pour le soin des plaies`,
-    'Test kits for measuring blood glucose levels': $localize`:@@supply.data.descriptions.bloodGlucoseTestKits:Trousses pour mesurer la glycémie`,
-    'Test kits for analyzing urine samples': $localize`:@@supply.data.descriptions.urinalysisTestKits:Trousses pour analyser des échantillons d'urine`,
-    'Hydrogel dressing for moist wound healing': $localize`:@@supply.data.descriptions.hydrogelDressing:Pansement hydrogel pour la cicatrisation des plaies en milieu humide`,
-    'Kit containing sutures for wound closure': $localize`:@@supply.data.descriptions.suturesKit:Trousse contenant des sutures pour fermer les plaies`,
-    'Machines for administering anesthesia': $localize`:@@supply.data.descriptions.anesthesiaMachines:Appareils pour administrer l'anesthésie`,
-    'Masks for delivering anesthesia': $localize`:@@supply.data.descriptions.anestheticMasks:Masques pour administrer l'anesthésie`,
-    'Scissors for cutting tissues during surgery': $localize`:@@supply.data.descriptions.surgicalScissors:Ciseaux pour couper les tissus pendant une chirurgie`,
-    'Clamps for controlling bleeding during surgery': $localize`:@@supply.data.descriptions.hemostats:Pinces pour maîtriser les saignements pendant une chirurgie`,
-    'Hold needles securely during suturing': $localize`:@@supply.data.descriptions.needleHolders:Maintiennent les aiguilles en place pendant les sutures`,
-    'Accessories like water bowls and food trays for pet carriers': $localize`:@@supply.data.descriptions.petCarrierAccessories:Accessoires comme des bols d'eau et des plateaux de nourriture pour les cages de transport`,
-    'Cleaning sprays and wipes for pet carriers': $localize`:@@supply.data.descriptions.carrierCleaningSupplies:Vaporisateurs et lingettes pour nettoyer les cages de transport`,
-    'Comfortable pads for lining pet carriers': $localize`:@@supply.data.descriptions.comfortPads:Coussinets confortables pour garnir les cages de transport`,
-    'Test kits for detecting canine parvovirus': $localize`:@@supply.data.descriptions.parvovirusTestKits:Trousses pour détecter le parvovirus canin`,
-    'Test kits for detecting feline leukemia virus': $localize`:@@supply.data.descriptions.felineLeukemiaTestKits:Trousses pour détecter le virus de la leucémie féline`,
-    'Test kits for detecting heartworm infection': $localize`:@@supply.data.descriptions.heartwormTestKits:Trousses pour détecter une infection par le ver du cœur`,
-  };
+  protected canRestock(supply: Supply): boolean {
+    return (
+      this.canManageSupplies() &&
+      !this.uncertainRestocks().has(supply.productId) &&
+      (supply.status === Status.RE_ORDER || supply.status === Status.OUT_OF_STOCK)
+    );
+  }
+
+  protected openRestock(supply: Supply): void {
+    if (!this.inventoryId || !this.canRestock(supply) || this.restockDialogRef) return;
+
+    this.restockingSupply.set(supply);
+    this.restockForm().reset({ quantity: null });
+    this.restockError.set('');
+    const dialogRef = this.dialog.open(this.restockDialogTemplate(), {
+      ariaLabel: $localize`:@@supply.restock.ariaLabel:Réapprovisionner ${this.localizedSupplyName(supply)}:name:`,
+    });
+    this.restockDialogRef = dialogRef;
+    dialogRef.afterClosed().subscribe(() => {
+      this.restockDialogRef = null;
+      this.restockingSupply.set(null);
+      this.restockPending.set(false);
+    });
+  }
+
+  protected cancelRestock(): void {
+    if (!this.restockPending()) this.restockDialogRef?.close();
+  }
+
+  protected submitRestock(event: Event): void {
+    event.preventDefault();
+    if (this.restockPending()) return;
+    if (this.uncertainRestocks().has(this.restockingSupply()?.productId ?? '')) return;
+
+    const supply = this.restockingSupply();
+    const inventoryId = this.inventoryId;
+    if (!supply || !inventoryId || !this.canRestock(supply)) {
+      this.restockError.set(
+        $localize`:@@supply.restock.permission:Vous n’avez plus la permission de réapprovisionner cet article.`,
+      );
+      return;
+    }
+
+    const quantity = this.restockModel().quantity;
+    if (
+      quantity === null ||
+      !Number.isInteger(quantity) ||
+      quantity <= 0 ||
+      quantity > 2147483647
+    ) {
+      this.restockError.set(
+        $localize`:@@supply.restock.quantityInteger:Saisissez un entier entre 1 et 2147483647.`,
+      );
+      return;
+    }
+
+    this.restockPending.set(true);
+    this.restockError.set('');
+    const dialogRef = this.restockDialogRef;
+    if (dialogRef) dialogRef.disableClose = true;
+    this.supplyService.restockSupply(inventoryId, supply.productId, quantity).subscribe({
+      next: (updated) => {
+        // Use the authoritative response. No refresh can turn a successful addition into an error.
+        this.supplies.update((supplies) =>
+          supplies.map((row) => (row.productId === updated.productId ? updated : row)),
+        );
+        // Keep submission blocked through the dialog's closing animation.
+        dialogRef?.close();
+      },
+      error: (error: unknown) => {
+        this.restockPending.set(false);
+        if (dialogRef) dialogRef.disableClose = false;
+        const code = isApiError(error) ? Number(error.code) : 0;
+        if (!code || code >= 500) {
+          // Stock may have changed before an audit write or the response failed. A second
+          // additive request could duplicate it; require reconciliation by reloading the page.
+          this.uncertainRestocks.update((ids) => new Set([...ids, supply.productId]));
+          this.restockError.set(
+            $localize`:@@supply.restock.uncertain:Impossible de confirmer le réapprovisionnement. Le stock a peut-être changé. Rechargez la page pour vérifier les quantités avant de réessayer.`,
+          );
+        } else {
+          this.restockError.set(
+            isApiError(error)
+              ? error.message
+              : $localize`:@@supply.restock.failed:Impossible de réapprovisionner l’article.`,
+          );
+        }
+      },
+    });
+  }
+  private readonly locale = inject(LOCALE_ID);
 
   protected readonly isFrench = this.locale.startsWith('fr');
   protected readonly tableLabel = $localize`:@@supply.table.label:Articles dans cet inventaire`;
@@ -150,19 +217,18 @@ export class SupplyPage {
 
   protected readonly filteredSupplies = computed(() => {
     const { productName, supplierName, productDescription, status } = this.filters();
+    const nameQuery = productName.trim().toLowerCase();
+    const descriptionQuery = productDescription.trim().toLowerCase();
+    const supplierQuery = supplierName.trim().toLowerCase();
     return this.supplies().filter(
       (supply) =>
-        (this.localizedSupplyName(supply.productName)
-          .toLowerCase()
-          .includes(productName.trim().toLowerCase()) ||
-          supply.productName.toLowerCase().includes(productName.trim().toLowerCase())) &&
-        this.supplierLabel(supply).toLowerCase().includes(supplierName.trim().toLowerCase()) &&
-        (this.localizedSupplyDescription(supply.productDescription)
-          .toLowerCase()
-          .includes(productDescription.trim().toLowerCase()) ||
-          supply.productDescription
-            .toLowerCase()
-            .includes(productDescription.trim().toLowerCase())) &&
+        [supply.name?.en, supply.name?.fr, supply.productName].some((text) =>
+          (text ?? '').toLowerCase().includes(nameQuery),
+        ) &&
+        this.supplierLabel(supply).toLowerCase().includes(supplierQuery) &&
+        [supply.description?.en, supply.description?.fr, supply.productDescription].some((text) =>
+          (text ?? '').toLowerCase().includes(descriptionQuery),
+        ) &&
         (!status || this.effectiveStatus(supply) === status),
     );
   });
@@ -176,11 +242,54 @@ export class SupplyPage {
       data: {
         inventoryId: this.inventoryId,
         productId: supply.productId,
-        supplyName: this.localizedSupplyName(supply.productName),
+        supplyName: this.localizedSupplyName(supply),
       },
-      ariaLabel: $localize`:@@supply.history.ariaLabel:Historique de l'article ${this.localizedSupplyName(supply.productName)}:name:`,
+      ariaLabel: $localize`:@@supply.history.ariaLabel:Historique de l'article ${this.localizedSupplyName(supply)}:name:`,
       width: '640px',
       maxWidth: '95vw',
+    });
+  }
+
+  protected openSupplySummary(supply: Supply): void {
+    const canConsume = this.canConsumeSupplies();
+    const dialogRef = this.dialog.open<
+      SupplySummaryDialog,
+      SupplySummaryDialogData,
+      SupplySummaryAction
+    >(SupplySummaryDialog, {
+      data: {
+        supply,
+        displayName: this.localizedSupplyName(supply),
+        displayDescription: this.localizedSupplyDescription(supply),
+        statusLabel: this.formatStatus(this.effectiveStatus(supply)),
+        photoUrl: this.supplyPhotoUrl(supply),
+        canManage: this.canManageSupplies(),
+        canConsume,
+        consumeDisabled:
+          supply.productQuantity <= 0 ||
+          this.expirationState(supply) === 'expired' ||
+          this.consumingSupplyId() === supply.productId,
+      },
+      ariaLabel: $localize`:@@supply.summary.ariaLabel:Résumé de l'article ${this.localizedSupplyName(supply)}:name:`,
+      width: '640px',
+      maxWidth: '95vw',
+    });
+
+    dialogRef.afterClosed().subscribe((action) => {
+      switch (action) {
+        case 'edit':
+          this.editSupply(supply);
+          break;
+        case 'delete':
+          this.deleteSupply(supply);
+          break;
+        case 'history':
+          this.openSupplyHistory(supply);
+          break;
+        case 'consume':
+          this.consumeSupply(supply);
+          break;
+      }
     });
   }
 
@@ -225,7 +334,7 @@ export class SupplyPage {
     {
       id: 'description',
       header: $localize`:@@supply.fields.description:Description`,
-      value: (supply) => this.localizedSupplyDescription(supply.productDescription),
+      value: (supply) => this.localizedSupplyDescription(supply),
     },
     {
       id: 'price',
@@ -247,23 +356,21 @@ export class SupplyPage {
       header: $localize`:@@supply.fields.status:État`,
       template: this.statusCell(),
     },
-    ...(this.canManageSupplies() || this.canConsumeSupplies()
-      ? [
-          {
-            id: 'actions',
-            header: $localize`:@@supply.fields.actions:Actions`,
-            template: this.actionsCell(),
-          },
-        ]
-      : []),
+    {
+      id: 'actions',
+      header: $localize`:@@supply.fields.actions:Actions`,
+      template: this.actionsCell(),
+    },
   ]);
 
-  protected localizedSupplyName(name: string): string {
-    return this.starterSupplyNames[name] ?? name;
+  protected localizedSupplyName(supply: Supply): string {
+    return (this.isFrench ? supply.name?.fr : supply.name?.en) ?? supply.productName;
   }
 
-  protected localizedSupplyDescription(description: string): string {
-    return this.starterSupplyDescriptions[description] ?? description;
+  protected localizedSupplyDescription(supply: Supply): string {
+    return (
+      (this.isFrench ? supply.description?.fr : supply.description?.en) ?? supply.productDescription
+    );
   }
 
   private supplierLabel(supply: Supply): string {
@@ -285,24 +392,38 @@ export class SupplyPage {
   }
 
   private loadSupplies(): void {
+    this.supplyLoadSubscription?.unsubscribe();
+    this.supplies.set([]);
+    this.loading.set(true);
+    this.error.set(false);
+
     if (!this.inventoryId) {
       this.loading.set(false);
       this.error.set(true);
       return;
     }
 
-    this.error.set(false);
+    this.supplyLoadSubscription = this.supplyService
+      .getSupplies(this.inventoryId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (supply) => {
+          this.supplies.update((current) => {
+            const index = current.findIndex((item) => item.productId === supply.productId);
+            if (index === -1) return [...current, supply];
 
-    this.supplyService.getSupplies(this.inventoryId).subscribe({
-      next: (supplies) => {
-        this.supplies.set(supplies);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set(true);
-        this.loading.set(false);
-      },
-    });
+            const updated = [...current];
+            updated[index] = supply;
+            return updated;
+          });
+          this.loading.set(false);
+        },
+        error: () => {
+          this.error.set(true);
+          this.loading.set(false);
+        },
+        complete: () => this.loading.set(false),
+      });
   }
 
   protected openAddDialog(): void {
@@ -326,8 +447,14 @@ export class SupplyPage {
 
     return [
       {
-        key: 'productName',
-        label: $localize`:@@supply.fields.name:Nom`,
+        key: 'productNameEn',
+        label: $localize`:@@supply.fields.nameEn:Nom (anglais)`,
+        type: 'string',
+        required: true,
+      },
+      {
+        key: 'productNameFr',
+        label: $localize`:@@supply.fields.nameFr:Nom (français)`,
         type: 'string',
         required: true,
       },
@@ -349,8 +476,14 @@ export class SupplyPage {
         },
       },
       {
-        key: 'productDescription',
-        label: $localize`:@@supply.fields.description:Description`,
+        key: 'productDescriptionEn',
+        label: $localize`:@@supply.fields.descriptionEn:Description (anglais)`,
+        type: 'string',
+        required: true,
+      },
+      {
+        key: 'productDescriptionFr',
+        label: $localize`:@@supply.fields.descriptionFr:Description (français)`,
         type: 'string',
         required: true,
       },
@@ -416,18 +549,22 @@ export class SupplyPage {
         fields: this.supplyFields(supply),
         initialValue: supply
           ? {
-              productName: this.localizedSupplyName(supply.productName),
+              productNameEn: supply.name?.en ?? supply.productName,
+              productNameFr: supply.name?.fr ?? supply.productName,
               supplierName: supply.supplierName ?? '',
-              productDescription: this.localizedSupplyDescription(supply.productDescription),
+              productDescriptionEn: supply.description?.en ?? supply.productDescription,
+              productDescriptionFr: supply.description?.fr ?? supply.productDescription,
               productPrice: supply.productPrice,
               productQuantity: supply.productQuantity,
               productSalePrice: supply.productSalePrice,
               expirationDate: supply.expirationDate ?? '',
             }
           : {
-              productName: '',
+              productNameEn: '',
+              productNameFr: '',
               supplierName: '',
-              productDescription: '',
+              productDescriptionEn: '',
+              productDescriptionFr: '',
               productPrice: 0,
               productQuantity: 1,
               productSalePrice: 0,
@@ -463,7 +600,7 @@ export class SupplyPage {
     this.addError.set('');
 
     try {
-      const payload = await this.buildSupplyRequest(value, original);
+      const payload = await this.buildSupplyRequest(value);
 
       const request$ = editingId
         ? this.supplyService.updateSupply(inventoryId, editingId, payload)
@@ -531,7 +668,7 @@ export class SupplyPage {
     >(ModalForm, {
       data: {
         title: $localize`:@@supply.actions.deleteTitle:Supprimer l'article`,
-        message: $localize`:@@supply.actions.deleteConfirm:Voulez-vous vraiment supprimer ${this.localizedSupplyName(supply.productName)}:name: ?`,
+        message: $localize`:@@supply.actions.deleteConfirm:Voulez-vous vraiment supprimer ${this.localizedSupplyName(supply)}:name: ?`,
         fields: [],
         initialValue: {},
         submitLabel: $localize`:@@supply.actions.delete:Supprimer`,
@@ -571,16 +708,19 @@ export class SupplyPage {
     this.downloadingPdf.set(true);
     this.downloadError.set('');
 
-    this.supplyService.downloadSupplyPdf(inventoryId).subscribe({
-      next: (blob) => {
-        this.saveFile(blob, `supply-report-${inventoryId}.pdf`);
-        this.downloadingPdf.set(false);
-      },
-      error: async (err: unknown) => {
-        this.downloadError.set(await this.readDownloadError(err));
-        this.downloadingPdf.set(false);
-      },
-    });
+    this.supplyService
+      .downloadSupplyPdf(inventoryId, this.isFrench ? 'fr' : 'en')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.saveFile(blob, `supply-report-${inventoryId}.pdf`);
+          this.downloadingPdf.set(false);
+        },
+        error: async (err: unknown) => {
+          this.downloadError.set(await this.readDownloadError(err));
+          this.downloadingPdf.set(false);
+        },
+      });
   }
 
   private saveFile(blob: Blob, fileName: string): void {
@@ -691,23 +831,20 @@ export class SupplyPage {
     });
   }
 
-  private async buildSupplyRequest(
-    value: SupplyFormValue,
-    original: Supply | null,
-  ): Promise<SupplyRequest> {
+  private async buildSupplyRequest(value: SupplyFormValue): Promise<SupplyRequest> {
     const { photo, expirationDate, supplierName, ...fields } = value;
     const normalizedSupplierName = supplierName.trim();
     const request: SupplyRequest = {
-      ...fields,
-      productName:
-        original && value.productName === this.localizedSupplyName(original.productName)
-          ? original.productName
-          : value.productName,
-      productDescription:
-        original &&
-        value.productDescription === this.localizedSupplyDescription(original.productDescription)
-          ? original.productDescription
-          : value.productDescription,
+      productName: fields.productNameEn.trim(),
+      productDescription: fields.productDescriptionEn.trim(),
+      productPrice: fields.productPrice,
+      productQuantity: fields.productQuantity,
+      productSalePrice: fields.productSalePrice,
+      name: { en: fields.productNameEn.trim(), fr: fields.productNameFr.trim() },
+      description: {
+        en: fields.productDescriptionEn.trim(),
+        fr: fields.productDescriptionFr.trim(),
+      },
       expirationDate: expirationDate || null,
       ...(normalizedSupplierName ? { supplierName: normalizedSupplierName } : {}),
     };

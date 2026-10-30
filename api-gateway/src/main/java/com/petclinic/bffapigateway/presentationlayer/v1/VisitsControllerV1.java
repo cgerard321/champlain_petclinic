@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.CancellationRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Prescriptions.PrescriptionResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.RescheduleRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.TimeSlotDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VetNoteRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
@@ -13,6 +14,7 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingPrescriptionNotFoundException;
+import com.petclinic.bffapigateway.exceptions.ForbiddenAccessException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -28,6 +30,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.stream.Stream;
 
 @RestController()
 @RequiredArgsConstructor
@@ -47,6 +51,27 @@ public class VisitsControllerV1 {
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<Flux<VisitResponseDTO>> getAllVisits(@RequestParam(required = false) String description){
         return ResponseEntity.ok().body(visitsServiceClient.getAllVisits(description));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.VET})
+    @GetMapping(value = "/search", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> searchVisits(@RequestParam String query, ServerWebExchange exchange) {
+        TokenResponseDTO user = exchange.getAttribute("tokenValues");
+        if (user == null) {
+            throw new IllegalStateException("Authenticated user is missing from the validated token.");
+        }
+        String search = query.trim().toLowerCase();
+
+        return visitsServiceClient.getVisitByPractitionerId(user.getUserId())
+                .filter(visit -> matchesSearch(visit, search));
+    }
+
+    private boolean matchesSearch(VisitResponseDTO visit, String search) {
+        return Stream.of(
+                        visit.getVisitId(),
+                        visit.getPetName(),
+                        visit.getDescription())
+                .anyMatch(value -> value != null && value.toLowerCase().contains(search));
     }
 
 //    @GetMapping(value ="/{visitId}")
@@ -340,7 +365,7 @@ public class VisitsControllerV1 {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.CUST})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.RECEPTIONIST, Roles.CUST, Roles.VET})
     @PatchMapping(value = "/{visitId}/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VisitResponseDTO>> cancelVisit(@PathVariable String visitId, @RequestBody CancellationRequestDTO cancellationRequestDTO) {
 
@@ -357,6 +382,50 @@ public class VisitsControllerV1 {
                 .addVetNote(visitId, vetNoteRequestDTO)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.VET})
+    @PostMapping("/weekly-email")
+    public Mono<ResponseEntity<String>> sendMyWeeklyScheduleEmail(
+            ServerWebExchange exchange) {
+
+        TokenResponseDTO user = exchange.getAttribute("tokenValues");
+
+        if (user == null) {
+            return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+        }
+
+        return visitsServiceClient
+                .sendWeeklyScheduleEmail(user.getUserId())
+                .map(ResponseEntity::ok);
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
+    @PatchMapping(value = "/{visitId}/confirm", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> confirmFollowUpVisit(@PathVariable String visitId, ServerWebExchange exchange) {
+        TokenResponseDTO user = exchange.getAttribute("tokenValues");
+        return findVisitOfCustomer(visitId, user)
+                .flatMap(visit -> visitsServiceClient.confirmFollowUpVisit(visitId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
+    @PatchMapping(value = "/{visitId}/reschedule", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> rescheduleFollowUpVisit(@PathVariable String visitId, @RequestBody RescheduleRequestDTO rescheduleRequestDTO, ServerWebExchange exchange) {
+        TokenResponseDTO user = exchange.getAttribute("tokenValues");
+        return findVisitOfCustomer(visitId, user)
+                .flatMap(visit -> visitsServiceClient.rescheduleFollowUpVisit(visitId, rescheduleRequestDTO))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    // Customers can only change visits for their own pets
+    private Mono<VisitResponseDTO> findVisitOfCustomer(String visitId, TokenResponseDTO user) {
+        return visitsServiceClient.getVisitByVisitId(visitId, false)
+                .flatMap(visit -> customersServiceClient.getPetByPetId(visit.getPetId(), false)
+                        .filter(pet -> user != null && user.getUserId().equals(pet.getCustomerId()))
+                        .switchIfEmpty(Mono.error(new ForbiddenAccessException("You can only change visits for your own pets")))
+                        .thenReturn(visit));
     }
 
 

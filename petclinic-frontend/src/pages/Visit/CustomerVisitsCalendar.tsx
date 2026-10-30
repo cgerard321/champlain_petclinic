@@ -3,10 +3,12 @@ import CustomerCalendarView from '@/features/visits/Calendar/CustomerCalendarVie
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { FaArrowLeft } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import './VisitsCalendar.css';
 
 export default function CustomerVisitsCalendar(): JSX.Element {
   const navigate = useNavigate();
+  const { t } = useTranslation('visits');
 
   const handleBackToList = (): void => {
     navigate(AppRoutePaths.CustomerVisits);
@@ -23,7 +25,7 @@ export default function CustomerVisitsCalendar(): JSX.Element {
               className="btn btn-outline-secondary back-to-list-btn"
               onClick={handleBackToList}
             >
-              <FaArrowLeft /> Back to My Visits
+              <FaArrowLeft /> {t('calendar.backToList')}
             </button>
           </div>
 

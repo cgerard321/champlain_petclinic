@@ -5,7 +5,8 @@
     mat-icon-button
     mat-dialog-close
     type="button"
-    aria-label="Close delete confirmation dialog"
+    aria-label="Fermer la fenêtre de confirmation de suppression"
+    i18n-aria-label="@@products.delete.close"
   >
     <mat-icon>close</mat-icon>
   </button>
@@ -16,7 +17,9 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="cancel()">Cancel</button>
+  <button mat-button type="button" (click)="cancel()" i18n="@@products.actions.cancel">
+    Annuler
+  </button>
   <button mat-flat-button color="warn" type="button" (click)="confirm()">
     {{ data.confirmLabel }}
   </button>

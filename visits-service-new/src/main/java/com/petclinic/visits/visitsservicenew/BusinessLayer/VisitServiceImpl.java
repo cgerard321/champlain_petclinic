@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.BusinessLayer.Availability.AvailabilityService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions.PrescriptionService;
 import com.petclinic.visits.visitsservicenew.DataLayer.CancellationReason;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
@@ -19,6 +20,7 @@ import com.petclinic.visits.visitsservicenew.Exceptions.DuplicateTimeException;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.CancellationRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.RescheduleRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VetNoteRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
@@ -27,14 +29,23 @@ import com.petclinic.visits.visitsservicenew.Utils.IdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Comparator;
+import java.util.List;
 
 import static java.lang.String.format;
 
@@ -64,6 +75,7 @@ public class VisitServiceImpl implements VisitService {
 
     private final PrescriptionService prescriptionService;
     private final FilesServiceClient filesServiceClient;
+    private final AvailabilityService availabilityService;
 
     /**
      * Get all visits from the repo
@@ -234,19 +246,24 @@ public class VisitServiceImpl implements VisitService {
                 .map(entityDtoUtil::toVisitEntity)
                 // Generate new ID with current date and incremented sequence
                 .flatMap(visit -> {
-                    visit.setVisitId(IdGenerator.generateVisitId());
-                    return repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
+                    return repo.findByVisitDateAndPractitionerId(visit.getVisitDate(),visit.getPractitionerId())
                             .collectList()
                             .flatMap(existingVisits -> {
-                                if (existingVisits.isEmpty()) {// If there are no existing visits
-                                    return repo.insert(visit); // Insert the visit
+                                if (existingVisits.isEmpty()) {
+                                    return generateUniqueVisitId()
+                                            .flatMap(uniqueId -> {
+                                                visit.setVisitId(uniqueId);
+                                                return repo.insert(visit);
+                                            });
                                 } else {
-                                    //return exception if a visits already exists at the specific day and time for a specific practitioner
-                                    return Mono.error(new DuplicateTimeException("A visit with the same time and practitioner already exists."));
+                                    return Mono.error(new DuplicateTimeException(
+                                            "A visit with the same time and practitioner already exists."
+                                    ));
                                 }
                             });
                 })
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
+
     }
 
 
@@ -390,6 +407,45 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
     }
 
+    @Override
+    public Mono<VisitResponseDTO> confirmFollowUpVisit(String visitId) {
+        return findFollowUpVisitToChange(visitId)
+                .filter(visit -> visit.getStatus() == Status.UPCOMING)
+                .switchIfEmpty(Mono.error(new BadRequestException("Only upcoming follow-up visits can be confirmed.")))
+                .flatMap(visit -> {
+                    visit.setStatus(Status.CONFIRMED);
+                    return repo.save(visit);
+                })
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
+    }
+
+    @Override
+    public Mono<VisitResponseDTO> rescheduleFollowUpVisit(String visitId, RescheduleRequestDTO request) {
+        if (request == null || request.getVisitDate() == null) {
+            return Mono.error(new BadRequestException("Please choose a new date for the visit"));
+        }
+
+        if (isLessThan24HoursAway(request.getVisitDate())) {
+            return Mono.error(new BadRequestException("A visit must be rescheduled to at least 24 hours from now."));
+        }
+
+        return findFollowUpVisitToChange(visitId)
+                .filter(visit -> visit.getStatus() == Status.UPCOMING)
+                .switchIfEmpty(Mono.error(new BadRequestException("Only upcoming follow-up visits can be rescheduled.")))
+                .flatMap(visit -> availabilityService
+                        .getAvailableTimeSlotsForDate(visit.getPractitionerId(), request.getVisitDate().toLocalDate())
+                        .filter(slot -> slot.isAvailable() && slot.getStartTime().equals(request.getVisitDate()))
+                        .next()
+                        .switchIfEmpty(Mono.error(new BadRequestException("The selected time slot is not available.")))
+                        .thenReturn(visit))
+                .flatMap(visit -> {
+                    visit.setVisitDate(request.getVisitDate());
+                    visit.setVisitEndDate(request.getVisitDate().plusHours(1));
+                    return repo.save(visit);
+                })
+                .flatMap(entityDtoUtil::toVisitResponseDTO);
+    }
+
 
 //    @Override
 //    public Mono<VetDTO> testingGetVetDTO(String vetId) {
@@ -425,6 +481,7 @@ public class VisitServiceImpl implements VisitService {
 
                                     updatedVisit.setPrescriptionFileId(existingVisit.getPrescriptionFileId());
                                     updatedVisit.setVetNote(existingVisit.getVetNote());
+                                    updatedVisit.setFollowUpOfVisitId(existingVisit.getFollowUpOfVisitId());
 
                                     if (updatedVisit.getStatus() == null) {
                                         updatedVisit.setStatus(existingVisit.getStatus());
@@ -484,6 +541,25 @@ public class VisitServiceImpl implements VisitService {
 
 
     /**
+     * Find a follow-up visit that can still be changed by the customer (more than 24 hours before it starts)
+     *
+     * @param visitId The visit ID to find
+     * @return The follow-up visit or an error if it can't be changed
+     */
+    private Mono<Visit> findFollowUpVisitToChange(String visitId) {
+        return repo.findByVisitId(visitId)
+                .switchIfEmpty(Mono.error(new NotFoundException("No visit was found with visitId: " + visitId)))
+                .filter(visit -> visit.getFollowUpOfVisitId() != null)
+                .switchIfEmpty(Mono.error(new BadRequestException("Only follow-up visits can be confirmed or rescheduled.")))
+                .filter(visit -> !isLessThan24HoursAway(visit.getVisitDate()))
+                .switchIfEmpty(Mono.error(new BadRequestException("A visit can't be changed less than 24 hours before it starts.")));
+    }
+
+    private boolean isLessThan24HoursAway(LocalDateTime visitDate) {
+        return visitDate.isBefore(LocalDateTime.now().plusHours(24));
+    }
+
+    /**
      * Validate if a pet exist. If it doesn't exist, returns 404 NotFound
      *
      * @param petId Pet Id to verify
@@ -540,8 +616,6 @@ public class VisitServiceImpl implements VisitService {
      * @return The email built from the message
      */
     private Mail generateVisitRequestEmail(UserDetails user, String petName, LocalDateTime visitDate) {
-
-
         return new Mail(
                 user.getEmail(), "PetClinic Visit request", "Default", "PetClinic Visit request",
                 "Dear " + user.getUsername() + ",\n" +
@@ -602,6 +676,84 @@ public class VisitServiceImpl implements VisitService {
     }
 
 
+    //Weekly email service
+    public Mono<String> sendSchedule(String vetId, LocalDate weekStart) {
+        LocalDateTime start = weekStart.atStartOfDay();
+        LocalDateTime end = weekStart.plusDays(7).atStartOfDay();
+
+        return vetsClient.getVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(
+                        new NotFoundException("No veterinarian found with vetId: " + vetId)))
+                .flatMap(vet -> {
+                    if (vet.getEmail() == null || vet.getEmail().isBlank()) {
+                        return Mono.error(new IllegalArgumentException(
+                                "The veterinarian does not have an email address."));
+                    }
+
+                    return repo.findByPractitionerIdAndVisitDateBetween(vetId, start, end)
+                            .filter(visit -> visit.getStatus() == Status.UPCOMING
+                                    || visit.getStatus() == Status.CONFIRMED)
+                            .sort(Comparator.comparing(Visit::getVisitDate))
+                            .collectList()
+                            .flatMap(visits -> sendEmail(vet, visits, weekStart));
+                });
+    }
+
+
+
+    public Mono<String> sendEmail(VetDTO vet, List<Visit> visits, LocalDate weekStart) {
+        StringBuilder body = new StringBuilder();
+        body.append("Your schedule for the week starting ")
+                .append(weekStart)
+                .append(":\n\n");
+
+        if (visits.isEmpty()) {
+            body.append("There are no appointments scheduled for this week.");
+        } else {
+            DateTimeFormatter formatter =
+                    DateTimeFormatter.ofPattern("EEEE, MMMM d 'at' h:mm a");
+
+            for (Visit visit : visits) {
+                body.append("- ")
+                        .append(visit.getVisitDate().format(formatter))
+                        .append(" | ")
+                        .append(visit.getDescription())
+                        .append(" | Status: ")
+                        .append(visit.getStatus())
+                        .append("\n\n");
+            }
+        }
+
+        Mail mail = new Mail(
+                vet.getEmail(), "Your weekly PetClinic schedule", "Default", "Your weekly schedule",
+                body.toString(), "Thank you,\nPetClinic", vet.getFirstName(), "ChamplainPetClinic@gmail.com");
+
+        return Mono.fromCallable(() -> mailService.sendMail(mail))
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+
+    @Scheduled(
+            cron = "${app.weekly-schedule-email.cron:0 0 7 * * MON}",
+            zone = "America/Toronto")
+    public void sendWeeklySchedulesAutomatically() {
+        LocalDate weekStart = LocalDate.now(ZoneId.of("America/Toronto"))
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        vetsClient.getAllVets()
+                .filter(VetDTO::isActive)
+                .concatMap(vet -> sendSchedule(vet.getVetId(), weekStart)
+                        .doOnError(error -> log.error(
+                                "Could not send schedule to vet {}",
+                                vet.getVetId(),
+                                error)
+                        )
+                        .onErrorResume(error -> Mono.empty()))
+                .subscribe();
+    }
+
+
+
     @Override
     public Mono<VisitResponseDTO> patchVisitStatusInVisit(String visitId, String status) {
         // Find the visit by the ID
@@ -622,6 +774,23 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(entityDtoUtil::toVisitResponseDTO)
                 .doOnNext(dto -> log.info("Converted to DTO with status: {}", dto.getStatus()));
     }
+
+
+    private Mono<String> generateUniqueVisitId() {
+        return Mono.defer(() -> {
+            String candidateId = IdGenerator.generateVisitId();
+
+            return repo.existsByVisitId(candidateId)
+                    .flatMap(exists -> {
+                        if (exists) {
+                            return generateUniqueVisitId();
+                        }
+
+                        return Mono.just(candidateId);
+                    });
+        });
+    }
+
 
 
 }

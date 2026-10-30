@@ -1,5 +1,6 @@
+import { CurrencyPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { form, FormField, required, min } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
@@ -16,6 +17,7 @@ import { MatSelect } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { AuthState } from '@core/services/auth-state';
+import { VISIT_PRICES } from '@features/bill/config/visit-prices';
 import { BillRequestModel } from '@features/bill/models/bill.model';
 import { Customer } from '@features/bill/models/customer.model';
 import { Veterinarian } from '@features/bill/models/vet.model';
@@ -23,6 +25,7 @@ import { BillService } from '@features/bill/services/bill-service';
 
 @Component({
   imports: [
+    CurrencyPipe,
     MatFormFieldModule,
     MatCardModule,
     MatCheckboxModule,
@@ -64,6 +67,32 @@ export class CreateBill implements OnInit {
     amount: null,
   });
 
+  protected onVisitTypeChange(visitType: string): void {
+    const selectedVisit = VISIT_PRICES.find((visit) => visit.value === visitType);
+
+    this.billRequest.update((request) => ({
+      ...request,
+      visitType,
+      amount: selectedVisit?.price ?? null,
+    }));
+  }
+
+  protected readonly priceSummary = computed(() => {
+    const amount = this.billRequest().amount ?? 0;
+
+    const subtotalCents = Math.round(amount * 100);
+
+    const gstCents = Math.round(subtotalCents * 0.05);
+    const qstCents = Math.round(subtotalCents * 0.09975);
+
+    return {
+      subtotal: subtotalCents / 100,
+      gst: gstCents / 100,
+      qst: qstCents / 100,
+      total: (subtotalCents + gstCents + qstCents) / 100,
+    };
+  });
+
   private _snackBar = inject(MatSnackBar);
 
   protected showSnackbar(message: string): void {
@@ -73,12 +102,22 @@ export class CreateBill implements OnInit {
   }
 
   protected readonly billRequestForm = form(this.billRequest, (schemaPath) => {
-    required(schemaPath.customerId, { message: 'Customer is required' });
-    required(schemaPath.visitType, { message: 'Visit Type is required' });
-    required(schemaPath.vetId, { message: 'Vet is required' });
-    required(schemaPath.date, { message: 'Date is required' });
-    required(schemaPath.amount, { message: 'Amount is required' });
-    min(schemaPath.amount, 0.01, { message: 'Amount must be greater than 0' });
+    required(schemaPath.customerId, {
+      message: $localize`:@@bill.message.custReq:Client(e) est requis(e)`,
+    });
+    required(schemaPath.visitType, {
+      message: $localize`:@@bill.message.vistReq:Type de visite est requis`,
+    });
+    required(schemaPath.vetId, {
+      message: $localize`:@@bill.message.vetReq:Vétérinaire est requis`,
+    });
+    required(schemaPath.date, { message: $localize`:@@bill.message.dateReq:La date est requise` });
+    required(schemaPath.amount, {
+      message: $localize`:@@bill.message.amtReq:Le montant est requis`,
+    });
+    min(schemaPath.amount, 0.01, {
+      message: $localize`:@@bill.message.greatAmtReq:Le montant doit être supérieur à 0`,
+    });
   });
 
   readonly dialogRef = inject(MatDialogRef<CreateBill>);
@@ -106,7 +145,7 @@ export class CreateBill implements OnInit {
     this.billService.createBill(this.billRequest(), this.sendEmail()).subscribe({
       next: (createdBill: BillRequestModel) => {
         this.dialogRef.close(createdBill);
-        this.showSnackbar('Bill created successfully!');
+        this.showSnackbar($localize`:@@bill.createBill.success:Facture créée avec succès`);
       },
       error: (error: HttpErrorResponse) => {
         this.isSubmitting = false;
@@ -123,7 +162,9 @@ export class CreateBill implements OnInit {
         next: (customer) => this.customers.update((customers) => [...customers, customer]),
         error: () => {
           this.isLoading.set(false);
-          this.errorMessage.set('Unable to load customers. Please try again later.');
+          this.errorMessage.set(
+            $localize`:@@bill.loading.unableCust:Impossible de charger la liste des clients. Veuillez réessayer plus tard.`,
+          );
           this.showSnackbar(`${this.errorMessage()}`);
         },
         complete: () => this.isLoading.set(false),
@@ -144,7 +185,9 @@ export class CreateBill implements OnInit {
         },
         error: () => {
           this.isLoading.set(false);
-          this.errorMessage.set('Unable to load veterinarians. Please try again later.');
+          this.errorMessage.set(
+            $localize`:@@bill.loading.unableVet:Impossible de charger la liste des vétérinaires. Veuillez réessayer plus tard`,
+          );
           this.showSnackbar(`${this.errorMessage()}`);
         },
         complete: () => this.isLoading.set(false),

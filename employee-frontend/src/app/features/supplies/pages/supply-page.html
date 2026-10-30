@@ -135,10 +135,10 @@
 <ng-template #nameCell let-supply>
   <div class="supply-details">
     @if (supplyPhotoUrl(supply); as photo) {
-      <img class="supply-photo" [src]="photo" [alt]="localizedSupplyName(supply.productName)" />
+      <img class="supply-photo" [src]="photo" [alt]="localizedSupplyName(supply)" />
     }
 
-    <span class="supply-name">{{ localizedSupplyName(supply.productName) }}</span>
+    <span class="supply-name">{{ localizedSupplyName(supply) }}</span>
   </div>
 </ng-template>
 
@@ -159,7 +159,33 @@
 
 <ng-template #actionsCell let-supply>
   <div class="action-buttons">
+    <button
+      type="button"
+      class="summary-button desktop-action-button"
+      (click)="openSupplySummary(supply)"
+      i18n="@@supply.actions.summary"
+    >
+      Info
+    </button>
+    <button
+      type="button"
+      class="history-button mobile-actions-button"
+      [matMenuTriggerFor]="supplyActionsMenu"
+      i18n="@@supply.fields.actions"
+    >
+      Actions
+    </button>
     @if (canManageSupplies()) {
+      @if (canRestock(supply)) {
+        <button
+          type="button"
+          class="edit-button desktop-action-button"
+          (click)="openRestock(supply)"
+          i18n="@@supply.actions.restock"
+        >
+          Réapprovisionner
+        </button>
+      }
       <button
         type="button"
         class="edit-button desktop-action-button"
@@ -193,6 +219,11 @@
         Actions
       </button>
       <mat-menu #supplyActionsMenu="matMenu">
+        @if (canRestock(supply)) {
+          <button mat-menu-item (click)="openRestock(supply)" i18n="@@supply.actions.restock">
+            Réapprovisionner
+          </button>
+        }
         <button mat-menu-item (click)="editSupply(supply)" i18n="@@supply.actions.edit">
           Modifier
         </button>
@@ -205,27 +236,104 @@
       </mat-menu>
     }
     @if (canConsumeSupplies()) {
-      <button
-        type="button"
-        class="consume-button"
-        (click)="consumeSupply(supply)"
-        [disabled]="
-          supply.productQuantity <= 0 ||
-          expirationState(supply) === 'expired' ||
-          consumingSupplyId() === supply.productId
-        "
-        [attr.aria-label]="
+      <span
+        [matTooltip]="
           supply.productQuantity <= 0
             ? cannotConsumeStockLabel
             : expirationState(supply) === 'expired'
               ? cannotConsumeExpiredLabel
-              : consumeLabel
+              : ''
+        "
+        [matTooltipDisabled]="supply.productQuantity > 0 && expirationState(supply) !== 'expired'"
+      >
+        <button
+          type="button"
+          class="consume-button"
+          (click)="consumeSupply(supply)"
+          [disabled]="
+            supply.productQuantity <= 0 ||
+            expirationState(supply) === 'expired' ||
+            consumingSupplyId() === supply.productId
+          "
+          [attr.aria-label]="
+            supply.productQuantity <= 0
+              ? cannotConsumeStockLabel
+              : expirationState(supply) === 'expired'
+                ? cannotConsumeExpiredLabel
+                : consumeLabel
+          "
+        >
+          {{ consumingSupplyId() === supply.productId ? consumingLabel : consumeButtonLabel }}
+        </button>
+      </span>
+    }
+    <mat-menu #supplyActionsMenu="matMenu">
+      <button mat-menu-item (click)="openSupplySummary(supply)" i18n="@@supply.actions.summary">
+        Info
+      </button>
+      @if (canManageSupplies()) {
+        <button mat-menu-item (click)="editSupply(supply)" i18n="@@supply.actions.edit">
+          Modifier
+        </button>
+        <button mat-menu-item (click)="deleteSupply(supply)" i18n="@@supply.actions.deleteButton">
+          Supprimer
+        </button>
+        <button mat-menu-item (click)="openSupplyHistory(supply)" i18n="@@supply.actions.history">
+          Historique
+        </button>
+      }
+    </mat-menu>
+  </div>
+</ng-template>
+
+<ng-template #restockDialog>
+  <h2 mat-dialog-title i18n="@@supply.restock.title">Réapprovisionner un article</h2>
+  <form (submit)="submitRestock($event)">
+    <mat-dialog-content>
+      @if (restockingSupply(); as supply) {
+        <p i18n="@@supply.restock.currentQuantity">
+          {{ localizedSupplyName(supply) }} — Quantité actuelle :
+          {{ supply.productQuantity }}
+        </p>
+      }
+      <label for="restockQuantity" i18n="@@supply.restock.quantity">Quantité à ajouter</label>
+      <input
+        id="restockQuantity"
+        type="number"
+        step="1"
+        [formField]="restockForm.quantity"
+        [readOnly]="restockPending()"
+      />
+      @if (restockForm.quantity().touched() && restockForm.quantity().invalid()) {
+        <p class="field-error">{{ restockForm.quantity().errors()[0]?.message }}</p>
+      }
+      @if (restockError()) {
+        <p class="field-error" role="alert">{{ restockError() }}</p>
+      }
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+      <button
+        type="button"
+        class="dialog-cancel-button"
+        [disabled]="restockPending()"
+        (click)="cancelRestock()"
+        i18n="@@supply.restock.cancel"
+      >
+        Annuler
+      </button>
+      <button
+        type="submit"
+        class="restock-submit-button"
+        [disabled]="
+          restockPending() ||
+          !canManageSupplies() ||
+          uncertainRestocks().has(restockingSupply()?.productId ?? '')
         "
       >
-        {{ consumingSupplyId() === supply.productId ? consumingLabel : consumeButtonLabel }}
+        {{ restockPending() ? restockAddingLabel : restockAddLabel }}
       </button>
-    }
-  </div>
+    </mat-dialog-actions>
+  </form>
 </ng-template>
 
 <ng-template #expirationCell let-supply>

@@ -7,20 +7,26 @@
     <p role="alert">{{ error() }}</p>
     <button type="button" (click)="retry()" i18n="@@vets.actions.retry">Réessayer</button>
   } @else if (vet(); as veterinarian) {
+    @if (warning()) {
+      <p class="warning" role="alert">{{ warning() }}</p>
+    }
     @if (saved()) {
       <p class="success" role="status" i18n="@@vets.detail.saved">Le profil a été enregistré.</p>
     }
     @if (editing() && canEdit()) {
       <app-vet-edit-form
         [vet]="veterinarian"
+        [availableSpecialties]="availableSpecialties"
         [saving]="saving()"
         [error]="saveError()"
+        [visits]="visits()"
+        [visitsChecked]="visitsStatus() === 'ready'"
         (submitted)="save($event)"
         (cancelled)="cancel()"
       />
     } @else {
       @if (profile(); as displayProfile) {
-        <app-vet-profile-card [vet]="displayProfile" />
+        <app-vet-profile-card [vet]="displayProfile" , [educations]="educations()" />
       }
       @if (canEdit()) {
         <button class="edit-button" type="button" (click)="edit()" i18n="@@vets.actions.edit">

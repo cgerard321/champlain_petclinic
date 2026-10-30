@@ -10,6 +10,8 @@ import { CustomerResponseModel } from '../models/CustomerResponseModel.ts';
 import { UserDetailsModel } from '../models/UserDetailsModel';
 import { useUsernameValidation } from '../hooks/useUsernameValidation';
 import './UpdateCustomerForm.css';
+import AddressAutocomplete from './AddressAutocomplete';
+import { AddressSuggestionModel } from '../models/AddressSuggestionModel';
 
 const provincesOfCanada = [
   'Alberta',
@@ -101,6 +103,15 @@ const AdminUpdateCustomerForm: FC = () => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleAddressSelect = (suggestion: AddressSuggestionModel): void => {
+    setFormData({
+      ...formData,
+      address: suggestion.address,
+      city: suggestion.city,
+      province: suggestion.province,
     });
   };
 
@@ -209,11 +220,10 @@ const AdminUpdateCustomerForm: FC = () => {
         {errors.lastName && <span className="error">{t(errors.lastName)}</span>}
         <br />
         <label>{t('fields.address')} </label>
-        <input
-          type="text"
-          name="address"
+        <AddressAutocomplete
           value={formData.address}
           onChange={handleChange}
+          onSelect={handleAddressSelect}
         />
         {errors.address && <span className="error">{t(errors.address)}</span>}
         <br />

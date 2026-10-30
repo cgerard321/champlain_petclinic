@@ -1,5 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 
+import { VetEducationResponse } from '@features/vets/models/vet-api.model';
+import { specialtyLabel } from '@features/vets/models/vet-profile.mapper';
 import { VetProfile } from '@features/vets/models/vet-profile.model';
 
 @Component({
@@ -9,6 +11,8 @@ import { VetProfile } from '@features/vets/models/vet-profile.model';
 })
 export class VetProfileCard {
   readonly vet = input.required<VetProfile>();
+  readonly educations = input<readonly VetEducationResponse[]>([]);
+  protected readonly specialtyLabel = specialtyLabel;
   protected readonly initials = computed(() => {
     const { firstName, lastName } = this.vet();
     return `${firstName.trim().charAt(0)}${lastName.trim().charAt(0)}`.toLocaleUpperCase();

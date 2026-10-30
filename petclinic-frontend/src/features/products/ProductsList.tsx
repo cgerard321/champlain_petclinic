@@ -1,8 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import {
-  localizedProduct,
-  normalizeProductSearch,
-} from '@/features/products/utils/localizedProduct';
+import { matchesFilters } from '@/features/products/utils/productFilters';
 import * as React from 'react';
 import { useState, useEffect, useCallback, useMemo, useRef, JSX } from 'react';
 import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
@@ -20,7 +17,10 @@ import ProductBundle from './components/ProductBundle';
 import './components/Image.css';
 //import ProductSearch from './components/ProductSearch';
 import Reveal from '@/shared/components/animations/Reveal';
-import { loadRecentlyViewed } from './utils/recentlyViewed';
+import {
+  addProductToRecentlyViewed,
+  loadRecentlyViewed,
+} from './utils/recentlyViewed';
 
 const CATALOG_PAGE_SIZE = 8;
 
@@ -35,8 +35,10 @@ interface ProductsListProps {
     maxStars?: number;
     deliveryType?: string;
     productType?: string;
+    availability?: string;
   };
   sortCriteria?: string;
+  onClearFilters?: () => void;
 }
 
 const ProductList = function Productlist({
@@ -44,6 +46,7 @@ const ProductList = function Productlist({
   view,
   filters,
   sortCriteria,
+  onClearFilters,
 }: ProductsListProps): JSX.Element {
   const { t, i18n } = useTranslation('products');
   const language = i18n.resolvedLanguage || i18n.language || 'en';
@@ -77,7 +80,7 @@ const ProductList = function Productlist({
         filters.minStars,
         filters.maxStars,
         filters.deliveryType ?? '',
-        filters.productType ?? ''
+        filters.productType?.includes(',') ? '' : filters.productType ?? ''
       );
       const visible = list.filter(p => !p.isUnlisted);
       setProductList(visible);
@@ -133,25 +136,12 @@ const ProductList = function Productlist({
         break;
     }
 
-    if (searchQuery === '') {
-      setFilteredList(sorted);
-    } else {
-      const query = normalizeProductSearch(searchQuery);
-      setFilteredList(
-        sorted.filter(
-          p =>
-            normalizeProductSearch(localizedProduct(p, language).name).includes(
-              query
-            ) ||
-            normalizeProductSearch(
-              t(`types.${(p.productType || '').toUpperCase()}`, {
-                defaultValue: p.productType || '',
-              })
-            ).includes(query)
-        )
-      );
-    }
-  }, [sortCriteria, productList, searchQuery, language, t]);
+    setFilteredList(
+      sorted.filter(product =>
+        matchesFilters(product, filters, { query: searchQuery, language, t })
+      )
+    );
+  }, [sortCriteria, productList, searchQuery, language, t, filters]);
 
   const totalPages = Math.ceil(filteredList.length / CATALOG_PAGE_SIZE);
   const firstVisibleProduct = currentPage * CATALOG_PAGE_SIZE + 1;
@@ -165,6 +155,17 @@ const ProductList = function Productlist({
     return filteredList.slice(startIndex, startIndex + CATALOG_PAGE_SIZE);
   }, [currentPage, filteredList]);
 
+  const visiblePageNumbers = useMemo(() => {
+    const firstPage = Math.max(
+      0,
+      Math.min(currentPage - 2, Math.max(totalPages - 5, 0))
+    );
+    return Array.from(
+      { length: Math.min(totalPages, 5) },
+      (_, index) => firstPage + index
+    );
+  }, [currentPage, totalPages]);
+
   useEffect(() => {
     setCurrentPage(0);
   }, [filters, searchQuery, sortCriteria]);
@@ -174,52 +175,48 @@ const ProductList = function Productlist({
   }, [totalPages]);
 
   const handleProductClick = (product: ProductModel): void => {
+    addProductToRecentlyViewed(product, user.userId);
+
     setRecentlyClickedProducts(prev => {
       const updated = prev.filter(p => p.productId !== product.productId);
       updated.unshift(product);
-      if (updated.length > 5) updated.pop();
-      localStorage.setItem(
-        `recentlyClickedProducts_${user.userId}`,
-        JSON.stringify(updated)
-      );
-      return updated;
+      return updated.slice(0, 5);
     });
   };
 
-  const RecentlyViewedProducts = (): JSX.Element => (
-    <Reveal delay={80}>
-      <div className="products-section-container ">
-        <h2 className="section-title category-title">{t('recent')}</h2>
-        <div className="recently-viewed-flex">
-          {recentlyClickedProducts.length > 0 ? (
-            recentlyClickedProducts
-              .filter(p => !p.isUnlisted)
-              .map((p, i) => (
-                <Reveal key={p.productId} delay={i * 60 + 120}>
-                  <Product product={p} />
-                </Reveal>
-              ))
-          ) : (
-            <p>{t('noRecent')}</p>
-          )}
-        </div>
-      </div>
-    </Reveal>
-  );
   return (
     <div className="product-list-container">
       <div className="main-content">
         {view === 'catalog' && (
           <Reveal delay={80}>
             <div ref={catalogRef} className="products-section-container ">
-              <h2 className="section-title category-title">{t('catalog')}</h2>
+              <div className="shop-section-heading">
+                <div>
+                  <h2 className="section-title category-title">
+                    {t('catalog')}
+                  </h2>
+                  <p>{t('catalogHint')}</p>
+                </div>
+                {!isLoading && (
+                  <span>
+                    {t('productCount', { count: filteredList.length })}
+                  </span>
+                )}
+              </div>
               {isLoading ? (
-                <div className="products-loading-state">
-                  <span
-                    className="image-loading-spinner"
-                    role="status"
-                    aria-label={t('loading')}
-                  />
+                <div
+                  className="grid catalog-grid products-loading-grid"
+                  role="status"
+                  aria-label={t('loading')}
+                >
+                  {Array.from({ length: CATALOG_PAGE_SIZE }, (_, index) => (
+                    <div className="product-card-skeleton" key={index}>
+                      <span className="skeleton-image" />
+                      <span className="skeleton-line skeleton-line-title" />
+                      <span className="skeleton-line skeleton-line-short" />
+                      <span className="skeleton-line skeleton-line-button" />
+                    </div>
+                  ))}
                 </div>
               ) : filteredList.length > 0 ? (
                 <div className="grid catalog-grid">
@@ -232,48 +229,86 @@ const ProductList = function Productlist({
                               current => current.productId === p.productId
                             ) ?? p
                           }
+                          recentlyViewed={recentlyClickedProducts.some(
+                            recentlyViewedProduct =>
+                              recentlyViewedProduct.productId === p.productId
+                          )}
                         />
                       </div>
                     </Reveal>
                   ))}
                 </div>
               ) : (
-                <p style={{ textAlign: 'center', margin: '40px 0' }}>
-                  {t('noItems')}
-                </p>
+                <div className="no-products-results">
+                  <p>
+                    {filters.availability ||
+                    filters.minPrice !== undefined ||
+                    filters.maxPrice !== undefined ||
+                    filters.deliveryType ||
+                    filters.productType ||
+                    (filters.minStars ?? 0) > 0 ||
+                    (filters.maxStars ?? 5) < 5
+                      ? t('noFilteredItems')
+                      : t('noItems')}
+                  </p>
+                  {onClearFilters && (
+                    <button type="button" onClick={onClearFilters}>
+                      {t('clearFilters')}
+                    </button>
+                  )}
+                </div>
               )}
               {!isLoading && filteredList.length > 0 && (
                 <div className="catalog-pagination-container">
                   <nav
                     className="catalog-pagination"
-                    aria-label="Product pages"
+                    aria-label={t('productPages')}
                   >
                     <button
                       type="button"
                       className="catalog-pagination-button"
                       onClick={() => handlePageChange(-1)}
                       disabled={currentPage === 0}
-                      aria-label="Previous product page"
-                      title="Previous page"
+                      aria-label={t('previousProductPage')}
+                      title={t('previousPage')}
                     >
                       <span aria-hidden="true">&lsaquo;</span>
                     </button>
 
-                    <span
-                      className="catalog-page-number active"
-                      aria-current="page"
-                      aria-label={`Current product page ${currentPage + 1}`}
-                    >
-                      {currentPage + 1}
-                    </span>
+                    {visiblePageNumbers.map(pageNumber => (
+                      <button
+                        type="button"
+                        key={pageNumber}
+                        className={`catalog-page-number${pageNumber === currentPage ? ' active' : ''}`}
+                        aria-current={
+                          pageNumber === currentPage ? 'page' : undefined
+                        }
+                        aria-label={t('currentProductPage', {
+                          count: pageNumber + 1,
+                        })}
+                        onClick={() => {
+                          setCurrentPage(pageNumber);
+                          catalogRef.current?.scrollIntoView({
+                            behavior: window.matchMedia(
+                              '(prefers-reduced-motion: reduce)'
+                            ).matches
+                              ? 'instant'
+                              : 'smooth',
+                            block: 'start',
+                          });
+                        }}
+                      >
+                        {pageNumber + 1}
+                      </button>
+                    ))}
 
                     <button
                       type="button"
                       className="catalog-pagination-button"
                       onClick={() => handlePageChange(1)}
                       disabled={currentPage + 1 >= totalPages}
-                      aria-label="Next product page"
-                      title="Next page"
+                      aria-label={t('nextProductPage')}
+                      title={t('nextPage')}
                     >
                       <span aria-hidden="true">&rsaquo;</span>
                     </button>
@@ -295,8 +330,13 @@ const ProductList = function Productlist({
         {view === 'extras' && (
           <>
             <Reveal delay={80}>
-              <div className="products-section-container ">
-                <h2 className="section-title">{t('bundles')}</h2>
+              <div className="products-section-container shop-bundles-section">
+                <div className="shop-section-heading">
+                  <div>
+                    <h2 className="section-title">{t('bundles')}</h2>
+                    <p>{t('bundlesHint')}</p>
+                  </div>
+                </div>
                 <div className="grid product-bundles-grid">
                   {bundleList.length > 0 ? (
                     bundleList.map((b, i) => (
@@ -310,10 +350,6 @@ const ProductList = function Productlist({
                 </div>
               </div>
             </Reveal>
-            <div>
-              <hr />
-            </div>
-            <RecentlyViewedProducts />
           </>
         )}
       </div>

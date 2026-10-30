@@ -1,0 +1,180 @@
+<div class="dialog-header">
+  <h2 mat-dialog-title class="dialog-title" i18n="@@products.bundles.update.title">
+    Modifier l'ensemble
+  </h2>
+  <button
+    class="dialog-close-button"
+    mat-icon-button
+    mat-dialog-close
+    type="button"
+    aria-label="Fermer la boîte de dialogue de modification d'un ensemble"
+    i18n-aria-label="@@products.bundles.update.close"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<form class="bundle-form" (submit)="submit($event)">
+  <mat-dialog-content>
+    @if (errorMessage(); as message) {
+      <div class="error-message" role="alert">
+        <mat-icon class="error-icon" aria-hidden="true">error_outline</mat-icon>
+        <span>{{ message }}</span>
+      </div>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label i18n="@@products.bundles.fields.name">Nom de l'ensemble</mat-label>
+      <input matInput type="text" [formField]="bundleForm.bundleName" />
+      @if (bundleForm.bundleName().touched() && bundleForm.bundleName().invalid()) {
+        <mat-error>{{ bundleForm.bundleName().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label i18n="@@products.bundles.fields.description">Description</mat-label>
+      <textarea matInput rows="4" [formField]="bundleForm.bundleDescription"></textarea>
+      @if (bundleForm.bundleDescription().touched() && bundleForm.bundleDescription().invalid()) {
+        <mat-error>{{ bundleForm.bundleDescription().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label i18n="@@products.bundles.fields.items">Articles</mat-label>
+      <mat-chip-grid
+        aria-label="Articles de l'ensemble"
+        i18n-aria-label="@@products.bundles.fields.items"
+        [errorStateMatcher]="itemsErrorStateMatcher"
+      >
+        @for (productId of selectedProductIds(); track productId) {
+          <mat-chip-row (removed)="removeProduct(productId)">
+            {{ productName(productId) }}
+            <button
+              matChipRemove
+              type="button"
+              aria-label="Retirer l'article"
+              i18n-aria-label="@@products.bundles.actions.removeItem"
+            >
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip-row>
+        }
+      </mat-chip-grid>
+      <button
+        mat-button
+        matSuffix
+        type="button"
+        (click)="openProductSelector()"
+        i18n="@@products.bundles.actions.addItems"
+      >
+        Ajouter des articles
+      </button>
+      @if (bundleForm.productIds().touched() && bundleForm.productIds().invalid()) {
+        <mat-error>{{ bundleForm.productIds().errors()[0]?.message }}</mat-error>
+      }
+    </mat-form-field>
+
+    @if (selectedProductIds().size > 0) {
+      <section class="discount-section">
+        <h3 class="section-title" i18n="@@products.bundles.discount.title">Rabais de l'ensemble</h3>
+        <mat-tab-group
+          (selectedTabChange)="handleTabChangeBundleDiscount($event, percentageTab)"
+          [(selectedIndex)]="selectedTabIndex"
+        >
+          <mat-tab
+            label="Pourcentage"
+            i18n-label="@@products.bundles.discount.percentage"
+            #percentageTab
+          >
+            <mat-form-field appearance="outline" class="discount-field">
+              <mat-label i18n="@@products.bundles.discount.percentageLabel"
+                >Pourcentage de rabais</mat-label
+              >
+              <input
+                #percentageInput
+                matInput
+                type="number"
+                min="1"
+                max="100"
+                step="1"
+                value="{{ discountPercentage() }}"
+                [errorStateMatcher]="percentageErrorStateMatcher"
+                (input)="handlePercentageBundlePrice($event)"
+              />
+              <span matTextSuffix>%</span>
+              @if (percentageError(); as error) {
+                <mat-error>{{ error }}</mat-error>
+              }
+            </mat-form-field>
+          </mat-tab>
+          <mat-tab label="Manuel" i18n-label="@@products.bundles.discount.manual">
+            <mat-form-field appearance="outline" class="discount-field">
+              <mat-label i18n="@@products.bundles.fields.bundlePrice">Prix de l'ensemble</mat-label>
+              <span matTextPrefix>$&nbsp;</span>
+              <input
+                #manualInput
+                matInput
+                type="number"
+                min="0"
+                step="0.01"
+                value="{{ discountManual() }}"
+                max="{{ getBundleOriginalPrice() }}"
+                [errorStateMatcher]="manualErrorStateMatcher"
+                (input)="handleManualBundlePrice($event)"
+              />
+              @if (manualError(); as error) {
+                <mat-error>{{ error }}</mat-error>
+              }
+            </mat-form-field>
+          </mat-tab>
+        </mat-tab-group>
+      </section>
+
+      <dl class="price-summary">
+        <div>
+          <dt i18n="@@products.bundles.fields.originalPrice">Prix original</dt>
+          <dd [class.original-price]="bundlePriceDisplay() !== null">
+            {{ getBundleOriginalPrice() | currency }}
+          </dd>
+        </div>
+        <div>
+          <dt i18n="@@products.bundles.fields.bundlePrice">Prix de l'ensemble</dt>
+          <dd class="bundle-price">
+            @if (bundlePriceDisplay(); as price) {
+              {{ price | currency }}
+            } @else {
+              <span class="price-placeholder" i18n="@@products.bundles.discount.enter"
+                >Saisissez un rabais</span
+              >
+            }
+          </dd>
+        </div>
+        @if (bundleSavings(); as savings) {
+          <div class="savings">
+            <dt i18n="@@products.bundles.discount.savings">Économies du client</dt>
+            <dd>{{ savings | currency }}</dd>
+          </div>
+        }
+      </dl>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button
+      mat-button
+      type="button"
+      [disabled]="isSubmitting()"
+      (click)="cancel()"
+      i18n="@@products.actions.cancel"
+    >
+      Annuler
+    </button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="isSubmitting()">
+      @if (isSubmitting()) {
+        <mat-progress-spinner diameter="20" mode="indeterminate" />
+      } @else {
+        <ng-container i18n="@@products.bundles.actions.update">Modifier l'ensemble</ng-container>
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

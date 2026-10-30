@@ -1,0 +1,29 @@
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.message {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.note-field {
+  width: 100%;
+}
+
+.error-message {
+  margin: 0;
+  color: var(--mat-sys-error, #b00020);
+}
+
+mat-dialog-actions {
+  gap: 8px;
+  padding: 12px 24px 20px;
+}
+
+.reject-button {
+  background: var(--mat-sys-error, #b00020);
+  color: var(--mat-sys-on-error, #fff);
+}

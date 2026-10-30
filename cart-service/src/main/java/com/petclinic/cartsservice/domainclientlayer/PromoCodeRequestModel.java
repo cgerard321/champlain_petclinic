@@ -22,4 +22,11 @@ public class PromoCodeRequestModel {
 
     private Boolean active;
 
+    private FileRequestDTO image;
+    private boolean removeImage;
+
+    private String scope;
+    private java.util.List<String> productIds;
+    private java.util.List<String> productTypes;
+
 }

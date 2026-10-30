@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -35,6 +37,8 @@ public class PromoCodeController {
     public Mono<ResponseEntity<PromoCodeResponseDTO>> createPromoCode(@RequestBody PromoCodeRequestDTO promoCodeRequestDTO
     ) {
         return cartServiceClient.createPromoCode(promoCodeRequestDTO)
+                .onErrorMap(WebClientResponseException.class, ex -> new ResponseStatusException(
+                        ex.getStatusCode(), "Could not save promotion. Verify its details and image, then try again.", ex))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -44,6 +48,8 @@ public class PromoCodeController {
     public Mono<ResponseEntity<PromoCodeResponseDTO>> updatePromoCode(@RequestBody PromoCodeRequestDTO promoCodeRequestDTO,
                                                                       @PathVariable String promoCodeId) {
         return cartServiceClient.updatePromoCode(promoCodeId, promoCodeRequestDTO)
+                .onErrorMap(WebClientResponseException.class, ex -> new ResponseStatusException(
+                        ex.getStatusCode(), "Could not save promotion. Verify its details and image, then try again.", ex))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

@@ -345,8 +345,9 @@ class CartControllerUnitTest {
         verify(cartService, times(1)).addProductToCart(anyString(), any(CartItemRequestModel.class));
     }
 
+
     @Test
-    void whenCheckoutCart_thenReturnCartResponseModel() {
+    void whenCheckoutCartWithStripe_thenReturnCartResponseModel() {
         // Arrange
         String stripeSessionId = "stripeId";
 
@@ -361,16 +362,13 @@ class CartControllerUnitTest {
                 .customerId("1")
                 .products(new ArrayList<>())
                 .build();
-
-        when(cartService.checkoutCart(cart.getCartId(), stripeSessionId))
-                .thenReturn(Mono.just(cartResponseModel));
-
+      when(cartService.checkoutCart(cart.getCartId(), stripeSessionId))
+        .thenReturn(Mono.just(cartResponseModel));
         // Act & Assert
         webTestClient
                 .post()
-                .uri("/api/v1/carts/" + cart.getCartId()
-                        + "/checkout?stripeSessionId=" + stripeSessionId)
-                .accept(MediaType.APPLICATION_JSON)
+         .uri("/api/v1/carts/" + cart.getCartId() + "/checkout/stripe?stripeSessionId=" + stripeSessionId)
+         .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -380,11 +378,69 @@ class CartControllerUnitTest {
                     assertEquals(cart.getCustomerId(), response.getCustomerId());
                     assertEquals(0, response.getProducts().size());
                 });
-
-        // Verify
+      // Verify
         verify(cartService, times(1))
                 .checkoutCart(cart.getCartId(), stripeSessionId);
     }
+
+
+      
+    @Test
+    void whenCheckoutCart_thenReturnCartResponseModel() {
+        // Arrange
+        String stripeSessionId = "stripeId";
+
+        Cart cart = Cart.builder()
+                .cartId(VALID_CART_ID)
+                .products(products)
+                .customerId("1")
+                .build();
+
+        BillingRequestModel billing = new BillingRequestModel();
+        billing.setCity("Montreal");
+        billing.setProvince("Quebec");
+        billing.setPostalCode("H1A 1A1");
+        billing.setEmail("customer@example.com");
+
+        CartResponseModel cartResponseModel = CartResponseModel.builder()
+                .cartId(cart.getCartId())
+                .customerId("1")
+                .products(new ArrayList<>())
+                .build();
+        when(cartService.checkoutCart(
+                eq(cart.getCartId()),
+                any(BillingRequestModel.class)))
+           .thenReturn(Mono.just(cartResponseModel));
+        // Act & Assert
+        webTestClient
+                .post()
+          .uri("/api/v1/carts/" + cart.getCartId() + "/checkout")
+                .contentType(MediaType.APPLICATION_JSON)
+           .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(billing)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CartResponseModel.class)
+                .value(response -> {
+                    assertEquals(cart.getCartId(), response.getCartId());
+                    assertEquals(cart.getCustomerId(), response.getCustomerId());
+                    assertEquals(0, response.getProducts().size());
+                });
+        //Verify
+        ArgumentCaptor<BillingRequestModel> billingCaptor =
+                ArgumentCaptor.forClass(BillingRequestModel.class);
+        verify(cartService).checkoutCart(
+                eq(cart.getCartId()),
+                billingCaptor.capture()
+        );
+        BillingRequestModel capturedBilling = billingCaptor.getValue();
+        assertEquals("Montreal", capturedBilling.getCity());
+        assertEquals("Quebec", capturedBilling.getProvince());
+        assertEquals("H1A 1A1", capturedBilling.getPostalCode());
+        assertEquals("customer@example.com", capturedBilling.getEmail());
+    }
+
 
     @Test
     void whenAddProductToCart_OutOfStock_ThrowsBadRequest() {
@@ -915,12 +971,12 @@ class CartControllerUnitTest {
                 .promoPercent(15.0)
                 .build();
 
-        when(cartService.applyPromoToCart(cartId, 15.0)).thenReturn(Mono.just(response));
+        when(cartService.applyPromoCodeToCart(cartId, "SAVE15")).thenReturn(Mono.just(response));
 
         webTestClient.put()
                 .uri("/api/v1/carts/" + cartId + "/promo")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(new CartPromoRequestModel(15.0))
+                .bodyValue(new CartPromoRequestModel("SAVE15"))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(CartResponseModel.class)
@@ -929,7 +985,7 @@ class CartControllerUnitTest {
                     assertEquals(15.0, result.getPromoPercent());
                 });
 
-        verify(cartService).applyPromoToCart(cartId, 15.0);
+        verify(cartService).applyPromoCodeToCart(cartId, "SAVE15");
     }
 
     @Test
@@ -941,13 +997,13 @@ class CartControllerUnitTest {
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
 
-        verify(cartService, never()).applyPromoToCart(anyString(), any());
+        verify(cartService, never()).clearPromoFromCart(anyString());
     }
 
     @Test
     void clearPromoFromCart_success() {
         String cartId = VALID_CART_ID;
-        when(cartService.applyPromoToCart(cartId, null)).thenReturn(Mono.just(new CartResponseModel()));
+        when(cartService.clearPromoFromCart(cartId)).thenReturn(Mono.just(new CartResponseModel()));
 
         webTestClient.delete()
                 .uri("/api/v1/carts/" + cartId + "/promo")
@@ -955,7 +1011,7 @@ class CartControllerUnitTest {
                 .expectStatus().isNoContent()
                 .expectBody().isEmpty();
 
-        verify(cartService).applyPromoToCart(cartId, null);
+        verify(cartService).clearPromoFromCart(cartId);
     }
 
     @Test
@@ -1075,5 +1131,14 @@ class CartControllerUnitTest {
     }
 
 
+
+    @Test
+    void customerCannotSubmitArbitraryPercentage() {
+        webTestClient.put().uri("/api/v1/carts/" + VALID_CART_ID + "/promo")
+                .contentType(MediaType.APPLICATION_JSON).bodyValue(java.util.Map.of("promoPercent", 100))
+                .exchange().expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
+        verify(cartService, never()).applyPromoCodeToCart(anyString(), any());
+        verify(cartService, never()).clearPromoFromCart(anyString());
+    }
 
 }

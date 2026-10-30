@@ -36,11 +36,27 @@ CREATE TABLE IF NOT EXISTS product_ratings
     customer_id VARCHAR(36) NOT NULL,
     rating      SMALLINT,
     review      TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    quality_rating          SMALLINT,
+    value_rating            SMALLINT,
+    pet_satisfaction_rating SMALLINT,
+    ingredients_rating      SMALLINT
 );
 
 ALTER TABLE product_ratings
 ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE product_ratings
+ADD COLUMN IF NOT EXISTS quality_rating SMALLINT;
+
+ALTER TABLE product_ratings
+ADD COLUMN IF NOT EXISTS value_rating SMALLINT;
+
+ALTER TABLE product_ratings
+ADD COLUMN IF NOT EXISTS pet_satisfaction_rating SMALLINT;
+
+ALTER TABLE product_ratings
+ADD COLUMN IF NOT EXISTS ingredients_rating SMALLINT;
 
 UPDATE product_ratings
 SET created_at = CURRENT_TIMESTAMP
@@ -86,4 +102,11 @@ CREATE TABLE IF NOT EXISTS images
     image_name TEXT,
     image_type TEXT,
     image_data BYTEA
+);
+
+-- CPC-2024: durable migration journal. Never delete original images on a failed run.
+CREATE TABLE IF NOT EXISTS product_image_migration (
+    legacy_image_id TEXT PRIMARY KEY,
+    file_id VARCHAR(36) UNIQUE,
+    state VARCHAR(16) NOT NULL CHECK (state IN ('PENDING', 'UPLOADING', 'UPLOADED', 'VERIFIED'))
 );
