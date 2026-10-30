@@ -9,6 +9,25 @@
     </p>
   </header>
 
+  @if (canCreate()) {
+    @if (adding()) {
+      <app-vet-create-form (completed)="created()" (cancelled)="adding.set(false)" />
+    } @else {
+      <button
+        type="button"
+        class="add-vet-button"
+        (click)="adding.set(true); added.set(false)"
+        i18n="@@vets.create.title"
+      >
+        Ajouter un vétérinaire
+      </button>
+    }
+  }
+
+  @if (added()) {
+    <p role="status" i18n="@@vets.create.success">Le vétérinaire a été créé avec succès.</p>
+  }
+
   @if (deleteError()) {
     <p class="delete-message delete-error" role="alert">
       {{ deleteError() }}
@@ -68,7 +87,7 @@
             class="profile-link"
             [routerLink]="['/vets', vet.vetId]"
             i18n="@@vets.actions.open_profile"
-            >Voir le profil de {{ vet.firstName }} {{ vet.lastName }}</a
+          >Voir le profil de {{ vet.firstName }} {{ vet.lastName }}</a
           >
           @if (isAdmin()) {
             <button

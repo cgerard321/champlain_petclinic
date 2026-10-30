@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, output } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { provideRouter, Router, RouterLink } from '@angular/router';
@@ -10,7 +10,7 @@ import { of } from 'rxjs';
 import { vi } from 'vitest';
 
 import { AuthState } from '@core/services/auth-state';
-import { VetResponse } from '@features/vets/models/vet-api.model';
+import { VetEducationResponse, VetResponse } from '@features/vets/models/vet-api.model';
 import { VetProfile } from '@features/vets/models/vet-profile.model';
 import { VetList } from '@features/vets/pages/vet-list/vet-list';
 import { Veterinarians } from '@features/vets/pages/veterinarians/veterinarians';
@@ -36,9 +36,27 @@ import { VetService } from '@features/vets/services/vet.service';
   `,
 })
 class MockVetProfileCard {
-  // Test-only compatibility: preserve the decorator-based input for Vitest routing tests.
+  // Test-only compatibility for the required vet input.
   // eslint-disable-next-line @angular-eslint/prefer-signals
   @Input({ required: true }) vet!: VetProfile;
+
+  // Accept the education data passed by VetList.
+  // eslint-disable-next-line @angular-eslint/prefer-signals
+  @Input() educations: VetEducationResponse[] = [];
+}
+
+/**
+ * Test-only replacement for VetCreateForm.
+ * Preserves the output events used by the real VetList template.
+ */
+@Component({
+  selector: 'app-vet-create-form',
+  standalone: true,
+  template: '',
+})
+class MockVetCreateForm {
+  readonly completed = output<void>();
+  readonly cancelled = output<void>();
 }
 
 describe('Veterinarian directory navigation', () => {
@@ -65,7 +83,6 @@ describe('Veterinarian directory navigation', () => {
             children: routes,
           },
         ]),
-
         {
           provide: VetService,
           useValue: {
@@ -86,19 +103,14 @@ describe('Veterinarian directory navigation', () => {
                   specialties: [],
                 })),
               ),
-
-            // Required by VetList after education integration.
-            getEducations: () => of([]),
           },
         },
-
         {
           provide: AuthState,
           useValue: {
             hasRole: vi.fn().mockReturnValue(false),
           },
         },
-
         {
           provide: MatDialog,
           useValue: {
@@ -107,7 +119,6 @@ describe('Veterinarian directory navigation', () => {
         },
       ],
     })
-
       /**
        * Use the real Veterinarians landing-page HTML.
        */
@@ -119,21 +130,20 @@ describe('Veterinarian directory navigation', () => {
           styles: [],
         },
       })
-
       /**
        * Use the real VetList HTML, but replace its
-       * VetProfileCard dependency with a test-only component.
+       * VetProfileCard and VetCreateForm dependencies
+       * with test-only components.
        */
       .overrideComponent(VetList, {
         set: {
-          imports: [RouterLink, MockVetProfileCard],
+          imports: [RouterLink, MockVetProfileCard, MockVetCreateForm],
           templateUrl: undefined,
           styleUrl: undefined,
           template: vetListTemplate,
           styles: [],
         },
       })
-
       .compileComponents();
   });
 

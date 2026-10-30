@@ -111,6 +111,82 @@
   text-transform: capitalize;
 }
 
+/*
+ * Dark mode
+ * Match the theme used by bill.css.
+ */
+:host-context(.dark-mode) {
+  .bill-smart-search {
+    border: 1px solid rgb(255 255 255 / 12%);
+    background: var(--mat-sys-surface-container);
+  }
+
+  .bill-smart-search > label {
+    color: #e0e0e0;
+  }
+
+  .bill-smart-search input {
+    border: 1px solid #315842;
+    background: var(--mat-sys-surface-container-lowest);
+    color: #fff;
+    color-scheme: dark;
+  }
+
+  .bill-smart-search input::placeholder {
+    color: #aeb9b0;
+    opacity: 1;
+  }
+
+  .bill-smart-search input:focus-visible {
+    border-color: #8dbb8f;
+    outline: 3px solid #8dbb8f;
+    outline-offset: 2px;
+  }
+
+  .bill-smart-search__clear {
+    color: #8dbb8f;
+  }
+
+  .bill-smart-search__clear:hover {
+    color: #fff;
+  }
+
+  .bill-search-suggestions {
+    border: 1px solid #315842;
+    background: var(--mat-sys-surface-container-highest);
+    box-shadow: 0 8px 18px rgb(0 0 0 / 35%);
+  }
+
+  .bill-search-suggestion {
+    color: #fff;
+  }
+
+  .bill-search-suggestion:hover,
+  .bill-search-suggestion:focus-visible {
+    background: #315842;
+  }
+
+  .bill-search-suggestion small {
+    color: #b7cbbd;
+  }
+
+  .bill-smart-search__controls .bill-secondary-action {
+    border: 1px solid #315842;
+    background: var(--mat-sys-surface-container-highest);
+    color: #8dbb8f;
+  }
+
+  .bill-smart-search__controls .bill-secondary-action:hover:not(:disabled) {
+    background: #315842;
+    color: #fff;
+  }
+
+  .bill-smart-search__controls .bill-secondary-action:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
 @media (width <= 640px) {
   .bill-smart-search__controls {
     flex-direction: column;
