@@ -1,24 +1,17 @@
-
-import { Component, DestroyRef, inject, signal, computed } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { filter, switchMap } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
-import {
-  ConfirmDialog,
-  ConfirmDialogData,
-} from '@shared/components/confirm-dialog/confirm-dialog';
-import { Roles } from '@shared/models/roles';
 import { VetProfileCard } from '@features/vets/components/vet-profile-card/vet-profile-card';
 import { VetEducationResponse } from '@features/vets/models/vet-api.model';
 import { toVetProfile } from '@features/vets/models/vet-profile.mapper';
 import { VetProfile } from '@features/vets/models/vet-profile.model';
-import {
-  VetService,
-  vetErrorMessage,
-} from '@features/vets/services/vet.service';
+import { VetService, vetErrorMessage } from '@features/vets/services/vet.service';
+import { ConfirmDialog, ConfirmDialogData } from '@shared/components/confirm-dialog/confirm-dialog';
+import { Roles } from '@shared/models/roles';
 
 @Component({
   selector: 'app-vet-list',
@@ -42,14 +35,10 @@ export class VetList {
   protected readonly selectedSpecialty = signal('');
   protected readonly educationsByVet = signal<Partial<Record<string, VetEducationResponse[]>>>({});
 
-  protected readonly isAdmin = computed(() =>
-    this.auth.hasRole(Roles.admin),
-  );
+  protected readonly isAdmin = computed(() => this.auth.hasRole(Roles.admin));
 
   protected readonly specialties = computed(() => {
-    return Array.from(
-      new Set(this.vets().flatMap((vet) => vet.specialties)),
-    ).sort();
+    return Array.from(new Set(this.vets().flatMap((vet) => vet.specialties))).sort();
   });
 
   protected readonly filteredVets = computed(() => {
@@ -57,12 +46,8 @@ export class VetList {
     const specialty = this.selectedSpecialty();
 
     return this.vets().filter((vet) => {
-      const matchesName = `${vet.firstName} ${vet.lastName}`
-        .toLowerCase()
-        .includes(query);
-
-      const matchesSpecialty =
-        !specialty || vet.specialties.includes(specialty);
+      const matchesName = `${vet.firstName} ${vet.lastName}`.toLowerCase().includes(query);
+      const matchesSpecialty = !specialty || vet.specialties.includes(specialty);
 
       return matchesName && matchesSpecialty;
     });
@@ -81,9 +66,7 @@ export class VetList {
   }
 
   protected onSpecialtyChange(event: Event): void {
-    this.selectedSpecialty.set(
-      (event.target as HTMLSelectElement).value,
-    );
+    this.selectedSpecialty.set((event.target as HTMLSelectElement).value);
   }
 
   protected clearFilters(): void {
@@ -138,32 +121,13 @@ export class VetList {
       )
       .subscribe({
         next: (vets) => {
-          // Temporary diagnostic logs.
-          // Check the browser console to see how many
-          // veterinarians are active or inactive.
-          console.log('[VETS] All veterinarians:', vets);
-          console.log('[VETS] Total:', vets.length);
-          console.log(
-            '[VETS] Active:',
-            vets.filter((vet) => vet.active === true).length,
-          );
-          console.log(
-            '[VETS] Inactive:',
-            vets.filter((vet) => vet.active === false).length,
-          );
-
-          // The backend uses soft deletion.
-          // Removed veterinarians have active = false.
-          const activeVets = vets
-            .filter((vet) => vet.active === true)
-            .map(toVetProfile);
+          const activeVets = vets.filter((vet) => vet.active === true).map(toVetProfile);
 
           this.vets.set(activeVets);
           this.loading.set(false);
         },
         error: (error: unknown) => {
           console.error('[VETS] Failed to load:', error);
-
           this.error.set(vetErrorMessage(error));
           this.loading.set(false);
         },
@@ -171,8 +135,6 @@ export class VetList {
   }
 
   protected removeVet(vet: VetProfile): void {
-    // Only Admin users can remove veterinarians.
-    // Prevent multiple simultaneous deletion requests.
     if (!this.auth.hasRole(Roles.admin) || this.deletingVetId()) {
       return;
     }
@@ -196,33 +158,17 @@ export class VetList {
       })
       .afterClosed()
       .pipe(
-        // Continue only if deletion was confirmed.
         filter((confirmed) => confirmed === true),
-
-        // Recheck Admin authorization.
-        filter(
-          () =>
-            this.auth.hasRole(Roles.admin) &&
-            !this.deletingVetId(),
-        ),
-
-        // Send DELETE request to backend.
+        filter(() => this.auth.hasRole(Roles.admin) && !this.deletingVetId()),
         switchMap(() => {
           this.deletingVetId.set(vet.vetId);
           return this.service.deleteVet(vet.vetId);
         }),
-
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => {
-          // Remove the veterinarian from the displayed list
-          // immediately after successful deletion.
-          this.vets.update((current) =>
-            current.filter(
-              (item) => item.vetId !== vet.vetId,
-            ),
-          );
+          this.vets.update((current) => current.filter((item) => item.vetId !== vet.vetId));
 
           this.deleteSuccess.set(
             $localize`:@@vets.remove.success:Le vétérinaire a été supprimé avec succès.`,

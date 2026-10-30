@@ -1,16 +1,16 @@
-
-import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
+import { provideRouter } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import { vi } from 'vitest';
 
 import { AuthState } from '@core/services/auth-state';
 import { VetService } from '@features/vets/services/vet.service';
+
 import { VetList } from './vet-list';
 
 describe('VetList - CPC-2195 Remove VETS', () => {
-  let fixture: ReturnType<typeof TestBed.createComponent<VetList>>;
+  let fixture: ComponentFixture<VetList>;
 
   let isAdmin: boolean;
   let dialogResult: Subject<boolean | undefined>;
@@ -45,15 +45,10 @@ describe('VetList - CPC-2195 Remove VETS', () => {
     open: vi.fn(),
   };
 
-
   const removeButtons = (): HTMLButtonElement[] =>
-    Array.from(
-      fixture.nativeElement.querySelectorAll(
-        '.remove-vet-button',
-      ),
-    );
+    Array.from(fixture.nativeElement.querySelectorAll('.remove-vet-button'));
 
-  const createComponent = () => {
+  const createComponent = (): ComponentFixture<VetList> => {
     fixture = TestBed.createComponent(VetList);
     fixture.detectChanges();
     return fixture;
@@ -65,9 +60,7 @@ describe('VetList - CPC-2195 Remove VETS', () => {
     isAdmin = true;
     dialogResult = new Subject<boolean | undefined>();
 
-    authMock.hasRole.mockImplementation(
-      (role: string) => role === 'ADMIN' && isAdmin,
-    );
+    authMock.hasRole.mockImplementation((role: string) => role === 'ADMIN' && isAdmin);
 
     vetServiceMock.getVets.mockReturnValue(of([vet]));
     vetServiceMock.deleteVet.mockReturnValue(of(vet));
@@ -156,7 +149,6 @@ describe('VetList - CPC-2195 Remove VETS', () => {
     removeButtons()[0]!.click();
 
     expect(dialogMock.open).toHaveBeenCalledTimes(1);
-
     expect(vetServiceMock.deleteVet).not.toHaveBeenCalled();
 
     const dialogCall = dialogMock.open.mock.calls[0];
@@ -188,11 +180,7 @@ describe('VetList - CPC-2195 Remove VETS', () => {
     fixture.detectChanges();
 
     expect(vetServiceMock.deleteVet).not.toHaveBeenCalled();
-
-    expect(
-      fixture.nativeElement.textContent,
-    ).toContain('John Smith');
-
+    expect(fixture.nativeElement.textContent).toContain('John Smith');
     expect(removeButtons()).toHaveLength(1);
   });
 
@@ -207,30 +195,17 @@ describe('VetList - CPC-2195 Remove VETS', () => {
     dialogResult.complete();
 
     expect(vetServiceMock.deleteVet).toHaveBeenCalledTimes(1);
-
-    expect(vetServiceMock.deleteVet).toHaveBeenCalledWith(
-      'vet-123',
-    );
+    expect(vetServiceMock.deleteVet).toHaveBeenCalledWith('vet-123');
 
     fixture.detectChanges();
 
-    expect(
-      fixture.nativeElement.textContent,
-    ).not.toContain('John Smith');
-
+    expect(fixture.nativeElement.textContent).not.toContain('John Smith');
     expect(removeButtons()).toHaveLength(0);
-
-    expect(
-      fixture.nativeElement.querySelector(
-        '[role="status"]',
-      ),
-    ).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[role="status"]')).not.toBeNull();
   });
 
   it('shows an error and preserves the veterinarian when DELETE fails', () => {
-    vetServiceMock.deleteVet.mockReturnValue(
-      throwError(() => new Error('Delete failed')),
-    );
+    vetServiceMock.deleteVet.mockReturnValue(throwError(() => new Error('Delete failed')));
 
     createComponent();
 
@@ -241,29 +216,16 @@ describe('VetList - CPC-2195 Remove VETS', () => {
 
     fixture.detectChanges();
 
-    expect(vetServiceMock.deleteVet).toHaveBeenCalledWith(
-      'vet-123',
-    );
-
-    expect(
-      fixture.nativeElement.textContent,
-    ).toContain('John Smith');
-
+    expect(vetServiceMock.deleteVet).toHaveBeenCalledWith('vet-123');
+    expect(fixture.nativeElement.textContent).toContain('John Smith');
     expect(removeButtons()).toHaveLength(1);
-
-    expect(
-      fixture.nativeElement.querySelector(
-        '[role="alert"]',
-      ),
-    ).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[role="alert"]')).not.toBeNull();
   });
 
   it('disables Remove while a DELETE request is pending', () => {
     const pendingDelete = new Subject<unknown>();
 
-    vetServiceMock.deleteVet.mockReturnValue(
-      pendingDelete.asObservable(),
-    );
+    vetServiceMock.deleteVet.mockReturnValue(pendingDelete.asObservable());
 
     createComponent();
 
@@ -274,7 +236,6 @@ describe('VetList - CPC-2195 Remove VETS', () => {
     fixture.detectChanges();
 
     expect(vetServiceMock.deleteVet).toHaveBeenCalledTimes(1);
-
     expect(removeButtons()).toHaveLength(1);
     expect(removeButtons()[0]!.disabled).toBe(true);
 
@@ -284,9 +245,6 @@ describe('VetList - CPC-2195 Remove VETS', () => {
     fixture.detectChanges();
 
     expect(removeButtons()).toHaveLength(0);
-
-    expect(
-      fixture.nativeElement.textContent,
-    ).not.toContain('John Smith');
+    expect(fixture.nativeElement.textContent).not.toContain('John Smith');
   });
 });

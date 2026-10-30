@@ -1,4 +1,3 @@
-
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -37,6 +36,8 @@ import { VetService } from '@features/vets/services/vet.service';
   `,
 })
 class MockVetProfileCard {
+  // Test-only compatibility: preserve the decorator-based input for Vitest routing tests.
+  // eslint-disable-next-line @angular-eslint/prefer-signals
   @Input({ required: true }) vet!: VetProfile;
 }
 
@@ -45,8 +46,7 @@ describe('Veterinarian directory navigation', () => {
    * Load the original HTML templates instead of replacing
    * them with simplified test templates.
    */
-  const loadTemplate = (path: string): string =>
-    readFileSync(resolve(process.cwd(), path), 'utf8');
+  const loadTemplate = (path: string): string => readFileSync(resolve(process.cwd(), path), 'utf8');
 
   beforeEach(async () => {
     vi.clearAllMocks();
@@ -55,9 +55,7 @@ describe('Veterinarian directory navigation', () => {
       'src/app/features/vets/pages/veterinarians/veterinarians.html',
     );
 
-    const vetListTemplate = loadTemplate(
-      'src/app/features/vets/pages/vet-list/vet-list.html',
-    );
+    const vetListTemplate = loadTemplate('src/app/features/vets/pages/vet-list/vet-list.html');
 
     await TestBed.configureTestingModule({
       providers: [
@@ -73,25 +71,19 @@ describe('Veterinarian directory navigation', () => {
           useValue: {
             getVets: () =>
               of(
-                [
-                  'Alex Morin',
-                  'Julie Lambert',
-                  'Sam Tremblay',
-                ].map(
-                  (name, index): VetResponse => ({
-                    vetId: `test-vet-${index}`,
-                    firstName: name.split(' ')[0] ?? '',
-                    lastName: name.split(' ')[1] ?? '',
-                    vetBillId: null,
-                    email: null,
-                    phoneNumber: null,
-                    resume: null,
-                    workday: [],
-                    workHoursJson: null,
-                    active: true,
-                    specialties: [],
-                  }),
-                ),
+                ['Alex Morin', 'Julie Lambert', 'Sam Tremblay'].map((name, index): VetResponse => ({
+                  vetId: `test-vet-${index}`,
+                  firstName: name.split(' ')[0] ?? '',
+                  lastName: name.split(' ')[1] ?? '',
+                  vetBillId: null,
+                  email: null,
+                  phoneNumber: null,
+                  resume: null,
+                  workday: [],
+                  workHoursJson: null,
+                  active: true,
+                  specialties: [],
+                })),
               ),
           },
         },
@@ -145,9 +137,7 @@ describe('Veterinarian directory navigation', () => {
     const harness = await RouterTestingHarness.create('/vets');
 
     const directoryLink =
-      harness.routeNativeElement?.querySelector<HTMLAnchorElement>(
-        'a[href="/vets/list"]',
-      );
+      harness.routeNativeElement?.querySelector<HTMLAnchorElement>('a[href="/vets/list"]');
 
     expect(directoryLink).toBeTruthy();
 
@@ -158,30 +148,18 @@ describe('Veterinarian directory navigation', () => {
 
     expect(TestBed.inject(Router).url).toBe('/vets/list');
 
-    expect(
-      harness.routeNativeElement?.querySelectorAll(
-        'app-vet-profile-card',
-      ).length,
-    ).toBe(3);
+    expect(harness.routeNativeElement?.querySelectorAll('app-vet-profile-card').length).toBe(3);
 
-    expect(
-      harness.routeNativeElement?.querySelectorAll(
-        '.profile-link',
-      ).length,
-    ).toBe(3);
+    expect(harness.routeNativeElement?.querySelectorAll('.profile-link').length).toBe(3);
 
-    harness.routeNativeElement
-      ?.querySelector<HTMLAnchorElement>('a[href="/vets"]')
-      ?.click();
+    harness.routeNativeElement?.querySelector<HTMLAnchorElement>('a[href="/vets"]')?.click();
 
     await harness.fixture.whenStable();
     harness.detectChanges();
 
     expect(TestBed.inject(Router).url).toBe('/vets');
 
-    expect(
-      harness.routeNativeElement?.querySelector('h1')?.textContent,
-    ).toBe('Vétérinaires');
+    expect(harness.routeNativeElement?.querySelector('h1')?.textContent).toBe('Vétérinaires');
   });
 
   it('renders multiple distinct profiles when the directory is opened directly', async () => {
@@ -189,24 +167,14 @@ describe('Veterinarian directory navigation', () => {
 
     harness.detectChanges();
 
-    const headings =
-      harness.routeNativeElement?.querySelectorAll(
-        '.profile-card h2',
-      );
+    const headings = harness.routeNativeElement?.querySelectorAll('.profile-card h2');
 
-    expect(
-      Array.from(
-        headings ?? [],
-        (heading) => heading.textContent?.trim(),
-      ),
-    ).toEqual([
+    expect(Array.from(headings ?? [], (heading) => heading.textContent?.trim())).toEqual([
       'Alex Morin',
       'Julie Lambert',
       'Sam Tremblay',
     ]);
 
-    expect(
-      harness.routeNativeElement?.textContent,
-    ).not.toContain('Profils fictifs');
+    expect(harness.routeNativeElement?.textContent).not.toContain('Profils fictifs');
   });
 });

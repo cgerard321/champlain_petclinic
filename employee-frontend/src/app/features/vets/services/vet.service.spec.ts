@@ -1,4 +1,3 @@
-
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
@@ -20,8 +19,6 @@ describe('Veterinarian endpoint responses', () => {
   });
 
   afterEach(() => http.verify());
-
-
 
   for (const status of [200, 201]) {
     it(`collects separate veterinarian events from a ${status} response`, async () => {
@@ -78,9 +75,7 @@ describe('Veterinarian endpoint responses', () => {
 
     const result = firstValueFrom(service.deleteVet(vetId));
 
-    const request = http.expectOne(
-      `/api/v2/gateway/vets/${vetId}`,
-    );
+    const request = http.expectOne(`/api/v2/gateway/vets/${vetId}`);
 
     expect(request.request.method).toBe('DELETE');
 
@@ -104,9 +99,7 @@ describe('Veterinarian endpoint responses', () => {
       status: 500,
     });
 
-    const request = http.expectOne(
-      `/api/v2/gateway/vets/${vetId}`,
-    );
+    const request = http.expectOne(`/api/v2/gateway/vets/${vetId}`);
 
     expect(request.request.method).toBe('DELETE');
 

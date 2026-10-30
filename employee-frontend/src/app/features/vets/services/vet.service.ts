@@ -39,9 +39,7 @@ export class VetService {
   }
 
   deleteVet(vetId: string): Observable<VetResponse> {
-    return this.http.delete<VetResponse>(
-      `${this.baseUrl}/${encodeURIComponent(vetId)}`,
-    );
+    return this.http.delete<VetResponse>(`${this.baseUrl}/${encodeURIComponent(vetId)}`);
   }
 
   addSpecialty(vetId: string, name: string): Observable<VetResponse> {

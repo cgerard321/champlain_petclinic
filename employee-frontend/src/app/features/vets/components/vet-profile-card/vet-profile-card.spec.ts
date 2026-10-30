@@ -1,8 +1,8 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 
 import { VetProfileCard } from '@features/vets/components/vet-profile-card/vet-profile-card';
 import { VetProfile } from '@features/vets/models/vet-profile.model';
@@ -21,8 +21,7 @@ describe('VetProfileCard', () => {
   };
 
   beforeEach(async () => {
-    const componentDirectory =
-      'src/app/features/vets/components/vet-profile-card';
+    const componentDirectory = 'src/app/features/vets/components/vet-profile-card';
 
     const template = readFileSync(
       resolve(process.cwd(), componentDirectory, 'vet-profile-card.html'),
@@ -111,14 +110,8 @@ describe('VetProfileCard', () => {
     expect(element.textContent).toContain('Horaire non renseigné.');
 
     expect(
-      Array.from(
-        element.querySelectorAll('dd'),
-        (detail) => detail.textContent?.trim(),
-      ),
-    ).toEqual([
-      'Courriel non renseigné',
-      'Téléphone non renseigné',
-    ]);
+      Array.from(element.querySelectorAll('dd'), (detail) => detail.textContent?.trim()),
+    ).toEqual(['Courriel non renseigné', 'Téléphone non renseigné']);
 
     expect(element.textContent).not.toContain('undefined');
   });
