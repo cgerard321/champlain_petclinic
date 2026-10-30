@@ -47,5 +47,12 @@
       "CANCELLED": "Annulée",
       "ARCHIVED": "Archivée"
     }
+  },
+  "reviews": {
+    "addReview": "Ajouter un avis",
+    "completedAppointmentRequired": "Vous devez avoir terminé au moins un rendez-vous avant de pouvoir laisser un avis.",
+    "checkingEligibility": "Vérification de votre admissibilité à laisser un avis...",
+    "eligibilityUnavailable": "Impossible de vérifier votre admissibilité à laisser un avis. Veuillez recharger la page et réessayer."
   }
+
 }

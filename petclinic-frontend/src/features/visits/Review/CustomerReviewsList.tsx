@@ -12,14 +12,41 @@ import '../VisitListTable.css';
 import StarRating from '@/features/products/components/StarRating';
 import BasicModal from '@/shared/components/BasicModal';
 import SvgIcon from '@/shared/components/SvgIcon';
+import { useTranslation } from 'react-i18next';
+import { getReviewEligibility } from './Api/getReviewEligibility';
 
 const CustomerReviewsList: React.FC = (): JSX.Element => {
   const [reviewList, setReviewList] = useState<ReviewResponseDTO[]>([]);
   const navigate = useNavigate();
   const { user } = useUser();
   const isOwner = IsCustomer();
+  const { t } = useTranslation('visits');
+  const [eligibilityStatus, setEligibilityStatus] = useState<
+    'loading' | 'eligible' | 'ineligible' | 'error'
+  >('loading');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!isOwner || !user?.userId) return;
+    let active = true;
+    setEligibilityStatus('loading');
+    getReviewEligibility()
+      .then(({ eligible }) => {
+        if (active) {
+          setEligibilityStatus(eligible ? 'eligible' : 'ineligible');
+        }
+      })
+      .catch(error => {
+        console.error('Failed to check review eligibility:', error);
+        if (active) {
+          setEligibilityStatus('error');
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [isOwner, user?.userId]);
 
   useEffect(() => {
     const fetchReviewsData = async (): Promise<void> => {
@@ -76,7 +103,24 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
         >
           Return to visits
         </button>
-        {isOwner && <AddingReview />}
+        {isOwner && (
+          <div>
+            <AddingReview canReview={eligibilityStatus === 'eligible'} />
+            {eligibilityStatus !== 'eligible' && (
+              <p
+                className="text-muted mt-2 mb-3"
+                role="status"
+                aria-live="polite"
+              >
+                {eligibilityStatus === 'ineligible'
+                  ? t('reviews.completedAppointmentRequired')
+                  : eligibilityStatus === 'error'
+                    ? t('reviews.eligibilityUnavailable')
+                    : t('reviews.checkingEligibility')}
+              </p>
+            )}
+          </div>
+        )}{' '}
         {showSuccessMessage && successMessage && (
           <div
             className="visit-success-message"

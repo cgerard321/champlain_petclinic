@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import ReviewModal from './ReviewModal';
 import { FormEvent, useState, useEffect, useRef } from 'react';
 import { addReview } from '../Api/addReview';
@@ -7,6 +8,8 @@ import { useUser } from '@/context/UserContext';
 import StarRating from '../../../products/components/StarRating';
 import { CustomerResponseModel } from '../../../customers/models/CustomerResponseModel.ts';
 import { getCustomer } from '../../../customers/api/getCustomer.ts';
+import { useTranslation } from 'react-i18next';
+import axios from 'axios';
 
 import { cleanReviewText, isReviewProfane } from '../ReviewProfanity';
 import BasicModal from '@/shared/components/BasicModal';
@@ -15,7 +18,15 @@ interface ApiError {
   message: string;
 }
 
-const AddingReview: React.FC = (): JSX.Element => {
+interface AddingReviewProps {
+  canReview: boolean;
+}
+
+const AddingReview: React.FC<AddingReviewProps> = ({
+  canReview,
+}): JSX.Element => {
+  const { t } = useTranslation('visits');
+
   const [review, setReview] = useState<ReviewRequestDTO>({
     rating: 0,
     ownerId: '',
@@ -87,6 +98,11 @@ const AddingReview: React.FC = (): JSX.Element => {
   ): Promise<void> => {
     event.preventDefault();
 
+    if (!canReview) {
+      setErrorMessage(t('reviews.completedAppointmentRequired'));
+      return;
+    }
+
     // Validate form inputs
     if (!validate()) return;
 
@@ -125,7 +141,9 @@ const AddingReview: React.FC = (): JSX.Element => {
       // Error handling
       const apiError = error as ApiError;
       setErrorMessage(
-        `Error adding review: ${apiError?.message || 'Unknown error'}`
+        axios.isAxiosError(error) && error.response?.status === 403
+          ? t('reviews.completedAppointmentRequired')
+          : `Error adding review: ${apiError?.message || 'Unknown error'}`
       );
     } finally {
       // Reset loading state
@@ -144,8 +162,13 @@ const AddingReview: React.FC = (): JSX.Element => {
       title="Add Review"
       validate={validate}
       showButton={
-        <button className="btn btn-primary" title="Add Review">
-          Add Review
+        <button
+          type="button"
+          className={`btn ${canReview ? 'btn-primary' : 'btn-secondary'}`}
+          disabled={!canReview}
+          title={t('reviews.addReview')}
+        >
+          {t('reviews.addReview')}
         </button>
       }
       errorMessage={errorMessage}

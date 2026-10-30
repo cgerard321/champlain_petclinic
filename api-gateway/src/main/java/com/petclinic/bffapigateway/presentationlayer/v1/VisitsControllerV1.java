@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer.v1;
 
+import com.petclinic.bffapigateway.businesslayer.ReviewEligibilityService;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
@@ -30,7 +31,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import com.petclinic.bffapigateway.exceptions.NoTokenFoundException;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 @RestController()
@@ -42,6 +45,9 @@ public class VisitsControllerV1 {
     private final VisitsServiceClient visitsServiceClient;
 
     private final CustomersServiceClient customersServiceClient;
+
+    private final ReviewEligibilityService reviewEligibilityService;
+
 
     /////////////////////////////////////////////
     ///////////Visits Methods///////////////////
@@ -242,13 +248,64 @@ public class VisitsControllerV1 {
     }
 
 
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
+    @GetMapping(
+            value = "/reviews/eligibility",
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<Map<String, Boolean>> getReviewEligibility(
+            ServerWebExchange exchange) {
+
+        String customerId = authenticatedCustomerId(exchange);
+
+        return reviewEligibilityService
+                .hasCompletedAppointment(customerId)
+                .map(eligible -> Map.of("eligible", eligible));
+    }
+
+
+
+
 
     @SecuredEndpoint(allowedRoles = {Roles.CUST})
-    @PostMapping(value = "/reviews", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ReviewResponseDTO>> PostReview(@RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono){
-        return visitsServiceClient.createReview(reviewRequestDTOMono)
-                .map(c->ResponseEntity.status(HttpStatus.CREATED).body(c))
+    @PostMapping(
+            value = "/reviews",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public Mono<ResponseEntity<ReviewResponseDTO>> PostReview(
+            @RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono,
+            ServerWebExchange exchange) {
+
+        String customerId = authenticatedCustomerId(exchange);
+
+        return reviewRequestDTOMono
+                .flatMap(review ->
+                        reviewEligibilityService
+                                .hasCompletedAppointment(customerId)
+                                .flatMap(eligible -> {
+                                    if (!eligible) {
+                                        return Mono.error(new ForbiddenAccessException("You must have at least one completed appointment before you can leave a review."));}
+                                    review.setOwnerId(customerId);
+                                    return visitsServiceClient
+                                            .createReview(Mono.just(review));}))
+                .map(created ->
+                        ResponseEntity
+                                .status(HttpStatus.CREATED)
+                                .body(created))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+
+
+    private String authenticatedCustomerId(ServerWebExchange exchange) {
+        TokenResponseDTO user = exchange.getAttribute("tokenValues");
+
+        if (user == null || user.getUserId() == null || user.getUserId().isBlank()) {
+            throw new NoTokenFoundException("Authenticated customer not found.");
+        }
+
+        return user.getUserId();
     }
 
 
