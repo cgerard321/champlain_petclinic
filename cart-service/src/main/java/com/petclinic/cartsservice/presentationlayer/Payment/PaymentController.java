@@ -1,6 +1,6 @@
 package com.petclinic.cartsservice.presentationlayer.Payment;
 
-import com.petclinic.cartsservice.businesslayer.Payment.PaymentServiceImpl;
+import com.petclinic.cartsservice.businesslayer.Payment.PaymentService;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import org.springframework.http.ResponseEntity;
@@ -9,13 +9,12 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/v1/carts")
-@CrossOrigin(origins = {"http://localhost:3000", "https://petclinic.benmusicgeek.synology.me"})
 public class PaymentController {
 
 
-    private final PaymentServiceImpl paymentService;
+    private final PaymentService paymentService;
 
-    public PaymentController(PaymentServiceImpl paymentService) {
+    public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
     }
 

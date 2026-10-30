@@ -7,8 +7,14 @@ import InvoiceComponent, {
   InvoiceFull as InvoiceFullType,
   InvoiceItem as InvoiceItemType,
 } from './Invoice';
-import { generatePath, useNavigate, useParams } from 'react-router-dom';
+import {
+  generatePath,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
 import CartItem from './CartItem';
+import { useCreateStripeCheckoutSession } from '../api/createStripeCheckoutSession';
 import { ProductModel } from '../models/ProductModel';
 import './cart-shared.css';
 import './UserCart.css';
@@ -76,8 +82,6 @@ interface Invoice {
   quantity: number;
 }
 
-import { useCreateStripCheckoutSessiontype } from '../api/createStripeCheckoutSession';
-
 /**
  * UserCart component displays the user's shopping cart, allowing them to view, update, and remove items,
  * manage billing information, and proceed to checkout. It also handles displaying invoices and notifications,
@@ -91,6 +95,8 @@ const UserCart: React.FC = () => {
   const { user } = useUser();
   const { showToast } = useToast();
   const customerId = user?.userId ?? null;
+  const { createStripeSession } = useCreateStripeCheckoutSession();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
@@ -507,9 +513,11 @@ const UserCart: React.FC = () => {
   const taxableSubtotal = roundToCents(
     discountedSubtotal + effectiveShippingCost
   );
+  // The backend always charges Quebec taxes (TVQ + TVC), so show the same ones
+  // here. Otherwise the total on this page would not match the Stripe charge.
   const resolvedTaxLines = computeTaxes(
     taxableSubtotal,
-    billingInfo?.province
+    billingInfo?.province ?? 'QC'
   ).map(line => ({
     ...line,
     amount: line.amount ?? roundToCents(taxableSubtotal * line.rate),
@@ -557,6 +565,43 @@ const UserCart: React.FC = () => {
 
     fetchCartItems();
   }, [cartId, syncCartState]);
+
+  // Stripe redirects back here with ?payment=success or ?payment=cancelled
+  useEffect(() => {
+    const paymentStatus = searchParams.get('payment');
+    if (!paymentStatus) return;
+
+    if (paymentStatus === 'cancelled') {
+      setCheckoutMessage(t('toasts.checkoutCancelled'));
+      setSearchParams({}, { replace: true });
+      return;
+    }
+
+    if (paymentStatus !== 'success') {
+      setSearchParams({}, { replace: true });
+      return;
+    }
+
+    setCheckoutMessage(t('toasts.checkoutSuccess'));
+
+    // The order is created by the Stripe webhook, so give it a moment before reloading
+    const timer = setTimeout(async () => {
+      setSearchParams({}, { replace: true });
+      if (!cartId) return;
+      try {
+        const { data } = await axiosInstance.get<CartDetailsModel>(
+          `/carts/${cartId}`,
+          { useV2: false }
+        );
+        syncCartState(data);
+      } catch (err) {
+        console.error('Failed to refresh cart after payment:', err);
+      }
+      await fetchOrders();
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [searchParams, setSearchParams, cartId, syncCartState, fetchOrders, t]);
 
   useEffect(() => {
     updateCartItemCount();
@@ -1003,8 +1048,6 @@ const UserCart: React.FC = () => {
       setMovingAll(false);
     }
   };
-
-  const { createStripeSession } = useCreateStripCheckoutSessiontype();
 
   const handleCheckoutConfirmation = async (): Promise<void> => {
     if (isStaff) {
@@ -1495,7 +1538,7 @@ const UserCart: React.FC = () => {
                 {resolvedTaxLines.map(line => (
                   <p key={`${line.name}-${line.rate}`} className="summary-item">
                     {t(
-                      `taxes.${taxLabelKey(line.name, billingInfo?.province)}`,
+                      `taxes.${taxLabelKey(line.name, billingInfo?.province ?? 'QC')}`,
                       {
                         defaultValue: line.name,
                       }

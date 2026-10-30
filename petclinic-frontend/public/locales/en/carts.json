@@ -121,6 +121,7 @@
     "moved": "Added {{movable}} wishlist item(s) to cart.",
     "purchaseAdded": "{{name}} (x{{quantity}}) added to cart!",
     "checkoutSuccess": "Checkout successful! Your order is being processed.",
+    "checkoutCancelled": "Payment cancelled. Your cart has not been changed.",
     "staffCheckout": "Staff/Admin cannot perform checkout."
   },
   "errors": {

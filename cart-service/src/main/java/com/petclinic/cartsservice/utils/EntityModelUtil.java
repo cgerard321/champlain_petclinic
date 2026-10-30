@@ -1,6 +1,9 @@
 package com.petclinic.cartsservice.utils;
 
-import com.petclinic.cartsservice.dataaccesslayer.*;
+import com.petclinic.cartsservice.dataaccesslayer.Cart;
+import com.petclinic.cartsservice.dataaccesslayer.ShippingMethod;
+import com.petclinic.cartsservice.dataaccesslayer.Order;
+import com.petclinic.cartsservice.dataaccesslayer.PaymentStatus;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReport;
 import com.petclinic.cartsservice.dataaccesslayer.orderreport.OrderReportStatus;
@@ -158,49 +161,40 @@ public class EntityModelUtil {
         return responseModel;
     }
 
-    public static Order toOrder(Cart cart, CustomerResponseModel customer, String stripeSessionId) {
-      return Order.builder()
-              .orderId(UUID.randomUUID().toString())
-              .customerId(customer.getCustomerId())
-              .customerName(customer.getFirstName() + " " + customer.getLastName())
-              .products(copyCartProducts(cart.getProducts()))
-              .subtotal(cart.getSubtotal())
-              .promoPercent(cart.getPromoPercent())
-              .tvq(cart.getTvq())
-              .tvc(cart.getTvc())
-              .total(cart.getTotal())
-              .shippingMethod(cart.getShippingMethod())
-              .shippingCost(cart.getShippingCost())
-              .invoiceId(cart.getInvoiceId())
-              .orderDate(LocalDateTime.now())
-              .stripeSessionId(stripeSessionId)
-              .paymentStatus(PaymentStatus.PAID)
-              .paidDate(LocalDateTime.now())
-              .build();
+    // Stripe orders take the billing details the customer entered on the Stripe checkout page
+    public static Order toOrder(Cart cart, CustomerResponseModel customer, String stripeSessionId, BillingRequestModel billing) {
+        Order order = toOrder(cart, customer, billing);
+        if (order.getCustomerName() == null || order.getCustomerName().isBlank()) {
+            order.setCustomerName(customer.getFirstName() + " " + customer.getLastName());
+        }
+        order.setStripeSessionId(stripeSessionId);
+        order.setPaymentStatus(PaymentStatus.PAID);
+        order.setPaidDate(order.getOrderDate());
+        return order;
     }
-  
-   public static Order toOrder(Cart cart, CustomerResponseModel customer, BillingRequestModel billing) {
-    return Order.builder()
-            .orderId(UUID.randomUUID().toString())
-            .customerId(customer.getCustomerId())
-            .customerName(billing.getCustomerName())
-            .address(billing.getAddress())
-            .city(billing.getCity())
-            .email(billing.getEmail())
-            .postalCode(billing.getPostalCode())
-            .province(billing.getProvince())
-            .products(copyCartProducts(cart.getProducts()))
-            .subtotal(cart.getSubtotal())
-            .promoPercent(cart.getPromoPercent())
-            .tvq(cart.getTvq())
-            .tvc(cart.getTvc())
-            .total(cart.getTotal())
-            .shippingMethod(cart.getShippingMethod())
-            .shippingCost(cart.getShippingCost())
-            .invoiceId(cart.getInvoiceId())
-            .orderDate(LocalDateTime.now())
-            .build();
-}
+
+    public static Order toOrder(Cart cart, CustomerResponseModel customer, BillingRequestModel billing) {
+        return Order.builder()
+                .orderId(UUID.randomUUID().toString())
+                .customerId(customer.getCustomerId())
+                .customerName(billing.getCustomerName())
+                .address(billing.getAddress())
+                .city(billing.getCity())
+                .email(billing.getEmail())
+                .postalCode(billing.getPostalCode())
+                .province(billing.getProvince())
+                .products(copyCartProducts(cart.getProducts()))
+                .subtotal(cart.getSubtotal())
+                .promoPercent(cart.getPromoPercent())
+                .tvq(cart.getTvq())
+                .tvc(cart.getTvc())
+                .total(cart.getTotal())
+                .shippingMethod(cart.getShippingMethod())
+                .shippingCost(cart.getShippingCost())
+                .invoiceId(cart.getInvoiceId())
+                .orderDate(LocalDateTime.now())
+                .build();
+    }
 
     public static OrderReport toOrderReport(
             String orderId,

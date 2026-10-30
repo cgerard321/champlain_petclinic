@@ -66,23 +66,12 @@ public class WebhookController {
         return Mono.fromCallable(() -> Session.retrieve(extractCheckoutSessionId(event)))
                 .subscribeOn(Schedulers.boundedElastic())
                 .flatMap(session -> {
-                    switch (eventType) {
-                        case "checkout.session.completed":
-                            if ("paid".equals(session.getPaymentStatus())) {
-                                return paymentService.processSuccessfulPayment(session)
-                                        .thenReturn(ResponseEntity.ok().body("Payment processed"));
-                            }
-                            return Mono.just(ResponseEntity.ok().body("Checkout completed"));
-                        case "checkout.session.async_payment_succeeded":
-                            return paymentService.processSuccessfulPayment(session)
-                                    .thenReturn(ResponseEntity.ok().body("Payment processed"));
-                        case "checkout.session.async_payment_failed":
-                            return Mono.just(ResponseEntity.ok().body("Checkout payment failed"));
-                        case "checkout.session.expired":
-                            return Mono.just(ResponseEntity.ok().body("Checkout session expired"));
-                        default:
-                            return Mono.just(ResponseEntity.ok().body("Webhook received"));
+                    // checkout.session.completed also fires for delayed payment methods that are not paid yet
+                    if (!"paid".equals(session.getPaymentStatus())) {
+                        return Mono.just(ResponseEntity.ok().body("Checkout completed"));
                     }
+                    return paymentService.processSuccessfulPayment(session)
+                            .thenReturn(ResponseEntity.ok().body("Payment processed"));
                 })
                 .onErrorResume(e -> {
                     log.error("Stripe checkout webhook failed: {}", e.getMessage());

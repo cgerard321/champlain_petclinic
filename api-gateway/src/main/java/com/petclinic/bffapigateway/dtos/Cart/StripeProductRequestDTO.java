@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StripeProductRequestDTO {
     private String cartId;
-    private String frontendTypeUrl;
+    private String frontendType;
 }

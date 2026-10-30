@@ -121,6 +121,7 @@
     "moved": "{{movable}} article(s) de la liste de souhaits ajouté(s) au panier.",
     "purchaseAdded": "{{name}} (x{{quantity}}) ajouté au panier!",
     "checkoutSuccess": "Commande réussie! Votre commande est en cours de traitement.",
+    "checkoutCancelled": "Paiement annulé. Votre panier n'a pas été modifié.",
     "staffCheckout": "Le personnel et les administrateurs ne peuvent pas passer de commande."
   },
   "errors": {

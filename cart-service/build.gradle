@@ -31,7 +31,6 @@ dependencies {
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
     implementation 'com.stripe:stripe-java:34.0.0'
-    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 

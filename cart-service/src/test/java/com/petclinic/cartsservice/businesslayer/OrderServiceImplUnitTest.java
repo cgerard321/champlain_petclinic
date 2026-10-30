@@ -175,7 +175,7 @@ class OrderServiceUnitTest {
                         Mono.just(invocation.getArgument(0)));
 
         // Act & Assert
-        StepVerifier.create(orderService.createOrder(cart, stripeSessionId))
+        StepVerifier.create(orderService.createOrder(cart, stripeSessionId, new BillingRequestModel()))
                 .assertNext(response -> {
                     assertNotNull(response.getOrderId());
                     assertEquals(CUSTOMER_ID, response.getCustomerId());
@@ -221,7 +221,7 @@ class OrderServiceUnitTest {
                         Mono.just(invocation.getArgument(0)));
 
         // Act & Assert
-        StepVerifier.create(orderService.createOrder(cart, stripeSessionId))
+        StepVerifier.create(orderService.createOrder(cart, stripeSessionId, new BillingRequestModel()))
                 .assertNext(response -> {
                     assertEquals(125.0, response.getSubtotal(), 0.001);
                     assertEquals(12.47, response.getTvq(), 0.001);
@@ -308,7 +308,7 @@ class OrderServiceUnitTest {
                 .thenReturn(Mono.empty());
 
         // Act & Assert
-        StepVerifier.create(orderService.createOrder(cart, stripeSessionId))
+        StepVerifier.create(orderService.createOrder(cart, stripeSessionId, new BillingRequestModel()))
                 .expectErrorMatches(error ->
                         error instanceof NotFoundException &&
                         "Customer not found".equals(error.getMessage()))
@@ -356,7 +356,7 @@ class OrderServiceUnitTest {
                 ));
 
         // Act & Assert
-        StepVerifier.create(orderService.createOrder(cart, stripeSessionId))
+        StepVerifier.create(orderService.createOrder(cart, stripeSessionId, new BillingRequestModel()))
                 .expectErrorMatches(error ->
                         error instanceof RuntimeException &&
                         "Database error".equals(error.getMessage()))
