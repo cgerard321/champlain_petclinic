@@ -920,6 +920,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     private void applyInventoryPhoto(Inventory inventory, InventoryRequestDTO requestDTO) {
         byte[] upload = requestDTO.getImageUploaded();
         if (upload != null) {
+            if (upload.length > 160 * 1024) {
+                throw new InvalidInputException("Uploaded image must be 160KB or smaller.");
+            }
             inventory.setImageUploaded(upload.length == 0 ? null : upload);
             inventory.setInventoryImage(null);
             inventory.setInventoryBackupImage(null);

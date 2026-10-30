@@ -103,6 +103,16 @@ class InventoryPhotoServiceTest {
     }
 
     @Test
+    void editingDetailsKeepsAStoredPhotoThatIsOverTheUploadLimit() {
+        byte[] seededFirstAidPhoto = new byte[168_838];
+        current.setImageUploaded(seededFirstAidPhoto);
+
+        StepVerifier.create(service.updateInventory(Mono.just(request().inventoryType("Medications").build()), "current"))
+                .assertNext(response -> assertArrayEquals(seededFirstAidPhoto, response.getImageUploaded()))
+                .expectComplete().verify(TIMEOUT);
+    }
+
+    @Test
     void creatingAnInventoryWithAPhotoStoresIt() {
         when(inventories.count()).thenReturn(Mono.just(1L));
         when(inventories.findAll()).thenReturn(Flux.empty());

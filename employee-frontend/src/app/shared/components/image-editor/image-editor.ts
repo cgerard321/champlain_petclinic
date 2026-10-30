@@ -34,7 +34,11 @@ export class ImageEditor implements OnDestroy {
   readonly imageChange = output<ImageAction>();
 
   private readonly limit = computed(() => this.maxSizeBytes() ?? DEFAULT_MAX_IMAGE_BYTES);
-  protected readonly limitLabel = computed(() => `${this.limit() / (1024 * 1024)} MB`);
+  protected readonly limitLabel = computed(() =>
+    this.limit() < 1024 * 1024
+      ? `${Math.round(this.limit() / 1024)} KB`
+      : `${this.limit() / (1024 * 1024)} MB`,
+  );
 
   protected readonly selectedPreview = signal<string | null>(null);
   protected readonly removed = signal(false);

@@ -232,15 +232,19 @@ export class InventoryList implements OnInit, OnDestroy {
     );
   }
 
-  protected inventoryPhotoUrl(inventory: Inventory): string | null {
+  private storedPhotoUrls(inventory: Inventory): string[] {
     const upload = inventory.imageUploaded;
     const prefix = upload && Object.keys(PHOTO_TYPES).find((start) => upload.startsWith(start));
-    const candidates = [
-      prefix ? `data:${PHOTO_TYPES[prefix]};base64,${upload}` : null,
-      inventory.inventoryImage,
-      inventory.inventoryBackupImage,
-    ];
-    return candidates.find((url) => !!url && !this.brokenPhotos().has(url)) ?? null;
+    const uploadUrl = upload
+      ? `data:${prefix ? PHOTO_TYPES[prefix] : 'image/jpeg'};base64,${upload}`
+      : null;
+    return [uploadUrl, inventory.inventoryImage, inventory.inventoryBackupImage].filter(
+      (url): url is string => !!url,
+    );
+  }
+
+  protected inventoryPhotoUrl(inventory: Inventory): string | null {
+    return this.storedPhotoUrls(inventory).find((url) => !this.brokenPhotos().has(url)) ?? null;
   }
 
   protected markPhotoBroken(url: string): void {
@@ -512,7 +516,9 @@ export class InventoryList implements OnInit, OnDestroy {
         key: 'photo',
         label: $localize`:@@inventory.fields.photo:Photo de l'inventaire`,
         type: 'image',
-        currentImageUrl: inventory ? this.inventoryPhotoUrl(inventory) : null,
+        currentImageUrl: inventory
+          ? (this.inventoryPhotoUrl(inventory) ?? this.storedPhotoUrls(inventory)[0] ?? null)
+          : null,
         maxImageSizeBytes: MAX_PHOTO_BYTES,
       },
     ];
