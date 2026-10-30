@@ -95,8 +95,6 @@ public class InventoryValidator {
             return Mono.error(new InvalidInputException("Inventory image must be a valid URL (http/https)."));
         if (hasText(e.getInventoryBackupImage()) && !looksLikeHttpUrl(e.getInventoryBackupImage()))
             return Mono.error(new InvalidInputException("Inventory backup image must be a valid URL (http/https)."));
-        if (e.getImageUploaded() != null && e.getImageUploaded().length > 160 * 1024)
-            return Mono.error(new InvalidInputException("Uploaded image must be 160KB or smaller."));
 
         return inventoryRepository
                 .existsByInventoryNameAndInventoryIdNot(e.getInventoryName(), currentId)
