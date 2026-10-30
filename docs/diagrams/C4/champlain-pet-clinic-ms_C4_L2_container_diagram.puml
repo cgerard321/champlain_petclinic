@@ -50,6 +50,7 @@ Person(customer, "Customer", "A customer of the Champlain Pet Clinic.")
 
 Container_Ext(minio, "Bucket Storage", "Minio", "Stores uploaded files externally")
 System_Ext(smtp_gmail, "Gmail SMTP", "smtp.gmail.com:587", "Delivers outbound application email")
+System_Ext(stripe, "Stripe", "Hosted checkout and card payment processing")
 
 System_Boundary(c1, "Champlain Pet Clinic System"){
 
@@ -153,6 +154,9 @@ Rel(visits_service, auth_service, "Makes API calls to", "JSON/REST/HTTPS", $tags
 Rel(visits_service, customers_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
 Rel(visits_service, vets_service, "Looks up vet profiles and email recipients for weekly schedules", "JSON/REST/HTTPS", $tags="orange-line")
 Rel(visits_service, billing_service, "Makes API calls to", "JSON/REST/HTTPS", $tags="orange-line")
+Rel(cart_service, stripe, "Creates checkout sessions", "JSON/HTTPS")
+Rel(stripe, api_gateway, "Sends payment webhook events", "JSON/HTTPS")
+Rel(customer, stripe, "Pays on the hosted checkout page", "HTTPS")
 
 
 SHOW_LEGEND()

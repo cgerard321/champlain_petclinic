@@ -210,7 +210,54 @@ public class CartServiceImpl implements CartService {
                              .then(Mono.just(EntityModelUtil.toCartResponseModel(found, products)));
                  });
      }
-
+  
+    // Called by the Stripe webhook once the payment is confirmed.
+    // The order is saved first so a paid session is never lost if clearing the cart fails.
+    @Override
+    public Mono<CartResponseModel> checkoutCart(final String cartId, final String stripeSessionId, BillingRequestModel billing) {
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMap(cart -> {
+                    if (cart.getProducts() == null || cart.getProducts().isEmpty()) {
+                        return Mono.error(new InvalidInputException("Cart is empty"));
+                    }
+                    return automaticDiscountService.apply(
+                                    EntityModelUtil.toCartResponseModel(cart, cart.getProducts()))
+                            .flatMap(calculatedCart -> {
+                                Cart orderCart = EntityModelUtil.storeCartOrder(cart, calculatedCart);
+                                String invoiceId = UUID.randomUUID().toString();
+                                orderCart.setInvoiceId(invoiceId);
+                                List<CartProduct> purchasedProducts = orderCart.getProducts();
+                                double total = orderCart.getTotal();
+                                return orderService.createOrder(orderCart, stripeSessionId, billing)
+                                        .flatMap(savedOrder -> generateRecommendations(purchasedProducts)
+                                                .onErrorReturn(Collections.emptyList()))
+                                        .flatMap(recommendations -> {
+                                            cart.setRecentPurchases(
+                                                    EntityModelUtil.mergeRecentPurchases(
+                                                            cart.getRecentPurchases(),
+                                                            purchasedProducts)
+                                            );
+                                            cart.setRecommendationPurchase(recommendations);
+                                            cart.setProducts(Collections.emptyList());
+                                            cart.setShippingMethod(ShippingMethod.PICKUP);
+                                            cart.setShippingCost(ShippingMethod.PICKUP.getCost());
+                                            return cartRepository.save(cart);
+                                        })
+                                        .map(savedCart -> {
+                                            CartResponseModel response = new CartResponseModel();
+                                            BeanUtils.copyProperties(calculatedCart, response);
+                                            response.setInvoiceId(invoiceId);
+                                            response.setCartId(cartId);
+                                            response.setProducts(purchasedProducts);
+                                            response.setTotal(total);
+                                            response.setShippingMethod(orderCart.getShippingMethod());
+                                            response.setShippingCost(orderCart.getShippingCost());
+                                            return response;
+                                        });
+                            });
+                });
+    }
 
     @Override
     public Mono<CartResponseModel> checkoutCart(final String cartId, BillingRequestModel billing) {

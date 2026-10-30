@@ -286,6 +286,36 @@ public class CartControllerV1 {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.CUST})
+    @PostMapping("/{cartId}/checkout/sessions")
+    public Mono<ResponseEntity<StripeResponseDTO>> createStripeCheckoutSession(@RequestBody StripeProductRequestDTO sessionRequestModel, @PathVariable String cartId) {
+        if(sessionRequestModel == null || cartId == null) {
+            return Mono.just(ResponseEntity.badRequest().build());
+        }
+
+        if (!cartId.equals(sessionRequestModel.getCartId())) {
+            return  Mono.just(ResponseEntity.badRequest().build());
+        }
+
+        return cartServiceClient.createStripeCheckoutSession(cartId, sessionRequestModel)
+                .map(ResponseEntity::ok)
+                .switchIfEmpty(Mono.just(ResponseEntity.notFound().build()))
+                .onErrorResume(e -> this.mapCartError(
+                        e,
+                        ErrorOptions.builder().build()
+                ));
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping(value = "/webhook")
+    public Mono<ResponseEntity<String>> stripeWebhook(
+            @RequestBody String payload,
+            @RequestHeader(value = "Stripe-Signature", required = false) String signature) {
+
+        return cartServiceClient.forwardStripeWebhook(payload, signature);
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.CUST})
     @PostMapping("/{cartId}/wishlist")
     public Mono<ResponseEntity<CartResponseDTO>> addProductToWishlist(
         @PathVariable String cartId,
