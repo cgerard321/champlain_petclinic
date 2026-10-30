@@ -1,6 +1,17 @@
 {
   "locale": "en",
   "translations": {
+    "promo": {
+      "automatic": {
+        "toggle": "Automatic discount",
+        "minimumLabel": "Minimum purchase amount (CAD)",
+        "type": "Automatic",
+        "minimumSummary": "Minimum: {$INTERPOLATION}",
+        "codeRequired": "A promo code is required.",
+        "invalidMinimum": "The minimum amount must be zero or greater.",
+        "invalidExpiration": "The expiration date must be in the future."
+      }
+    },
     "auth": {
       "errors": {
         "unreachable": "Could not reach the server.",
@@ -281,6 +292,47 @@
       }
     },
     "vets": {
+      "create": {
+        "title": "Add Veterinarian",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "nameHint": "Between 2 and 30 characters.",
+        "email": "Email",
+        "emailHint": "Enter a valid email address.",
+        "username": "Username",
+        "usernameHint": "Required, without spaces.",
+        "password": "Password",
+        "passwordHint": "At least 8 characters: uppercase, lowercase, digit and special character (@#$%^&+=*!()_.<>,{}), without spaces.",
+        "phone": "Phone",
+        "phoneHint": "Example: (514) 555-0123, optional extension #1234.",
+        "resume": "About",
+        "resumeHint": "At least 10 characters.",
+        "school": "School",
+        "degree": "Degree",
+        "study": "Field of study",
+        "start": "Start date",
+        "end": "End date",
+        "partial": "The veterinarian was created. Retry saving education or return to the list.",
+        "details": "Profile and account — required fields",
+        "specialties": "Specialties (at least one)",
+        "specialtyRequired": "Select at least one specialty.",
+        "days": "Working days (optional)",
+        "active": "Active",
+        "education": "Education (optional — complete all fields if provided)",
+        "educationInvalid": "Complete all education fields. The end date must be on or after the start date.",
+        "save": "Save",
+        "return": "Return to list",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "success": "The veterinarian was added.",
+        "Monday": "Monday",
+        "Tuesday": "Tuesday",
+        "Wednesday": "Wednesday",
+        "Thursday": "Thursday",
+        "Friday": "Friday",
+        "Saturday": "Saturday",
+        "Sunday": "Sunday"
+      },
       "eyebrow": "Veterinary team",
       "title": "Veterinarians",
       "description": "The people behind every healthy pet.",
@@ -1123,7 +1175,8 @@
         "type": "Inventory type",
         "description": "Description",
         "descriptionEn": "Description (English)",
-        "descriptionFr": "Description (French)"
+        "descriptionFr": "Description (French)",
+        "photo": "Inventory photo"
       },
       "filters": {
         "aria": "Filter inventories",

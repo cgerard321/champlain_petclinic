@@ -172,6 +172,19 @@
             >
               <mat-card appearance="outlined" class="inventory-card">
                 <mat-card-header>
+                  @if (inventoryPhotoUrl(inventory); as photo) {
+                    <img
+                      mat-card-avatar
+                      class="inventory-photo"
+                      [src]="photo"
+                      alt=""
+                      (error)="markPhotoBroken(photo)"
+                    />
+                  } @else {
+                    <mat-icon mat-card-avatar class="inventory-photo" aria-hidden="true"
+                      >inventory_2</mat-icon
+                    >
+                  }
                   <mat-card-title>{{ localizedInventoryName(inventory) }}</mat-card-title>
                   <mat-card-subtitle>{{
                     localizedInventoryType(inventory.inventoryType)

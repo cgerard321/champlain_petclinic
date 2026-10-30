@@ -30,6 +30,8 @@ interface PromoFormModel {
   scope: 'CART' | 'PRODUCT' | 'PRODUCT_TYPE';
   productIds: string[];
   productTypes: string[];
+  automatic: boolean;
+  minimumPurchaseAmount: number;
 }
 
 @Component({
@@ -92,18 +94,19 @@ export class PromoFormDialog implements OnInit {
 
   protected readonly model = signal<PromoFormModel>({
     name: this.promo?.name ?? '',
-    code: this.promo?.code ?? '',
+    code: this.promo?.automatic ? '' : (this.promo?.code ?? ''),
     discount: this.promo?.discount ?? 0,
     expirationDate: this.promo?.expirationDate.slice(0, 10) ?? '',
     active: this.promo?.active ?? true,
     scope: this.promo?.scope ?? 'CART',
     productIds: this.promo?.productIds ?? [],
     productTypes: this.promo?.productTypes ?? [],
+    automatic: this.promo?.automatic ?? false,
+    minimumPurchaseAmount: this.promo?.minimumPurchaseAmount ?? 0,
   });
 
   protected readonly promoForm = form(this.model, (schemaPath) => {
     required(schemaPath.name, { message: 'Name is required' });
-    required(schemaPath.code, { message: 'Code is required' });
     required(schemaPath.expirationDate, { message: 'Expiration date is required' });
   });
 
@@ -156,6 +159,17 @@ export class PromoFormDialog implements OnInit {
     this.model.update((current) => ({ ...current, active }));
   }
 
+  protected setAutomatic(automatic: boolean): void {
+    this.model.update((current) => ({
+      ...current,
+      automatic,
+      code: '',
+      scope: automatic ? 'CART' : current.scope,
+      productIds: automatic ? [] : current.productIds,
+      productTypes: automatic ? [] : current.productTypes,
+    }));
+  }
+
   protected submit(event: Event): void {
     event.preventDefault();
     if (
@@ -166,8 +180,37 @@ export class PromoFormDialog implements OnInit {
     ) {
       return;
     }
-    if (this.model().discount <= 0 || this.model().discount > 100) {
+    if (
+      !Number.isFinite(this.model().discount) ||
+      this.model().discount <= 0 ||
+      this.model().discount > 100
+    ) {
       this.errorMessage.set('Discount must be between 0 and 100.');
+      return;
+    }
+
+    const { automatic, minimumPurchaseAmount, code, expirationDate, active } = this.model();
+
+    if (!automatic && !code.trim()) {
+      this.errorMessage.set(
+        $localize`:@@promo.automatic.codeRequired:Un code promotionnel est requis.`,
+      );
+      return;
+    }
+
+    if (automatic && (!Number.isFinite(minimumPurchaseAmount) || minimumPurchaseAmount < 0)) {
+      this.errorMessage.set(
+        $localize`:@@promo.automatic.invalidMinimum:Le montant minimum doit être égal ou supérieur à zéro.`,
+      );
+      return;
+    }
+
+    const expiresAt = new Date(`${expirationDate}T23:59:59`);
+
+    if (automatic && active && (!Number.isFinite(expiresAt.getTime()) || expiresAt <= new Date())) {
+      this.errorMessage.set(
+        $localize`:@@promo.automatic.invalidExpiration:La date d'expiration doit être dans le futur.`,
+      );
       return;
     }
 
@@ -183,6 +226,7 @@ export class PromoFormDialog implements OnInit {
     this.errorMessage.set(null);
     const request = {
       ...this.model(),
+      minimumPurchaseAmount: automatic ? minimumPurchaseAmount : null,
       expirationDate: `${this.model().expirationDate}T23:59:59`,
       ...(this.selectedImage() ? { image: this.selectedImage()! } : {}),
       removeImage: this.removeOriginalImage(),

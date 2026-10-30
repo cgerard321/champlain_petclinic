@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,8 +33,11 @@ import java.util.stream.Collectors;
 @Order(0)
 public class DataLoaderService implements CommandLineRunner {
 
-    @Value("${app.seed-data.enabled:true}")
-    private boolean seedDataEnabled = true;
+    private final boolean seedDataEnabled;
+
+    public DataLoaderService(@Value("${app.seed-data.enabled:true}") boolean seedDataEnabled) {
+        this.seedDataEnabled = seedDataEnabled;
+    }
 
     private static final Logger log = LoggerFactory.getLogger(DataLoaderService.class);
 

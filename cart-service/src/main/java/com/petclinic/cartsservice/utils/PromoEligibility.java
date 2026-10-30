@@ -41,6 +41,52 @@ public final class PromoEligibility {
         promo.setProductTypes(scope.equals("PRODUCT_TYPE") ? types : List.of());
     }
 
+    public static void setAutomatic(PromoCode promo,PromoCodeRequestModel request) {
+        boolean automatic = request.getAutomatic() == null
+                ? promo.isAutomatic()
+                : request.getAutomatic();
+
+        Double minimum = request.getMinimumPurchaseAmount() == null
+                ? promo.getMinimumPurchaseAmount()
+                : request.getMinimumPurchaseAmount();
+
+        if (automatic) {
+            if (!"CART".equals(scope(promo))
+                    || minimum == null
+                    || !Double.isFinite(minimum)
+                    || minimum < 0
+                    || !Double.isFinite(promo.getDiscount())
+                    || promo.getDiscount() <= 0
+                    || promo.getDiscount() > 100) {
+                throw new InvalidInputException(
+                        "Automatic discounts require a full-cart scope, "
+                                + "a non-negative minimum, and a percentage "
+                                + "greater than 0 and no more than 100"
+                );
+            }
+
+            if (promo.isActive()
+                    && (promo.getExpirationDate() == null
+                        || !promo.getExpirationDate().isAfter(
+                                java.time.LocalDateTime.now()
+                        ))) {
+                throw new InvalidInputException(
+                        "An active automatic discount must expire in the future"
+                );
+            }
+
+            // Retain a unique internal code for existing consumers.
+            promo.setCode("AUTO-" + promo.getId());
+        } else if (Boolean.FALSE.equals(request.getAutomatic())
+                && (request.getCode() == null
+                    || request.getCode().isBlank())) {
+            throw new InvalidInputException("A promo code is required");
+        }
+
+        promo.setAutomatic(automatic);
+        promo.setMinimumPurchaseAmount(automatic ? minimum : null);
+    }
+
     private static List<String> clean(List<String> values) {
         return values == null ? List.of() : values.stream().filter(v -> v != null && !v.isBlank())
                 .map(String::trim).distinct().toList();

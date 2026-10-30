@@ -12,6 +12,8 @@ export interface Promo {
   scope?: 'CART' | 'PRODUCT' | 'PRODUCT_TYPE';
   productIds?: string[];
   productTypes?: string[];
+  automatic?: boolean;
+  minimumPurchaseAmount?: number | null;
 }
 
 export interface PromoRequest {
@@ -25,4 +27,6 @@ export interface PromoRequest {
   scope?: 'CART' | 'PRODUCT' | 'PRODUCT_TYPE';
   productIds?: string[];
   productTypes?: string[];
+  automatic?: boolean;
+  minimumPurchaseAmount?: number | null;
 }
