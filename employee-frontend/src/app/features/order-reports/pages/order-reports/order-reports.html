@@ -1,0 +1,82 @@
+<section class="reports-page">
+  <div class="reports-header">
+    <h1 i18n="@@orderReports.title">Signalements de commandes</h1>
+    <p i18n="@@orderReports.subtitle">
+      Consultez les problèmes signalés par les clients sur leurs commandes.
+    </p>
+  </div>
+
+  @if (errorMessage()) {
+    <p class="error-message" role="alert">{{ errorMessage() }}</p>
+  }
+
+  @if (isLoading()) {
+    <div class="state-container" role="status">
+      <mat-progress-spinner mode="indeterminate" diameter="40" />
+      <span i18n="@@orderReports.loading">Chargement des signalements...</span>
+    </div>
+  } @else if (reports().length === 0 && !errorMessage()) {
+    <div class="state-container">
+      <p i18n="@@orderReports.empty">Aucun signalement trouvé.</p>
+    </div>
+  } @else {
+    <table mat-table class="reports-table" [dataSource]="pagedReports()">
+      <ng-container matColumnDef="report">
+        <th mat-header-cell *matHeaderCellDef i18n="@@orderReports.columns.report">Signalement</th>
+        <td mat-cell *matCellDef="let report">
+          <div class="cell-main">{{ report.reportId }}</div>
+          <div class="cell-sub">{{ report.submittedAt | date: 'medium' }}</div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="order">
+        <th mat-header-cell *matHeaderCellDef i18n="@@orderReports.columns.order">
+          Numéro de commande
+        </th>
+        <td mat-cell *matCellDef="let report">
+          <button class="link-button" type="button" (click)="openOrder($event, report.orderId)">
+            {{ report.orderId }}
+          </button>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="customer">
+        <th mat-header-cell *matHeaderCellDef i18n="@@orderReports.columns.customer">Client</th>
+        <td mat-cell *matCellDef="let report">
+          <div class="cell-main">{{ report.customerName }}</div>
+          <div class="cell-sub">{{ report.customerEmail }}</div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="reason">
+        <th mat-header-cell *matHeaderCellDef i18n="@@orderReports.columns.category">Catégorie</th>
+        <td mat-cell *matCellDef="let report">{{ reasonLabel(report.reason) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef i18n="@@orderReports.columns.status">Statut</th>
+        <td mat-cell *matCellDef="let report">
+          <span class="status" [class]="'status-' + report.status">
+            {{ statusLabel(report.status) }}
+          </span>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns"></tr>
+      <tr
+        mat-row
+        class="report-row"
+        *matRowDef="let row; columns: columns"
+        (click)="openReport(row)"
+      ></tr>
+    </table>
+
+    <mat-paginator
+      [length]="reports().length"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[10, 25, 50]"
+      (page)="onPage($event)"
+    />
+  }
+</section>

@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2.Products;
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.ProductsServiceClient;
 import com.petclinic.bffapigateway.dtos.Products.DeliveryType;
+import com.petclinic.bffapigateway.dtos.Products.ProductQuantityRequest;
 import com.petclinic.bffapigateway.dtos.Products.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v2.ProductController;
@@ -18,6 +19,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -428,4 +430,205 @@ class ProductControllerUnitTest {
                 });
     }
 
+    @Test
+    void whenGetAllProductsWithValidPriceRange_thenReturnProducts() {
+        when(productsServiceClient.getAllProducts(10.0, 100.0, null, null, null, null, null))
+                .thenReturn(Flux.just(productResponseDTO1));
+
+        webTestClient.get()
+                .uri(baseInventoryURL + "?minPrice=10&maxPrice=100")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .hasSize(1);
+
+        verify(productsServiceClient).getAllProducts(10.0, 100.0, null, null, null, null, null);
+    }
+
+    @Test
+    void whenGetAllProductsWithOnlyMinPriceAndMinRating_thenReturnProducts() {
+        when(productsServiceClient.getAllProducts(10.0, null, 1.0, null, null, null, null))
+                .thenReturn(Flux.just(productResponseDTO1));
+
+        webTestClient.get()
+                .uri(baseInventoryURL + "?minPrice=10&minRating=1")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .hasSize(1);
+
+        verify(productsServiceClient).getAllProducts(10.0, null, 1.0, null, null, null, null);
+    }
+
+    @Test
+    void whenGetAllProductsWithNegativeMaxPrice_thenReturnBadRequest() {
+        webTestClient.get()
+                .uri(baseInventoryURL + "?maxPrice=-5")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(response -> assertTrue(response.contains("Price and rating values cannot be negative")));
+
+        verifyNoInteractions(productsServiceClient);
+    }
+
+    @Test
+    void whenGetAllProductsWithNegativeMinRating_thenReturnBadRequest() {
+        webTestClient.get()
+                .uri(baseInventoryURL + "?minRating=-1")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(response -> assertTrue(response.contains("Price and rating values cannot be negative")));
+
+        verifyNoInteractions(productsServiceClient);
+    }
+
+    @Test
+    void whenGetAllProductsWithNegativeMaxRating_thenReturnBadRequest() {
+        webTestClient.get()
+                .uri(baseInventoryURL + "?maxRating=-1")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(String.class)
+                .value(response -> assertTrue(response.contains("Price and rating values cannot be negative")));
+
+        verifyNoInteractions(productsServiceClient);
+    }
+
+    @Test
+    void whenGetProductByValidProductId_thenReturnProduct() {
+        when(productsServiceClient.getProductByProductId(productResponseDTO1.getProductId()))
+                .thenReturn(Mono.just(productResponseDTO1));
+
+        webTestClient.get()
+                .uri(baseInventoryURL + "/" + productResponseDTO1.getProductId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(product -> assertEquals(productResponseDTO1.getProductId(), product.getProductId()));
+
+        verify(productsServiceClient).getProductByProductId(productResponseDTO1.getProductId());
+    }
+
+    @Test
+    void whenGetProductByNonExistentProductId_thenReturnNotFound() {
+        String nonExistentProductId = "non-existent-id";
+        when(productsServiceClient.getProductByProductId(nonExistentProductId))
+                .thenReturn(Mono.empty());
+
+        webTestClient.get()
+                .uri(baseInventoryURL + "/" + nonExistentProductId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(productsServiceClient).getProductByProductId(nonExistentProductId);
+    }
+
+    @Test
+    void whenIncrementRequestCount_thenReturnNoContent() {
+        when(productsServiceClient.requestCount(productResponseDTO1.getProductId()))
+                .thenReturn(Mono.empty());
+
+        webTestClient.patch()
+                .uri(baseInventoryURL + "/" + productResponseDTO1.getProductId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(productsServiceClient).requestCount(productResponseDTO1.getProductId());
+    }
+
+    @Test
+    void whenGetProductsByType_thenReturnProducts() {
+        when(productsServiceClient.getProductsByType("FOOD"))
+                .thenReturn(Flux.just(productResponseDTO1, productResponseDTO2));
+
+        webTestClient.get()
+                .uri(baseInventoryURL + "/filter/FOOD")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .hasSize(2);
+
+        verify(productsServiceClient).getProductsByType("FOOD");
+    }
+
+    @Test
+    void whenDecreaseProductQuantity_thenReturnNoContent() {
+        when(productsServiceClient.decreaseProductQuantity(productResponseDTO1.getProductId()))
+                .thenReturn(Mono.empty());
+
+        webTestClient.patch()
+                .uri(baseInventoryURL + "/" + productResponseDTO1.getProductId() + "/decrease")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+
+        verify(productsServiceClient).decreaseProductQuantity(productResponseDTO1.getProductId());
+    }
+
+    @Test
+    void whenChangeProductQuantity_thenReturnNoContent() {
+        ProductQuantityRequest request = new ProductQuantityRequest();
+        request.setProductQuantity(10);
+
+        when(productsServiceClient.changeProductQuantity(productResponseDTO1.getProductId(), 10))
+                .thenReturn(Mono.empty());
+
+        webTestClient.patch()
+                .uri(baseInventoryURL + "/" + productResponseDTO1.getProductId() + "/quantity")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(productsServiceClient).changeProductQuantity(productResponseDTO1.getProductId(), 10);
+    }
+
+    @Test
+    void whenChangeProductQuantityForNonExistentProduct_thenReturnNotFound() {
+        String nonExistentProductId = "non-existent-id";
+        ProductQuantityRequest request = new ProductQuantityRequest();
+        request.setProductQuantity(10);
+
+        when(productsServiceClient.changeProductQuantity(nonExistentProductId, 10))
+                .thenReturn(Mono.error(new NotFoundException("Product not found")));
+
+        webTestClient.patch()
+                .uri(baseInventoryURL + "/" + nonExistentProductId + "/quantity")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(productsServiceClient).changeProductQuantity(nonExistentProductId, 10);
+    }
+
+    @Test
+    void whenChangeProductQuantityServiceThrowsException_thenReturnInternalServerError() {
+        ProductQuantityRequest request = new ProductQuantityRequest();
+        request.setProductQuantity(10);
+
+        when(productsServiceClient.changeProductQuantity(productResponseDTO1.getProductId(), 10))
+                .thenReturn(Mono.error(new RuntimeException("Service unavailable")));
+
+        webTestClient.patch()
+                .uri(baseInventoryURL + "/" + productResponseDTO1.getProductId() + "/quantity")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        verify(productsServiceClient).changeProductQuantity(productResponseDTO1.getProductId(), 10);
+    }
 }

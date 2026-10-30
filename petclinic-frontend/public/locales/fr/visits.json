@@ -1,0 +1,59 @@
+{
+  "followUp": {
+    "label": "Suivi",
+    "confirm": "Confirmer",
+    "reschedule": "Reporter",
+    "rescheduleTitle": "Reporter la visite de suivi",
+    "confirmReschedule": "Confirmer la nouvelle heure",
+    "noSlots": "Aucune heure disponible pour cette date.",
+    "confirmed": "Votre visite de suivi est confirmée.",
+    "rescheduled": "Votre visite de suivi a été reportée.",
+    "error": "Cette visite n'a pas pu être mise à jour. Veuillez réessayer.",
+    "tooLate": "Cette visite de suivi ne peut plus être confirmée ni reportée, car elle commence dans moins de 24 heures.",
+    "confirmedNote": "Vous avez confirmé cette visite de suivi. À bientôt!",
+    "pet": "Animal",
+    "veterinarian": "Vétérinaire",
+    "date": "Date",
+    "time": "Heure disponible",
+    "loadingSlots": "Chargement des heures...",
+    "slotsError": "Impossible de charger les heures disponibles.",
+    "dateRequired": "La date est requise",
+    "timeRequired": "L'heure est requise"
+  },
+  "calendar": {
+    "backToList": "Retour à mes visites",
+    "title": "Mes rendez-vous",
+    "year": "Année",
+    "month": "Mois",
+    "week": "Semaine",
+    "today": "Aujourd’hui",
+    "loading": "Chargement de vos rendez-vous...",
+    "retry": "Réessayer",
+    "userNotFound": "Utilisateur introuvable. Veuillez vous connecter.",
+    "loadError": "Impossible de charger vos visites. Veuillez réessayer.",
+    "visitCount_one": "{{count}} visite",
+    "visitCount_other": "{{count}} visites",
+    "more_one": "+{{count}} autre",
+    "more_other": "+{{count}} autres",
+    "noAppointments": "Aucun rendez-vous",
+    "unknownPet": "Animal inconnu",
+    "vetName": "Dr {{firstName}} {{lastName}}",
+    "emergency": "Urgence",
+    "vetNote": "Note du vétérinaire :",
+    "status": {
+      "UPCOMING": "À venir",
+      "CONFIRMED": "Confirmée",
+      "COMPLETED": "Terminée",
+      "CANCELLED": "Annulée",
+      "ARCHIVED": "Archivée"
+    }
+  },
+  "reviews": {
+    "filterByRating": "Filtrer par note :",
+    "allRatings": "Toutes les notes",
+    "stars_one": "{{count}} étoile",
+    "stars_other": "{{count}} étoiles",
+    "noReviews": "Aucun avis disponible",
+    "noMatchingReviews": "Aucun avis ne correspond à cette note."
+  }
+}

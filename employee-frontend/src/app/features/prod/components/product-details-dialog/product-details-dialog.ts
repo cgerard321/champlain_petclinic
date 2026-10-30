@@ -1,11 +1,18 @@
 import { CurrencyPipe } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, LOCALE_ID, OnInit, signal } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { isApiError } from '@core/models/api-error';
 import { FileDetails } from '@features/prod/models/image.model';
+import {
+  localizedDeliveryType,
+  localizedProductDescription,
+  localizedProductName,
+  localizedProductStatus,
+  localizedProductType,
+} from '@features/prod/models/product-localization';
 import { Product } from '@features/prod/models/product.model';
 import { ImageService } from '@features/prod/services/image.service';
 import { ProductService } from '@features/prod/services/product.service';
@@ -24,6 +31,7 @@ export class ProductDetailsDialog implements OnInit {
   private readonly data = inject<ProductDetailsData>(MAT_DIALOG_DATA);
   private readonly productService = inject(ProductService);
   private readonly imageService = inject(ImageService);
+  private readonly locale = inject(LOCALE_ID);
 
   protected readonly product = signal<Product | null>(null);
   protected readonly image = signal<FileDetails | null>(null);
@@ -37,25 +45,36 @@ export class ProductDetailsDialog implements OnInit {
         this.isLoading.set(false);
         if (product.image?.fileData) {
           this.image.set(product.image);
-        } else if (product.imageId) {
-          this.imageService.getImage(product.imageId).subscribe({
-            next: (image) =>
-              this.image.set({
-                fileId: image.imageId,
-                fileName: image.imageName,
-                fileType: image.imageType,
-                fileData: image.imageData,
-              }),
-            error: () => undefined,
-          });
         }
       },
       error: (error: unknown) => {
         this.isLoading.set(false);
         this.errorMessage.set(
-          isApiError(error) ? error.message : 'Could not load product details.',
+          isApiError(error)
+            ? error.message
+            : $localize`:@@products.errors.details:Impossible de charger les détails du produit.`,
         );
       },
     });
+  }
+
+  protected productName(product: Product): string {
+    return localizedProductName(product, this.locale);
+  }
+
+  protected productDescription(product: Product): string {
+    return localizedProductDescription(product, this.locale);
+  }
+
+  protected productType(type: string): string {
+    return localizedProductType(type);
+  }
+
+  protected productStatus(status: Product['productStatus']): string {
+    return localizedProductStatus(status);
+  }
+
+  protected deliveryType(type: Product['deliveryType']): string {
+    return localizedDeliveryType(type);
   }
 }

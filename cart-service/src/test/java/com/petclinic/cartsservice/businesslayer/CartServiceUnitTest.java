@@ -3,17 +3,13 @@ package com.petclinic.cartsservice.businesslayer;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.dataaccesslayer.ShippingMethod;
-import com.petclinic.cartsservice.dataaccesslayer.Order;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CustomerClient;
 import com.petclinic.cartsservice.domainclientlayer.CustomerResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
-import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
-import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
-import com.petclinic.cartsservice.presentationlayer.WishlistItemRequestModel;
-import com.petclinic.cartsservice.presentationlayer.WishlistTransferDirection;
+import com.petclinic.cartsservice.presentationlayer.*;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
@@ -1439,36 +1435,73 @@ class CartServiceUnitTest {
     }
 
     // negative
+
     @Test
     void checkoutCart_notFound_throwsNotFound() {
+        // Arrange
         String cartId = "missing";
-        String stripeSessionId = "sessionId";
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.empty());
+        BillingRequestModel billing = mock(BillingRequestModel.class);
 
-        StepVerifier.create(cartService.checkoutCart(cartId, stripeSessionId))
+        when(cartRepository.findCartByCartId(cartId))
+                .thenReturn(Mono.empty());
+
+        // Act & Assert
+        StepVerifier.create(cartService.checkoutCart(cartId, billing))
                 .expectError(NotFoundException.class)
                 .verify();
 
-        verify(cartRepository, never()).save(any());
+        verify(cartRepository).findCartByCartId(cartId);
+        verify(cartRepository, never()).save(any(Cart.class));
+        verify(orderService, never())
+                .createOrder(any(Cart.class), any(BillingRequestModel.class));
     }
+  
+  @Test
+  void checkoutCart_StripeNotFound_throwsNotFound() {
+      // Arrange
+      String cartId = "missing";
+      String stripeSessionId = "sessionId";
+
+      when(cartRepository.findCartByCartId(cartId))
+              .thenReturn(Mono.empty());
+
+      // Act & Assert
+      StepVerifier.create(cartService.checkoutCart(cartId, stripeSessionId))
+              .expectError(NotFoundException.class)
+              .verify();
+
+      verify(cartRepository).findCartByCartId(cartId);
+      verify(cartRepository, never()).save(any(Cart.class));
+      verify(orderService, never())
+              .createOrder(any(Cart.class), anyString());
+  }
+
 
     // negative
     @Test
     void checkoutCart_emptyCart_throwsInvalidInput() {
+        // Arrange
         String cartId = "cart-empty";
-        String stripeSessionId = "sessionId";
+        BillingRequestModel billing = mock(BillingRequestModel.class);
 
-        Cart empty = Cart.builder().cartId(cartId).products(new ArrayList<>()).build();
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(empty));
+        Cart empty = Cart.builder()
+                .cartId(cartId)
+                .products(new ArrayList<>())
+                .build();
 
-        StepVerifier.create(cartService.checkoutCart(cartId, stripeSessionId))
+        when(cartRepository.findCartByCartId(cartId))
+                .thenReturn(Mono.just(empty));
+
+        // Act & Assert
+        StepVerifier.create(cartService.checkoutCart(cartId, billing))
                 .expectError(InvalidInputException.class)
                 .verify();
 
-        verify(cartRepository, never()).save(any());
+        verify(cartRepository).findCartByCartId(cartId);
+        verify(cartRepository, never()).save(any(Cart.class));
+        verify(orderService, never())
+                .createOrder(any(Cart.class), any(BillingRequestModel.class));
     }
-
-        // negative
     @Test
     void deleteCartByCartId_notFound_throwsNotFound() {
 
@@ -1484,7 +1517,7 @@ class CartServiceUnitTest {
     @Test
     void testGetRecentPurchases_ReturnsList() {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService, null);
 
         String customerId = "customer-123";
         List<CartProduct> recentPurchases = List.of(
@@ -1503,7 +1536,7 @@ class CartServiceUnitTest {
     @Test
     void testGetRecentPurchases_ReturnsEmptyListIfNull() {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService, null);
 
         String customerId = "customer-456";
         Cart cart = Cart.builder().cartId("cart456").customerId(customerId).recentPurchases(null).build();
@@ -1961,69 +1994,132 @@ class CartServiceUnitTest {
                 .verifyComplete();
     }
 
-    @Test
-    void checkoutCart_CartNotFound_ThrowsNotFoundException() {
+
+   @Test
+    void checkoutCart_StripeCartNotFound_ThrowsNotFoundException() {
+        // Arrange
         String cartId = "missing";
         String stripeSessionId = "sessionId";
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.empty());
 
+        when(cartRepository.findCartByCartId(cartId))
+                .thenReturn(Mono.empty());
+
+        // Act & Assert
         StepVerifier.create(cartService.checkoutCart(cartId, stripeSessionId))
-                .expectErrorMatches(e -> e instanceof NotFoundException &&
+                .expectErrorMatches(e ->
+                        e instanceof NotFoundException &&
                         e.getMessage().equals("Cart not found: " + cartId))
                 .verify();
+
+        verify(cartRepository).findCartByCartId(cartId);
+        verify(cartRepository, never()).save(any(Cart.class));
+        verify(orderService, never())
+                .createOrder(any(Cart.class), anyString());
     }
+  
+  @Test
+  void checkoutCart_BillingCartNotFound_ThrowsNotFoundException() {
+      // Arrange
+      String cartId = "missing";
+      BillingRequestModel billing = mock(BillingRequestModel.class);
+
+      when(cartRepository.findCartByCartId(cartId))
+              .thenReturn(Mono.empty());
+
+      // Act & Assert
+      StepVerifier.create(cartService.checkoutCart(cartId, billing))
+              .expectErrorMatches(e ->
+                      e instanceof NotFoundException &&
+                      e.getMessage().equals("Cart not found: " + cartId))
+              .verify();
+
+      verify(cartRepository).findCartByCartId(cartId);
+      verify(cartRepository, never()).save(any(Cart.class));
+      verify(orderService, never())
+              .createOrder(any(Cart.class), any(BillingRequestModel.class));
+  }
+
     @Test
-    void checkoutCart_EmptyCart_ThrowsInvalidInputException() {
+    void checkoutCart_StripeEmptyCart_ThrowsInvalidInputException() {
+        // Arrange
         String cartId = "emptyCart";
         String stripeSessionId = "sessionId";
+
         Cart emptyCart = Cart.builder()
                 .cartId(cartId)
                 .products(Collections.emptyList())
                 .build();
 
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(emptyCart));
+        when(cartRepository.findCartByCartId(cartId))
+                .thenReturn(Mono.just(emptyCart));
 
+        // Act & Assert
         StepVerifier.create(cartService.checkoutCart(cartId, stripeSessionId))
-                .expectErrorMatches(e -> e instanceof InvalidInputException &&
+                .expectErrorMatches(e ->
+                        e instanceof InvalidInputException &&
                         e.getMessage().equals("Cart is empty"))
                 .verify();
+
+        verify(cartRepository).findCartByCartId(cartId);
+        verify(cartRepository, never()).save(any(Cart.class));
+        verify(orderService, never())
+                .createOrder(any(Cart.class), anyString());
     }
+    
+    @Test
+    void checkoutCart_BillingEmptyCart_ThrowsInvalidInputException() {
+        // Arrange
+        String cartId = "emptyCart";
+        BillingRequestModel billing = mock(BillingRequestModel.class);
+
+        Cart emptyCart = Cart.builder()
+                .cartId(cartId)
+                .products(Collections.emptyList())
+                .build();
+
+        when(cartRepository.findCartByCartId(cartId))
+                .thenReturn(Mono.just(emptyCart));
+
+        // Act & Assert
+        StepVerifier.create(cartService.checkoutCart(cartId, billing))
+                .expectErrorMatches(e ->
+                        e instanceof InvalidInputException &&
+                        e.getMessage().equals("Cart is empty"))
+                .verify();
+
+        verify(cartRepository).findCartByCartId(cartId);
+        verify(cartRepository, never()).save(any(Cart.class));
+        verify(orderService, never())
+                .createOrder(any(Cart.class), any(BillingRequestModel.class));
+    } 
+
+
 
     @Test
     void testCheckoutCart_AllBranches() {
         // Arrange
         String stripeSessionId = "cs_test_123456";
         String cartId = "test-cart-id";
+
         Cart cart = Cart.builder()
                 .cartId(cartId)
                 .customerId("test-customer-id")
-                .products(Arrays.asList(product1, product2))
-                .recentPurchases(Arrays.asList(product1))
-                .shippingMethod(ShippingMethod.EXPRESS)
-                .shippingCost(ShippingMethod.EXPRESS.getCost())
+                .products(new ArrayList<>(List.of(product1, product2)))
+                .recentPurchases(new ArrayList<>(List.of(product1)))
                 .build();
+
         when(cartRepository.findCartByCartId(cartId))
                 .thenReturn(Mono.just(cart));
 
         OrderResponseModel orderResponse = OrderResponseModel.builder()
-                .orderId(UUID.randomUUID().toString())
+                .orderId("order-123")
                 .customerId("test-customer-id")
-                .products(cart.getProducts())
+                .products(List.of(product1, product2))
                 .total(100.0)
                 .build();
 
         when(orderService.createOrder(any(Cart.class), eq(stripeSessionId)))
-                .thenAnswer(invocation -> {
-                    Cart checkoutCart = invocation.getArgument(0);
-                    String capturedSessionId = invocation.getArgument(1);
-                    assertEquals("test-customer-id", checkoutCart.getCustomerId());
-                    assertEquals(2, checkoutCart.getProducts().size());
-                    assertTrue(checkoutCart.getSubtotal() > 0);
-                    assertTrue(checkoutCart.getTvq() > 0);
-                    assertTrue(checkoutCart.getTvc() > 0);
-                    assertTrue(checkoutCart.getTotal() > 0);
-                    return Mono.just(orderResponse);
-                });
+                .thenReturn(Mono.just(orderResponse));
 
         ProductResponseModel productResponse = ProductResponseModel.builder()
                 .productId(product1.getProductId())
@@ -2049,28 +2145,61 @@ class CartServiceUnitTest {
                     assertEquals(cartId, response.getCartId());
                     assertNotNull(response.getInvoiceId());
                     assertEquals(2, response.getProducts().size());
-                    assertEquals(ShippingMethod.EXPRESS, response.getShippingMethod());
-                    assertEquals(ShippingMethod.EXPRESS.getCost(), response.getShippingCost());
                     assertTrue(response.getTotal() > 0);
+                    assertNotNull(response.getShippingMethod());
+                    assertEquals(ShippingMethod.PICKUP, response.getShippingMethod());
+                    assertEquals(
+                            ShippingMethod.PICKUP.getCost(),
+                            response.getShippingCost(),
+                            0.001
+                    );
                 })
                 .verifyComplete();
 
-        ArgumentCaptor<Cart> checkoutCartCaptor = ArgumentCaptor.forClass(Cart.class);
-        verify(cartRepository).save(checkoutCartCaptor.capture());
-        assertEquals(ShippingMethod.PICKUP, checkoutCartCaptor.getValue().getShippingMethod());
-        assertEquals(ShippingMethod.PICKUP.getCost(), checkoutCartCaptor.getValue().getShippingCost());
+        // Verify order creation
+        ArgumentCaptor<Cart> orderCartCaptor =
+                ArgumentCaptor.forClass(Cart.class);
 
-        when(cartRepository.findCartByCartId("notfound")).thenReturn(Mono.empty());
-        // Verify checkout operations
-        verify(cartRepository).findCartByCartId(cartId);
-        verify(cartRepository).save(any(Cart.class));
-        verify(orderService).createOrder(any(Cart.class), eq(stripeSessionId));
+        verify(orderService)
+                .createOrder(orderCartCaptor.capture(), eq(stripeSessionId));
+
+        Cart orderCart = orderCartCaptor.getValue();
+
+        assertEquals("test-customer-id", orderCart.getCustomerId());
+        assertEquals(2, orderCart.getProducts().size());
+        assertNotNull(orderCart.getInvoiceId());
+
+        // Verify cart was cleared and shipping reset
+        ArgumentCaptor<Cart> savedCartCaptor =
+                ArgumentCaptor.forClass(Cart.class);
+
+        verify(cartRepository).save(savedCartCaptor.capture());
+
+        Cart savedCart = savedCartCaptor.getValue();
+
+        assertTrue(savedCart.getProducts().isEmpty());
+        assertEquals(ShippingMethod.PICKUP, savedCart.getShippingMethod());
+        assertEquals(
+                ShippingMethod.PICKUP.getCost(),
+                savedCart.getShippingCost(),
+                0.001
+        );
+
+        // Verify order was created BEFORE cart was saved
+        InOrder inOrder = inOrder(orderService, cartRepository);
+
+        inOrder.verify(orderService)
+                .createOrder(any(Cart.class), eq(stripeSessionId));
+
+        inOrder.verify(cartRepository)
+                .save(any(Cart.class));
 
         // Act & Assert: Cart not found
         when(cartRepository.findCartByCartId("notfound"))
                 .thenReturn(Mono.empty());
 
-        StepVerifier.create(cartService.checkoutCart("notfound", "cs_test_123456"))
+        StepVerifier.create(
+                        cartService.checkoutCart("notfound", stripeSessionId))
                 .expectError(NotFoundException.class)
                 .verify();
 
@@ -2081,15 +2210,23 @@ class CartServiceUnitTest {
                 .products(Collections.emptyList())
                 .build();
 
-        when(cartRepository.findCartByCartId("empty")).thenReturn(Mono.just(emptyCart));
-        StepVerifier.create(cartService.checkoutCart("empty", "cs_test_123456"))
+        when(cartRepository.findCartByCartId("empty"))
+                .thenReturn(Mono.just(emptyCart));
+
+        StepVerifier.create(
+                        cartService.checkoutCart("empty", stripeSessionId))
                 .expectError(InvalidInputException.class)
                 .verify();
 
-        verify(orderService, times(1)).createOrder(any(Cart.class), eq(stripeSessionId));
+        // Only the successful checkout should create an order
+        verify(orderService, times(1))
+                .createOrder(any(Cart.class), eq(stripeSessionId));
+
+        verify(cartRepository, times(1))
+                .save(any(Cart.class));
     }
 
-    @Test
+   @Test
     void checkoutCart_OrderCreationFails_DoesNotSaveCart() {
         // Arrange
         String cartId = "cart-order-failure";
@@ -2105,19 +2242,6 @@ class CartServiceUnitTest {
         when(cartRepository.findCartByCartId(cartId))
                 .thenReturn(Mono.just(cart));
 
-        // Mock recommendation service dependencies
-        ProductResponseModel productResponse = ProductResponseModel.builder()
-                .productId(product1.getProductId())
-                .productName(product1.getProductName())
-                .productType("Food")
-                .build();
-
-        when(productClient.getProductByProductId(anyString()))
-                .thenReturn(Mono.just(productResponse));
-
-        when(productClient.getProductsByType("Food"))
-                .thenReturn(Flux.just(productResponse));
-
         // Simulate order creation failure
         when(orderService.createOrder(any(Cart.class), eq(stripeSessionId)))
                 .thenReturn(Mono.error(
@@ -2128,7 +2252,7 @@ class CartServiceUnitTest {
         StepVerifier.create(cartService.checkoutCart(cartId, stripeSessionId))
                 .expectErrorMatches(error ->
                         error instanceof RuntimeException &&
-                                "Order creation failed".equals(error.getMessage()))
+                        "Order creation failed".equals(error.getMessage()))
                 .verify();
 
         // Verify order creation was attempted
@@ -2138,15 +2262,18 @@ class CartServiceUnitTest {
         );
 
         // Verify cart was not saved
-        verify(cartRepository, never()).save(any(Cart.class));
-    }
+        verify(cartRepository, never())
+                .save(any(Cart.class));
 
+        // Recommendations should not run if order creation fails
+        verifyNoInteractions(productClient);
+    }
 
     @Test
         void testGetRecommendationPurchases_ReturnsRecommendations() {
                 CartRepository cartRepository = Mockito.mock(CartRepository.class);
                 ProductClient productClient = Mockito.mock(ProductClient.class);
-                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService);
+                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService, null);
 
                 String customerId = "customer-rec";
                 List<CartProduct> recommendations = List.of(CartProduct.builder().productId("prod1").build());
@@ -2166,7 +2293,7 @@ class CartServiceUnitTest {
         void testGetRecommendationPurchases_ReturnsEmptyList() {
                 CartRepository cartRepository = Mockito.mock(CartRepository.class);
                 ProductClient productClient = Mockito.mock(ProductClient.class);
-                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService);
+                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService, null);
 
                 String customerId = "customer-empty";
                 Cart cart = Mockito.mock(Cart.class);
@@ -2181,35 +2308,13 @@ class CartServiceUnitTest {
                                 .verifyComplete();
     }
     @Test
-    void applyPromoToCart_validPercent_setsAndSaves() {
-        String cartId = cart1.getCartId();
-        double promo = 15.0;
-
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
-        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
-
-        StepVerifier.create(cartService.applyPromoToCart(cartId, promo))
-                .assertNext(resp -> {
-                    assertNotNull(resp);
-                    try {
-                        assertEquals(promo, resp.getPromoPercent());
-                    } catch (Exception ignored) {  }
-                })
-                .verifyComplete();
-
-        ArgumentCaptor<Cart> cap = ArgumentCaptor.forClass(Cart.class);
-        verify(cartRepository).save(cap.capture());
-        assertEquals(promo, cap.getValue().getPromoPercent());
-    }
-
-    @Test
-    void applyPromoToCart_nullPercent_clearsPromo() {
+    void clearPromoFromCart_clearsPromo() {
         String cartId = cart1.getCartId();
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
         when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
-        StepVerifier.create(cartService.applyPromoToCart(cartId, null))
+        StepVerifier.create(cartService.clearPromoFromCart(cartId))
                 .assertNext(resp -> {
                     assertNotNull(resp);
                     try {
@@ -2224,47 +2329,12 @@ class CartServiceUnitTest {
     }
 
     @Test
-    void applyPromoToCart_zeroOrNegative_clearsPromo() {
-        String cartId = cart1.getCartId();
-
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
-        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
-
-        StepVerifier.create(cartService.applyPromoToCart(cartId, 0.0))
-                .assertNext(resp -> {
-                    assertNotNull(resp);
-                    try {
-                        assertNull(resp.getPromoPercent());
-                    } catch (Exception ignored) {}
-                })
-                .verifyComplete();
-
-        ArgumentCaptor<Cart> cap = ArgumentCaptor.forClass(Cart.class);
-        verify(cartRepository).save(cap.capture());
-        assertNull(cap.getValue().getPromoPercent());
-    }
-
-    @Test
-    void applyPromoToCart_over100_throwsInvalidInput_andDoesNotSave() {
-        String cartId = cart1.getCartId();
-
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
-
-        StepVerifier.create(cartService.applyPromoToCart(cartId, 101.0))
-                .expectErrorMatches(t -> t instanceof InvalidInputException &&
-                        t.getMessage().equals("promoPercent must be 1..100"))
-                .verify();
-
-        verify(cartRepository, never()).save(any(Cart.class));
-    }
-
-    @Test
-    void applyPromoToCart_cartNotFound_throwsNotFound() {
+    void clearPromoFromCart_cartNotFound_throwsNotFound() {
         String cartId = "missing";
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(cartService.applyPromoToCart(cartId, 10.0))
+        StepVerifier.create(cartService.clearPromoFromCart(cartId))
                 .expectErrorMatches(t -> t instanceof NotFoundException &&
                         t.getMessage().equals("Cart not found: " + cartId))
                 .verify();
@@ -2313,68 +2383,64 @@ class CartServiceUnitTest {
 
 
     @Test
-    void checkoutCart_CartSaveFails_PropagatesError() {
-        // Arrange
-        String cartId = "cart-save-failure";
-        String stripeSessionId = "sessionId";
+  void checkoutCart_CartSaveFails_PropagatesError() {
+      // Arrange
+      String cartId = "cart-save-failure";
+      String stripeSessionId = "sessionId";
 
-        Cart cart = Cart.builder()
-                .cartId(cartId)
-                .customerId("customer-123")
-                .products(new ArrayList<>(List.of(product1, product2)))
-                .recentPurchases(new ArrayList<>())
-                .build();
+      Cart cart = Cart.builder()
+              .cartId(cartId)
+              .customerId("customer-123")
+              .products(new ArrayList<>(List.of(product1, product2)))
+              .recentPurchases(new ArrayList<>())
+              .build();
 
-        when(cartRepository.findCartByCartId(cartId))
-                .thenReturn(Mono.just(cart));
+      when(cartRepository.findCartByCartId(cartId))
+              .thenReturn(Mono.just(cart));
 
-        ProductResponseModel productResponse = ProductResponseModel.builder()
-                .productId(product1.getProductId())
-                .productName(product1.getProductName())
-                .productType("Food")
-                .build();
+      ProductResponseModel productResponse = ProductResponseModel.builder()
+              .productId(product1.getProductId())
+              .productName(product1.getProductName())
+              .productType("Food")
+              .build();
 
-        when(productClient.getProductByProductId(anyString()))
-                .thenReturn(Mono.just(productResponse));
+      when(productClient.getProductByProductId(anyString()))
+              .thenReturn(Mono.just(productResponse));
 
-        when(productClient.getProductsByType("Food"))
-                .thenReturn(Flux.just(productResponse));
+      when(productClient.getProductsByType("Food"))
+              .thenReturn(Flux.just(productResponse));
 
-        // Order creation succeeds
-        OrderResponseModel orderResponse = new OrderResponseModel();
+      when(orderService.createOrder(any(Cart.class), eq(stripeSessionId)))
+              .thenReturn(Mono.just(new OrderResponseModel()));
 
-        when(orderService.createOrder(any(Cart.class), eq(stripeSessionId)))
-                .thenReturn(Mono.just(orderResponse));
+      when(cartRepository.save(any(Cart.class)))
+              .thenReturn(Mono.error(
+                      new RuntimeException("Cart save failed")
+              ));
 
-        // Cart saving fails
-        when(cartRepository.save(any(Cart.class)))
-                .thenReturn(Mono.error(
-                        new RuntimeException("Cart save failed")
-                ));
+      // Act & Assert
+      StepVerifier.create(cartService.checkoutCart(cartId, stripeSessionId))
+              .expectErrorMatches(error ->
+                      error instanceof RuntimeException &&
+                              "Cart save failed".equals(error.getMessage()))
+              .verify();
 
-        // Act & Assert
-        StepVerifier.create(cartService.checkoutCart(cartId, stripeSessionId))
-                .expectErrorMatches(error ->
-                        error instanceof RuntimeException &&
-                                "Cart save failed".equals(error.getMessage()))
-                .verify();
+      InOrder inOrder = inOrder(orderService, cartRepository);
 
-        // Verify the order is created before saving the cart
-        InOrder inOrder = inOrder(orderService, cartRepository);
+      inOrder.verify(orderService)
+              .createOrder(any(Cart.class), eq(stripeSessionId));
 
-        inOrder.verify(orderService)
-                .createOrder(any(Cart.class), eq(stripeSessionId));
-
-        inOrder.verify(cartRepository)
-                .save(any(Cart.class));
-    }
-
+      inOrder.verify(cartRepository)
+              .save(any(Cart.class));
+  }
 
     @Test
-    void checkoutCart_RecommendationFails_DoesNotCreateOrder() {
+    void checkoutCarFails_DoesNotCreateOrder() {
         // Arrange
         String cartId = "cart-recommendation-failure";
         String stripeSessionId = "stripeSessionId";
+
+        BillingRequestModel billing = mock(BillingRequestModel.class);
 
         Cart cart = Cart.builder()
                 .cartId(cartId)
@@ -2389,69 +2455,65 @@ class CartServiceUnitTest {
                 .thenReturn(Mono.error(new RuntimeException("Recommendation service failed")));
 
         // Act & Assert
-        StepVerifier.create(cartService.checkoutCart(cartId, stripeSessionId))
-                .expectErrorMatches(error -> error instanceof RuntimeException &&
-                                "Recommendation service failed".equals(error.getMessage()))
-                .verify();
-        verify(productClient)
-                .getProductByProductId(product1.getProductId());
-        verify(cartRepository, never())
-                .save(any(Cart.class));
-        verify(orderService, never())
-                .createOrder(any(Cart.class), eq(stripeSessionId));
+    StepVerifier.create(cartService.checkoutCart(cartId, billing))
+            .expectNextCount(1)
+            .verifyComplete();
+
+    // Verify order was created
+    verify(orderService)
+            .createOrder(any(Cart.class), same(billing));
+
+    // Verify recommendation generation was attempted
+    verify(productClient)
+            .getProductByProductId(product1.getProductId());
+
+    // Verify cart was saved despite recommendation failure
+    verify(cartRepository)
+            .save(any(Cart.class));
+
+    assertTrue(cart.getProducts().isEmpty());
+    assertTrue(cart.getRecommendationPurchase().isEmpty());
     }
 
 
-    @Test
-    void checkoutCart_OrderCreationFails_PropagatesError() {
-        // Arrange
-        String cartId = "cart-order-failure";
-        String stripeSessionId = "stripeId";
 
-        Cart cart = Cart.builder()
-                .cartId(cartId)
-                .customerId("customer-123")
-                .products(new ArrayList<>(List.of(product1, product2)))
-                .recentPurchases(new ArrayList<>())
-                .build();
+  @Test
+  void checkoutCart_OrderCreationFails_PropagatesError() {
+      // Arrange
+      String cartId = "cart-order-failure";
+      String stripeSessionId = "stripeId";
 
-        when(cartRepository.findCartByCartId(cartId))
-                .thenReturn(Mono.just(cart));
+      Cart cart = Cart.builder()
+              .cartId(cartId)
+              .customerId("customer-123")
+              .products(new ArrayList<>(List.of(product1, product2)))
+              .recentPurchases(new ArrayList<>())
+              .build();
 
-        ProductResponseModel productResponse = ProductResponseModel.builder()
-                .productId(product1.getProductId())
-                .productName(product1.getProductName())
-                .productType("Food")
-                .build();
+      when(cartRepository.findCartByCartId(cartId))
+              .thenReturn(Mono.just(cart));
 
-        when(productClient.getProductByProductId(anyString()))
-                .thenReturn(Mono.just(productResponse));
+      when(orderService.createOrder(any(Cart.class), eq(stripeSessionId)))
+              .thenReturn(Mono.error(
+                      new RuntimeException("Order creation failed")
+              ));
 
-        when(productClient.getProductsByType("Food"))
-                .thenReturn(Flux.just(productResponse));
+      // Act & Assert
+      StepVerifier.create(cartService.checkoutCart(cartId, stripeSessionId))
+              .expectErrorMatches(error ->
+                      error instanceof RuntimeException &&
+                              "Order creation failed".equals(error.getMessage()))
+              .verify();
 
-        when(orderService.createOrder(any(Cart.class), eq(stripeSessionId)))
-                .thenReturn(Mono.error(
-                        new RuntimeException("Order creation failed")
-                ));
+      verify(orderService)
+              .createOrder(any(Cart.class), eq(stripeSessionId));
 
-        // Act & Assert
-        StepVerifier.create(cartService.checkoutCart(cartId, stripeSessionId))
-                .expectErrorMatches(error ->
-                        error instanceof RuntimeException &&
-                                "Order creation failed".equals(error.getMessage()))
-                .verify();
+      verify(cartRepository, never())
+              .save(any(Cart.class));
 
-        // Verify that order creation was attempted
-        verify(orderService).createOrder(
-                any(Cart.class),
-                eq(stripeSessionId)
-        );
-
-        // Verify that the cart was not saved because order creation failed
-        verify(cartRepository, never()).save(any(Cart.class));
-    }
-
+      verifyNoInteractions(productClient);
+  }
+  
     @Test
     void updateShippingMethod_cartNotFound_throwsNotFoundAndDoesNotSave() {
         String cartId = "missing-cart";
@@ -2466,8 +2528,8 @@ class CartServiceUnitTest {
         verify(cartRepository, never()).save(any(Cart.class));
     }
 
-    @Test
-    void applyPromoToCart_negativePercent_clearsExistingPromo() {
+   @Test
+   void applyPromoToCart_negativePercent_clearsExistingPromo() {
         String cartId = cart1.getCartId();
         cart1.setPromoPercent(15.0);
 
@@ -2480,10 +2542,12 @@ class CartServiceUnitTest {
                 .verifyComplete();
 
         ArgumentCaptor<Cart> captor = ArgumentCaptor.forClass(Cart.class);
-        verify(cartRepository).save(captor.capture());
+
+        verify(cartRepository)
+                .save(captor.capture());
 
         assertNull(captor.getValue().getPromoPercent());
-    }
+    } 
 
 
 

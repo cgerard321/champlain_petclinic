@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.petclinic.bffapigateway.presentationlayer.v1.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
+import static com.petclinic.bffapigateway.presentationlayer.v1.mockservers.MockServerConfigAuthService.jwtTokenForValidVet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -283,6 +284,29 @@ public class CustomerControllerV1IntegrationTests {
                 .expectStatus().isUnauthorized();
     }
 
+    @Test
+    void whenGetSoftDeletedCustomers_asVet_thenReturnForbidden() {
+        mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
 
+        webTestClient.get()
+                .uri(CUSTOMER_BASE_PATH + "/soft-deleted")
+                .cookie("Bearer", jwtTokenForValidVet)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .exchange()
+                .expectStatus().isForbidden();
+    }
 
+    @Test
+    void whenReactivateCustomer_asVet_thenReturnForbidden() {
+        mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
+
+        webTestClient.patch()
+                .uri(CUSTOMER_BASE_PATH + "/{customerId}/reactivate", CUSTOMER_ID)
+                .cookie("Bearer", jwtTokenForValidVet)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isForbidden();
+    }
 }

@@ -1,7 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import {
   IsAdmin,
-  IsInventoryManager,
   IsCustomer,
   IsReceptionist,
   IsVet,
@@ -26,7 +25,6 @@ export function NavBar(): JSX.Element {
   const { cartCount, refreshFromAPI } = useCart();
   const navigate = useNavigate();
   const isAdmin = IsAdmin();
-  const isInventoryManager = IsInventoryManager();
   const isReceptionist = IsReceptionist();
   const isVet = IsVet();
   const isCustomer = IsCustomer();
@@ -125,24 +123,11 @@ export function NavBar(): JSX.Element {
                     )}
                   </NavDropdown>
                 )}
-                {isAdmin && (
-                  <NavDropdown title={t('nav.users')} id="users-dropdown">
-                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllUsers}>
-                      {t('nav.usersList')}
-                    </NavDropdown.Item>
-                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllRoles}>
-                      {t('nav.rolesList')}
-                    </NavDropdown.Item>
-                  </NavDropdown>
+                {isCustomer && !hasStaffVisits && (
+                  <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
+                    {t('nav.bills')}
+                  </Nav.Link>
                 )}
-                {!isAdmin &&
-                  !isInventoryManager &&
-                  !isVet &&
-                  !isReceptionist && (
-                    <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
-                      {t('nav.bills')}
-                    </Nav.Link>
-                  )}
                 {isCustomer && !hasStaffVisits && (
                   <NavDropdown
                     title={t('nav.visits')}
@@ -250,12 +235,21 @@ export function NavBar(): JSX.Element {
             {user.userId ? (
               <NavDropdown title={user.username} id="user-dropdown">
                 {isCustomer && (
-                  <NavDropdown.Item
-                    as={Link}
-                    to={AppRoutePaths.CustomerProfile}
-                  >
-                    {t('nav.profile')}
-                  </NavDropdown.Item>
+                  <>
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.CustomerProfile}
+                    >
+                      {t('nav.profile')}
+                    </NavDropdown.Item>
+
+                    <NavDropdown.Item
+                      as={Link}
+                      to={AppRoutePaths.CustomerOrderHistory}
+                    >
+                      {t('nav.orderHistory')}
+                    </NavDropdown.Item>
+                  </>
                 )}
                 {isAdmin && (
                   <NavDropdown.Item as={Link} to={AppRoutePaths.Home}>

@@ -1,11 +1,14 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.BusinessLayer.Availability.AvailabilityService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.Prescriptions.PrescriptionService;
 import com.petclinic.visits.visitsservicenew.DataLayer.CancellationReason;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.Role;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FileResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.FileService.FilesServiceClient;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.CancellationRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.RescheduleRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.TimeSlotDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VetNoteRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.Prescriptions.PrescriptionResponseDTO;
@@ -78,6 +81,9 @@ class VisitServiceImplTest {
 
     @MockBean
     PrescriptionService prescriptionService;
+
+    @MockBean
+    private AvailabilityService availabilityService;
 
 
 //    private final Long dbSize = 2L;
@@ -335,6 +341,7 @@ class VisitServiceImplTest {
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(new PetResponseDTO()));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(new VetDTO()));
         when(visitRepo.findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString())).thenReturn(Flux.empty());
+        when(visitRepo.existsByVisitId(anyString())).thenReturn(Mono.just(false));
         when(entityDtoUtil.toVisitEntity(any())).thenReturn(visit1);
         when(visitRepo.insert(visit1)).thenReturn(Mono.just(visit1));
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
@@ -1118,5 +1125,166 @@ class VisitServiceImplTest {
                         VetNoteRequestDTO.builder().vetNote("Keep giving the meds").build()))
                 .expectError(NotFoundException.class)
                 .verify();
+    }
+    private Visit buildFollowUpVisit(Status status, LocalDateTime visitDate) {
+        Visit visit = buildVisit("Follow-up check");
+        visit.setStatus(status);
+        visit.setVisitDate(visitDate);
+        visit.setFollowUpOfVisitId("original-visit-id");
+        return visit;
+    }
+
+    @Test
+    void confirmFollowUpVisit_whenUpcomingFollowUp_thenSetConfirmed() {
+        Visit visit = buildFollowUpVisit(Status.UPCOMING, LocalDateTime.now().plusDays(3));
+        VisitResponseDTO response = buildVisitResponseDTO();
+        response.setStatus(Status.CONFIRMED);
+
+        when(visitRepo.findByVisitId(visit.getVisitId())).thenReturn(Mono.just(visit));
+        when(visitRepo.save(visit)).thenReturn(Mono.just(visit));
+        when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(response));
+
+        StepVerifier.create(visitService.confirmFollowUpVisit(visit.getVisitId()))
+                .expectNext(response)
+                .verifyComplete();
+
+        assertEquals(Status.CONFIRMED, visit.getStatus());
+        verify(visitRepo, times(1)).save(visit);
+    }
+
+    @Test
+    void confirmFollowUpVisit_whenNotFollowUp_thenThrowBadRequest() {
+        Visit visit = buildFollowUpVisit(Status.UPCOMING, LocalDateTime.now().plusDays(3));
+        visit.setFollowUpOfVisitId(null);
+
+        when(visitRepo.findByVisitId(visit.getVisitId())).thenReturn(Mono.just(visit));
+
+        StepVerifier.create(visitService.confirmFollowUpVisit(visit.getVisitId()))
+                .expectError(BadRequestException.class)
+                .verify();
+
+        verify(visitRepo, never()).save(any());
+    }
+
+    @Test
+    void confirmFollowUpVisit_whenLessThan24HoursAway_thenThrowBadRequest() {
+        Visit visit = buildFollowUpVisit(Status.UPCOMING, LocalDateTime.now().plusHours(5));
+
+        when(visitRepo.findByVisitId(visit.getVisitId())).thenReturn(Mono.just(visit));
+
+        StepVerifier.create(visitService.confirmFollowUpVisit(visit.getVisitId()))
+                .expectError(BadRequestException.class)
+                .verify();
+
+        verify(visitRepo, never()).save(any());
+    }
+
+    @Test
+    void confirmFollowUpVisit_whenAlreadyConfirmed_thenThrowBadRequest() {
+        Visit visit = buildFollowUpVisit(Status.CONFIRMED, LocalDateTime.now().plusDays(3));
+
+        when(visitRepo.findByVisitId(visit.getVisitId())).thenReturn(Mono.just(visit));
+
+        StepVerifier.create(visitService.confirmFollowUpVisit(visit.getVisitId()))
+                .expectError(BadRequestException.class)
+                .verify();
+
+        verify(visitRepo, never()).save(any());
+    }
+
+    @Test
+    void confirmFollowUpVisit_whenVisitDoesNotExist_thenThrowNotFound() {
+        when(visitRepo.findByVisitId("missing")).thenReturn(Mono.empty());
+
+        StepVerifier.create(visitService.confirmFollowUpVisit("missing"))
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
+    void rescheduleFollowUpVisit_whenSlotIsFree_thenMoveVisitToNewDate() {
+        Visit visit = buildFollowUpVisit(Status.UPCOMING, LocalDateTime.now().plusDays(3));
+        LocalDateTime newDate = LocalDateTime.now().plusDays(5).withHour(9).withMinute(0).withSecond(0).withNano(0);
+        VisitResponseDTO response = buildVisitResponseDTO();
+
+        when(visitRepo.findByVisitId(visit.getVisitId())).thenReturn(Mono.just(visit));
+        when(availabilityService.getAvailableTimeSlotsForDate(visit.getPractitionerId(), newDate.toLocalDate()))
+                .thenReturn(Flux.just(new TimeSlotDTO(newDate, newDate.plusHours(1), true)));
+        when(visitRepo.save(visit)).thenReturn(Mono.just(visit));
+        when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(response));
+
+        StepVerifier.create(visitService.rescheduleFollowUpVisit(visit.getVisitId(),
+                        RescheduleRequestDTO.builder().visitDate(newDate).build()))
+                .expectNext(response)
+                .verifyComplete();
+
+        assertEquals(Status.UPCOMING, visit.getStatus());
+        assertEquals(newDate, visit.getVisitDate());
+        assertEquals(newDate.plusHours(1), visit.getVisitEndDate());
+        verify(visitRepo, times(1)).save(visit);
+    }
+
+    @Test
+    void rescheduleFollowUpVisit_whenAlreadyConfirmed_thenThrowBadRequest() {
+        Visit visit = buildFollowUpVisit(Status.CONFIRMED, LocalDateTime.now().plusDays(3));
+
+        when(visitRepo.findByVisitId(visit.getVisitId())).thenReturn(Mono.just(visit));
+
+        StepVerifier.create(visitService.rescheduleFollowUpVisit(visit.getVisitId(),
+                        RescheduleRequestDTO.builder().visitDate(LocalDateTime.now().plusDays(5)).build()))
+                .expectError(BadRequestException.class)
+                .verify();
+
+        verify(visitRepo, never()).save(any());
+    }
+
+    @Test
+    void rescheduleFollowUpVisit_whenSlotIsTaken_thenThrowBadRequest() {
+        Visit visit = buildFollowUpVisit(Status.UPCOMING, LocalDateTime.now().plusDays(3));
+        LocalDateTime newDate = LocalDateTime.now().plusDays(5).withHour(9).withMinute(0).withSecond(0).withNano(0);
+
+        when(visitRepo.findByVisitId(visit.getVisitId())).thenReturn(Mono.just(visit));
+        when(availabilityService.getAvailableTimeSlotsForDate(visit.getPractitionerId(), newDate.toLocalDate()))
+                .thenReturn(Flux.just(new TimeSlotDTO(newDate, newDate.plusHours(1), false)));
+
+        StepVerifier.create(visitService.rescheduleFollowUpVisit(visit.getVisitId(),
+                        RescheduleRequestDTO.builder().visitDate(newDate).build()))
+                .expectError(BadRequestException.class)
+                .verify();
+
+        verify(visitRepo, never()).save(any());
+    }
+
+    @Test
+    void rescheduleFollowUpVisit_whenVisitIsLessThan24HoursAway_thenThrowBadRequest() {
+        Visit visit = buildFollowUpVisit(Status.UPCOMING, LocalDateTime.now().plusHours(5));
+
+        when(visitRepo.findByVisitId(visit.getVisitId())).thenReturn(Mono.just(visit));
+
+        StepVerifier.create(visitService.rescheduleFollowUpVisit(visit.getVisitId(),
+                        RescheduleRequestDTO.builder().visitDate(LocalDateTime.now().plusDays(5)).build()))
+                .expectError(BadRequestException.class)
+                .verify();
+
+        verify(visitRepo, never()).save(any());
+    }
+
+    @Test
+    void rescheduleFollowUpVisit_whenNewDateIsLessThan24HoursAway_thenThrowBadRequest() {
+        StepVerifier.create(visitService.rescheduleFollowUpVisit("visitId",
+                        RescheduleRequestDTO.builder().visitDate(LocalDateTime.now().plusHours(5)).build()))
+                .expectError(BadRequestException.class)
+                .verify();
+
+        verify(visitRepo, never()).findByVisitId(anyString());
+    }
+
+    @Test
+    void rescheduleFollowUpVisit_whenDateIsMissing_thenThrowBadRequest() {
+        StepVerifier.create(visitService.rescheduleFollowUpVisit("visitId", new RescheduleRequestDTO()))
+                .expectError(BadRequestException.class)
+                .verify();
+
+        verify(visitRepo, never()).findByVisitId(anyString());
     }
 }

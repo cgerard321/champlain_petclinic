@@ -16,6 +16,8 @@ import defaultProfile from '@/assets/Customers/defaultProfilePicture.png';
 
 import './UpdateCustomerForm.css';
 import { useTranslation } from 'react-i18next';
+import AddressAutocomplete from './AddressAutocomplete';
+import { AddressSuggestionModel } from '../models/AddressSuggestionModel';
 
 const NewUpdateCustomerForm = ({
   customer,
@@ -70,6 +72,16 @@ const NewUpdateCustomerForm = ({
         [name]: '',
       }));
     }
+  };
+
+  const handleAddressSelect = (suggestion: AddressSuggestionModel): void => {
+    setFormCustomer(prev => ({
+      ...prev,
+      address: suggestion.address,
+      city: suggestion.city,
+      province: suggestion.province,
+    }));
+    setErrors(prev => ({ ...prev, address: '', city: '', province: '' }));
   };
 
   const handleUsernameChange = (
@@ -149,12 +161,11 @@ const NewUpdateCustomerForm = ({
 
       if (username !== userDetails.username) {
         await updateUsername(user.userId, username);
-
         await checkSession();
       }
 
       showToast(t('customerForm.updateSuccess'), 'success');
-
+      window.location.reload();
       onBackButtonClick();
     } catch (error) {
       console.error('Error updating customer:', error);
@@ -237,11 +248,10 @@ const NewUpdateCustomerForm = ({
 
             <p>
               <strong>{t('fields.address')}</strong>{' '}
-              <input
-                type="text"
-                name="address"
+              <AddressAutocomplete
                 value={formCustomer.address}
                 onChange={handleChange}
+                onSelect={handleAddressSelect}
               />
               {errors.address && (
                 <span className="error">{t(errors.address)}</span>
@@ -266,7 +276,7 @@ const NewUpdateCustomerForm = ({
                 value={formCustomer.province}
                 onChange={handleChange}
               >
-                <option value="">Select Province</option>
+                <option value="">{t('customerForm.selectProvince')}</option>
 
                 {provincesOfCanada.map(province => (
                   <option key={province} value={province}>
