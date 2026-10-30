@@ -20,4 +20,5 @@ export class Table<T> {
   readonly rows = input.required<readonly T[]>();
   readonly columns = input.required<readonly TableColumn<T>[]>();
   readonly rowId = input.required<(row: T) => string>();
+  readonly stackOnSmallScreens = input(false);
 }
