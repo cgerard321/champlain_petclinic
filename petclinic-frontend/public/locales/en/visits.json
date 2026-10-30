@@ -49,6 +49,10 @@
     }
   },
   "reviews": {
+    "addReview": "Add Review",
+    "completedAppointmentRequired": "You must have at least one completed appointment before you can leave a review.",
+    "checkingEligibility": "Checking review eligibility...",
+    "eligibilityUnavailable": "Unable to verify review eligibility. Please reload the page and try again.",
     "filterByRating": "Filter by rating:",
     "allRatings": "All ratings",
     "stars_one": "{{count}} star",
@@ -56,4 +60,5 @@
     "noReviews": "No reviews available",
     "noMatchingReviews": "No reviews found for this rating"
   }
+
 }

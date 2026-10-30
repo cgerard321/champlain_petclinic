@@ -39,6 +39,28 @@ class PromoCodeControllerUnitTest {
         client = WebTestClient.bindToController(controller).build();
     }
 
+    @Test
+    void createAutomaticPromo_preservesEmployeeSettings() {
+        PromoCodeRequestDTO request = sampleRequest();
+        request.setAutomatic(true);
+        request.setMinimumPurchaseAmount(100.0);
+        PromoCodeResponseDTO response = samplePromo("automatic");
+        response.setAutomatic(true);
+        response.setMinimumPurchaseAmount(100.0);
+        when(cartServiceClient.createPromoCode(any(PromoCodeRequestDTO.class)))
+                .thenReturn(Mono.just(response));
+
+        client.post().uri(BASE_URL).contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request).exchange().expectStatus().isOk()
+                .expectBody().jsonPath("$.automatic").isEqualTo(true)
+                .jsonPath("$.minimumPurchaseAmount").isEqualTo(100.0);
+
+        var captured = org.mockito.ArgumentCaptor.forClass(PromoCodeRequestDTO.class);
+        verify(cartServiceClient).createPromoCode(captured.capture());
+        assertThat(captured.getValue().getAutomatic()).isTrue();
+        assertThat(captured.getValue().getMinimumPurchaseAmount()).isEqualTo(100.0);
+    }
+
     private PromoCodeResponseDTO samplePromo(String id) {
         PromoCodeResponseDTO response = new PromoCodeResponseDTO();
         response.setId(id);

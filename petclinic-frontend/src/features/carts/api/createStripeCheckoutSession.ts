@@ -10,7 +10,7 @@ type UseCreateStripeCheckoutSessionType = {
   createStripeSession: () => Promise<boolean>;
 };
 
-export function useCreateStripCheckoutSessiontype(): UseCreateStripeCheckoutSessionType {
+export function useCreateStripeCheckoutSession(): UseCreateStripeCheckoutSessionType {
   const { user } = useUser();
 
   const createStripeSession = async (): Promise<boolean> => {
@@ -28,7 +28,9 @@ export function useCreateStripCheckoutSessiontype(): UseCreateStripeCheckoutSess
 
       const request: StripeSessionRequestModel = {
         cartId: cartId,
-        frontendTypeUrl: 'react',
+        frontendType: 'react',
+        // so Stripe sends the customer back to this same site after paying
+        frontendOrigin: window.location.origin,
       };
 
       const { data } = await axiosInstance.post<StripeSessionResponseModel>(
@@ -45,7 +47,7 @@ export function useCreateStripCheckoutSessiontype(): UseCreateStripeCheckoutSess
       window.location.assign(data.sessionUrl); //redirects browser to Stripe hosted payment page
       return true;
     } catch (error) {
-      console.error('Error while create Stripe Checkout session', error);
+      console.error('Error while creating Stripe Checkout session', error);
       return false;
     }
   };

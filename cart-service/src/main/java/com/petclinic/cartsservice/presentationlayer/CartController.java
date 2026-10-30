@@ -181,14 +181,6 @@ public class CartController {
         return handleProductQuantityUpdate(cartId, productId, requestModel);
     }
 
-    @PostMapping("/{cartId}/checkout/stripe")
-    public Mono<ResponseEntity<CartResponseModel>> checkoutCart(@PathVariable String cartId, @RequestParam String stripeSessionId) {
-        return cartService.checkoutCart(cartId,stripeSessionId)
-                .map(ResponseEntity::ok)
-                .onErrorResume(NotFoundException.class, e -> Mono.just(ResponseEntity.notFound().build()))
-                .onErrorResume(InvalidInputException.class, e -> Mono.just(ResponseEntity.badRequest().body(null)));
-  }
-   
     @PostMapping("/{cartId}/checkout")
     public Mono<ResponseEntity<CartResponseModel>> checkoutCart(@PathVariable String cartId, @RequestBody BillingRequestModel billing) {
         return cartService.checkoutCart(cartId, billing)

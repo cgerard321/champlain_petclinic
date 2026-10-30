@@ -22,6 +22,10 @@ export interface CartDetailsModel {
   tvc: number;
   total: number;
   promoPercent?: number | null;
+  automaticDiscountMinimumAmount?: number;
+  automaticDiscountPercentage?: number;
+  automaticDiscountApplied?: boolean;
+  invoiceId?: string | null;
   discountAmount?: number;
   shippingMethod?: ShippingMethod | null;
   shippingCost?: number;

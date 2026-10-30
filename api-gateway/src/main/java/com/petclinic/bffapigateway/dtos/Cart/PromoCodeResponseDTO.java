@@ -29,5 +29,7 @@ public class PromoCodeResponseDTO {
     private String scope;
     private java.util.List<String> productIds;
     private java.util.List<String> productTypes;
+    private boolean automatic;
+    private Double minimumPurchaseAmount;
 
 }

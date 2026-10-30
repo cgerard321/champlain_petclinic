@@ -32,8 +32,8 @@ public class VetController {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "/users/vets", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<VetResponseDTO> addVetUser(@RequestBody Mono<RegisterVet> registerVet) {
-        return authServiceClient.addVetUser(registerVet);
+    public Mono<VetResponseDTO> addVetUser(@RequestBody Mono<RegisterVet> registerVet, @CookieValue("Bearer") String jwtToken) {
+        return authServiceClient.addVetUser(registerVet, jwtToken);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})

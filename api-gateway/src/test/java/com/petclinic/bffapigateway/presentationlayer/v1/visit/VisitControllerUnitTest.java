@@ -38,6 +38,9 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import com.petclinic.bffapigateway.businesslayer.ReviewEligibilityService;
+import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
+import org.mockito.ArgumentCaptor;
 
 
 import java.io.ByteArrayInputStream;
@@ -69,6 +72,9 @@ public class VisitControllerUnitTest {
 
     @Autowired
     private VisitsControllerV1 visitsControllerV1;
+
+    @MockBean
+    private ReviewEligibilityService reviewEligibilityService;
 
     private final String BASE_VISIT_URL = "/api/gateway/visits";
     private final String REVIEWS_URL = BASE_VISIT_URL + "/reviews";
@@ -259,14 +265,69 @@ public class VisitControllerUnitTest {
         verify(visitsServiceClient, never()).addVisit(any(Mono.class));
     }
 
+    private WebTestClient reviewClientForOwner(String customerId) {
+        return WebTestClient.bindToController(visitsControllerV1)
+                .controllerAdvice(new GlobalExceptionHandler())
+                .webFilter((exchange, chain) -> {
+                    exchange.getAttributes().put("tokenValues",
+                            TokenResponseDTO.builder()
+                                    .userId(customerId)
+                                    .roles(List.of("CUST"))
+                                    .build());
+                    return chain.filter(exchange);
+                })
+                .build();
+    }
+
+    @Test
+    void getReviewEligibility_whenCustomerIsIneligible_returnsFalse() {
+        when(reviewEligibilityService.hasCompletedAppointment("owner-1"))
+                .thenReturn(Mono.just(false));
+
+        reviewClientForOwner("owner-1").get()
+                .uri(REVIEWS_URL + "/eligibility")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.eligible").isEqualTo(false);
+    }
+
+    @Test
+    void getReviewEligibility_whenCustomerIsEligible_returnsTrue() {
+        when(reviewEligibilityService.hasCompletedAppointment("owner-1"))
+                .thenReturn(Mono.just(true));
+
+        reviewClientForOwner("owner-1").get()
+                .uri(REVIEWS_URL + "/eligibility")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.eligible").isEqualTo(true);
+    }
+
+    @Test
+    void postReview_whenIneligible_returnsForbiddenWithoutSaving() {
+        when(reviewEligibilityService.hasCompletedAppointment("owner-1"))
+                .thenReturn(Mono.just(false));
+
+        reviewClientForOwner("owner-1").post()
+                .uri(REVIEWS_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(reviewRequestDTO)
+                .exchange()
+                .expectStatus().isForbidden();
+
+        verify(visitsServiceClient, never()).createReview(any());
+    }
+
     @Test
     void postReview_whenValidRequest_thenReturnCreatedResponse() {
-        // Arrange
+        when(reviewEligibilityService.hasCompletedAppointment("owner-1"))
+                .thenReturn(Mono.just(true));
         when(visitsServiceClient.createReview(any(Mono.class)))
                 .thenReturn(Mono.just(reviewResponseDTO));
 
-        // Act
-        webTestClient.post()
+        reviewClientForOwner("owner-1").post()
                 .uri(REVIEWS_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(reviewRequestDTO)
@@ -275,8 +336,47 @@ public class VisitControllerUnitTest {
                 .expectBody(ReviewResponseDTO.class)
                 .isEqualTo(reviewResponseDTO);
 
-        // Assert
-        verify(visitsServiceClient, times(1)).createReview(any(Mono.class));
+        verify(visitsServiceClient).createReview(any(Mono.class));
+    }
+
+    @Test
+    void postReview_ignoresSpoofedOwnerIdAndUsesAuthenticatedCustomer() {
+        ReviewRequestDTO spoofed = ReviewRequestDTO.builder()
+                .ownerId("different-customer")
+                .reviewerName("Jane Doe")
+                .review("Good service")
+                .rating(4)
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+
+        when(reviewEligibilityService.hasCompletedAppointment("owner-1"))
+                .thenReturn(Mono.just(true));
+        when(visitsServiceClient.createReview(any(Mono.class)))
+                .thenReturn(Mono.just(reviewResponseDTO));
+
+        reviewClientForOwner("owner-1").post()
+                .uri(REVIEWS_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(spoofed)
+                .exchange()
+                .expectStatus().isCreated();
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Mono<ReviewRequestDTO>> captor =
+                ArgumentCaptor.forClass(Mono.class);
+
+        verify(visitsServiceClient).createReview(captor.capture());
+
+        ReviewRequestDTO saved = captor.getValue().block();
+
+        Assertions.assertNotNull(saved);
+        Assertions.assertEquals("owner-1", saved.getOwnerId());
+
+        verify(reviewEligibilityService)
+                .hasCompletedAppointment("owner-1");
+
+        verify(reviewEligibilityService, never())
+                .hasCompletedAppointment("different-customer");
     }
 
     @Test

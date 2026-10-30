@@ -67,22 +67,23 @@ public class OrderServiceImpl implements OrderService {
 
 
     @Override
-    public Mono<OrderResponseModel> createOrder(Cart cart, String stripeSessionId) {
-          return customerClient.getCustomerById(cart.getCustomerId())
-                          .switchIfEmpty(Mono.error(
-                                  new NotFoundException("Customer not found")))
-                          .map(customer ->
-                               EntityModelUtil.toOrder(cart, customer, stripeSessionId))
-                          .flatMap(orderRepository::save)
-                          .map(EntityModelUtil::toOrderResponseModel);
+    public Mono<OrderResponseModel> createOrder(Cart cart, String stripeSessionId, BillingRequestModel billing) {
+        return customerClient.getCustomerById(cart.getCustomerId())
+                        .switchIfEmpty(Mono.error(
+                                new NotFoundException("Customer not found")))
+                        .map(customer ->
+                                EntityModelUtil.toOrder(cart, customer, stripeSessionId, billing))
+                        .flatMap(orderRepository::save)
+                        .map(EntityModelUtil::toOrderResponseModel);
     }
+
     @Override
     public Mono<OrderResponseModel> createOrder(Cart cart, BillingRequestModel billing) {
         return customerClient.getCustomerById(cart.getCustomerId())
                         .switchIfEmpty(Mono.error(
                                 new NotFoundException("Customer not found")))
                         .map(customer ->
-                    EntityModelUtil.toOrder(cart, customer, billing))
+                                EntityModelUtil.toOrder(cart, customer, billing))
                         .flatMap(orderRepository::save)
                         .map(EntityModelUtil::toOrderResponseModel);
     }

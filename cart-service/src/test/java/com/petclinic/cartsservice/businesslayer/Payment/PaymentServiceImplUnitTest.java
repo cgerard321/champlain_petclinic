@@ -1,5 +1,6 @@
 package com.petclinic.cartsservice.businesslayer.Payment;
 
+import com.petclinic.cartsservice.businesslayer.AutomaticDiscountService;
 import com.petclinic.cartsservice.businesslayer.CartService;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
@@ -10,10 +11,13 @@ import com.petclinic.cartsservice.presentationlayer.Payment.StripeResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
+import com.stripe.model.Address;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -21,6 +25,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import com.petclinic.cartsservice.presentationlayer.BillingRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.stripe.model.Coupon;
 import com.stripe.param.CouponCreateParams;
@@ -49,6 +54,16 @@ class PaymentServiceImplUnitTest {
 
     @Mock
     private CartService cartService;
+
+    @Mock
+    private AutomaticDiscountService automaticDiscountService;
+
+    // by default no automatic discount applies, so the totals pass through unchanged
+    @BeforeEach
+    void noAutomaticDiscountByDefault() {
+        lenient().when(automaticDiscountService.apply(any(CartResponseModel.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+    }
 
     private static final String CART_ID = "cart-001";
 
@@ -82,24 +97,44 @@ class PaymentServiceImplUnitTest {
             Double tvq,
             Double tvc,
             Long expectedDiscountCents) {
+        return executeCheckout(frontend, null, total, shipping, tvq, tvc, expectedDiscountCents);
+    }
+
+    // same pattern as frontend.allowed-return-origins in application.properties
+    private static final String ALLOWED_RETURN_ORIGINS =
+            "http://localhost:(3000|4200)"
+                    + "|https://petclinic(-emp-portal)?\\.benmusicgeek\\.synology\\.me"
+                    + "|https://petdev-[0-9]+(-employee)?\\.benmusicgeek\\.synology\\.me";
+
+    private SessionCreateParams executeCheckout(
+            String frontend,
+            String frontendOrigin,
+            Double total,
+            Double shipping,
+            Double tvq,
+            Double tvc,
+            Long expectedDiscountCents) {
 
         Cart cart = createCart(List.of(createCartProduct(20.00, 2)));
         StripeProductRequestModel request = createRequest(CART_ID);
-        request.setFrontendTypeUrl(frontend);
+        request.setFrontendType(frontend);
+        request.setFrontendOrigin(frontendOrigin);
+        ReflectionTestUtils.setField(
+                paymentService, "allowedReturnOrigins", ALLOWED_RETURN_ORIGINS);
 
         ReflectionTestUtils.setField(
-                paymentService, "frontendDockerUrl", "http://localhost:3000");
+                paymentService, "customerFrontendUrl", "http://localhost:3000");
         ReflectionTestUtils.setField(
-                paymentService, "frontendUrl2", "http://localhost:4200");
+                paymentService, "employeeFrontendUrl", "http://localhost:4200");
 
         when(cartRepository.findCartByCartId(CART_ID))
                 .thenReturn(Mono.just(cart));
 
         CartResponseModel totals = mock(CartResponseModel.class);
-        when(totals.getTotal()).thenReturn(total);
-        when(totals.getShippingCost()).thenReturn(shipping);
-        when(totals.getTvq()).thenReturn(tvq);
-        when(totals.getTvc()).thenReturn(tvc);
+        lenient().when(totals.getTotal()).thenReturn(total);
+        lenient().when(totals.getShippingCost()).thenReturn(shipping);
+        lenient().when(totals.getTvq()).thenReturn(tvq);
+        lenient().when(totals.getTvc()).thenReturn(tvc);
 
         Session stripeSession = new Session();
         stripeSession.setId("cs_test_123");
@@ -112,7 +147,7 @@ class PaymentServiceImplUnitTest {
         Scheduler immediate = Schedulers.immediate();
 
         try (MockedStatic<EntityModelUtil> entityMock =
-                     mockStatic(EntityModelUtil.class);
+                     mockStatic(EntityModelUtil.class, Mockito.CALLS_REAL_METHODS);
              MockedStatic<Schedulers> schedulerMock =
                      mockStatic(Schedulers.class);
              MockedStatic<Session> sessionMock =
@@ -504,9 +539,22 @@ class PaymentServiceImplUnitTest {
         Session session = new Session();
         session.setPaymentStatus("paid");
         session.setId(stripeSessionId);
-        session.setMetadata(Map.of("cartId", CART_ID));
+        session.setMetadata(Map.of(
+                "cartId", CART_ID,
+                "expectedAmountCents", String.valueOf(expectedAmount)));
         session.setAmountTotal(expectedAmount);
         session.setCurrency("cad");
+
+        Address address = new Address();
+        address.setLine1("123 Main St");
+        address.setCity("Montreal");
+        address.setState("QC");
+        address.setPostalCode("H1H 1H1");
+        Session.CustomerDetails details = new Session.CustomerDetails();
+        details.setName("Jane Doe");
+        details.setEmail("jane@example.com");
+        details.setAddress(address);
+        session.setCustomerDetails(details);
 
         when(orderRepository.existsByStripeSessionId(stripeSessionId))
                 .thenReturn(Mono.just(false));
@@ -514,7 +562,7 @@ class PaymentServiceImplUnitTest {
         when(cartRepository.findCartByCartId(CART_ID))
                 .thenReturn(Mono.just(cart));
 
-        when(cartService.checkoutCart(CART_ID, stripeSessionId))
+        when(cartService.checkoutCart(eq(CART_ID), eq(stripeSessionId), any(BillingRequestModel.class)))
                 .thenReturn(Mono.empty());
 
         // Act
@@ -524,7 +572,58 @@ class PaymentServiceImplUnitTest {
         StepVerifier.create(result)
                 .verifyComplete();
 
-        verify(cartService).checkoutCart(CART_ID, stripeSessionId);
+        ArgumentCaptor<BillingRequestModel> billingCaptor =
+                ArgumentCaptor.forClass(BillingRequestModel.class);
+        verify(cartService).checkoutCart(eq(CART_ID), eq(stripeSessionId), billingCaptor.capture());
+
+        BillingRequestModel billing = billingCaptor.getValue();
+        assertEquals("Jane Doe", billing.getCustomerName());
+        assertEquals("jane@example.com", billing.getEmail());
+        assertEquals("123 Main St", billing.getAddress());
+        assertEquals("Montreal", billing.getCity());
+        assertEquals("QC", billing.getProvince());
+        assertEquals("H1H 1H1", billing.getPostalCode());
+    }
+
+    @Test
+    void processSuccessfulPayment_whenCartChangedAfterSessionCreated_returnsError() {
+        Cart cart = createCart(List.of(createCartProduct(20.00, 2)));
+        Session session = createPaidSession();
+        session.setAmountTotal(standardCartAmountCents());
+
+        // the customer added another item in a different tab after going to Stripe
+        cart.setProducts(List.of(createCartProduct(20.00, 3)));
+
+        when(orderRepository.existsByStripeSessionId(session.getId()))
+                .thenReturn(Mono.just(false));
+        when(cartRepository.findCartByCartId(CART_ID))
+                .thenReturn(Mono.just(cart));
+
+        StepVerifier.create(paymentService.processSuccessfulPayment(session))
+                .expectErrorMatches(error ->
+                        error instanceof InvalidInputException
+                                && "Cart changed after payment was started."
+                                .equals(error.getMessage()))
+                .verify();
+
+        verifyNoInteractions(cartService);
+    }
+
+    @Test
+    void processSuccessfulPayment_whenSameSessionIsSavedTwice_completesWithoutError() {
+        Cart cart = createCart(List.of(createCartProduct(20.00, 2)));
+        Session session = createPaidSession();
+        session.setAmountTotal(standardCartAmountCents());
+
+        when(orderRepository.existsByStripeSessionId(session.getId()))
+                .thenReturn(Mono.just(false));
+        when(cartRepository.findCartByCartId(CART_ID))
+                .thenReturn(Mono.just(cart));
+        when(cartService.checkoutCart(eq(CART_ID), eq(session.getId()), any(BillingRequestModel.class)))
+                .thenReturn(Mono.error(new org.springframework.dao.DuplicateKeyException("duplicate stripeSessionId")));
+
+        StepVerifier.create(paymentService.processSuccessfulPayment(session))
+                .verifyComplete();
     }
 
     @Test
@@ -661,54 +760,52 @@ class PaymentServiceImplUnitTest {
                 .thenReturn(Mono.just(false));
         when(cartRepository.findCartByCartId(CART_ID))
                 .thenReturn(Mono.just(cart));
-        when(cartService.checkoutCart(CART_ID, session.getId()))
+        when(cartService.checkoutCart(eq(CART_ID), eq(session.getId()), any(BillingRequestModel.class)))
                 .thenReturn(Mono.error(failure));
 
         StepVerifier.create(paymentService.processSuccessfulPayment(session))
                 .expectErrorMatches(error -> error == failure)
                 .verify();
 
-        verify(cartService).checkoutCart(CART_ID, session.getId());
+        verify(cartService).checkoutCart(eq(CART_ID), eq(session.getId()), any(BillingRequestModel.class));
     }
 
     private Session createPaidSession() {
         Session session = new Session();
         session.setPaymentStatus("paid");
         session.setId("cs_test_123");
-        session.setMetadata(Map.of("cartId", CART_ID));
+        session.setMetadata(Map.of(
+                "cartId", CART_ID,
+                "expectedAmountCents", String.valueOf(standardCartAmountCents())));
         session.setCurrency("cad");
         return session;
     }
 
+    // total of the 2 x $20.00 cart most tests use
+    private long standardCartAmountCents() {
+        Cart cart = createCart(List.of(createCartProduct(20.00, 2)));
+        return Math.round(
+                EntityModelUtil.toCartResponseModel(cart, cart.getProducts()).getTotal() * 100);
+    }
+
     @Test
-    void processSuccessfulPayment_nonPositiveTotal_returnsError() {
+    void processSuccessfulPayment_withMissingExpectedAmountMetadata_returnsError() {
         Cart cart = createCart(List.of(createCartProduct(20.00, 2)));
         Session session = createPaidSession();
+        session.setMetadata(Map.of("cartId", CART_ID));
+        session.setAmountTotal(standardCartAmountCents());
 
         when(orderRepository.existsByStripeSessionId(session.getId()))
                 .thenReturn(Mono.just(false));
         when(cartRepository.findCartByCartId(CART_ID))
                 .thenReturn(Mono.just(cart));
 
-        CartResponseModel totals = mock(CartResponseModel.class);
-        when(totals.getTotal()).thenReturn(0.0);
-
-        try (MockedStatic<EntityModelUtil> entityMock =
-                     mockStatic(EntityModelUtil.class)) {
-
-            entityMock.when(() ->
-                            EntityModelUtil.toCartResponseModel(
-                                    cart, cart.getProducts()))
-                    .thenReturn(totals);
-
-            StepVerifier.create(
-                            paymentService.processSuccessfulPayment(session))
-                    .expectErrorMatches(error ->
-                            error instanceof InvalidInputException
-                                    && "Total amount is invalid."
-                                    .equals(error.getMessage()))
-                    .verify();
-        }
+        StepVerifier.create(paymentService.processSuccessfulPayment(session))
+                .expectErrorMatches(error ->
+                        error instanceof InvalidInputException
+                                && "Total amount is invalid."
+                                .equals(error.getMessage()))
+                .verify();
 
         verifyNoInteractions(cartService);
     }
@@ -745,6 +842,46 @@ class PaymentServiceImplUnitTest {
     }
 
     @Test
+    void createStripeCheckoutSession_automaticDiscount_chargesDiscountedTotal() {
+        // Products: $40, the automatic discount brings the cart total to $30 => $10 coupon
+        CartResponseModel discounted = new CartResponseModel();
+        discounted.setTotal(30.0);
+        when(automaticDiscountService.apply(any(CartResponseModel.class)))
+                .thenReturn(Mono.just(discounted));
+
+        SessionCreateParams params =
+                executeCheckout("react", 40.0, 0.0, 0.0, 0.0, 1000L);
+
+        assertEquals("3000", params.getMetadata().get("expectedAmountCents"));
+        assertEquals(1, params.getDiscounts().size());
+    }
+
+    @Test
+    void processSuccessfulPayment_withAutomaticDiscount_acceptsDiscountedAmount() {
+        Cart cart = createCart(List.of(createCartProduct(20.00, 2)));
+        Session session = createPaidSession();
+        session.setMetadata(Map.of("cartId", CART_ID, "expectedAmountCents", "3000"));
+        session.setAmountTotal(3000L);
+
+        CartResponseModel discounted = new CartResponseModel();
+        discounted.setTotal(30.0);
+
+        when(orderRepository.existsByStripeSessionId(session.getId()))
+                .thenReturn(Mono.just(false));
+        when(cartRepository.findCartByCartId(CART_ID))
+                .thenReturn(Mono.just(cart));
+        when(automaticDiscountService.apply(any(CartResponseModel.class)))
+                .thenReturn(Mono.just(discounted));
+        when(cartService.checkoutCart(eq(CART_ID), eq(session.getId()), any(BillingRequestModel.class)))
+                .thenReturn(Mono.empty());
+
+        StepVerifier.create(paymentService.processSuccessfulPayment(session))
+                .verifyComplete();
+
+        verify(cartService).checkoutCart(eq(CART_ID), eq(session.getId()), any(BillingRequestModel.class));
+    }
+
+    @Test
     void createStripeCheckoutSession_higherExpectedTotal_addsAdjustment() {
         // Products: $40, expected total: $40.01 => 1-cent adjustment
         SessionCreateParams params =
@@ -777,6 +914,49 @@ class PaymentServiceImplUnitTest {
             assertEquals(
                     baseUrl + "/carts/" + CART_ID + "?payment=cancelled",
                     params.getCancelUrl());
+        }
+    }
+
+    @Test
+    void createStripeCheckoutSession_allowedOrigin_returnsCustomerToThatSite() {
+        for (String origin : new String[]{
+                "https://petdev-1746.benmusicgeek.synology.me",
+                "https://petdev-1746-employee.benmusicgeek.synology.me",
+                "https://petclinic.benmusicgeek.synology.me",
+                "https://petclinic-emp-portal.benmusicgeek.synology.me",
+                "http://localhost:3000"}) {
+
+            SessionCreateParams params =
+                    executeCheckout("react", origin, 40.0, 0.0, 0.0, 0.0, null);
+
+            assertEquals(
+                    origin + "/carts/" + CART_ID
+                            + "?payment=success&session_id={CHECKOUT_SESSION_ID}",
+                    params.getSuccessUrl());
+            assertEquals(
+                    origin + "/carts/" + CART_ID + "?payment=cancelled",
+                    params.getCancelUrl());
+        }
+    }
+
+    @Test
+    void createStripeCheckoutSession_unknownOrigin_fallsBackToConfiguredUrl() {
+        for (String origin : new String[]{
+                "https://evil.example.com",
+                "https://petdev-1746.benmusicgeek.synology.me.evil.com",
+                "https://petdevX1746.benmusicgeek.synology.me",
+                "https://petdev-abc.benmusicgeek.synology.me",
+                "https://petclinic.benmusicgeek.synology.me/carts",
+                "javascript:alert(1)",
+                ""}) {
+
+            SessionCreateParams params =
+                    executeCheckout("react", origin, 40.0, 0.0, 0.0, 0.0, null);
+
+            assertEquals(
+                    "http://localhost:3000/carts/" + CART_ID + "?payment=cancelled",
+                    params.getCancelUrl(),
+                    "origin should be rejected: " + origin);
         }
     }
 

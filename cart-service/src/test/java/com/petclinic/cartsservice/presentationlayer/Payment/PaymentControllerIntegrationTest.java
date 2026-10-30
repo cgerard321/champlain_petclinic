@@ -217,7 +217,7 @@ class PaymentControllerIntegrationTest {
         // Arrange
         StripeProductRequestModel request = new StripeProductRequestModel();
         request.setCartId(CART_ID);
-        request.setFrontendTypeUrl("invalid-frontend");
+        request.setFrontendType("invalid-frontend");
 
         when(paymentService.createStripeCheckoutSession(request, CART_ID))
                 .thenReturn(Mono.error(

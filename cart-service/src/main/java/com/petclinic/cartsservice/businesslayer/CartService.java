@@ -22,10 +22,9 @@ public interface CartService {
     Mono<CartResponseModel> addProductToCart(String cartId, CartItemRequestModel cartItemRequestModel);
     Mono<CartResponseModel> updateProductQuantityInCart(String cartId, String productId, int quantity);
 
-    Mono<CartResponseModel> checkoutCart(String cartId, String stripeSessionId);
-  
-    Mono<CartResponseModel> checkoutCart(String cartId, BillingRequestModel billing);
+    Mono<CartResponseModel> checkoutCart(String cartId, String stripeSessionId, BillingRequestModel billing);
 
+    Mono<CartResponseModel> checkoutCart(String cartId, BillingRequestModel billing);
 
     Mono<CartResponseModel> assignCartToCustomer(String customerId);
 

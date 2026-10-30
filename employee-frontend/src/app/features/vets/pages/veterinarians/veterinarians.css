@@ -37,7 +37,7 @@ h1 {
   font-size: 16px;
 }
 
-:host-context(.dark-mode) .page-description{
+:host-context(.dark-mode) .page-description {
   color: white;
 }
 
@@ -226,8 +226,7 @@ h1 {
 
 :host-context(.dark-mode) .directory-card {
   background-color: #2b3d34 !important;
-  border: 1px solid rgb(255 255 255 / 12%)  !important;
-
+  border: 1px solid rgb(255 255 255 / 12%) !important;
 }
 
 :host-context(.dark-mode) .directory-card:hover {
@@ -236,7 +235,7 @@ h1 {
 
 :host-context(.dark-mode) .feature-card {
   background-color: var(--mat-sys-surface-container-highest) !important;
-  border: 1px solid rgb(255 255 255 / 12%)  !important;
+  border: 1px solid rgb(255 255 255 / 12%) !important;
 }
 
 :host-context(.dark-mode) .feature-card:hover {

@@ -1,9 +1,17 @@
 {
+  "automaticDiscount": {
+    "summaryLabel": "Automatic discount ({{percent}}%):",
+    "offer": "Spend {{minimum}} on products to get {{percent}}% off automatically.",
+    "remaining": "Add {{amount}} more in products to qualify.",
+    "applied": "Automatic discount applied. You save {{amount}}.",
+    "bestDiscount": "The best available discount is included in your total."
+  },
   "buttons": {
     "addToCart": "Add to Cart",
     "apply": "Apply",
     "browseProducts": "Browse Products",
     "cancel": "Cancel",
+    "checkoutStripe": "Pay with Stripe",
     "checkout": "Checkout",
     "clear": "Clear",
     "clearCart": "Clear Cart",
@@ -114,6 +122,7 @@
     "moved": "Added {{movable}} wishlist item(s) to cart.",
     "purchaseAdded": "{{name}} (x{{quantity}}) added to cart!",
     "checkoutSuccess": "Checkout successful! Your order is being processed.",
+    "checkoutCancelled": "Payment cancelled. Your cart has not been changed.",
     "staffCheckout": "Staff/Admin cannot perform checkout."
   },
   "errors": {

@@ -347,49 +347,8 @@ class CartControllerUnitTest {
 
 
     @Test
-    void whenCheckoutCartWithStripe_thenReturnCartResponseModel() {
-        // Arrange
-        String stripeSessionId = "stripeId";
-
-        Cart cart = Cart.builder()
-                .cartId(VALID_CART_ID)
-                .products(products)
-                .customerId("1")
-                .build();
-
-        CartResponseModel cartResponseModel = CartResponseModel.builder()
-                .cartId(cart.getCartId())
-                .customerId("1")
-                .products(new ArrayList<>())
-                .build();
-      when(cartService.checkoutCart(cart.getCartId(), stripeSessionId))
-        .thenReturn(Mono.just(cartResponseModel));
-        // Act & Assert
-        webTestClient
-                .post()
-         .uri("/api/v1/carts/" + cart.getCartId() + "/checkout/stripe?stripeSessionId=" + stripeSessionId)
-         .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(CartResponseModel.class)
-                .value(response -> {
-                    assertEquals(cart.getCartId(), response.getCartId());
-                    assertEquals(cart.getCustomerId(), response.getCustomerId());
-                    assertEquals(0, response.getProducts().size());
-                });
-      // Verify
-        verify(cartService, times(1))
-                .checkoutCart(cart.getCartId(), stripeSessionId);
-    }
-
-
-      
-    @Test
     void whenCheckoutCart_thenReturnCartResponseModel() {
         // Arrange
-        String stripeSessionId = "stripeId";
-
         Cart cart = Cart.builder()
                 .cartId(VALID_CART_ID)
                 .products(products)
@@ -410,13 +369,14 @@ class CartControllerUnitTest {
         when(cartService.checkoutCart(
                 eq(cart.getCartId()),
                 any(BillingRequestModel.class)))
-           .thenReturn(Mono.just(cartResponseModel));
+                .thenReturn(Mono.just(cartResponseModel));
+
         // Act & Assert
         webTestClient
                 .post()
-          .uri("/api/v1/carts/" + cart.getCartId() + "/checkout")
+                .uri("/api/v1/carts/" + cart.getCartId() + "/checkout")
                 .contentType(MediaType.APPLICATION_JSON)
-           .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(billing)
                 .exchange()
                 .expectStatus().isOk()
@@ -427,13 +387,12 @@ class CartControllerUnitTest {
                     assertEquals(cart.getCustomerId(), response.getCustomerId());
                     assertEquals(0, response.getProducts().size());
                 });
-        //Verify
+
         ArgumentCaptor<BillingRequestModel> billingCaptor =
                 ArgumentCaptor.forClass(BillingRequestModel.class);
         verify(cartService).checkoutCart(
                 eq(cart.getCartId()),
-                billingCaptor.capture()
-        );
+                billingCaptor.capture());
         BillingRequestModel capturedBilling = billingCaptor.getValue();
         assertEquals("Montreal", capturedBilling.getCity());
         assertEquals("Quebec", capturedBilling.getProvince());
@@ -1087,50 +1046,6 @@ class CartControllerUnitTest {
         verify(cartService, never()).getAllCarts(any());
     }
 
-    @Test
-    void checkoutCart_CartNotFound_ReturnsNotFound() {
-        // Arrange
-        String cartId = NOT_FOUND_ID;
-        String stripeSessionId = "cs_test_123";
-
-        when(cartService.checkoutCart(cartId, stripeSessionId))
-                .thenReturn(Mono.error(
-                        new NotFoundException("Cart not found: " + cartId)
-                ));
-
-        // Act & Assert
-        webTestClient.post()
-                .uri("/api/v1/carts/" + cartId
-                        + "/checkout?stripeSessionId=" + stripeSessionId)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        verify(cartService).checkoutCart(cartId, stripeSessionId);
-    }
-
-
-    @Test
-    void checkoutCart_EmptyCart_ReturnsBadRequest() {
-        // Arrange
-        String cartId = VALID_CART_ID;
-        String stripeSessionId = "cs_test_123";
-
-        when(cartService.checkoutCart(cartId, stripeSessionId))
-                .thenReturn(Mono.error(
-                        new InvalidInputException("Cart is empty")
-                ));
-
-        // Act & Assert
-        webTestClient.post()
-                .uri("/api/v1/carts/" + cartId
-                        + "/checkout?stripeSessionId=" + stripeSessionId)
-                .exchange()
-                .expectStatus().isBadRequest();
-
-        verify(cartService).checkoutCart(cartId, stripeSessionId);
-    }
-
-
 
     @Test
     void customerCannotSubmitArbitraryPercentage() {
@@ -1140,5 +1055,4 @@ class CartControllerUnitTest {
         verify(cartService, never()).applyPromoCodeToCart(anyString(), any());
         verify(cartService, never()).clearPromoFromCart(anyString());
     }
-
 }
