@@ -35,5 +35,7 @@ public class PromoCodeRequestDTO {
     private String scope;
     private java.util.List<String> productIds;
     private java.util.List<String> productTypes;
+    private Boolean automatic;
+    private Double minimumPurchaseAmount;
 
 }

@@ -11,4 +11,5 @@ public interface PromoRepository extends ReactiveMongoRepository<PromoCode, Stri
      Mono<PromoCode> findPromoCodeById(String promoId);
      Flux<PromoCode> findAllByExpirationDateGreaterThanEqual(LocalDateTime currentDate);
      Mono<PromoCode> findPromoCodeByCode(String promoCode);
+     Flux<PromoCode> findAllByAutomaticTrue();
 }
