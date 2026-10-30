@@ -10,4 +10,5 @@ public interface OrderRepository extends ReactiveMongoRepository<Order, String> 
     public Mono<Order> findByOrderIdAndCustomerId(String orderId, String customerId);
 
     public Flux<Order> findAllByCustomerId(String customerId);
+    public Mono<Boolean> existsByStripeSessionId(String stripeSessionId);
 }

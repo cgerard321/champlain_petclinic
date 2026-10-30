@@ -7,8 +7,14 @@ import InvoiceComponent, {
   InvoiceFull as InvoiceFullType,
   InvoiceItem as InvoiceItemType,
 } from './Invoice';
-import { generatePath, useNavigate, useParams } from 'react-router-dom';
+import {
+  generatePath,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom';
 import CartItem from './CartItem';
+import { useCreateStripeCheckoutSession } from '../api/createStripeCheckoutSession';
 import { ProductModel } from '../models/ProductModel';
 import './cart-shared.css';
 import './UserCart.css';
@@ -89,6 +95,8 @@ const UserCart: React.FC = () => {
   const { user } = useUser();
   const { showToast } = useToast();
   const customerId = user?.userId ?? null;
+  const { createStripeSession } = useCreateStripeCheckoutSession();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [cartItems, setCartItems] = useState<ProductModel[]>([]);
   const [wishlistItems, setWishlistItems] = useState<ProductModel[]>([]);
@@ -505,9 +513,11 @@ const UserCart: React.FC = () => {
   const taxableSubtotal = roundToCents(
     discountedSubtotal + effectiveShippingCost
   );
+  // The backend always charges Quebec taxes (TVQ + TVC), so show the same ones
+  // here. Otherwise the total on this page would not match the Stripe charge.
   const resolvedTaxLines = computeTaxes(
     taxableSubtotal,
-    billingInfo?.province
+    billingInfo?.province ?? 'QC'
   ).map(line => ({
     ...line,
     amount: line.amount ?? roundToCents(taxableSubtotal * line.rate),
@@ -555,6 +565,43 @@ const UserCart: React.FC = () => {
 
     fetchCartItems();
   }, [cartId, syncCartState]);
+
+  // Stripe redirects back here with ?payment=success or ?payment=cancelled
+  useEffect(() => {
+    const paymentStatus = searchParams.get('payment');
+    if (!paymentStatus) return;
+
+    if (paymentStatus === 'cancelled') {
+      setCheckoutMessage(t('toasts.checkoutCancelled'));
+      setSearchParams({}, { replace: true });
+      return;
+    }
+
+    if (paymentStatus !== 'success') {
+      setSearchParams({}, { replace: true });
+      return;
+    }
+
+    setCheckoutMessage(t('toasts.checkoutSuccess'));
+
+    // The order is created by the Stripe webhook, so give it a moment before reloading
+    const timer = setTimeout(async () => {
+      setSearchParams({}, { replace: true });
+      if (!cartId) return;
+      try {
+        const { data } = await axiosInstance.get<CartDetailsModel>(
+          `/carts/${cartId}`,
+          { useV2: false }
+        );
+        syncCartState(data);
+      } catch (err) {
+        console.error('Failed to refresh cart after payment:', err);
+      }
+      await fetchOrders();
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [searchParams, setSearchParams, cartId, syncCartState, fetchOrders, t]);
 
   useEffect(() => {
     updateCartItemCount();
@@ -1002,6 +1049,48 @@ const UserCart: React.FC = () => {
     }
   };
 
+  const handleCheckoutConfirmation = async (): Promise<void> => {
+    if (isStaff) {
+      navigate(AppRoutePaths.Unauthorized, {
+        state: { message: t('toasts.staffCheckout') },
+      });
+      return;
+    }
+
+    try {
+      const success = await createStripeSession();
+
+      if (success) {
+        setIsCheckoutModalOpen(false);
+      } else {
+        setCheckoutMessage(
+          t('errors.checkoutFailed', {
+            message: t('errors.unexpected'),
+          })
+        );
+      }
+    } catch (error) {
+      console.error('Stripe checkout failed:', error);
+
+      setCheckoutMessage(
+        t('errors.checkoutFailed', {
+          message: t('errors.unexpected'),
+        })
+      );
+    }
+  };
+
+  // Original checkout: the customer fills in the billing form, no Stripe payment
+  const handleBillingCheckoutClick = (): void => {
+    if (isStaff) {
+      navigate(AppRoutePaths.Unauthorized, {
+        state: { message: t('toasts.staffCheckout') },
+      });
+      return;
+    }
+    setShowBillingForm(true);
+  };
+
   const handleViewOrderReceipt = (order: OrderModel): void => {
     const itemsSubtotal = roundToCents(
       order.products.reduce(
@@ -1044,17 +1133,6 @@ const UserCart: React.FC = () => {
 
     setLastInvoice(invoice);
     setShowInvoiceModal(true);
-  };
-
-  const handleCheckoutConfirmation = (): void => {
-    if (isStaff) {
-      navigate(AppRoutePaths.Unauthorized, {
-        state: { message: t('toasts.staffCheckout') },
-      });
-      return;
-    }
-    setShowBillingForm(true);
-    setIsCheckoutModalOpen(false);
   };
 
   const handleCheckout = async (billing?: BillingInfo): Promise<void> => {
@@ -1222,6 +1300,7 @@ const UserCart: React.FC = () => {
     }
     return acc;
   }, {});
+
   const recentPurchasesList = Object.values(uniqueRecentPurchases);
 
   // Helper to filter out duplicate recommendation purchases by productId
@@ -1470,7 +1549,7 @@ const UserCart: React.FC = () => {
                 {resolvedTaxLines.map(line => (
                   <p key={`${line.name}-${line.rate}`} className="summary-item">
                     {t(
-                      `taxes.${taxLabelKey(line.name, billingInfo?.province)}`,
+                      `taxes.${taxLabelKey(line.name, billingInfo?.province ?? 'QC')}`,
                       {
                         defaultValue: line.name,
                       }
@@ -1490,8 +1569,16 @@ const UserCart: React.FC = () => {
               </div>
 
               <button
-                className="checkout-btn cart-button cart-button--brand cart-button--block cart-button--disabled-muted"
+                className="checkout-btn cart-button cart-button--purple cart-button--block cart-button--disabled-muted"
                 onClick={handleCheckoutConfirmation}
+                disabled={cartItems.length === 0}
+              >
+                {t('buttons.checkoutStripe')}
+              </button>
+
+              <button
+                className="checkout-btn cart-button cart-button--accent cart-button--block cart-button--disabled-muted"
+                onClick={handleBillingCheckoutClick}
                 disabled={cartItems.length === 0}
               >
                 {t('buttons.checkout')}

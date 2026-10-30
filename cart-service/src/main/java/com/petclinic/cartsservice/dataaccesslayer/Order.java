@@ -37,4 +37,9 @@ public class Order {
     private double shippingCost;
     private String invoiceId;
     private LocalDateTime orderDate;
+
+    //to remember which Stripe payment belongs to which order
+    private String stripeSessionId;
+    private PaymentStatus paymentStatus;
+    private LocalDateTime paidDate;
 }
