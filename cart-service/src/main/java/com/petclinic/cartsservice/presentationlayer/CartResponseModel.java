@@ -34,6 +34,9 @@ public class CartResponseModel {
 
     private double discountAmount;
     private Double promoPercent;
+    private double automaticDiscountMinimumAmount;
+    private double automaticDiscountPercentage;
+    private boolean automaticDiscountApplied;
 
     private ShippingMethod shippingMethod;
     private double shippingCost;
