@@ -3,6 +3,7 @@ import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { of } from 'rxjs';
 
+import { AuthState } from '@core/services/auth-state';
 import { VetResponse } from '@features/vets/models/vet-api.model';
 import routes from '@features/vets/routes';
 import { VetService } from '@features/vets/services/vet.service';
@@ -11,10 +12,12 @@ describe('Veterinarian directory navigation', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
+        { provide: AuthState, useValue: { hasRole: () => false } },
         provideRouter([{ path: 'vets', children: routes }]),
         {
           provide: VetService,
           useValue: {
+            getEducations: () => of([]),
             getVets: () =>
               of(
                 ['Alex Morin', 'Julie Lambert', 'Sam Tremblay'].map((name, index): VetResponse => ({

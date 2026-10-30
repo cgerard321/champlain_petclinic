@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.utils;
 
+import lombok.Getter;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -18,14 +19,11 @@ public enum CanadianProvince {
     NU("Nunavut"),
     YT("Yukon");
 
+    @Getter
     private final String displayName;
 
     CanadianProvince(String displayName) {
         this.displayName = displayName;
-    }
-
-    public String getDisplayName() {
-        return displayName;
     }
 
     public static Optional<CanadianProvince> fromCode(String code) {
