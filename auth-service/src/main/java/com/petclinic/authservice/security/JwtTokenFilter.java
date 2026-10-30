@@ -1,6 +1,7 @@
 package com.petclinic.authservice.security;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,14 +19,15 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+
 
 @Component
 @Slf4j
 @Generated
 public class JwtTokenFilter extends OncePerRequestFilter {
-
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
@@ -41,56 +43,63 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         this.jwtTokenUtil = jwtTokenUtil;
     }
 
+    // Skip processing for public paths
     @Override
     protected boolean shouldNotFilter(@NotNull HttpServletRequest request) {
         return excludedPaths.stream().anyMatch(p -> p.matches(request));
     }
 
     @Override
-    protected void doFilterInternal(@NotNull HttpServletRequest request,
+    protected void doFilterInternal(HttpServletRequest request,
                                     @NotNull HttpServletResponse response,
-                                    @NotNull FilterChain chain) {
+                                    @NotNull FilterChain chain)
+            throws ServletException, IOException {
 
-        String token = extractToken(request);
+        final Cookie[] cookies = request.getCookies();
 
-        if (token == null) {
-            log.debug("No token found");
-            reject(request, response, "Unauthorized");
+        if (cookies == null) {
+            log.debug("No cookies found");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            chain.doFilter(request, response);
             return;
         }
+
+        Cookie sessionCookie = null;
+        for (Cookie cookie : cookies) {
+            if ((securityConst.getTOKEN_PREFIX()).equals(cookie.getName())) {
+                sessionCookie = cookie;
+                break;
+            }
+        }
+
+        if (sessionCookie == null) {
+            log.debug("No token found");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            resolver.resolveException(request, response, null, new InvalidBearerTokenException("Unauthorized"));
+            return;
+        }
+
+        final String token = sessionCookie.getValue();
 
         try {
             if (!jwtTokenUtil.validateToken(token)) {
                 log.debug("Token is invalid or expired");
-                reject(request, response, "Token is invalid or expired");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                resolver.resolveException(request, response, null, new InvalidBearerTokenException("Token is expired"));
                 return;
             }
 
             String email = jwtTokenUtil.getUsernameFromToken(token);
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(email, null, List.of());
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            authentication.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
 
+            SecurityContextHolder.getContext().setAuthentication(authentication);
             chain.doFilter(request, response);
         } catch (Exception ex) {
             resolver.resolveException(request, response, null, ex);
         }
-    }
-
-    private String extractToken(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) return null;
-        for (Cookie cookie : cookies) {
-            if (securityConst.getTOKEN_PREFIX().equals(cookie.getName())) {
-                return cookie.getValue();
-            }
-        }
-        return null;
-    }
-
-    private void reject(HttpServletRequest request, HttpServletResponse response, String message) {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        resolver.resolveException(request, response, null, new InvalidBearerTokenException(message));
     }
 }
