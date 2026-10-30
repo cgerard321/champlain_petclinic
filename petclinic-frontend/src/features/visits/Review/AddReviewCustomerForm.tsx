@@ -9,6 +9,9 @@ import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import StarRating from '../../products/components/StarRating';
 import { CustomerResponseModel } from '../../customers/models/CustomerResponseModel.ts';
 import { getCustomer } from '../../customers/api/getCustomer.ts';
+import { getReviewEligibility } from './Api/getReviewEligibility';
+import { useTranslation } from 'react-i18next';
+import axios from 'axios';
 
 import { cleanReviewText, isReviewProfane } from './ReviewProfanity';
 
@@ -17,6 +20,10 @@ interface ApiError {
 }
 
 const AddCustomerReviewForm: React.FC = (): JSX.Element => {
+  const { t } = useTranslation('visits');
+  const [eligibilityStatus, setEligibilityStatus] = useState<
+    'loading' | 'eligible' | 'ineligible' | 'error'
+  >('loading');
   const [review, setReview] = useState<ReviewRequestDTO>({
     rating: 0,
     ownerId: '',
@@ -36,6 +43,31 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
   const { user } = useUser(); // Assuming this hook provides the user info
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    if (!user?.userId) return;
+
+    let active = true;
+
+    setEligibilityStatus('loading');
+
+    getReviewEligibility()
+      .then(({ eligible }) => {
+        if (active) {
+          setEligibilityStatus(eligible ? 'eligible' : 'ineligible');
+        }
+      })
+      .catch(error => {
+        console.error('Failed to check review eligibility:', error);
+        if (active) {
+          setEligibilityStatus('error');
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [user?.userId]);
 
   useEffect(() => {
     if (user?.userId) {
@@ -132,13 +164,17 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
         dateSubmitted: new Date(),
       });
     } catch (error) {
-      // Error handling
       const apiError = error as ApiError;
-      setErrorMessage(
-        `Error adding review: ${apiError?.message || 'Unknown error'}`
-      );
+
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        setEligibilityStatus('ineligible');
+        setErrorMessage(t('reviews.completedAppointmentRequired'));
+      } else {
+        setErrorMessage(
+          `Error adding review: ${apiError?.message || 'Unknown error'}`
+        );
+      }
     } finally {
-      // Reset loading state
       setIsLoading(false);
     }
   };
@@ -147,6 +183,29 @@ const AddCustomerReviewForm: React.FC = (): JSX.Element => {
     setShowProfanityModal(false);
     requestAnimationFrame(() => textareaRef.current?.focus());
   };
+
+  if (eligibilityStatus !== 'eligible') {
+    const message =
+      eligibilityStatus === 'ineligible'
+        ? t('reviews.completedAppointmentRequired')
+        : eligibilityStatus === 'error'
+          ? t('reviews.eligibilityUnavailable')
+          : t('reviews.checkingEligibility');
+
+    return (
+      <div className="add-review-form">
+        <h2>Add a Customer Review</h2>
+
+        <p className="text-muted" role="status" aria-live="polite">
+          {message}
+        </p>
+
+        <button className="cancel" type="button" onClick={handleCancel}>
+          Cancel
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="add-review-form">
