@@ -1,21 +1,23 @@
 <section class="bill-card">
   <div class="bill-card__header">
     <div>
-      <h2>Bills by Customer</h2>
-      <p>Select a customer to view their bills.</p>
+      <h2 i18n="@@bill.lookup.billByCust">Facture par client(e)</h2>
+      <p i18n="@@bill.lookup.select">Sélectionez un(e) client(e) pour afficher leur factures</p>
     </div>
   </div>
 
   @if (customersLoading()) {
-    <p role="status">Loading customers...</p>
+    <p role="status" i18n="@@bill.lookup.loadCust">Chargement des clients...</p>
   } @else if (customersFailed()) {
-    <p role="alert">Unable to load customers. Please try again.</p>
+    <p role="alert" i18n="@@bill.lookup.loadUnable">
+      Impossible de charger les clients. Veuillez réessayer
+    </p>
     <button class="bill-secondary-action" type="button" (click)="loadCustomers()">Try again</button>
   } @else if (customers().length === 0) {
-    <p role="status">No customers available.</p>
+    <p role="status" i18n="@@bill.lookup.noCust">Aucun(e) client(e) disponible.</p>
   } @else {
     <div class="bill-filters bill-lookup">
-      <label for="customer-bill-select">Customer</label>
+      <label for="customer-bill-select" i18n="@@bill.tableBill.cust">Client(e)</label>
 
       <select
         #customerSelect
@@ -23,7 +25,7 @@
         [value]="selectedCustomerId()"
         (change)="selectCustomer(customerSelect.value)"
       >
-        <option value="">Select a customer</option>
+        <option value="" i18n="@@bill.lookup.selectCust">Selectionez un(e) client(e)</option>
 
         @for (customer of customers(); track customer.customerId) {
           <option [value]="customer.customerId">
@@ -34,29 +36,32 @@
     </div>
 
     @if (billsLoading()) {
-      <p role="status">Loading bills...</p>
+      <p role="status" i18n="@@bill.lookup.loadBill">Chargement des factures...</p>
     } @else if (billsFailed()) {
-      <p role="alert">Unable to load bills. Please try again.</p>
+      <p role="alert" i18n="@@bill.lookup.loadBillUnable">
+        Impossible de charger les factures. Veuillez réessayer
+      </p>
       <button
         class="bill-secondary-action"
+        i18n="@@bill.lookup.try"
         type="button"
         (click)="selectCustomer(selectedCustomerId())"
       >
-        Try again
+        Réessayer
       </button>
     } @else if (selectedCustomerId()) {
       @if (bills().length === 0) {
-        <p role="status">This customer has no bills.</p>
+        <p role="status" i18n="@@bill.lookup.custNoBills">Cet(te) client(e) n'a aucune facture</p>
       } @else {
         <div class="bill-table-wrapper">
           <table class="bill-table">
             <thead>
               <tr>
-                <th scope="col">Bill ID</th>
+                <th scope="col" i18n="@@bill.tableBill.billId">N° de facture</th>
                 <th scope="col">Date</th>
-                <th scope="col">Due Date</th>
+                <th scope="col" i18n="@@bill.tableBill.dueDate">Date d'échéance</th>
                 <th scope="col">Total (CAD)</th>
-                <th scope="col">Status</th>
+                <th scope="col" i18n="@@bill.status">Statut</th>
               </tr>
             </thead>
             <tbody>
@@ -66,7 +71,7 @@
                   <td>{{ bill.date | date: 'mediumDate' }}</td>
                   <td>{{ bill.dueDate | date: 'mediumDate' }}</td>
                   <td>{{ bill.totalAmount ?? bill.amount | currency: 'CAD' }}</td>
-                  <td>{{ statusLabel(bill.billStatus) }}</td>
+                  <td>{{ translateStatus(statusLabel(bill.billStatus)) }}</td>
                 </tr>
               }
             </tbody>
@@ -74,7 +79,9 @@
         </div>
       }
     } @else {
-      <p role="status">Select a customer to display their bills.</p>
+      <p role="status" i18n="@@bill.lookup.select">
+        Sélectionez un(e) client(e) pour afficher leur factures
+      </p>
     }
   }
 </section>

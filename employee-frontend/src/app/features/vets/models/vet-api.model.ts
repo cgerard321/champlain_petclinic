@@ -6,6 +6,19 @@ export interface VetSpecialty {
   name: string;
 }
 
+export interface VetEducation {
+  vetId: string;
+  schoolName: string;
+  degree: string;
+  fieldOfStudy: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface VetEducationResponse extends VetEducation {
+  educationId: string;
+}
+
 export interface VetPhoto {
   fileId: string;
   fileName: string;
@@ -46,4 +59,21 @@ export interface VetUpdateRequest {
 export interface VetEditSubmission {
   request: VetUpdateRequest;
   newSpecialtyNames: string[];
+  newEducation: VetEducation[];
+}
+
+export interface VetCreateRequest {
+  username: string;
+  password: string;
+  email: string;
+  vet: Omit<VetUpdateRequest, 'vetId' | 'vetBillId'>;
+}
+
+export interface VetEducationRequest {
+  vetId?: string;
+  schoolName: string;
+  degree: string;
+  fieldOfStudy: string;
+  startDate: string;
+  endDate: string;
 }

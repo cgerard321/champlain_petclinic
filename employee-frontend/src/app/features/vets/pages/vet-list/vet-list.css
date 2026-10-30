@@ -188,8 +188,8 @@ app-vet-profile-card {
   color: white !important;
 }
 
-:host-context(.dark-mode) .page-description{
-  color:#a3b8ac;
+:host-context(.dark-mode) .page-description {
+  color: #a3b8ac;
 }
 
 :host-context(.dark-mode) .back-link {
@@ -198,12 +198,23 @@ app-vet-profile-card {
 
 :host-context(.dark-mode) .preview-notice {
   background-color: var(--mat-sys-surface-container-highest) !important;
-  border: 1px solid rgb(255 255 255 / 12%)  !important;
+  border: 1px solid rgb(255 255 255 / 12%) !important;
   color: white;
 }
 
 :host-context(.dark-mode) .preview-notice p {
-  color:#a3b8ac;
+  color: #a3b8ac;
+}
+
+.add-vet-button {
+  margin-bottom: 24px;
+  padding: 12px 20px;
+  border: 1px solid var(--mat-sys-primary, #254e3e);
+  border-radius: 8px;
+  background: var(--mat-sys-primary, #254e3e);
+  color: var(--mat-sys-on-primary, #fff);
+  font: inherit;
+  cursor: pointer;
 }
 
 :host-context(.dark-mode) .search-container {

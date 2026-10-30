@@ -52,7 +52,13 @@
     "addReview": "Ajouter un avis",
     "completedAppointmentRequired": "Vous devez avoir terminé au moins un rendez-vous avant de pouvoir laisser un avis.",
     "checkingEligibility": "Vérification de votre admissibilité à laisser un avis...",
-    "eligibilityUnavailable": "Impossible de vérifier votre admissibilité à laisser un avis. Veuillez recharger la page et réessayer."
+    "eligibilityUnavailable": "Impossible de vérifier votre admissibilité à laisser un avis. Veuillez recharger la page et réessayer.",
+    "filterByRating": "Filtrer par note :",
+    "allRatings": "Toutes les notes",
+    "stars_one": "{{count}} étoile",
+    "stars_other": "{{count}} étoiles",
+    "noReviews": "Aucun avis disponible",
+    "noMatchingReviews": "Aucun avis ne correspond à cette note."
   }
 
 }

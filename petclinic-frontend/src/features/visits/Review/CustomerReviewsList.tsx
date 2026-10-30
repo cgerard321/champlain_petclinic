@@ -16,11 +16,19 @@ import { useTranslation } from 'react-i18next';
 import { getReviewEligibility } from './Api/getReviewEligibility';
 
 const CustomerReviewsList: React.FC = (): JSX.Element => {
+  const { t } = useTranslation('visits');
   const [reviewList, setReviewList] = useState<ReviewResponseDTO[]>([]);
+
+  const [selectedRating, setSelectedRating] = useState<number | null>(null);
+
+  const filteredReviews =
+    selectedRating === null
+      ? reviewList
+      : reviewList.filter(review => review.rating === selectedRating);
+
   const navigate = useNavigate();
   const { user } = useUser();
   const isOwner = IsCustomer();
-  const { t } = useTranslation('visits');
   const [eligibilityStatus, setEligibilityStatus] = useState<
     'loading' | 'eligible' | 'ineligible' | 'error'
   >('loading');
@@ -131,6 +139,30 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
             {successMessage}
           </div>
         )}
+
+        <div className="d-flex align-items-center gap-2 my-3">
+          <label htmlFor="customer-review-rating-filter">
+            {t('reviews.filterByRating')}
+          </label>
+          <select
+            id="customer-review-rating-filter"
+            className="form-select w-auto"
+            value={selectedRating ?? 'all'}
+            onChange={event =>
+              setSelectedRating(
+                event.target.value === 'all' ? null : Number(event.target.value)
+              )
+            }
+          >
+            <option value="all">{t('reviews.allRatings')}</option>
+            {[1, 2, 3, 4, 5].map(rating => (
+              <option key={rating} value={rating}>
+                {t('reviews.stars', { count: rating })}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <table className="reviews-table">
           <thead>
             <tr>
@@ -142,8 +174,8 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
             </tr>
           </thead>
           <tbody>
-            {reviewList.length > 0 ? (
-              reviewList.map(review => {
+            {filteredReviews.length > 0 ? (
+              filteredReviews.map(review => {
                 const isOwner = user && review.ownerId === user.userId;
 
                 return (
@@ -189,7 +221,9 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
             ) : (
               <tr>
                 <td colSpan={5} className="text-center">
-                  No reviews available
+                  {selectedRating === null
+                    ? t('reviews.noReviews')
+                    : t('reviews.noMatchingReviews')}
                 </td>
               </tr>
             )}

@@ -65,9 +65,14 @@ public class VetServiceImpl implements VetService {
     @Override
     public Mono<VetResponseDTO> addVet(Mono<VetRequestDTO> vetDTOMono) {
         return vetDTOMono
-                .flatMap(this::validateVetRequestDTO)
+                .flatMap(this::validateProfileUpdate)
                 .flatMap(vetRequest -> {
                     Vet vetEntity = EntityDtoUtil.vetRequestDtoToEntity(vetRequest);
+                    vetEntity.getSpecialties().forEach(specialty -> {
+                        if (specialty.getSpecialtyId() == null || specialty.getSpecialtyId().isBlank()) {
+                            specialty.setSpecialtyId(java.util.UUID.randomUUID().toString());
+                        }
+                    });
                     
                     Mono<FileResponseDTO> photoMono;
                     if (vetRequest.getPhoto() != null && vetRequest.getPhoto().getFileData() != null) {
@@ -84,15 +89,14 @@ public class VetServiceImpl implements VetService {
                     }
                     
                     return photoMono
-                            .defaultIfEmpty(null)
+                            .map(java.util.Optional::of)
+                            .defaultIfEmpty(java.util.Optional.empty())
                             .flatMap(photo -> {
-                                if (photo != null) {
-                                    vetEntity.setImageId(photo.getFileId());
-                                }
+                                photo.ifPresent(value -> vetEntity.setImageId(value.getFileId()));
                                 return assignBadgeAndSaveBadgeAndVet(vetEntity)
                                         .map(savedVet -> {
                                             VetResponseDTO dto = EntityDtoUtil.vetEntityToResponseDTO(savedVet);
-                                            dto.setPhoto(photo);
+                                            photo.ifPresent(dto::setPhoto);
                                             return dto;
                                         });
                             });
@@ -229,22 +233,6 @@ public class VetServiceImpl implements VetService {
         } catch (IOException io) {
             throw new InvalidInputException("Picture does not exist: " + io.getMessage());
         }
-    }
-
-    private Mono<VetRequestDTO> validateVetRequestDTO(VetRequestDTO requestDTO) {
-        if(requestDTO.getFirstName().length()>30||requestDTO.getFirstName().length()<2)
-            return Mono.error(new InvalidInputException("firstName length should be between 2 and 20 characters: "+requestDTO.getFirstName()));
-        if(requestDTO.getLastName().length()>30||requestDTO.getLastName().length()<2)
-            return Mono.error(new InvalidInputException("lastName length should be between 2 and 20 characters: "+requestDTO.getLastName()));
-        if(requestDTO.getPhoneNumber().length()!=20)
-            return Mono.error(new InvalidInputException("phoneNumber length not equal to 20 characters: "+requestDTO.getPhoneNumber()));
-        if(requestDTO.getEmail().length()<6||requestDTO.getEmail().length()>320)
-            return Mono.error(new InvalidInputException("email length should be between 6 and 320 characters: "+requestDTO.getEmail()));
-        if(requestDTO.getResume().length()<10)
-            return Mono.error(new InvalidInputException("resume length should be more than 10 characters: "+requestDTO.getResume()));
-        if(requestDTO.getSpecialties()==null)
-            return Mono.error(new InvalidInputException("invalid specialties"));
-        return Mono.just(requestDTO);
     }
 
     private Mono<Vet> assignBadgeAndSaveBadgeAndVet(Vet vetEntity) {
