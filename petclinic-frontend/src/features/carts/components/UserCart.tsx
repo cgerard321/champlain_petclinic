@@ -979,25 +979,36 @@ const UserCart: React.FC = () => {
   const { createStripeSession } = useCreateStripCheckoutSessiontype();
 
   const handleCheckoutConfirmation = async (): Promise<void> => {
-      if (isStaff) {
-        navigate(AppRoutePaths.Unauthorized, {
-          state: { message: t('toasts.staffCheckout') },
-        });
-        return;
-      }
-      //setShowBillingForm(true);
-      setIsCheckoutModalOpen(false);
+    if (isStaff) {
+      navigate(AppRoutePaths.Unauthorized, {
+        state: { message: t('toasts.staffCheckout') },
+      });
+      return;
+    }
 
+    try {
       const success = await createStripeSession();
-      if (!success) {
+
+      if (success) {
+        setIsCheckoutModalOpen(false);
+      } else {
         setCheckoutMessage(
           t('errors.checkoutFailed', {
             message: t('errors.unexpected'),
           })
         );
       }
-    };
-        
+    } catch (error) {
+      console.error('Stripe checkout failed:', error);
+
+      setCheckoutMessage(
+        t('errors.checkoutFailed', {
+          message: t('errors.unexpected'),
+        })
+      );
+    }
+  };
+
   const handleViewOrderReceipt = (order: OrderModel): void => {
     const discount = roundToCents(
       order.subtotal * ((order.promoPercent ?? 0) / 100)
@@ -1035,27 +1046,6 @@ const UserCart: React.FC = () => {
     setLastInvoice(invoice);
     setShowInvoiceModal(true);
   };
-
-  const handleCheckoutConfirmation = (): void => {
-     if (isStaff) {
-      navigate(AppRoutePaths.Unauthorized, {
-        state: { message: t('toasts.staffCheckout') },
-      });
-      return;
-    }
-    //setShowBillingForm(true);
-    setIsCheckoutModalOpen(false);
-
-    const success = await createStripeSession();
-    if (!success) {
-      setCheckoutMessage(
-        t('errors.checkoutFailed', {
-          message: t('errors.unexpected'),
-        })
-      );
-    }
-  };
-    
 
   const handleCheckout = async (billing?: BillingInfo): Promise<void> => {
     if (isStaff) return;

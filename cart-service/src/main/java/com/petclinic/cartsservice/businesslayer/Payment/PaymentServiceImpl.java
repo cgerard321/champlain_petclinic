@@ -23,6 +23,9 @@ import reactor.core.scheduler.Schedulers;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.petclinic.cartsservice.utils.EntityModelUtil.createLineItem;
+import static com.petclinic.cartsservice.utils.EntityModelUtil.toCents;
+
 @Slf4j
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -167,33 +170,6 @@ public class PaymentServiceImpl implements PaymentService {
                             .subscribeOn(Schedulers.boundedElastic());
 
                 });
-    }
-
-    //helper method for shipping
-    private SessionCreateParams.LineItem createLineItem(String name, long amountInCents, long quantity){
-        SessionCreateParams.LineItem.PriceData.ProductData productData = SessionCreateParams.LineItem.PriceData.ProductData
-                .builder()
-                .setName(name)
-                .build();
-
-        SessionCreateParams.LineItem.PriceData priceData = SessionCreateParams.LineItem.PriceData
-                .builder()
-                .setCurrency("cad")
-                .setUnitAmount(amountInCents)
-                .setProductData(productData)
-                .build();
-
-        return SessionCreateParams.LineItem.builder()
-                .setQuantity(quantity)
-                .setPriceData(priceData)
-                .build();
-    }
-
-    private static long toCents(Double amount) {
-        if (amount == null) {
-            return 0L;
-        }
-        return Math.round(amount * 100.0);
     }
 
     @Override

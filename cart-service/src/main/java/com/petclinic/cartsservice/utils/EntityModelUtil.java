@@ -14,6 +14,7 @@ import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CreateOrderReportRequestModel;
 import com.petclinic.cartsservice.presentationlayer.OrderReportResponseModel;
 import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
+import com.stripe.param.checkout.SessionCreateParams;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.util.StringUtils;
@@ -318,4 +319,32 @@ public class EntityModelUtil {
     private static double round2(double v) {
         return Math.round(v * 100.0) / 100.0;
     }
+
+    public static long toCents(Double amount) {
+        if (amount == null) {
+            return 0L;
+        }
+        return Math.round(amount * 100.0);
+    }
+
+    //helper method for shipping for stripe
+    public static SessionCreateParams.LineItem createLineItem(String name, long amountInCents, long quantity){
+        SessionCreateParams.LineItem.PriceData.ProductData productData = SessionCreateParams.LineItem.PriceData.ProductData
+                .builder()
+                .setName(name)
+                .build();
+
+        SessionCreateParams.LineItem.PriceData priceData = SessionCreateParams.LineItem.PriceData
+                .builder()
+                .setCurrency("cad")
+                .setUnitAmount(amountInCents)
+                .setProductData(productData)
+                .build();
+
+        return SessionCreateParams.LineItem.builder()
+                .setQuantity(quantity)
+                .setPriceData(priceData)
+                .build();
+    }
+
 }
