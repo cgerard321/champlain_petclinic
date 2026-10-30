@@ -25,18 +25,15 @@ import com.petclinic.vet.presentationlayer.ratings.RatingResponseDTO;
 import com.petclinic.vet.utils.EntityDtoUtil;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.StreamUtils;
@@ -51,7 +48,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port=0"})
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port=0",
+        "spring.r2dbc.url=r2dbc:h2:mem:///vet-controller-tests;DB_CLOSE_DELAY=-1"})
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
 class VetControllerIntegrationTest {
@@ -77,10 +75,6 @@ class VetControllerIntegrationTest {
     FilesServiceClient filesServiceClient;
         @MockBean
         com.petclinic.vet.utils.DataSetupService dataSetupService;
-    @MockBean
-    ConnectionFactoryInitializer connectionFactoryInitializer;
-    @MockBean
-    R2dbcScriptDatabaseInitializer r2dbcScriptDatabaseInitializer;
 
     Education education1 = buildEducation();
     Education education2 = buildEducation2();
@@ -1236,7 +1230,6 @@ class VetControllerIntegrationTest {
 
 
     @Test
-    @Disabled("Temporarily disabled due to changes in addVet method requiring files service")
     void createVet() {
         Publisher<Void> setup = vetRepository.deleteAll();
 
@@ -1297,7 +1290,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("phoneNumber length not equal to 20 characters: "+newVet.getPhoneNumber());
+                .jsonPath("$.message").isEqualTo("A valid phone number is required");
     }
 
     @Test
@@ -1339,7 +1332,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("email length should be between 6 and 320 characters: "+newVet.getEmail());
+                .jsonPath("$.message").isEqualTo("A valid email address is required");
 
     }
 
@@ -1375,7 +1368,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("resume length should be more than 10 characters: "+newVet.getResume());
+                .jsonPath("$.message").isEqualTo("Biography must contain at least 10 characters");
 
     }
 
@@ -1411,7 +1404,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("invalid specialties");
+                .jsonPath("$.message").isEqualTo("Specialties must not be null");
     }
 
     @Test

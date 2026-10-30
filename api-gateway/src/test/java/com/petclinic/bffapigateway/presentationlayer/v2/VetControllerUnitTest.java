@@ -154,11 +154,12 @@ class VetControllerUnitTest {
     @Test
     void whenAddVet_asAdmin_thenReturnCreatedVetDTO() {
         VetResponseDTO createdVetResponseDTO = vetResponseDTO;
-        when(authServiceClient.addVetUser(any(Mono.class)))
+        when(authServiceClient.addVetUser(any(Mono.class), anyString()))
                 .thenReturn(Mono.just(createdVetResponseDTO));
 
         Mono<VetResponseDTO> result = webTestClient.post()
                 .uri(BASE_VET_URL + "/users/vets")
+                .cookie("Bearer", "admin-token")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(registerVet), RegisterVet.class)
                 .accept(MediaType.APPLICATION_JSON)
@@ -183,7 +184,7 @@ class VetControllerUnitTest {
                 })
                 .verifyComplete();
 
-        verify(authServiceClient, Mockito.times(1)).addVetUser(any(Mono.class));
+        verify(authServiceClient, Mockito.times(1)).addVetUser(any(Mono.class), anyString());
     }
 
     @Test

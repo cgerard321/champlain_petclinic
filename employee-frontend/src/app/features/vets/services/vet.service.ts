@@ -7,7 +7,8 @@ import { SseClient } from '@core/services/sse-client';
 import {
   VetResponse,
   VetUpdateRequest,
-  VetEducation,
+  VetCreateRequest,
+  VetEducationRequest,
   VetEducationResponse,
 } from '@features/vets/models/vet-api.model';
 
@@ -54,10 +55,6 @@ export class VetService {
         Accept: 'application/json',
       },
     });
-  }
-
-  addEducation(vetId: string, education: VetEducation): Observable<VetEducationResponse> {
-    return this.http.post<VetEducationResponse>(`${this.baseUrl}/${vetId}/educations`, education);
   }
 }
 

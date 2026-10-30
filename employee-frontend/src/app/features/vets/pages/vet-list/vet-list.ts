@@ -15,11 +15,25 @@ import { Roles } from '@shared/models/roles';
 
 @Component({
   selector: 'app-vet-list',
-  imports: [RouterLink, VetProfileCard],
+  imports: [RouterLink, VetProfileCard, VetCreateForm],
   templateUrl: './vet-list.html',
   styleUrl: './vet-list.css',
 })
 export class VetList {
+  private readonly auth = inject(AuthState);
+  protected readonly canCreate = computed(() => this.auth.hasRole(Roles.admin));
+  protected readonly adding = signal(
+    inject(ActivatedRoute).snapshot.queryParamMap.get('add') === '1',
+  );
+  protected readonly added = signal(false);
+
+  protected created(): void {
+    this.adding.set(false);
+    this.added.set(true);
+    this.load();
+  }
+
+  private listRequest?: Subscription;
   private readonly service = inject(VetService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly auth = inject(AuthState);

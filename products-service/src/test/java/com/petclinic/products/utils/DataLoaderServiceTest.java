@@ -57,7 +57,7 @@ class DataLoaderServiceTest {
 
     @BeforeEach
     void setUp() {
-        dataLoaderService = spy(new DataLoaderService());
+        dataLoaderService = spy(new DataLoaderService(true));
         dataLoaderService.productRepository = productRepository;
         dataLoaderService.productBundleRepository = productBundleRepository;
         dataLoaderService.imagePublisher = imagePublisher;
@@ -76,6 +76,21 @@ class DataLoaderServiceTest {
                 .productId(PRODUCT_ID)
                 .imageId(IMAGE_ID)
                 .build();
+    }
+
+    @Test
+    void disabledSeedingDoesNotAccessRepositoriesOrPublishImages() throws Exception {
+        DataLoaderService disabledLoader = new DataLoaderService(false);
+        disabledLoader.productRepository = productRepository;
+        disabledLoader.productBundleRepository = productBundleRepository;
+        disabledLoader.imagePublisher = imagePublisher;
+        disabledLoader.ratingRepository = ratingRepository;
+        disabledLoader.productTypeRepository = productTypeRepository;
+
+        disabledLoader.run();
+
+        org.mockito.Mockito.verifyNoInteractions(productRepository, productBundleRepository,
+                imagePublisher, ratingRepository, productTypeRepository);
     }
 
     @Test

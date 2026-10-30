@@ -7,6 +7,15 @@
     </p>
   </header>
 
+  @if (canCreate()) {
+    <a
+      class="directory-button"
+      routerLink="/vets/list"
+      [queryParams]="{ add: '1' }"
+      i18n="@@vets.create.title"
+      >Ajouter un vétérinaire</a
+    >
+  }
   <div class="feature-grid">
     <article class="directory-card">
       <div class="icon-badge">
