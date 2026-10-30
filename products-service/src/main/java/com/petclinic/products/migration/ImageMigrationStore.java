@@ -53,7 +53,7 @@ public class ImageMigrationStore {
     public Mono<Void> uploaded(String oldId, String fileId) {
         return database.sql("UPDATE product_image_migration SET file_id = :file, state = 'UPLOADED' WHERE legacy_image_id = :id AND state = 'UPLOADING'")
                 .bind("id", oldId).bind("file", fileId).fetch().rowsUpdated()
-                .flatMap(count -> count == 1 ? Mono.<Void>empty() : Mono.error(new IllegalStateException("Upload journal update failed")));
+                .flatMap(count -> count == 1 ? Mono.empty() : Mono.error(new IllegalStateException("Upload journal update failed")));
     }
 
     public Mono<Void> linkProducts(String oldId, String fileId) {

@@ -236,7 +236,7 @@ public class AuthServiceClient {
         });
     }
 
-    public Mono<VetResponseDTO> addVetUser(Mono<RegisterVet> model) {
+    public Mono<VetResponseDTO> addVetUser(Mono<RegisterVet> model, String jwtToken) {
 
         String uuid = UUID.randomUUID().toString();
 
@@ -260,18 +260,27 @@ public class AuthServiceClient {
                                         .email(registerVet.getEmail())
                                         .resume(registerVet.getVet().getResume())
                                         .workday(registerVet.getVet().getWorkday())
+                                        .workHoursJson(registerVet.getVet().getWorkHoursJson())
                                         .phoneNumber(registerVet.getVet().getPhoneNumber())
                                         .vetBillId(registerVet.getVet().getVetBillId())
                                         .firstName(registerVet.getVet().getFirstName())
                                         .lastName(registerVet.getVet().getLastName())
                                         .vetId(uuid)
                                         .build();
-                                return vetsServiceClient.addVet((Mono.just(vetDTO)));
+                                return vetsServiceClient.addVet(Mono.just(vetDTO))
+                                        .onErrorResume(error -> webClientBuilder.build().delete()
+                                                .uri(authServiceUrl + "/users/{userId}", uuid)
+                                                .cookie("Bearer", jwtToken)
+                                                .retrieve()
+                                                .bodyToMono(Void.class)
+                                                .timeout(Duration.ofSeconds(5))
+                                                .onErrorResume(cleanupError -> {
+                                                    log.error("Could not remove account after veterinarian creation failed: {}", uuid, cleanupError);
+                                                    return Mono.empty();
+                                                })
+                                                .then(Mono.error(error)));
                             }
                     );
-        }).doOnError(throwable -> {
-            log.error("Error creating user: " + throwable.getMessage());
-            vetsServiceClient.deleteVet(uuid);
         });
     }
 
