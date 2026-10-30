@@ -45,6 +45,7 @@ const AddingReview: React.FC = (): JSX.Element => {
           setReview(prev => ({
             ...prev,
             ownerId: data.customerId,
+            reviewerId: data.customerId,
             reviewerName: `${data.firstName} ${data.lastName}`,
           }));
         })

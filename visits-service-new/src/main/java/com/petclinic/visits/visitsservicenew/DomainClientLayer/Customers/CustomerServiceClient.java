@@ -27,6 +27,10 @@ public class CustomerServiceClient {
 
 
     public Mono<CustomerResponseDTO> getCustomerByCustomerId(String customerId) {
+        // A blank id would hit GET /customers/ and return the whole customer list
+        if (customerId == null || customerId.isBlank()) {
+            return Mono.error(new NotFoundException("Customer id is not found: " + customerId));
+        }
         String url = customerServiceUrl + "/customers/{customerId}";
         return webClientBuilder.build()
                 .get()
