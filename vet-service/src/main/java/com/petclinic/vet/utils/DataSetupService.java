@@ -1094,6 +1094,7 @@ public class DataSetupService implements CommandLineRunner {
     }*/
 
     //method that converts the work hours map to a string
+
     private static String setWorkHours(Map<Workday, List<WorkHour>> workHours) {
         try {
             String workHoursJson = new ObjectMapper().writeValueAsString(workHours);

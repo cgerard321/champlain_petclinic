@@ -47,8 +47,14 @@ class CartServiceUnitTest {
     @Mock
     private OrderServiceImpl orderService;
 
+    @Mock
+    private AutomaticDiscountService automaticDiscountService;
+
     @BeforeEach
     void init() {
+        lenient().when(automaticDiscountService.apply(any(CartResponseModel.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
         lenient().when(cartRepository.findAll()).thenReturn(Flux.empty());
         lenient().when(cartRepository.findCartByCartId(anyString())).thenReturn(Mono.empty());
         lenient().when(cartRepository.findCartByCustomerId(anyString())).thenReturn(Mono.empty());
@@ -1461,7 +1467,7 @@ class CartServiceUnitTest {
     @Test
     void testGetRecentPurchases_ReturnsList() {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService, null, automaticDiscountService);
 
         String customerId = "customer-123";
         List<CartProduct> recentPurchases = List.of(
@@ -1480,7 +1486,7 @@ class CartServiceUnitTest {
     @Test
     void testGetRecentPurchases_ReturnsEmptyListIfNull() {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService, null, automaticDiscountService);
 
         String customerId = "customer-456";
         Cart cart = Cart.builder().cartId("cart456").customerId(customerId).recentPurchases(null).build();
@@ -2076,7 +2082,7 @@ class CartServiceUnitTest {
         void testGetRecommendationPurchases_ReturnsRecommendations() {
                 CartRepository cartRepository = Mockito.mock(CartRepository.class);
                 ProductClient productClient = Mockito.mock(ProductClient.class);
-                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService);
+                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService, null, automaticDiscountService);
 
                 String customerId = "customer-rec";
                 List<CartProduct> recommendations = List.of(CartProduct.builder().productId("prod1").build());
@@ -2096,7 +2102,7 @@ class CartServiceUnitTest {
         void testGetRecommendationPurchases_ReturnsEmptyList() {
                 CartRepository cartRepository = Mockito.mock(CartRepository.class);
                 ProductClient productClient = Mockito.mock(ProductClient.class);
-                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService);
+                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService, null, automaticDiscountService);
 
                 String customerId = "customer-empty";
                 Cart cart = Mockito.mock(Cart.class);
@@ -2111,35 +2117,13 @@ class CartServiceUnitTest {
                                 .verifyComplete();
     }
     @Test
-    void applyPromoToCart_validPercent_setsAndSaves() {
-        String cartId = cart1.getCartId();
-        double promo = 15.0;
-
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
-        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
-
-        StepVerifier.create(cartService.applyPromoToCart(cartId, promo))
-                .assertNext(resp -> {
-                    assertNotNull(resp);
-                    try {
-                        assertEquals(promo, resp.getPromoPercent());
-                    } catch (Exception ignored) {  }
-                })
-                .verifyComplete();
-
-        ArgumentCaptor<Cart> cap = ArgumentCaptor.forClass(Cart.class);
-        verify(cartRepository).save(cap.capture());
-        assertEquals(promo, cap.getValue().getPromoPercent());
-    }
-
-    @Test
-    void applyPromoToCart_nullPercent_clearsPromo() {
+    void clearPromoFromCart_clearsPromo() {
         String cartId = cart1.getCartId();
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
         when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
 
-        StepVerifier.create(cartService.applyPromoToCart(cartId, null))
+        StepVerifier.create(cartService.clearPromoFromCart(cartId))
                 .assertNext(resp -> {
                     assertNotNull(resp);
                     try {
@@ -2154,47 +2138,12 @@ class CartServiceUnitTest {
     }
 
     @Test
-    void applyPromoToCart_zeroOrNegative_clearsPromo() {
-        String cartId = cart1.getCartId();
-
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
-        when(cartRepository.save(any(Cart.class))).thenAnswer(inv -> Mono.just(inv.getArgument(0)));
-
-        StepVerifier.create(cartService.applyPromoToCart(cartId, 0.0))
-                .assertNext(resp -> {
-                    assertNotNull(resp);
-                    try {
-                        assertNull(resp.getPromoPercent());
-                    } catch (Exception ignored) {}
-                })
-                .verifyComplete();
-
-        ArgumentCaptor<Cart> cap = ArgumentCaptor.forClass(Cart.class);
-        verify(cartRepository).save(cap.capture());
-        assertNull(cap.getValue().getPromoPercent());
-    }
-
-    @Test
-    void applyPromoToCart_over100_throwsInvalidInput_andDoesNotSave() {
-        String cartId = cart1.getCartId();
-
-        when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.just(cart1));
-
-        StepVerifier.create(cartService.applyPromoToCart(cartId, 101.0))
-                .expectErrorMatches(t -> t instanceof InvalidInputException &&
-                        t.getMessage().equals("promoPercent must be 1..100"))
-                .verify();
-
-        verify(cartRepository, never()).save(any(Cart.class));
-    }
-
-    @Test
-    void applyPromoToCart_cartNotFound_throwsNotFound() {
+    void clearPromoFromCart_cartNotFound_throwsNotFound() {
         String cartId = "missing";
 
         when(cartRepository.findCartByCartId(cartId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(cartService.applyPromoToCart(cartId, 10.0))
+        StepVerifier.create(cartService.clearPromoFromCart(cartId))
                 .expectErrorMatches(t -> t instanceof NotFoundException &&
                         t.getMessage().equals("Cart not found: " + cartId))
                 .verify();

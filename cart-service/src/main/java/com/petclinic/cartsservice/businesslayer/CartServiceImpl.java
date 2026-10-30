@@ -2,6 +2,8 @@ package com.petclinic.cartsservice.businesslayer;
 
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
+import com.petclinic.cartsservice.dataaccesslayer.PromoRepository;
+import com.petclinic.cartsservice.utils.PromoEligibility;
 import com.petclinic.cartsservice.dataaccesslayer.ShippingMethod;
 import com.petclinic.cartsservice.dataaccesslayer.cartproduct.CartProduct;
 import com.petclinic.cartsservice.domainclientlayer.CartItemRequestModel;
@@ -12,6 +14,7 @@ import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistItemRequestModel;
 import com.petclinic.cartsservice.presentationlayer.WishlistTransferDirection;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
+import org.springframework.beans.BeanUtils;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import com.petclinic.cartsservice.utils.exceptions.OutOfStockException;
@@ -30,12 +33,17 @@ public class CartServiceImpl implements CartService {
     private final ProductClient productClient;
     private final CustomerClient customerClient;
     private final OrderServiceImpl orderService;
+    private final PromoRepository promoRepository;
+    private final AutomaticDiscountService automaticDiscountService;
 
-    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient, CustomerClient customerClient , OrderServiceImpl orderService) {
+    public CartServiceImpl(CartRepository cartRepository, ProductClient productClient, CustomerClient customerClient,
+                           OrderServiceImpl orderService, PromoRepository promoRepository, AutomaticDiscountService automaticDiscountService) {
         this.cartRepository = cartRepository;
         this.productClient = productClient;
         this.customerClient = customerClient;
         this.orderService = orderService;
+        this.promoRepository = promoRepository;
+        this.automaticDiscountService = automaticDiscountService;
     }
     private static final int DEFAULT_PAGE_SIZE = 50;
     private static final int MAX_PAGE_SIZE = 200;
@@ -78,7 +86,7 @@ public class CartServiceImpl implements CartService {
 
         return responseFlux
                 .skip(itemsToSkip)
-                .take(size);
+                .take(size).concatMap(automaticDiscountService::apply);
     }
 
     private Mono<CartResponseModel> toCartResponseModelWithCustomer(Cart cart) {
@@ -130,7 +138,7 @@ public class CartServiceImpl implements CartService {
                     return customerClient.getCustomerById(cid)
                             .map(c -> EntityModelUtil.toCartResponseModel(cart, cart.getProducts(), c.getFullName()))
                             .onErrorResume(e -> Mono.just(EntityModelUtil.toCartResponseModel(cart, cart.getProducts())));
-                });
+                }).flatMap(automaticDiscountService::apply);
     }
 
     @Override
@@ -208,11 +216,15 @@ public class CartServiceImpl implements CartService {
     public Mono<CartResponseModel> checkoutCart(final String cartId, BillingRequestModel billing) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
-                .flatMap(cart -> {
+                .zipWhen(cart -> automaticDiscountService.apply(
+                        EntityModelUtil.toCartResponseModel(cart, cart.getProducts())))
+                .flatMap(pricedCart -> {
+                    Cart cart = pricedCart.getT1();
+                    CartResponseModel calculatedCart = pricedCart.getT2();
                     if (cart.getProducts() == null || cart.getProducts().isEmpty()) {
                         return Mono.error(new InvalidInputException("Cart is empty"));
                     }
-                    Cart orderCart = EntityModelUtil.storeCartOrder(cart);
+                    Cart orderCart = EntityModelUtil.storeCartOrder(cart, calculatedCart);
                     String invoiceId = UUID.randomUUID().toString();
                     orderCart.setInvoiceId(invoiceId);
                     List<CartProduct> purchasedProducts = orderCart.getProducts();
@@ -234,6 +246,8 @@ public class CartServiceImpl implements CartService {
                             .map(savedOrder -> {
                                 CartResponseModel response =
                                         new CartResponseModel(invoiceId, cartId, purchasedProducts, total);
+                                BeanUtils.copyProperties(calculatedCart, response);
+                                response.setInvoiceId(invoiceId);
                                 response.setShippingMethod(orderCart.getShippingMethod());
                                 response.setShippingCost(orderCart.getShippingCost());
                                 return response;
@@ -262,6 +276,7 @@ public class CartServiceImpl implements CartService {
         private CartProduct toCartProduct(ProductResponseModel product) {
         return CartProduct.builder()
                 .productId(product.getProductId())
+                .productType(product.getProductType())
                 .imageId(product.getImageId())
                 .productName(product.getProductName())
                 .productDescription(product.getProductDescription())
@@ -298,7 +313,7 @@ public class CartServiceImpl implements CartService {
 
                     return cartRepository.save(newCart)
                             .flatMap(this::toCartResponseModelWithCustomer);
-                }));
+                })).flatMap(automaticDiscountService::apply);
     }
 
     @Override
@@ -354,9 +369,11 @@ public class CartServiceImpl implements CartService {
                                     }
                                     existingProduct.setQuantityInCart(newQuantity);
                                     existingProduct.setProductQuantity(availableStock);
+                                    existingProduct.setProductType(product.getProductType());
                                 } else {
                                     CartProduct cartProduct = CartProduct.builder()
                                             .productId(product.getProductId())
+                                            .productType(product.getProductType())
                                             .imageId(product.getImageId())
                                             .productName(product.getProductName())
                                             .productDescription(product.getProductDescription())
@@ -371,7 +388,7 @@ public class CartServiceImpl implements CartService {
                                 return cartRepository.save(cart)
                                         .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
                             });
-        });
+        }).flatMap(automaticDiscountService::apply);
     }
 
 
@@ -401,6 +418,7 @@ public class CartServiceImpl implements CartService {
                                 CartProduct existingProduct = existingProductOpt.get();
                                 existingProduct.setQuantityInCart(quantity);
                                 existingProduct.setProductQuantity(availableStock);
+                                existingProduct.setProductType(product.getProductType());
                             } else {
                                 return Mono.error(new NotFoundException("Product not found in cart: " + productId));
                             }
@@ -408,7 +426,7 @@ public class CartServiceImpl implements CartService {
                             return cartRepository.save(cart)
                                     .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts()));
                         })
-                );
+                ).flatMap(automaticDiscountService::apply);
     }
 
     private Mono<Cart> createNewCartForCustomer(String customerId) {
@@ -431,7 +449,7 @@ public class CartServiceImpl implements CartService {
                 .flatMap(cart -> {
                     List<CartProduct> products = cart.getProducts();
                     return Mono.just(EntityModelUtil.toCartResponseModel(cart, products));
-                });
+                }).flatMap(automaticDiscountService::apply);
     }
 
     @Override
@@ -466,6 +484,7 @@ public class CartServiceImpl implements CartService {
                     if (existingProductOpt.isEmpty()) {
                         CartProduct cartProduct = CartProduct.builder()
                             .productId(product.getProductId())
+                            .productType(product.getProductType())
                             .productName(product.getProductName())
                             .imageId(product.getImageId())
                             .productDescription(product.getProductDescription())
@@ -482,7 +501,7 @@ public class CartServiceImpl implements CartService {
                     return cartRepository.save(cart)
                         .map(savedCart -> EntityModelUtil.toCartResponseModel(savedCart, savedCart.getProducts() != null ? savedCart.getProducts() : Collections.emptyList()));
                 })
-            );
+            ).flatMap(automaticDiscountService::apply);
     }
 
     // transfer wishlist/cart items based on direction
@@ -506,7 +525,7 @@ public class CartServiceImpl implements CartService {
                         return moveWishlistToCart(cart, normalizedIds);
                     }
                     return moveCartToWishlist(cart, normalizedIds);
-                });
+                }).flatMap(automaticDiscountService::apply);
     }
 
     private Mono<CartResponseModel> moveWishlistToCart(Cart cart, List<String> normalizedIds) {
@@ -624,9 +643,11 @@ public class CartServiceImpl implements CartService {
                 int currentQty = safeQuantity(cartLine.getQuantityInCart());
                 cartLine.setQuantityInCart(currentQty + allocated);
                 cartLine.setProductQuantity(availability.getAvailableStock());
+                cartLine.setProductType(availability.productType);
             } else {
                 CartProduct newLine = CartProduct.builder()
                         .productId(item.getProductId())
+                        .productType(availability.productType)
                         .imageId(item.getImageId())
                         .productName(item.getProductName())
                         .productDescription(item.getProductDescription())
@@ -686,6 +707,7 @@ public class CartServiceImpl implements CartService {
     private static final class WishlistProductAvailability {
         private final String productId;
         private final String productName;
+        private String productType;
         private final int availableStock;
         private final boolean missing;
         private int existingInCart;
@@ -700,7 +722,9 @@ public class CartServiceImpl implements CartService {
 
         static WishlistProductAvailability fromProduct(String productId, ProductResponseModel product, int availableStock) {
             String resolvedName = product != null ? product.getProductName() : null;
-            return new WishlistProductAvailability(productId, resolvedName, availableStock, false);
+            WishlistProductAvailability availability = new WishlistProductAvailability(productId, resolvedName, availableStock, false);
+            availability.productType = product == null ? null : product.getProductType();
+            return availability;
         }
 
         static WishlistProductAvailability missing(String productId) {
@@ -800,6 +824,7 @@ public class CartServiceImpl implements CartService {
             } else {
                 CartProduct copy = CartProduct.builder()
                         .productId(selected.getProductId())
+                        .productType(selected.getProductType())
                         .imageId(selected.getImageId())
                         .productName(selected.getProductName())
                         .productDescription(selected.getProductDescription())
@@ -851,21 +876,66 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Mono<CartResponseModel> applyPromoToCart(String cartId, Double promoPercent) {
+    public Mono<CartResponseModel> clearPromoFromCart(String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
                 .flatMap(cart -> {
-                    if (promoPercent == null || promoPercent <= 0) {
-                        cart.setPromoPercent(null);
-                        return cartRepository.save(cart);
+                    cart.setPromoPercent(null);
+                    cart.setAppliedPromo(null);
+                    if (cart.getProducts() != null) {
+                        cart.getProducts().forEach(p -> p.setPromoLookupFailed(false));
                     }
-                    if (promoPercent > 100) {
-                        return Mono.error(new InvalidInputException("promoPercent must be 1..100"));
-                    }
-                    cart.setPromoPercent(promoPercent);
                     return cartRepository.save(cart);
                 })
-                .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts()));
+                .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts())).flatMap(automaticDiscountService::apply);
+    }
+
+    @Override
+    public Mono<CartResponseModel> applyPromoCodeToCart(String cartId, String code) {
+        if (code == null || code.isBlank()) {
+            return Mono.error(new InvalidInputException("Promo code must be provided"));
+        }
+        return promoRepository.findPromoCodeByCode(code.trim())
+                .filter(promo -> !promo.isAutomatic())
+                .filter(p -> p.isActive() && EntityModelUtil.isPromoActive(p.getExpirationDate())
+                        && Double.isFinite(p.getDiscount()) && p.getDiscount() > 0 && p.getDiscount() <= 100)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Promo code is invalid, inactive or expired")))
+                .flatMap(promo -> cartRepository.findCartByCartId(cartId)
+                        .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                        .flatMap(cart -> {
+                            List<CartProduct> products = cart.getProducts() == null ? List.of() : cart.getProducts();
+                            // Existing carts may predate product type snapshots.
+                            return Flux.fromIterable(products)
+                                    .concatMap(p -> {
+                                        CartProduct item = new CartProduct();
+                                        BeanUtils.copyProperties(p, item);
+                                        item.setPromoLookupFailed(false);
+                                        if (!"PRODUCT_TYPE".equals(promo.getScope())) {
+                                            return Mono.just(item);
+                                        }
+                                        return productClient.getProductByProductId(p.getProductId())
+                                                .map(current -> {
+                                                    item.setProductType(current.getProductType());
+                                                    return item;
+                                                })
+                                                .onErrorResume(error -> Mono.empty())
+                                                .switchIfEmpty(Mono.fromSupplier(() -> {
+                                                    item.setPromoLookupFailed(true);
+                                                    return item;
+                                                }));
+                                    })
+                                    .collectList()
+                                    .flatMap(items -> {
+                                        if (items.stream().noneMatch(p -> PromoEligibility.isEligible(promo, p))) {
+                                            return Mono.error(new InvalidInputException("Promo code does not apply to any items in this cart"));
+                                        }
+                                        cart.setAppliedPromo(promo);
+                                        cart.setPromoPercent(promo.getDiscount());
+                                        cart.setProducts(items);
+                                        return cartRepository.save(cart);
+                                    });
+                        }))
+                .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts())).flatMap(automaticDiscountService::apply);
     }
 
     //helper method that removes duplicates in wishlist before working with it
@@ -914,7 +984,7 @@ public class CartServiceImpl implements CartService {
                     cart.setShippingCost(resolvedMethod.getCost());
                     return cartRepository.save(cart);
                 })
-                .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts()));
+                .map(saved -> EntityModelUtil.toCartResponseModel(saved, saved.getProducts())).flatMap(automaticDiscountService::apply);
     }
 
     @Override

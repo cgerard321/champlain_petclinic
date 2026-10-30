@@ -3,13 +3,21 @@ export interface Inventory {
   inventoryName: string;
   inventoryType: string;
   inventoryDescription: string;
+  name?: { en: string; fr: string };
+  description?: { en: string; fr: string };
   important?: boolean;
+  inventoryImage?: string | null;
+  inventoryBackupImage?: string | null;
+  imageUploaded?: string | null;
 }
 
 export interface InventoryRequest {
   inventoryName: string;
   inventoryType: string;
   inventoryDescription: string;
+  name?: { en: string; fr: string };
+  description?: { en: string; fr: string };
+  imageUploaded?: string;
 }
 
 export const INVENTORY_TYPES = ['Bandages', 'Injections', 'Medications', 'Equipment'] as const;

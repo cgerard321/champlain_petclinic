@@ -7,7 +7,7 @@
 .product-thumbnail-placeholder {
   display: block;
   width: 100%;
-  height: 160px;
+  height: var(--product-thumbnail-height, 160px);
   border-radius: 8px;
 }
 

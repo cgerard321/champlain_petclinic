@@ -23,4 +23,13 @@ public class PromoCodeResponseModel {
     private LocalDateTime expirationDate;
 
     private  boolean isActive;
+    private String imageId;
+    private FileResponseDTO image;
+
+    private String scope;
+    private java.util.List<String> productIds;
+    private java.util.List<String> productTypes;
+    private boolean automatic;
+    private Double minimumPurchaseAmount;
+
 }

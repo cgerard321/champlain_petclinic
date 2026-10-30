@@ -1,0 +1,119 @@
+{
+  "title": "Your Bills",
+  "sidebar": {
+    "title": "Options",
+    "ariaLabel": "Billing options"
+  },
+  "buttons": {
+    "close": "Close",
+    "apply": "Apply",
+    "clear": "Clear",
+    "details": "Details",
+    "downloadPdf": "Download PDF",
+    "payBill": "Pay Bill",
+    "filterStatus": "Filter By Status",
+    "filterAmount": "Filter By Amount",
+    "filterDate": "Filter By Date",
+    "currency": "Currency:"
+  },
+  "status": "Status:",
+  "statusType": {
+    "paid": "PAID",
+    "unpaid": "UNPAID",
+    "overdue": "OVERDUE"
+  },
+  "currency": {
+    "ariaLabel": "Select currency"
+  },
+  "balance": {
+    "title": "Current Balance"
+  },
+  "filterStatus": {
+    "title": "Filter by Status",
+    "options": {
+      "all": "All"
+    }
+  },
+  "filterAmount": {
+    "title": "Filter by Amount",
+    "label": "Amount range",
+    "options": {
+      "none": "None",
+      "custom": "Custom"
+    },
+    "custom": {
+      "labelMin": "Custom Min",
+      "labelMax": "Custom Max",
+      "min": "min",
+      "max": "max"
+    }
+  },
+  "filterDate": {
+    "title": "Filter by Date",
+    "mode": "Date mode",
+    "month": "Month",
+    "year": "Year",
+    "options": {
+      "any": "Any",
+      "dueDate": "Due date",
+      "visitDate": "Visit date"
+    }
+  },
+  "billCard": {
+    "empty": "No bills to display.",
+    "vet": "Vet:",
+    "totalDue": "Total due:",
+    "date": "Appointment date:",
+    "detail": {
+      "title": "Bill Details",
+      "id": "Bill ID:",
+      "customer": "Customer:",
+      "visit": "Visit Type:",
+      "amount": "Amount:",
+      "gst": "GST (5%):",
+      "qst": "QST (9.975%):",
+      "tax": "Total tax:",
+      "interest": "Interest:",
+      "dueDate": "Due Date:",
+      "time": "Time Remaining:",
+      "timeStatus": {
+        "paid": "This bill is paid",
+        "zero": "0 days remaining to pay bill",
+        "unpaid": "{{count}} days remaining to pay bill"
+      }
+    }
+  },
+  "visitTypes": {
+    "regular": "Regular",
+    "vaccine": "Vaccine",
+    "emergency": "Emergency",
+    "checkup": "Checkup",
+    "dental": "Dental",
+    "surgery": "Surgery"
+  },
+  "paymentForm": {
+    "cancel": "Cancel",
+    "processing": "Processing...",
+    "cardNumber": "Card Number",
+    "expirationDate": "Expiration Date",
+    "cvv": "CVV",
+    "amounts": {
+      "baseAmount": "Base Amount",
+      "totalAmount": "Total Amount"
+    }
+  },
+  "errors": {
+    "fetchBalance": "Failed to fetch current balance",
+    "fetchBills": "Failed to fetch bills",
+    "invalidAmountRange": "Min and max must be numbers",
+    "invalidAmountOption": "Invalid amount option",
+    "cardNumberRequired": "Card number is required",
+    "cardNumberLength": "Card number must be 16 digits",
+    "cvvRequired": "CVV is required",
+    "cvvLength": "CVV must be 3 digits",
+    "expirationDateRequired": "Expiration date is required",
+    "expirationDateFormat": "Invalid format. Use MM/YY",
+    "cardExpired": "Card is expired",
+    "paymentFailed": "Payment failed. Please try again."
+  }
+}

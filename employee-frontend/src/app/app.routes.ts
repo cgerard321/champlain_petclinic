@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from '@core/guards/auth/auth-guard';
 import { customerRedirectGuard } from '@core/guards/customers/customer-redirect';
 import { employeeGuard } from '@core/guards/employee/employee-guard';
+import { Roles } from '@shared/models/roles';
 
 export const routes: Routes = [
   {
@@ -40,6 +41,11 @@ export const routes: Routes = [
       },
 
       {
+        path: 'customerDetails',
+        loadChildren: () => import('@features/cust/pages/customerDetails/routes'),
+      },
+
+      {
         path: 'bill',
         loadChildren: () => import('@features/bill/routes'),
       },
@@ -55,6 +61,12 @@ export const routes: Routes = [
       },
 
       {
+        path: 'users',
+        canActivate: [authGuard([Roles.admin])],
+        loadChildren: () => import('@features/users/routes'),
+      },
+
+      {
         path: 'prod',
         loadChildren: () => import('@features/prod/routes'),
       },
@@ -62,6 +74,10 @@ export const routes: Routes = [
       {
         path: 'promo',
         loadChildren: () => import('@features/promo/routes'),
+      },
+      {
+        path: 'order-reports',
+        loadChildren: () => import('@features/order-reports/routes'),
       },
       {
         path: 'error',

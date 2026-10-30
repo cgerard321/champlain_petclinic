@@ -29,14 +29,23 @@ import com.petclinic.visits.visitsservicenew.Utils.IdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Comparator;
+import java.util.List;
 
 import static java.lang.String.format;
 
@@ -237,19 +246,24 @@ public class VisitServiceImpl implements VisitService {
                 .map(entityDtoUtil::toVisitEntity)
                 // Generate new ID with current date and incremented sequence
                 .flatMap(visit -> {
-                    visit.setVisitId(IdGenerator.generateVisitId());
-                    return repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
+                    return repo.findByVisitDateAndPractitionerId(visit.getVisitDate(),visit.getPractitionerId())
                             .collectList()
                             .flatMap(existingVisits -> {
-                                if (existingVisits.isEmpty()) {// If there are no existing visits
-                                    return repo.insert(visit); // Insert the visit
+                                if (existingVisits.isEmpty()) {
+                                    return generateUniqueVisitId()
+                                            .flatMap(uniqueId -> {
+                                                visit.setVisitId(uniqueId);
+                                                return repo.insert(visit);
+                                            });
                                 } else {
-                                    //return exception if a visits already exists at the specific day and time for a specific practitioner
-                                    return Mono.error(new DuplicateTimeException("A visit with the same time and practitioner already exists."));
+                                    return Mono.error(new DuplicateTimeException(
+                                            "A visit with the same time and practitioner already exists."
+                                    ));
                                 }
                             });
                 })
                 .flatMap(entityDtoUtil::toVisitResponseDTO);
+
     }
 
 
@@ -602,8 +616,6 @@ public class VisitServiceImpl implements VisitService {
      * @return The email built from the message
      */
     private Mail generateVisitRequestEmail(UserDetails user, String petName, LocalDateTime visitDate) {
-
-
         return new Mail(
                 user.getEmail(), "PetClinic Visit request", "Default", "PetClinic Visit request",
                 "Dear " + user.getUsername() + ",\n" +
@@ -664,6 +676,84 @@ public class VisitServiceImpl implements VisitService {
     }
 
 
+    //Weekly email service
+    public Mono<String> sendSchedule(String vetId, LocalDate weekStart) {
+        LocalDateTime start = weekStart.atStartOfDay();
+        LocalDateTime end = weekStart.plusDays(7).atStartOfDay();
+
+        return vetsClient.getVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(
+                        new NotFoundException("No veterinarian found with vetId: " + vetId)))
+                .flatMap(vet -> {
+                    if (vet.getEmail() == null || vet.getEmail().isBlank()) {
+                        return Mono.error(new IllegalArgumentException(
+                                "The veterinarian does not have an email address."));
+                    }
+
+                    return repo.findByPractitionerIdAndVisitDateBetween(vetId, start, end)
+                            .filter(visit -> visit.getStatus() == Status.UPCOMING
+                                    || visit.getStatus() == Status.CONFIRMED)
+                            .sort(Comparator.comparing(Visit::getVisitDate))
+                            .collectList()
+                            .flatMap(visits -> sendEmail(vet, visits, weekStart));
+                });
+    }
+
+
+
+    public Mono<String> sendEmail(VetDTO vet, List<Visit> visits, LocalDate weekStart) {
+        StringBuilder body = new StringBuilder();
+        body.append("Your schedule for the week starting ")
+                .append(weekStart)
+                .append(":\n\n");
+
+        if (visits.isEmpty()) {
+            body.append("There are no appointments scheduled for this week.");
+        } else {
+            DateTimeFormatter formatter =
+                    DateTimeFormatter.ofPattern("EEEE, MMMM d 'at' h:mm a");
+
+            for (Visit visit : visits) {
+                body.append("- ")
+                        .append(visit.getVisitDate().format(formatter))
+                        .append(" | ")
+                        .append(visit.getDescription())
+                        .append(" | Status: ")
+                        .append(visit.getStatus())
+                        .append("\n\n");
+            }
+        }
+
+        Mail mail = new Mail(
+                vet.getEmail(), "Your weekly PetClinic schedule", "Default", "Your weekly schedule",
+                body.toString(), "Thank you,\nPetClinic", vet.getFirstName(), "ChamplainPetClinic@gmail.com");
+
+        return Mono.fromCallable(() -> mailService.sendMail(mail))
+                .subscribeOn(Schedulers.boundedElastic());
+    }
+
+
+    @Scheduled(
+            cron = "${app.weekly-schedule-email.cron:0 0 7 * * MON}",
+            zone = "America/Toronto")
+    public void sendWeeklySchedulesAutomatically() {
+        LocalDate weekStart = LocalDate.now(ZoneId.of("America/Toronto"))
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        vetsClient.getAllVets()
+                .filter(VetDTO::isActive)
+                .concatMap(vet -> sendSchedule(vet.getVetId(), weekStart)
+                        .doOnError(error -> log.error(
+                                "Could not send schedule to vet {}",
+                                vet.getVetId(),
+                                error)
+                        )
+                        .onErrorResume(error -> Mono.empty()))
+                .subscribe();
+    }
+
+
+
     @Override
     public Mono<VisitResponseDTO> patchVisitStatusInVisit(String visitId, String status) {
         // Find the visit by the ID
@@ -684,6 +774,23 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(entityDtoUtil::toVisitResponseDTO)
                 .doOnNext(dto -> log.info("Converted to DTO with status: {}", dto.getStatus()));
     }
+
+
+    private Mono<String> generateUniqueVisitId() {
+        return Mono.defer(() -> {
+            String candidateId = IdGenerator.generateVisitId();
+
+            return repo.existsByVisitId(candidateId)
+                    .flatMap(exists -> {
+                        if (exists) {
+                            return generateUniqueVisitId();
+                        }
+
+                        return Mono.just(candidateId);
+                    });
+        });
+    }
+
 
 
 }

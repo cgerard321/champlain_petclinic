@@ -755,10 +755,13 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        Mono<String> result = authServiceClient.updateUsername(userId, newUsername, jwtToken);
+        Mono<ResponseEntity<String>> result =
+                authServiceClient.updateUsername(userId, newUsername, jwtToken);
 
         StepVerifier.create(result)
-                .expectNextMatches(response -> response.contains("Username updated successfully"))
+                .expectNextMatches(response ->
+                        response.getBody() != null &&
+                                response.getBody().contains("Username updated successfully"))
                 .verifyComplete();
     }
 
@@ -850,7 +853,7 @@ public class AuthServiceClientIntegrationTest {
         when(vetsServiceClient.addVet(any(Mono.class))).thenReturn(Mono.just(vetResponse));
         when(vetsServiceClient.deleteVet(any())).thenReturn(Mono.empty());
 
-        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN));
+        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN), "admin-token");
 
         StepVerifier.create(result)
                 .expectNextMatches(vet -> vet.getVetId().equals("vet123"))
@@ -1049,11 +1052,12 @@ public class AuthServiceClientIntegrationTest {
                 .setBody(userJson);
 
         server.enqueue(mockResponse);
+        server.enqueue(new MockResponse().setResponseCode(204));
 
         when(vetsServiceClient.addVet(any(Mono.class))).thenReturn(Mono.error(new RuntimeException("Service error")));
         when(vetsServiceClient.deleteVet(any())).thenReturn(Mono.empty());
 
-        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN));
+        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN), "admin-token");
 
         StepVerifier.create(result)
                 .verifyError(RuntimeException.class);
@@ -1387,7 +1391,7 @@ public class AuthServiceClientIntegrationTest {
 
         when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid vet registration data", HttpStatus.BAD_REQUEST));
 
-        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN));
+        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN), "admin-token");
 
         StepVerifier.create(result)
                 .verifyError(GenericHttpException.class);
@@ -1454,9 +1458,13 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Username already exists", HttpStatus.BAD_REQUEST));
+        when(rethrower.rethrow(any(ClientResponse.class), any()))
+                .thenThrow(new GenericHttpException(
+                        "Username already exists",
+                        HttpStatus.BAD_REQUEST));
 
-        Mono<String> result = authServiceClient.updateUsername(userId, newUsername, jwtToken);
+        Mono<ResponseEntity<String>> result =
+                authServiceClient.updateUsername(userId, newUsername, jwtToken);
 
         StepVerifier.create(result)
                 .verifyError(GenericHttpException.class);
@@ -1598,7 +1606,7 @@ public class AuthServiceClientIntegrationTest {
             return Mono.error(lambda.apply(errorMap));
         });
 
-        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN));
+        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN), "admin-token");
 
         StepVerifier.create(result)
                 .verifyError(GenericHttpException.class);
@@ -1675,14 +1683,20 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        when(rethrower.rethrow(any(ClientResponse.class), any())).thenAnswer(invocation -> {
-            ClientResponse response = invocation.getArgument(0);
-            Function<Map, ? extends Throwable> lambda = invocation.getArgument(1);
-            Map<String, Object> errorMap = Map.of("message", "Username already exists");
-            return Mono.error(lambda.apply(errorMap));
-        });
+        when(rethrower.rethrow(any(ClientResponse.class), any()))
+                .thenAnswer(invocation -> {
+                    ClientResponse response = invocation.getArgument(0);
+                    Function<Map, ? extends Throwable> lambda =
+                            invocation.getArgument(1);
 
-        Mono<String> result = authServiceClient.updateUsername(userId, newUsername, jwtToken);
+                    Map<String, Object> errorMap =
+                            Map.of("message", "Username already exists");
+
+                    return Mono.error(lambda.apply(errorMap));
+                });
+
+        Mono<ResponseEntity<String>> result =
+                authServiceClient.updateUsername(userId, newUsername, jwtToken);
 
         StepVerifier.create(result)
                 .verifyError(GenericHttpException.class);

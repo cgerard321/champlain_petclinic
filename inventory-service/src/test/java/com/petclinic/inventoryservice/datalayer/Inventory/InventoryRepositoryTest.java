@@ -12,6 +12,7 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,6 +23,35 @@ class InventoryRepositoryTest {
 
     InputStream inputStream = getClass().getResourceAsStream("/images/DiagnosticKitImage.jpg");
     byte[] diagnosticKitImage = ImageUtil.readImage(inputStream);
+
+    @Test
+    void bilingualNameAndDescriptionAreStoredAndSearchable() {
+        String id = UUID.randomUUID().toString();
+        Inventory inventory = Inventory.builder()
+                .inventoryId(id)
+                .inventoryName("Wound care")
+                .inventoryDescription("Supplies for wounds")
+                .inventoryType("Equipment")
+                .name(Map.of("en", "Wound care", "fr", "Soins des plaies"))
+                .description(Map.of("en", "Supplies for wounds", "fr", "Fournitures pour les plaies"))
+                .build();
+        inventoryRepository.save(inventory).block();
+
+        StepVerifier.create(inventoryRepository.findByInventoryNameRegex("(?i)^Wound.*"))
+                .expectNextMatches(found -> id.equals(found.getInventoryId())
+                        && "Wound care".equals(found.getName().get("en")))
+                .verifyComplete();
+        StepVerifier.create(inventoryRepository.findByInventoryDescriptionRegex("(?i)^Supplies.*"))
+                .expectNextMatches(found -> id.equals(found.getInventoryId()))
+                .verifyComplete();
+        StepVerifier.create(inventoryRepository.findByInventoryNameRegex("(?i)^Soins.*"))
+                .expectNextMatches(found -> id.equals(found.getInventoryId())
+                        && "Soins des plaies".equals(found.getName().get("fr")))
+                .verifyComplete();
+        StepVerifier.create(inventoryRepository.findByInventoryDescriptionRegex("(?i)^Fournitures.*"))
+                .expectNextMatches(found -> id.equals(found.getInventoryId()))
+                .verifyComplete();
+    }
 
 
     InventoryRepositoryTest() throws IOException {

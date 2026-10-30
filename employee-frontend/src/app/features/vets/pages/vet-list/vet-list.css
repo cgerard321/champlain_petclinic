@@ -49,6 +49,33 @@ h1 {
   line-height: 1.6;
 }
 
+/* Add Veterinarian button */
+
+.add-vet-button {
+  margin-bottom: 24px;
+  padding: 12px 20px;
+  border: 1px solid var(--mat-sys-primary, #254e3e);
+  border-radius: 8px;
+  background: var(--mat-sys-primary, #254e3e);
+  color: var(--mat-sys-on-primary, #fff);
+  font: inherit;
+  cursor: pointer;
+}
+
+.add-vet-button:hover:not(:disabled) {
+  filter: brightness(0.9);
+}
+
+.add-vet-button:focus-visible {
+  outline: 3px solid var(--mat-sys-primary, #254e3e);
+  outline-offset: 3px;
+}
+
+.add-vet-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .preview-notice {
   margin-bottom: 28px;
   padding: 18px 22px;
@@ -127,12 +154,69 @@ app-vet-profile-card {
   }
 }
 
+.search-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding: 20px 24px;
+  border: 1px solid rgb(36 75 63 / 14%);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #fff, #fffdf8);
+  box-shadow: 0 2px 6px rgb(28 61 51 / 6%);
+}
+
+.search-container input,
+.search-container select {
+  min-height: 46px;
+  box-sizing: border-box;
+  padding: 0 12px;
+  border: 1px solid rgb(36 75 63 / 22%);
+  border-radius: 11px;
+  background: #fff;
+  color: #263832;
+  font: inherit;
+}
+
+.search-container input {
+  flex: 2 1 240px;
+}
+
+.search-container select {
+  flex: 1 1 200px;
+}
+
+.search-container input:focus-visible,
+.search-container select:focus-visible {
+  border-color: #244b3f;
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(36 75 63 / 14%);
+}
+
+.search-container button {
+  min-height: 46px;
+  padding: 0 18px;
+  border: 1px solid #244b3f;
+  border-radius: 10px;
+  background: #244b3f;
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.search-container button:hover {
+  background: #1c3d33;
+}
+
+/* Dark mode */
+
 :host-context(.dark-mode) {
   color: white !important;
 }
 
-:host-context(.dark-mode) .page-description{
-  color:#a3b8ac;
+:host-context(.dark-mode) .page-description {
+  color: #a3b8ac;
 }
 
 :host-context(.dark-mode) .back-link {
@@ -141,10 +225,83 @@ app-vet-profile-card {
 
 :host-context(.dark-mode) .preview-notice {
   background-color: var(--mat-sys-surface-container-highest) !important;
-  border: 1px solid rgb(255 255 255 / 12%)  !important;
+  border: 1px solid rgb(255 255 255 / 12%) !important;
   color: white;
 }
 
 :host-context(.dark-mode) .preview-notice p {
-  color:#a3b8ac;
+  color: #a3b8ac;
+}
+
+:host-context(.dark-mode) .search-container {
+  background: var(--mat-sys-surface-container-highest);
+  border-color: rgb(255 255 255 / 12%);
+}
+
+:host-context(.dark-mode) .search-container input,
+:host-context(.dark-mode) .search-container select {
+  background: var(--mat-sys-surface-container-lowest);
+  border-color: rgb(255 255 255 / 20%);
+  color: #e0e0e0;
+}
+
+/* Remove Veterinarian button */
+
+.remove-vet-button {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #b42318;
+  border-radius: 8px;
+  background: transparent;
+  color: #b42318;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.remove-vet-button:hover:not(:disabled) {
+  background: #fef3f2;
+}
+
+.remove-vet-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.remove-vet-button:focus-visible {
+  outline: 3px solid #b42318;
+  outline-offset: 3px;
+}
+
+/* Removal feedback messages */
+
+.delete-message {
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  border-radius: 8px;
+}
+
+.delete-error {
+  border: 1px solid #f4b4ae;
+  background: #fef3f2;
+  color: #912018;
+}
+
+.delete-success {
+  border: 1px solid #b7dfc5;
+  background: #edf8f0;
+  color: #205c36;
+}
+
+/* Dark-mode removal styling */
+
+:host-context(.dark-mode) .remove-vet-button {
+  color: #ffaaa3;
+  border-color: #ffaaa3;
+}
+
+:host-context(.dark-mode) .remove-vet-button:hover:not(:disabled) {
+  background: rgb(180 35 24 / 18%);
 }

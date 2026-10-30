@@ -57,6 +57,10 @@ public class ApplicationExceptions {
         return Mono.error(new UnprocessableEntityException("Province is required"));
     }
 
+    public static <T> Mono<T> invalidCustomerProvince() {
+        return Mono.error(new UnprocessableEntityException("Province must be a valid Canadian province or territory"));
+    }
+
     public static <T> Mono<T> invalidCustomerPhoneNumber() {
         return Mono.error(new UnprocessableEntityException("Phone number must be 10 digits"));
     }

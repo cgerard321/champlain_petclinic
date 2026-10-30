@@ -19,5 +19,41 @@
     "slotsError": "Unable to load the available times.",
     "dateRequired": "Date is required",
     "timeRequired": "Time is required"
+  },
+  "calendar": {
+    "backToList": "Back to My Visits",
+    "title": "My Appointments",
+    "year": "Year",
+    "month": "Month",
+    "week": "Week",
+    "today": "Today",
+    "loading": "Loading your appointments...",
+    "retry": "Retry",
+    "userNotFound": "User not found. Please log in.",
+    "loadError": "Failed to load your visits. Please try again.",
+    "visitCount_one": "{{count}} visit",
+    "visitCount_other": "{{count}} visits",
+    "more_one": "+{{count}} more",
+    "more_other": "+{{count}} more",
+    "noAppointments": "No appointments",
+    "unknownPet": "Unknown Pet",
+    "vetName": "Dr. {{firstName}} {{lastName}}",
+    "emergency": "Emergency",
+    "vetNote": "Vet Note:",
+    "status": {
+      "UPCOMING": "Upcoming",
+      "CONFIRMED": "Confirmed",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled",
+      "ARCHIVED": "Archived"
+    }
+  },
+  "reviews": {
+    "filterByRating": "Filter by rating:",
+    "allRatings": "All ratings",
+    "stars_one": "{{count}} star",
+    "stars_other": "{{count}} stars",
+    "noReviews": "No reviews available",
+    "noMatchingReviews": "No reviews found for this rating"
   }
 }

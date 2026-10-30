@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -7,6 +7,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 
 import { isApiError } from '@core/models/api-error';
+import { Product } from '@features/prod/models/product.model';
+import { ProductService } from '@features/prod/services/product.service';
 import { PromoFormDialog } from '@features/promo/components/promo-form-dialog/promo-form-dialog';
 import { Promo } from '@features/promo/models/promo.model';
 import { PromoService } from '@features/promo/services/promo.service';
@@ -14,6 +16,7 @@ import { PromoService } from '@features/promo/services/promo.service';
 @Component({
   imports: [
     DatePipe,
+    CurrencyPipe,
     MatButtonModule,
     MatDialogModule,
     MatIconModule,
@@ -27,14 +30,39 @@ import { PromoService } from '@features/promo/services/promo.service';
 export class PromoList implements OnInit {
   private readonly promoService = inject(PromoService);
   private readonly dialog = inject(MatDialog);
+  private readonly productService = inject(ProductService);
+  protected readonly products = signal<Product[]>([]);
 
-  protected readonly columns = ['name', 'code', 'discount', 'expirationDate', 'status', 'actions'];
+  protected eligibility(promo: Promo): string {
+    if (promo.scope === 'PRODUCT') {
+      return `Products: ${(promo.productIds ?? [])
+        .map((id) => this.products().find((product) => product.productId === id)?.productName ?? id)
+        .join(', ')}`;
+    }
+    return promo.scope === 'PRODUCT_TYPE'
+      ? `Product types: ${(promo.productTypes ?? []).join(', ')}`
+      : 'Full cart';
+  }
+
+  protected readonly columns = [
+    'name',
+    'code',
+    'discount',
+    'eligibility',
+    'expirationDate',
+    'status',
+    'actions',
+  ];
   protected readonly promos = signal<Promo[]>([]);
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadPromos();
+    this.productService.getProducts().subscribe({
+      next: (products) => this.products.set(products),
+      error: () => this.products.set([]),
+    });
   }
 
   protected loadPromos(): void {

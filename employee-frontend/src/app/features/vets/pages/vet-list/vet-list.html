@@ -9,6 +9,37 @@
     </p>
   </header>
 
+  @if (canCreate()) {
+    @if (adding()) {
+      <app-vet-create-form (completed)="created()" (cancelled)="adding.set(false)" />
+    } @else {
+      <button
+        type="button"
+        class="add-vet-button"
+        (click)="adding.set(true); added.set(false)"
+        i18n="@@vets.create.title"
+      >
+        Ajouter un vétérinaire
+      </button>
+    }
+  }
+
+  @if (added()) {
+    <p role="status" i18n="@@vets.create.success">Le vétérinaire a été créé avec succès.</p>
+  }
+
+  @if (deleteError()) {
+    <p class="delete-message delete-error" role="alert">
+      {{ deleteError() }}
+    </p>
+  }
+
+  @if (deleteSuccess()) {
+    <p class="delete-message delete-success" role="status">
+      {{ deleteSuccess() }}
+    </p>
+  }
+
   @if (loading()) {
     <p role="status" i18n="@@vets.list.loading">Chargement des vétérinaires…</p>
   } @else if (error()) {
@@ -17,23 +48,67 @@
       <button type="button" (click)="load()" i18n="@@vets.actions.retry">Réessayer</button>
     </div>
   } @else {
+    <div class="search-container">
+      <input
+        type="search"
+        [value]="searchQuery()"
+        (input)="onSearch($event)"
+        placeholder="Rechercher par nom"
+        i18n-placeholder="@@vets.list.search_placeholder"
+        aria-label="Rechercher un vétérinaire par nom"
+        i18n-aria-label="@@vets.list.search_label"
+      />
+
+      <select
+        [value]="selectedSpecialty()"
+        (change)="onSpecialtyChange($event)"
+        aria-label="Filtrer par spécialité"
+        i18n-aria-label="@@vets.list.specialty_label"
+      >
+        <option value="" i18n="@@vets.list.all_specialties">Toutes les spécialités</option>
+        @for (name of specialties(); track name) {
+          <option [value]="name" [selected]="name === selectedSpecialty()">{{ name }}</option>
+        }
+      </select>
+
+      <button type="button" (click)="clearFilters()" i18n="@@vets.list.clear">
+        Effacer les filtres
+      </button>
+    </div>
     <ul
       class="profile-grid"
       aria-label="Profils vétérinaires"
       i18n-aria-label="@@vets.list.live_profiles_label"
     >
-      @for (vet of vets(); track vet.vetId) {
+      @for (vet of filteredVets(); track vet.vetId) {
         <li>
-          <app-vet-profile-card [vet]="vet" />
+          <app-vet-profile-card [vet]="vet" [educations]="educationsByVet()[vet.vetId] ?? []" />
           <a
             class="profile-link"
             [routerLink]="['/vets', vet.vetId]"
             i18n="@@vets.actions.open_profile"
             >Voir le profil de {{ vet.firstName }} {{ vet.lastName }}</a
           >
+          @if (isAdmin()) {
+            <button
+              type="button"
+              class="remove-vet-button"
+              [disabled]="deletingVetId() !== null"
+              (click)="removeVet(vet)"
+              i18n="@@vets.remove.button"
+            >
+              Supprimer
+            </button>
+          }
         </li>
       } @empty {
-        <li class="empty-state" i18n="@@vets.list.empty">Aucun profil à afficher.</li>
+        @if (hasActiveFilters()) {
+          <li class="empty-state" role="status" i18n="@@vets.list.no_results">
+            Aucun vétérinaire trouvé
+          </li>
+        } @else {
+          <li class="empty-state" i18n="@@vets.list.empty">Aucun profil à afficher.</li>
+        }
       }
     </ul>
   }

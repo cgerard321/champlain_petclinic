@@ -37,7 +37,17 @@
         <tbody>
           @for (customer of filteredCustomers(); track customer.customerId) {
             <tr>
-              <td>{{ customer.firstName }} {{ customer.lastName }}</td>
+              <td>
+                <div class="customer-name">
+                  @if (canViewCustomerDetails()) {
+                    <button type="button" (click)="checkCustomerDetails(customer.customerId)">
+                      {{ customer.firstName }} {{ customer.lastName }}
+                    </button>
+                  } @else {
+                    <span>{{ customer.firstName }} {{ customer.lastName }}</span>
+                  }
+                </div>
+              </td>
               <td>{{ customer.address || notAvailable }}</td>
               <td>{{ customer.city || notAvailable }}</td>
               <td>{{ customer.telephone || notAvailable }}</td>
@@ -80,6 +90,68 @@
       >
         Ajouter Client
       </button>
+      <a class="AddButton pet-types-link" routerLink="/cust/pets" i18n="@@cust.allPetsButton">
+        Tous les animaux
+      </a>
+    </div>
+  }
+  @if (isAdmin()) {
+    <div class="deactivated-container">
+      <div class="add-button-container">
+        <button
+          mat-flat-button
+          class="AddButton pet-types-link"
+          [style.margin-left.rem]="1.2"
+          color="primary"
+          type="button"
+          (click)="toggleDeactivated()"
+          i18n="@@cust.deactivated.button"
+        >
+          Comptes désactivés
+        </button>
+      </div>
+      @if (showDeactivated()) {
+        @if (deactivatedError(); as message) {
+          <p role="alert">{{ message }}</p>
+        } @else {
+          <div class="table-container" [style.margin-top.px]="18">
+            <table>
+              <caption i18n="@@cust.deactivated.title">
+                Comptes clients désactivés
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col" i18n="@@cust.customerDetails.name">Nom</th>
+                  <th scope="col" i18n="@@cust.customerDetails.city">Ville</th>
+                  <th scope="col" i18n="@@cust.customerDetails.phone">Numéro de téléphone</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (customer of deactivatedCustomers(); track customer.customerId) {
+                  <tr>
+                    <td>
+                      <div class="customer-name">
+                        <button
+                          type="button"
+                          [routerLink]="['/customerDetails', customer.customerId]"
+                        >
+                          {{ customer.firstName }} {{ customer.lastName }}
+                        </button>
+                      </div>
+                    </td>
+                    <td>{{ customer.city || notAvailable }}</td>
+                    <td>{{ customer.telephone || notAvailable }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="3" i18n="@@cust.deactivated.none">Aucun compte désactivé.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
     </div>
   }
 </section>

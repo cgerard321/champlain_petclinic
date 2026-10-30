@@ -1,0 +1,95 @@
+@if (canCreate()) {
+  <form [formGroup]="form" (ngSubmit)="save()" aria-labelledby="create-vet-title">
+    <h2 id="create-vet-title" i18n="@@vets.create.title">Ajouter un vétérinaire</h2>
+    @if (created()) {
+      <p role="status" i18n="@@vets.create.partial">
+        Le vétérinaire est créé. Réessayez l’enregistrement de la formation ou retournez à la liste.
+      </p>
+    }
+    @if (error()) {
+      <p role="alert" class="error">{{ error() }}</p>
+    }
+    <fieldset [formGroup]="form" [disabled]="saving() || !!created()">
+      <legend i18n="@@vets.create.details">Profil et compte — champs obligatoires</legend>
+      @for (field of fields; track field.key) {
+        <div class="field">
+          <label [for]="'create-' + field.key">{{ field.label }}</label>
+          <input
+            [id]="'create-' + field.key"
+            [type]="field.type"
+            [formControlName]="field.key"
+            [attr.autocomplete]="field.key === 'password' ? 'new-password' : 'off'"
+            [attr.aria-invalid]="
+              form.controls[field.key].touched && form.controls[field.key].invalid
+            "
+            [attr.aria-describedby]="'hint-' + field.key"
+            required
+          />
+          <p
+            [id]="'hint-' + field.key"
+            [class.error]="form.controls[field.key].touched && form.controls[field.key].invalid"
+          >
+            {{ field.hint }}
+          </p>
+        </div>
+      }
+      <label for="create-specialties" i18n="@@vets.create.specialties"
+        >Spécialités (au moins une)</label
+      >
+      <select id="create-specialties" formControlName="specialties" multiple required>
+        @for (name of specialties; track name) {
+          <option [value]="name">{{ specialtyLabel(name) }}</option>
+        }
+      </select>
+      @if (form.controls.specialties.touched && form.controls.specialties.invalid) {
+        <p class="error" i18n="@@vets.create.specialtyRequired">
+          Sélectionnez au moins une spécialité.
+        </p>
+      }
+      <label for="create-days" i18n="@@vets.create.days">Jours de travail (facultatif)</label>
+      <select id="create-days" formControlName="workday" multiple>
+        @for (day of days; track day) {
+          <option [value]="day">{{ dayLabels[day] }}</option>
+        }
+      </select>
+      <label class="checkbox"
+        ><input type="checkbox" formControlName="active" /><span i18n="@@vets.create.active"
+          >Actif</span
+        ></label
+      >
+    </fieldset>
+    <fieldset [formGroup]="education" [disabled]="saving()">
+      <legend i18n="@@vets.create.education">
+        Formation (facultative — remplissez tous les champs si ajoutée)
+      </legend>
+      @for (field of educationFields; track field.key) {
+        <label [for]="'education-' + field.key">{{ field.label }}</label>
+        <input [id]="'education-' + field.key" [type]="field.type" [formControlName]="field.key" />
+      }
+      @if (education.dirty && !educationValid()) {
+        <p class="error" role="status" i18n="@@vets.create.educationInvalid">
+          Complétez tous les champs de formation. La date de fin doit suivre la date de début.
+        </p>
+      }
+    </fieldset>
+    <div class="actions">
+      <button
+        type="submit"
+        [disabled]="saving() || (!created() && form.invalid) || !educationValid()"
+        i18n="@@vets.create.save"
+      >
+        Enregistrer
+      </button>
+      <button type="button" [disabled]="saving()" (click)="cancel()">
+        @if (created()) {
+          <span i18n="@@vets.create.return">Retour à la liste</span>
+        } @else {
+          <span i18n="@@vets.create.cancel">Annuler</span>
+        }
+      </button>
+      @if (saving()) {
+        <span role="status" i18n="@@vets.create.saving">Enregistrement…</span>
+      }
+    </div>
+  </form>
+}

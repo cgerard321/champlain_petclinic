@@ -1,4 +1,11 @@
 {
+  "automaticDiscount": {
+    "summaryLabel": "Automatic discount ({{percent}}%):",
+    "offer": "Spend {{minimum}} on products to get {{percent}}% off automatically.",
+    "remaining": "Add {{amount}} more in products to qualify.",
+    "applied": "Automatic discount applied. You save {{amount}}.",
+    "bestDiscount": "The best available discount is included in your total."
+  },
   "buttons": {
     "addToCart": "Add to Cart",
     "apply": "Apply",
@@ -24,6 +31,7 @@
     "emptyMessage": "Looks like your cart is empty! Why not add something?",
     "voucherPlaceholder": "Enter voucher code",
     "currentPromo": "Current promo: {{percent}}%",
+    "promoLookupWarning": "No discount was applied to the following items because we couldn't verify their eligibility. Apply the promo again to retry:",
     "receiptLabel": "View your last receipt"
   },
   "summary": {
@@ -145,7 +153,8 @@
     "addToWishlist": "Add to wishlist",
     "addToCartLabel": "Add {{name}} to cart",
     "removeFromWishlistLabel": "Remove {{name}} from wishlist",
-    "lowStockOne": "Only 1 item left in stock."
+    "lowStockOne": "Only 1 item left in stock.",
+    "promoDiscount": "Promo discount: -{{amount}}"
   },
   "billing": {
     "close": "Close billing form",
@@ -195,6 +204,41 @@
     "price": "Price:",
     "quantity": "Quantity:",
     "download": "Download Invoice"
+  },
+  "reports": {
+    "openButton": "Report an Issue",
+    "title": "Report an Order Issue",
+    "orderNumber": "Order #{{id}}",
+    "reason": "Reason",
+    "selectReason": "Select a reason",
+    "affectedProducts": "Affected products",
+    "orderedQuantity": "Ordered quantity: {{quantity}}",
+    "description": "Description",
+    "submit": "Submit Report",
+    "submitting": "Submitting...",
+    "success": "Your report has been submitted. Our team is reviewing it.",
+    "bannerTitle": "Issue Reported",
+    "reference": "Reference",
+    "note": "Note from our team",
+    "reasons": {
+      "DAMAGED_ITEM": "Damaged Item",
+      "MISSING_ITEM": "Missing Item",
+      "WRONG_ITEM": "Wrong Item",
+      "PACKAGE_NOT_RECEIVED": "Package Not Received",
+      "OTHER": "Other"
+    },
+    "status": {
+      "NEW": "New",
+      "IN_REVIEW": "In Review",
+      "RESOLVED": "Resolved",
+      "REJECTED": "Rejected"
+    },
+    "errors": {
+      "reasonRequired": "Select a reason.",
+      "productRequired": "Select at least one affected product.",
+      "descriptionLength": "Description must contain between 15 and 500 characters.",
+      "submitFailed": "Could not submit the report."
+    }
   },
   "taxes": {
     "GST": "GST",

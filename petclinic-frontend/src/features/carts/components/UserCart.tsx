@@ -49,7 +49,16 @@ import {
 import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import { getCustomerOrders } from '../api/getCustomerOrders';
 import type { OrderModel } from '../models/OrderModel';
+import ReportOrderModal from './ReportOrderModal';
+import OrderReportBanner from './OrderReportBanner';
+import {
+  getCustomerOrderReports,
+  isOpenOrderReport,
+  type OrderReportSummary,
+} from '../api/orderReports';
 interface ProductAPIResponse {
+  promoLookupFailed?: boolean;
+  discountAmount?: number;
   productId: string;
   imageId?: string;
   productName: string;
@@ -106,8 +115,17 @@ const UserCart: React.FC = () => {
   const [orders, setOrders] = useState<OrderModel[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [ordersError, setOrdersError] = useState<string | null>(null);
+  const [reportsByOrderId, setReportsByOrderId] = useState<
+    Record<string, OrderReportSummary>
+  >({});
+  const [reportingOrder, setReportingOrder] = useState<OrderModel | null>(null);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
+  const [automaticDiscount, setAutomaticDiscount] = useState({
+    minimumAmount: 0,
+    percentage: 0,
+    applied: false,
+  });
   const [shippingMethod, setShippingMethod] =
     useState<ShippingMethod>('PICKUP');
   const [shippingCost, setShippingCost] = useState<number>(0);
@@ -115,6 +133,8 @@ const UserCart: React.FC = () => {
   const fetchOrders = useCallback(async (): Promise<void> => {
     if (!customerId) {
       setOrders([]);
+      setReportsByOrderId({});
+      setReportingOrder(null);
       setOrdersLoading(false);
       return;
     }
@@ -122,15 +142,43 @@ const UserCart: React.FC = () => {
     setOrdersLoading(true);
     setOrdersError(null);
 
-    try {
-      const data = await getCustomerOrders(customerId);
-      setOrders(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error('Failed to fetch orders:', error);
-      setOrdersError(t('orders.loadFailed'));
-    } finally {
-      setOrdersLoading(false);
-    }
+    const ordersRequest = getCustomerOrders(customerId)
+      .then(orderData => {
+        setOrders(Array.isArray(orderData) ? orderData : []);
+      })
+      .catch(error => {
+        console.error('Failed to fetch orders:', error);
+        setOrders([]);
+        setOrdersError(t('orders.loadFailed'));
+      })
+      .finally(() => setOrdersLoading(false));
+
+    const reportsRequest = getCustomerOrderReports(customerId)
+      .then(reportData => {
+        const latestReports = (
+          Array.isArray(reportData) ? reportData : []
+        ).reduce<Record<string, OrderReportSummary>>((reports, report) => {
+          const currentReport = reports[report.orderId];
+
+          if (
+            !currentReport ||
+            new Date(report.submittedAt).getTime() >
+              new Date(currentReport.submittedAt).getTime()
+          ) {
+            reports[report.orderId] = report;
+          }
+
+          return reports;
+        }, {});
+
+        setReportsByOrderId(latestReports);
+      })
+      .catch(error => {
+        console.error('Failed to fetch order reports:', error);
+        setReportsByOrderId({});
+      });
+
+    await Promise.all([ordersRequest, reportsRequest]);
   }, [customerId, t]);
 
   useEffect(() => {
@@ -139,6 +187,8 @@ const UserCart: React.FC = () => {
 
   const toProductModel = useCallback(
     (product: ProductAPIResponse): ProductModel => ({
+      promoLookupFailed: product.promoLookupFailed ?? false,
+      discountAmount: product.discountAmount ?? 0,
       productId: String(product.productId ?? ''),
       imageId: product.imageId ?? '',
       productName: product.productName,
@@ -232,6 +282,11 @@ const UserCart: React.FC = () => {
       setPromoPercent(
         typeof cartData.promoPercent === 'number' ? cartData.promoPercent : null
       );
+      setAutomaticDiscount({
+        minimumAmount: cartData.automaticDiscountMinimumAmount ?? 0,
+        percentage: cartData.automaticDiscountPercentage ?? 0,
+        applied: cartData.automaticDiscountApplied ?? false,
+      });
       setShippingMethod(cartData.shippingMethod ?? 'PICKUP');
       setShippingCost(
         typeof cartData.shippingCost === 'number' ? cartData.shippingCost : 0
@@ -245,6 +300,17 @@ const UserCart: React.FC = () => {
       emitCartMessage(serverMessage, fallbackMessage);
     },
     [emitCartMessage, toProductModel]
+  );
+
+  const refreshCart = useCallback(
+    async (existingCartId: string): Promise<void> => {
+      const { data } = await axiosInstance.get<CartDetailsModel>(
+        `/carts/${existingCartId}`,
+        { useV2: false }
+      );
+      syncCartState(data);
+    },
+    [syncCartState]
   );
 
   // Recent purchases state
@@ -430,8 +496,10 @@ const UserCart: React.FC = () => {
     0
   );
 
-  const promoDiscount =
-    promoPercent != null ? (subtotal * promoPercent) / 100 : 0;
+  const promoDiscount = cartItems.reduce(
+    (sum, item) => sum + (item.discountAmount ?? 0),
+    0
+  );
   const discountedSubtotal = Math.max(0, subtotal - promoDiscount);
   const effectiveShippingCost = cartItems.length > 0 ? shippingCost : 0;
   const taxableSubtotal = roundToCents(
@@ -548,27 +616,18 @@ const UserCart: React.FC = () => {
     }
 
     try {
-      const { data } = await axiosInstance.get(
-        `/carts/promos/validate/${encodeURIComponent(voucherCode.trim())}`,
-        { useV2: false, handleLocally: true }
-      );
-
-      const percent: number = Number(data?.discount);
-      if (Number.isNaN(percent) || percent < 0 || percent > 100) {
-        setVoucherError('errors.invalidDiscount');
-        return;
-      }
-
-      const updated = await applyPromo(existingCartId, percent);
+      const updated = await applyPromo(existingCartId, voucherCode.trim());
 
       setVoucherError(null);
       const appliedMessage = t('toasts.promoApplied', {
-        percent: updated?.promoPercent ?? percent,
+        percent: updated?.promoPercent ?? 0,
       });
       syncCartState(updated, appliedMessage);
     } catch (err) {
       console.error('Error validating promo code:', err);
-      setVoucherError('errors.promoInvalid');
+      const message = apiErrorMessage(err, t('errors.promoInvalid'));
+      setVoucherError(message);
+      showToast(message, 'error');
     }
   };
 
@@ -659,7 +718,7 @@ const UserCart: React.FC = () => {
     if (!existingCartId) return;
     try {
       await clearPromo(existingCartId);
-      setPromoPercent(null);
+      await refreshCart(existingCartId);
       showToast(t('toasts.promoRemoved'), 'success');
     } catch (err: unknown) {
       showToast(apiErrorMessage(err, t('errors.removePromoFailed')), 'error');
@@ -720,6 +779,7 @@ const UserCart: React.FC = () => {
           notifyCartChanged();
           return next;
         });
+        await refreshCart(existingCartId);
         showToast(t('toasts.itemRemoved'), 'success');
       } catch (error) {
         console.error('Error deleting item: ', error);
@@ -729,7 +789,15 @@ const UserCart: React.FC = () => {
         );
       }
     },
-    [apiErrorMessage, blockIfReadOnly, confirm, ensureCartId, showToast, t]
+    [
+      apiErrorMessage,
+      blockIfReadOnly,
+      confirm,
+      ensureCartId,
+      refreshCart,
+      showToast,
+      t,
+    ]
   );
 
   const clearCart = async (): Promise<void> => {
@@ -751,6 +819,7 @@ const UserCart: React.FC = () => {
         useV2: false,
       });
       setCartItems([]);
+      setAutomaticDiscount(previous => ({ ...previous, applied: false }));
       setCartItemCount(0);
       setCartCountInLS(0);
       notifyCartChanged();
@@ -934,8 +1003,14 @@ const UserCart: React.FC = () => {
   };
 
   const handleViewOrderReceipt = (order: OrderModel): void => {
+    const itemsSubtotal = roundToCents(
+      order.products.reduce(
+        (sum, item) => sum + item.productSalePrice * item.quantityInCart,
+        0
+      )
+    );
     const discount = roundToCents(
-      order.subtotal * ((order.promoPercent ?? 0) / 100)
+      Math.max(0, itemsSubtotal + (order.shippingCost ?? 0) - order.subtotal)
     );
 
     const orderBilling = {
@@ -957,7 +1032,7 @@ const UserCart: React.FC = () => {
         productSalePrice: item.productSalePrice,
         quantity: item.quantityInCart,
       })),
-      subtotal: order.subtotal,
+      subtotal: itemsSubtotal,
       taxableSubtotal: roundToCents(order.total - order.tvq - order.tvc),
       tvq: order.tvq,
       tvc: order.tvc,
@@ -1005,15 +1080,19 @@ const UserCart: React.FC = () => {
         postalCode: usedBilling.postalCode,
       };
 
-      await axiosInstance.post(`/carts/${cartId}/checkout`, checkoutBilling, {
-        useV2: false,
-      });
+      const { data: checkout } = await axiosInstance.post<CartDetailsModel>(
+        `/carts/${cartId}/checkout`,
+        checkoutBilling,
+        {
+          useV2: false,
+        }
+      );
 
-      const invoiceItems: Invoice[] = cartItems.map(item => ({
+      const invoiceItems: Invoice[] = checkout.products.map(item => ({
         productId: item.productId,
         productName: item.productName,
         productSalePrice: item.productSalePrice,
-        quantity: item.quantity || 1,
+        quantity: item.quantityInCart,
       }));
 
       const invoiceItemsForFull: InvoiceItemType[] = invoiceItems.map(i => ({
@@ -1029,37 +1108,13 @@ const UserCart: React.FC = () => {
         0
       );
       const invoiceSubtotal = invoiceSubtotalCents / 100;
-      const shippingCents = Math.round(effectiveShippingCost * 100);
-      const discountCents = Math.round(effectiveDiscount * 100);
-      const invoiceTaxableSubtotalCents = Math.max(
-        0,
-        invoiceSubtotalCents - discountCents + shippingCents
-      );
-      const invoiceTaxableSubtotal = invoiceTaxableSubtotalCents / 100;
-
-      const invoiceTaxLines = computeTaxes(
-        invoiceTaxableSubtotal,
-        usedBilling?.province
-      ).map(line => ({
-        ...line,
-        amount: line.amount ?? roundToCents(invoiceTaxableSubtotal * line.rate),
-      }));
-      const invoiceTaxCents = invoiceTaxLines.map(line =>
-        Math.round((line.amount ?? 0) * 100)
-      );
-      const invoiceTaxTotalCents = invoiceTaxCents.reduce(
-        (sum, cents) => sum + cents,
-        0
-      );
-      const invoiceTotalCents =
-        invoiceTaxableSubtotalCents + invoiceTaxTotalCents;
-      const invoiceTvq = (invoiceTaxCents[0] ?? 0) / 100;
-      const invoiceTvc =
-        invoiceTaxCents.slice(1).reduce((sum, cents) => sum + cents, 0) / 100;
-      const invoiceTotal = invoiceTotalCents / 100;
+      const invoiceTaxableSubtotal = checkout.subtotal;
+      const invoiceTvq = checkout.tvq;
+      const invoiceTvc = checkout.tvc;
+      const invoiceTotal = checkout.total;
 
       const newInvoice: InvoiceFullType = {
-        invoiceId: `${Date.now()}`,
+        invoiceId: checkout.invoiceId ?? '',
         userId: user?.userId || 'anonymous',
         billing: usedBilling
           ? {
@@ -1077,15 +1132,16 @@ const UserCart: React.FC = () => {
         taxableSubtotal: invoiceTaxableSubtotal,
         tvq: invoiceTvq,
         tvc: invoiceTvc,
-        discount: effectiveDiscount,
-        shippingMethod,
-        shippingCost: effectiveShippingCost,
+        discount: checkout.discountAmount ?? 0,
+        shippingMethod: checkout.shippingMethod ?? 'PICKUP',
+        shippingCost: checkout.shippingCost ?? 0,
         total: invoiceTotal,
       };
       setLastInvoice(newInvoice);
       setShowInvoiceModal(true);
       setCheckoutMessage(t('toasts.checkoutSuccess'));
       setCartItems([]);
+      setAutomaticDiscount(previous => ({ ...previous, applied: false }));
       setCartItemCount(0);
       setShippingMethod('PICKUP');
       setShippingCost(0);
@@ -1325,6 +1381,22 @@ const UserCart: React.FC = () => {
                 )}
               </div>
 
+              {promoPercent != null &&
+                cartItems.some(item => item.promoLookupFailed) && (
+                  <div className="alert alert-warning" role="status">
+                    <p>{t('cart.promoLookupWarning')}</p>
+                    <ul>
+                      {cartItems
+                        .filter(item => item.promoLookupFailed)
+                        .map(item => (
+                          <li key={item.productId}>
+                            {item.productName || item.productId}
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                )}
+
               {cartItems.length > 0 && (
                 <div className="voucher-code-section" style={{ marginTop: 12 }}>
                   <label htmlFor="shipping-method">{t('shipping.label')}</label>
@@ -1349,15 +1421,44 @@ const UserCart: React.FC = () => {
 
               <div className="CartSummary">
                 <h3>{t('summary.title')}</h3>
+                {automaticDiscount.percentage > 0 && (
+                  <div className="alert alert-info" role="status">
+                    <p>
+                      {t('automaticDiscount.offer', {
+                        percent: automaticDiscount.percentage,
+                        minimum: formatPrice(automaticDiscount.minimumAmount),
+                      })}
+                    </p>
+                    <p>
+                      {automaticDiscount.applied
+                        ? t('automaticDiscount.applied', {
+                            amount: formatPrice(effectiveDiscount),
+                          })
+                        : subtotal < automaticDiscount.minimumAmount
+                          ? t('automaticDiscount.remaining', {
+                              amount: formatPrice(
+                                roundToCents(
+                                  automaticDiscount.minimumAmount - subtotal
+                                )
+                              ),
+                            })
+                          : t('automaticDiscount.bestDiscount')}
+                    </p>
+                  </div>
+                )}
                 <p className="summary-item">
                   {t('summary.itemsSubtotal')} {formatPrice(subtotal)}
                 </p>
                 <p className="summary-item">
-                  {promoPercent != null
-                    ? t('summary.discountWithPercent', {
-                        percent: promoPercent,
+                  {automaticDiscount.applied
+                    ? t('automaticDiscount.summaryLabel', {
+                        percent: automaticDiscount.percentage,
                       })
-                    : t('summary.discount')}{' '}
+                    : promoPercent != null
+                      ? t('summary.discountWithPercent', {
+                          percent: promoPercent,
+                        })
+                      : t('summary.discount')}{' '}
                   {formatPrice(effectiveDiscount)}
                 </p>
                 <p className="summary-item">
@@ -1447,6 +1548,12 @@ const UserCart: React.FC = () => {
                     </p>
                   </div>
 
+                  {reportsByOrderId[order.orderId] && (
+                    <OrderReportBanner
+                      report={reportsByOrderId[order.orderId]}
+                    />
+                  )}
+
                   <div className="order-products">
                     {order.products.map(item => (
                       <div key={item.productId} className="order-product">
@@ -1480,6 +1587,20 @@ const UserCart: React.FC = () => {
                   </div>
 
                   <div className="order-footer">
+                    {!isStaff &&
+                      (!reportsByOrderId[order.orderId] ||
+                        !isOpenOrderReport(
+                          reportsByOrderId[order.orderId]
+                        )) && (
+                        <button
+                          type="button"
+                          className="cart-button cart-button--outline"
+                          onClick={() => setReportingOrder(order)}
+                        >
+                          {t('reports.openButton')}
+                        </button>
+                      )}
+
                     <button
                       type="button"
                       className="view-receipt-btn cart-button cart-button--brand cart-button--block"
@@ -1782,6 +1903,23 @@ const UserCart: React.FC = () => {
             )}
           </div>
         </div>
+
+        {reportingOrder && customerId && (
+          <ReportOrderModal
+            customerId={customerId}
+            order={reportingOrder}
+            onClose={() => setReportingOrder(null)}
+            onSubmitted={report => {
+              setReportsByOrderId(current => ({
+                ...current,
+                [report.orderId]: report,
+              }));
+
+              setReportingOrder(null);
+              showToast(t('reports.success'), 'success');
+            }}
+          />
+        )}
 
         {showBillingForm && (
           <CartBillingForm

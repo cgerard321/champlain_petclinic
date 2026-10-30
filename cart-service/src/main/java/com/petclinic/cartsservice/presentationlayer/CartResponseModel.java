@@ -32,7 +32,11 @@ public class CartResponseModel {
     private String paymentStatus;
     private String invoiceId;
 
+    private double discountAmount;
     private Double promoPercent;
+    private double automaticDiscountMinimumAmount;
+    private double automaticDiscountPercentage;
+    private boolean automaticDiscountApplied;
 
     private ShippingMethod shippingMethod;
     private double shippingCost;
