@@ -345,6 +345,15 @@
         "layout_preview_note": "Explore the layout with fictional profiles.",
         "live_note": "View your team’s profiles and contact details."
       },
+      "remove": {
+        "button": "Remove",
+        "title": "Remove veterinarian",
+        "confirm": "Are you sure you want to remove {$name}?",
+        "confirm_button": "Remove",
+        "cancel": "Cancel",
+        "success": "Veterinarian removed successfully.",
+        "error": "Unable to remove the veterinarian. Please try again."
+      },
       "list": {
         "back": "Back to veterinarians",
         "title": "Veterinarian directory",
