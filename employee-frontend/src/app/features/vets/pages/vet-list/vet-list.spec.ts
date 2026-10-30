@@ -34,6 +34,7 @@ describe('VetList - CPC-2195 Remove VETS', () => {
 
   const vetServiceMock = {
     getVets: vi.fn(),
+    getEducations: vi.fn(),
     deleteVet: vi.fn(),
   };
 
@@ -63,6 +64,7 @@ describe('VetList - CPC-2195 Remove VETS', () => {
     authMock.hasRole.mockImplementation((role: string) => role === 'ADMIN' && isAdmin);
 
     vetServiceMock.getVets.mockReturnValue(of([vet]));
+    vetServiceMock.getEducations.mockReturnValue(of([]));
     vetServiceMock.deleteVet.mockReturnValue(of(vet));
 
     dialogMock.open.mockReturnValue({

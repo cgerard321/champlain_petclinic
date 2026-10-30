@@ -85,6 +85,9 @@ describe('Veterinarian directory navigation', () => {
                   specialties: [],
                 })),
               ),
+
+            // Required by VetList after education integration.
+            getEducations: () => of([]),
           },
         },
 

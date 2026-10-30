@@ -2,7 +2,7 @@ import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
-import { filter, switchMap } from 'rxjs';
+import { filter, forkJoin, map, of, switchMap } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
 import { VetProfileCard } from '@features/vets/components/vet-profile-card/vet-profile-card';
@@ -121,7 +121,7 @@ export class VetList {
       )
       .subscribe({
         next: (vets) => {
-          const activeVets = vets.filter((vet) => vet.active === true).map(toVetProfile);
+          const activeVets = vets.profiles.filter((vet) => vet.active === true);
 
           this.vets.set(activeVets);
           this.loading.set(false);
