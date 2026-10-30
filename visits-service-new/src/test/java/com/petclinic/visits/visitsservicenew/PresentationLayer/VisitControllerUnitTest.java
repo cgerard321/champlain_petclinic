@@ -523,6 +523,46 @@ class VisitControllerUnitTest {
 
 
     @Test
+    public void whenUpdateReviewWithGeneratedReviewId_returnReviewResponseDTO() {
+        String reviewId = "REVIEW-2610-2903";
+        ReviewResponseDTO reviewResponseDTO1 = ReviewResponseDTO.builder()
+                .reviewId(reviewId)
+                .rating(4)
+                .reviewerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
+                .review("Updated review")
+                .build();
+
+        ReviewRequestDTO reviewRequestDTO = ReviewRequestDTO.builder()
+                .rating(4)
+                .review("Updated review")
+                .build();
+
+        when(reviewService.GetReviewByReviewId(reviewId)).thenReturn(Mono.just(reviewResponseDTO1));
+        when(reviewService.UpdateReview(any(Mono.class), eq(reviewId))).thenReturn(Mono.just(reviewResponseDTO1));
+
+        webTestClient
+                .get()
+                .uri("/visits/reviews/" + reviewId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        webTestClient
+                .put()
+                .uri("/visits/reviews/" + reviewId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(reviewRequestDTO), ReviewRequestDTO.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ReviewResponseDTO.class)
+                .isEqualTo(reviewResponseDTO1);
+
+        verify(reviewService, times(1)).UpdateReview(any(Mono.class), eq(reviewId));
+    }
+
+
+    @Test
     public void whenDeleteReviewById_returnReviewResponseDTO() {
 
         String reviewId = UUID.randomUUID().toString();
