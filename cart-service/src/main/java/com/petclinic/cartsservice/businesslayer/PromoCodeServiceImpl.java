@@ -41,12 +41,14 @@ public class PromoCodeServiceImpl implements PromoCodeService {
         LocalDateTime currentDateTime = LocalDateTime.now();
         return promoRepository.findAllByExpirationDateGreaterThanEqual(currentDateTime)
                 .filter(PromoCode::isActive)
+                .filter(promo -> !promo.isAutomatic())
                 .flatMapSequential(this::includeImage);
     }
 
     @Override
     public Mono<PromoCodeResponseModel> getPromoCodeByCode(String promoCode) {
         return promoRepository.findPromoCodeByCode(promoCode)
+                .filter(promo -> !promo.isAutomatic())
                 .flatMap(this::includeImage);
     }
 
@@ -87,6 +89,7 @@ public class PromoCodeServiceImpl implements PromoCodeService {
         promoCode.setExpirationDate(EntityModelUtil.validateExpirationDate(promoCodeRequestModel.getExpirationDate()));
 
         PromoEligibility.setScope(promoCode, promoCodeRequestModel);
+        PromoEligibility.setAutomatic(promoCode, promoCodeRequestModel);
         return saveWithImage(promoCode, promoCodeRequestModel);
     }
 

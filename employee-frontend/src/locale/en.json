@@ -1,6 +1,17 @@
 {
   "locale": "en",
   "translations": {
+    "promo": {
+      "automatic": {
+        "toggle": "Automatic discount",
+        "minimumLabel": "Minimum purchase amount (CAD)",
+        "type": "Automatic",
+        "minimumSummary": "Minimum: {$INTERPOLATION}",
+        "codeRequired": "A promo code is required.",
+        "invalidMinimum": "The minimum amount must be zero or greater.",
+        "invalidExpiration": "The expiration date must be in the future."
+      }
+    },
     "auth": {
       "errors": {
         "unreachable": "Could not reach the server.",
@@ -1164,7 +1175,8 @@
         "type": "Inventory type",
         "description": "Description",
         "descriptionEn": "Description (English)",
-        "descriptionFr": "Description (French)"
+        "descriptionFr": "Description (French)",
+        "photo": "Inventory photo"
       },
       "filters": {
         "aria": "Filter inventories",

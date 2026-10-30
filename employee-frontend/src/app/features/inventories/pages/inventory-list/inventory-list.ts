@@ -39,6 +39,7 @@ import {
   InventoryType,
 } from '@features/inventories/models/inventory.model';
 import { InventoryService } from '@features/inventories/services/inventory-service';
+import { ImageAction, readImageAsBase64 } from '@shared/components/image-editor/image-editor';
 import { ModalForm } from '@shared/components/modal-form/modal-form';
 import {
   ModalFormData,
@@ -58,7 +59,16 @@ interface InventoryFormValue {
   inventoryType: string;
   inventoryDescriptionEn: string;
   inventoryDescriptionFr: string;
+  photo: ImageAction;
 }
+
+const PHOTO_TYPES: Record<string, string> = {
+  '/9j/': 'image/jpeg',
+  iVBORw0KGgo: 'image/png',
+  UklGR: 'image/webp',
+};
+
+const MAX_PHOTO_BYTES = 160 * 1024;
 
 @Component({
   imports: [RouterLink, MatCardModule, MatIconModule, MatProgressSpinnerModule],
@@ -198,6 +208,7 @@ export class InventoryList implements OnInit, OnDestroy {
   protected readonly savingInventory = signal(false);
   protected readonly formError = signal<string | null>(null);
   protected readonly deleteError = signal<string | null>(null);
+  private readonly brokenPhotos = signal<ReadonlySet<string>>(new Set());
 
   ngOnInit(): void {
     this.loadInventories();
@@ -219,6 +230,25 @@ export class InventoryList implements OnInit, OnDestroy {
       (this.locale.startsWith('fr') ? inventory.name?.fr : inventory.name?.en) ??
       inventory.inventoryName
     );
+  }
+
+  private storedPhotoUrls(inventory: Inventory): string[] {
+    const upload = inventory.imageUploaded;
+    const prefix = upload && Object.keys(PHOTO_TYPES).find((start) => upload.startsWith(start));
+    const uploadUrl = upload
+      ? `data:${prefix ? PHOTO_TYPES[prefix] : 'image/jpeg'};base64,${upload}`
+      : null;
+    return [uploadUrl, inventory.inventoryImage, inventory.inventoryBackupImage].filter(
+      (url): url is string => !!url,
+    );
+  }
+
+  protected inventoryPhotoUrl(inventory: Inventory): string | null {
+    return this.storedPhotoUrls(inventory).find((url) => !this.brokenPhotos().has(url)) ?? null;
+  }
+
+  protected markPhotoBroken(url: string): void {
+    this.brokenPhotos.update((broken) => new Set(broken).add(url));
   }
 
   protected localizedInventoryType(type: string): string {
@@ -437,7 +467,7 @@ export class InventoryList implements OnInit, OnDestroy {
     void this.openInventoryDialog(inventory);
   }
 
-  private inventoryFields(): readonly ModalFormField[] {
+  private inventoryFields(inventory?: Inventory): readonly ModalFormField[] {
     return [
       {
         key: 'inventoryNameEn',
@@ -482,6 +512,15 @@ export class InventoryList implements OnInit, OnDestroy {
         type: 'string',
         required: true,
       },
+      {
+        key: 'photo',
+        label: $localize`:@@inventory.fields.photo:Photo de l'inventaire`,
+        type: 'image',
+        currentImageUrl: inventory
+          ? (this.inventoryPhotoUrl(inventory) ?? this.storedPhotoUrls(inventory)[0] ?? null)
+          : null,
+        maxImageSizeBytes: MAX_PHOTO_BYTES,
+      },
     ];
   }
 
@@ -509,7 +548,7 @@ export class InventoryList implements OnInit, OnDestroy {
           ? $localize`:@@inventory.actions.saveChanges:Enregistrer les modifications`
           : $localize`:@@inventory.actions.add:Ajouter un inventaire`,
         cancelLabel: $localize`:@@inventory.actions.cancel:Annuler`,
-        fields: this.inventoryFields(),
+        fields: this.inventoryFields(inventory),
         initialValue: inventory
           ? {
               inventoryNameEn: inventory.name?.en ?? inventory.inventoryName,
@@ -552,7 +591,7 @@ export class InventoryList implements OnInit, OnDestroy {
     this.formError.set(null);
 
     try {
-      const body = this.toInventoryRequest(value);
+      const body = await this.toInventoryRequest(value);
 
       await firstValueFrom(
         editingId
@@ -572,8 +611,8 @@ export class InventoryList implements OnInit, OnDestroy {
     }
   }
 
-  private toInventoryRequest(value: InventoryFormValue): InventoryRequest {
-    return {
+  private async toInventoryRequest(value: InventoryFormValue): Promise<InventoryRequest> {
+    const request: InventoryRequest = {
       inventoryName: value.inventoryNameEn.trim(),
       inventoryType: value.inventoryType,
       inventoryDescription: value.inventoryDescriptionEn.trim(),
@@ -586,6 +625,14 @@ export class InventoryList implements OnInit, OnDestroy {
         fr: value.inventoryDescriptionFr.trim(),
       },
     };
+
+    if (value.photo.action === 'replace') {
+      request.imageUploaded = await readImageAsBase64(value.photo.file);
+    } else if (value.photo.action === 'remove') {
+      request.imageUploaded = '';
+    }
+
+    return request;
   }
 
   protected deleteInventoryAction(inventory: Inventory): void {

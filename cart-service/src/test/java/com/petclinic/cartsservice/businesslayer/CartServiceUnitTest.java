@@ -47,8 +47,14 @@ class CartServiceUnitTest {
     @Mock
     private OrderServiceImpl orderService;
 
+    @Mock
+    private AutomaticDiscountService automaticDiscountService;
+
     @BeforeEach
     void init() {
+        lenient().when(automaticDiscountService.apply(any(CartResponseModel.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
         lenient().when(cartRepository.findAll()).thenReturn(Flux.empty());
         lenient().when(cartRepository.findCartByCartId(anyString())).thenReturn(Mono.empty());
         lenient().when(cartRepository.findCartByCustomerId(anyString())).thenReturn(Mono.empty());
@@ -1461,7 +1467,7 @@ class CartServiceUnitTest {
     @Test
     void testGetRecentPurchases_ReturnsList() {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService, null);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService, null, automaticDiscountService);
 
         String customerId = "customer-123";
         List<CartProduct> recentPurchases = List.of(
@@ -1480,7 +1486,7 @@ class CartServiceUnitTest {
     @Test
     void testGetRecentPurchases_ReturnsEmptyListIfNull() {
         CartRepository cartRepository = Mockito.mock(CartRepository.class);
-        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService, null);
+        CartServiceImpl service = new CartServiceImpl(cartRepository, null, customerClient, orderService, null, automaticDiscountService);
 
         String customerId = "customer-456";
         Cart cart = Cart.builder().cartId("cart456").customerId(customerId).recentPurchases(null).build();
@@ -2076,7 +2082,7 @@ class CartServiceUnitTest {
         void testGetRecommendationPurchases_ReturnsRecommendations() {
                 CartRepository cartRepository = Mockito.mock(CartRepository.class);
                 ProductClient productClient = Mockito.mock(ProductClient.class);
-                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService, null);
+                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService, null, automaticDiscountService);
 
                 String customerId = "customer-rec";
                 List<CartProduct> recommendations = List.of(CartProduct.builder().productId("prod1").build());
@@ -2096,7 +2102,7 @@ class CartServiceUnitTest {
         void testGetRecommendationPurchases_ReturnsEmptyList() {
                 CartRepository cartRepository = Mockito.mock(CartRepository.class);
                 ProductClient productClient = Mockito.mock(ProductClient.class);
-                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService, null);
+                CartServiceImpl service = new CartServiceImpl(cartRepository, productClient, customerClient, orderService, null, automaticDiscountService);
 
                 String customerId = "customer-empty";
                 Cart cart = Mockito.mock(Cart.class);
