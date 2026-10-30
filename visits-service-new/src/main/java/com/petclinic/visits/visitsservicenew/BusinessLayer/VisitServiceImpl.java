@@ -186,19 +186,35 @@ public class VisitServiceImpl implements VisitService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Visit not found: " + visitId)))
                 .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit)
                         .flatMap(dto -> {
-                            if (!includePrescription || visit.getPrescriptionFileId() == null) {
+                            if (!includePrescription) {
                                 return Mono.just(dto);
                             }
 
-                            return filesServiceClient.getFile(visit.getPrescriptionFileId())
-                                    .map(file -> {
-                                        dto.setPrescription(file);
-                                        return dto;
-                                    })
-                                    .onErrorResume(ex -> Mono.just(dto))
-                                    .defaultIfEmpty(dto);
-                        })
-                );
+                            Mono<VisitResponseDTO> firstPrescription =
+                                    visit.getPrescriptionFileId() == null
+                                            ? Mono.just(dto)
+                                            : filesServiceClient.getFile(visit.getPrescriptionFileId())
+                                              .map(file -> {
+                                                  dto.setPrescription(file);
+                                                  return dto;
+                                              })
+                                              .onErrorResume(ex -> Mono.just(dto))
+                                              .defaultIfEmpty(dto);
+
+                            return firstPrescription.flatMap(updatedDto -> {
+                                if (visit.getPrescriptionFileId2() == null) {
+                                    return Mono.just(updatedDto);
+                                }
+
+                                return filesServiceClient.getFile(visit.getPrescriptionFileId2())
+                                        .map(file -> {
+                                            updatedDto.setPrescription2(file);
+                                            return updatedDto;
+                                        })
+                                        .onErrorResume(ex -> Mono.just(updatedDto))
+                                        .defaultIfEmpty(updatedDto);
+                            });
+                        }));
     }
 
 
@@ -480,6 +496,7 @@ public class VisitServiceImpl implements VisitService {
                                     updatedVisit.setVisitId(existingVisit.getVisitId());
 
                                     updatedVisit.setPrescriptionFileId(existingVisit.getPrescriptionFileId());
+                                    updatedVisit.setPrescriptionFileId2(existingVisit.getPrescriptionFileId2());
                                     updatedVisit.setVetNote(existingVisit.getVetNote());
                                     updatedVisit.setFollowUpOfVisitId(existingVisit.getFollowUpOfVisitId());
 

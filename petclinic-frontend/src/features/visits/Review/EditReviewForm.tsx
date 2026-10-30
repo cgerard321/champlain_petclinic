@@ -37,6 +37,7 @@ const EditReviewForm: React.FC = (): JSX.Element => {
           setReview({
             rating: response.rating,
             ownerId: response.ownerId,
+            reviewerId: response.reviewerId,
             reviewerName: response.reviewerName,
             review: response.review,
             dateSubmitted: new Date(response.dateSubmitted),

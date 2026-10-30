@@ -62,11 +62,11 @@ public class DataSetupService implements CommandLineRunner {
     }
 
     private void setupReviews() {
-        Review review1 = buildReview("REVIEW-2211-2401", 5, "Alice Carter", "Excellent care, very attentive staff.", "2022-11-24 13:00");
-        Review review2 = buildReview("REVIEW-2301-1501", 4, "Miguel Ruiz", "Good service but wait time was longer than expected.", "2023-01-15 09:30");
-        Review review3 = buildReview("REVIEW-2306-0251", 5, "Priya Patel", "Couldn't be happier — professional and compassionate.", "2023-06-02 16:45");
-        Review review4 = buildReview("REVIEW-2403-1001", 3, "Jonas Müller", "Average experience; follow-up communication could improve.", "2024-03-10 11:10");
-        Review review5 = buildReview("REVIEW-2408-2101", 2, "Fatima Khan", "Unsatisfied with diagnosis, felt rushed during the visit.", "2024-08-21 18:00");
+        Review review1 = buildReview("REVIEW-2211-2401", 5, "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "Excellent care, very attentive staff.", "2022-11-24 13:00");
+        Review review2 = buildReview("REVIEW-2301-1501", 4, "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "Good service but wait time was longer than expected.", "2023-01-15 09:30");
+        Review review3 = buildReview("REVIEW-2306-0251", 5, "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Couldn't be happier — professional and compassionate.", "2023-06-02 16:45");
+        Review review4 = buildReview("REVIEW-2403-1001", 3, "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", "Average experience; follow-up communication could improve.", "2024-03-10 11:10");
+        Review review5 = buildReview("REVIEW-2408-2101", 2, "c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", "Unsatisfied with diagnosis, felt rushed during the visit.", "2024-08-21 18:00");
 
         Flux.just(review1, review2, review3, review4, review5)
                 .flatMap(reviewRepository::insert)
@@ -89,13 +89,13 @@ public class DataSetupService implements CommandLineRunner {
                 .build();
     }
 
-    private Review buildReview(String reviewId, int rating, String reviewerName, String review, String dateSub) {
+    private Review buildReview(String reviewId, int rating, String reviewerId, String review, String dateSub) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         LocalDateTime parsedReviewDate = LocalDateTime.parse(dateSub, formatter);
         return Review.builder()
                 .reviewId(reviewId)
                 .rating(rating)
-                .reviewerName(reviewerName)
+                .reviewerId(reviewerId)
                 .review(review)
                 .dateSubmitted(parsedReviewDate)
                 .build();

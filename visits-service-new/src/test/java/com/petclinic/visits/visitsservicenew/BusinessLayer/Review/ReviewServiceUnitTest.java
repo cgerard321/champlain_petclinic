@@ -13,6 +13,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Customers.CustomerResponseDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Customers.CustomerServiceClient;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -30,11 +34,14 @@ class ReviewServiceUnitTest {
     @Mock
     private ReviewRepository reviewRepository;
 
+    @Mock
+    private CustomerServiceClient customerServiceClient;
+
     Review review1 = Review.builder()
             .id(UUID.randomUUID().toString())
             .reviewId("REVIEW-2510-2401")
             .rating(5)
-            .reviewerName("John Doe")
+            .reviewerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
             .review("Excellent service")
             .dateSubmitted(LocalDateTime.now())
             .build();
@@ -43,7 +50,7 @@ class ReviewServiceUnitTest {
             .id(UUID.randomUUID().toString())
             .reviewId("REVIEW-2510-2402")
             .rating(4)
-            .reviewerName("Jane Doe")
+            .reviewerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
             .review("Very good experience")
             .dateSubmitted(LocalDateTime.now())
             .build();
@@ -53,7 +60,6 @@ class ReviewServiceUnitTest {
             .ownerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .reviewId("REVIEW-2510-2403")
             .rating(4)
-            .reviewerName("Jane Doe")
             .review("Very good experience")
             .dateSubmitted(LocalDateTime.now())
             .build();
@@ -63,15 +69,26 @@ class ReviewServiceUnitTest {
             .ownerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
             .reviewId("REVIEW-2510-2404")
             .rating(4)
-            .reviewerName("Jane Doe")
             .review("Very good experience")
             .dateSubmitted(LocalDateTime.now())
             .build();
+
+    private Mono<CustomerResponseDTO> customerResponse(String customerId) {
+        CustomerResponseDTO customer = new CustomerResponseDTO();
+        customer.setCustomerId(customerId);
+        customer.setFirstName("Test");
+        customer.setLastName("Reviewer");
+
+        return Mono.just(customer);
+    }
 
     @Test
     public void whenGetAllReviews_thenReturnReviews() {
         // Arrange
         when(reviewRepository.findAll()).thenReturn(Flux.just(review1, review2));
+
+        when(customerServiceClient.getCustomerByCustomerId(review1.getReviewerId()))
+                .thenReturn(customerResponse(review1.getReviewerId()));
 
         // Act
         Flux<ReviewResponseDTO> result = reviewService.GetAllReviews();
@@ -88,6 +105,9 @@ class ReviewServiceUnitTest {
     public void whenGetReviewByReviewId_thenReturnReview() {
         // Arrange
         when(reviewRepository.findReviewByReviewId(review1.getReviewId())).thenReturn(Mono.just(review1));
+
+        when(customerServiceClient.getCustomerByCustomerId(review1.getReviewerId()))
+                .thenReturn(customerResponse(review1.getReviewerId()));
 
         // Act
         Mono<ReviewResponseDTO> result = reviewService.GetReviewByReviewId(review1.getReviewId());
@@ -121,9 +141,12 @@ class ReviewServiceUnitTest {
         // Arrange
         when(reviewRepository.save(any(Review.class))).thenReturn(Mono.just(review1));
 
+        when(customerServiceClient.getCustomerByCustomerId(review1.getReviewerId()))
+                .thenReturn(customerResponse(review1.getReviewerId()));
+
         ReviewRequestDTO reviewRequestDTO = new ReviewRequestDTO();
         reviewRequestDTO.setRating(review1.getRating());
-        reviewRequestDTO.setReviewerName(review1.getReviewerName());
+        reviewRequestDTO.setReviewerId(review1.getReviewerId());
         reviewRequestDTO.setReview(review1.getReview());
         reviewRequestDTO.setDateSubmitted(review1.getDateSubmitted());
 
@@ -137,7 +160,7 @@ class ReviewServiceUnitTest {
                     assertNotNull(reviewResponseDTO);
                     assertEquals(reviewResponseDTO.getReviewId(), review1.getReviewId());
                     assertEquals(reviewResponseDTO.getRating(), review1.getRating());
-                    assertEquals(reviewResponseDTO.getReviewerName(), review1.getReviewerName());
+                    reviewRequestDTO.setReviewerId(review1.getReviewerId());
                     assertEquals(reviewResponseDTO.getReview(), review1.getReview());
                     assertEquals(reviewResponseDTO.getDateSubmitted(), review1.getDateSubmitted());
                     return true;
@@ -153,14 +176,17 @@ class ReviewServiceUnitTest {
                 .id(review1.getId())
                 .reviewId(existingReviewId)
                 .rating(3) // Updated rating
-                .reviewerName("John Smith") // Updated reviewer name
+                .reviewerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
                 .review("Good service") // Updated review text
                 .dateSubmitted(review1.getDateSubmitted())
                 .build();
 
+        when(customerServiceClient.getCustomerByCustomerId(updatedReview.getReviewerId()))
+                .thenReturn(customerResponse(updatedReview.getReviewerId()));
+
         ReviewRequestDTO updatedReviewRequestDTO = new ReviewRequestDTO();
         updatedReviewRequestDTO.setRating(updatedReview.getRating());
-        updatedReviewRequestDTO.setReviewerName(updatedReview.getReviewerName());
+        updatedReviewRequestDTO.setReviewerId(updatedReview.getReviewerId());
         updatedReviewRequestDTO.setReview(updatedReview.getReview());
         updatedReviewRequestDTO.setDateSubmitted(updatedReview.getDateSubmitted());
 
@@ -177,7 +203,7 @@ class ReviewServiceUnitTest {
                     assertNotNull(reviewResponseDTO);
                     assertEquals(updatedReview.getReviewId(), reviewResponseDTO.getReviewId());
                     assertEquals(updatedReview.getRating(), reviewResponseDTO.getRating());
-                    assertEquals(updatedReview.getReviewerName(), reviewResponseDTO.getReviewerName());
+                    assertEquals(updatedReview.getReviewerId(), reviewResponseDTO.getReviewerId());
                     assertEquals(updatedReview.getReview(), reviewResponseDTO.getReview());
                     assertEquals(updatedReview.getDateSubmitted(), reviewResponseDTO.getDateSubmitted());
                     return true;
@@ -213,6 +239,8 @@ class ReviewServiceUnitTest {
         when(reviewRepository.findReviewByReviewId(review1.getReviewId())).thenReturn(Mono.just(review1));
         // Mock the correct `delete` method, ensuring it returns a valid Mono
         when(reviewRepository.delete(review1)).thenReturn(Mono.empty());
+        when(customerServiceClient.getCustomerByCustomerId(review1.getReviewerId()))
+                .thenReturn(customerResponse(review1.getReviewerId()));
 
         // Act
         Mono<ReviewResponseDTO> result = reviewService.DeleteReview(review1.getReviewId());

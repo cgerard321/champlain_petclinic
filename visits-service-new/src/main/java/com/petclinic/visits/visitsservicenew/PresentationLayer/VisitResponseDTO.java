@@ -40,6 +40,7 @@ public class VisitResponseDTO {
     @JsonProperty("isEmergency")
     private Boolean isEmergency;
     private FileResponseDTO prescription;
+    private FileResponseDTO prescription2;
     private CancellationReason cancellationReason;
     private String cancellationReasonDetails;
     private String vetNote;

@@ -2,13 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v1.Cart;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Cart.CartItemRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartProductResponseDTO;
-import com.petclinic.bffapigateway.dtos.Cart.CartResponseDTO;
-import com.petclinic.bffapigateway.dtos.Cart.UpdateProductQuantityRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.WishlistItemRequestDTO;
-import com.petclinic.bffapigateway.dtos.Cart.WishlistTransferDirectionDTO;
-import com.petclinic.bffapigateway.dtos.Cart.WishlistTransferRequestDTO;
+import com.petclinic.bffapigateway.dtos.Cart.*;
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -474,6 +468,60 @@ class CartControllerV1IntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
+
+    @Test
+    void createStripCheckoutSession_returnsCreated(){
+        String cartId = "cart-009";
+        HttpResponse response = response()
+                .withStatusCode(201)
+                .withHeader("Content-Type", "application/json")
+                .withBody("""
+                        {
+                            "sessionId" : "testId",
+                            "sessionUrl" : "testUrl"
+                        }
+                        """);
+        cartMockClient.when(request()
+                .withMethod("POST")
+                .withPath("/api/v1/carts/" + cartId + "/checkout/sessions")
+        ).respond(response);
+
+
+        StripeProductRequestDTO requestDTO = new StripeProductRequestDTO().builder().cartId(cartId).build();
+
+        webTestClient.post()
+                .uri("/api/gateway/carts/{cartId}/checkout/sessions", cartId)
+                .cookie("Bearer", OWNER_TOKEN)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.sessionId").isEqualTo("testId")
+                .jsonPath("$.sessionUrl").isEqualTo("testUrl");
+
+    }
+
+    @Test
+    void createStripCheckoutSession_withMismatchedCartIds_returnsBadRequest() {
+        String cartId = "cart-010";
+        StripeProductRequestDTO requestDTO = new StripeProductRequestDTO().builder().cartId("cart-100").build();
+
+        webTestClient.post()
+                .uri("/api/gateway/carts/{cartId}/checkout/sessions", cartId)
+                .cookie("Bearer", OWNER_TOKEN)
+                .cookie("XSRF-TOKEN", CSRF_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("X-XSRF-TOKEN", CSRF_TOKEN)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
 
     private void stubCartService(String method, String path, int statusCode, String body) {
         HttpResponse mockResponse = response().withStatusCode(statusCode);

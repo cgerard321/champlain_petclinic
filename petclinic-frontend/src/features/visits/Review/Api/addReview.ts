@@ -7,5 +7,6 @@ export const addReview = async (
 ): Promise<AxiosResponse<void>> => {
   return await axiosInstance.post<void>('/visits/reviews', review, {
     useV2: false,
+    handleLocally: true,
   });
 };

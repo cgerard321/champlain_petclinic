@@ -19,6 +19,7 @@ import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenUtil;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 import com.petclinic.bffapigateway.utils.Utility;
+import com.petclinic.bffapigateway.businesslayer.ReviewEligibilityService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -30,6 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+
 
 import java.util.List;
 
@@ -55,6 +57,8 @@ class CustomerRoleSecurityIntegrationTest {
     @MockBean private AuthServiceClient auth;
     @MockBean private CartServiceClient carts;
     @MockBean private VisitsServiceClient visits;
+    @MockBean
+    private ReviewEligibilityService reviewEligibilityService;
     @MockBean private CustomersServiceClient customers;
 
     @Test

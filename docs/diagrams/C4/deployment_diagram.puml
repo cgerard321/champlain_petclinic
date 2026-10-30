@@ -40,6 +40,7 @@ Deployment_Node(internet_dns, "Synology DDNS", "DNS + Dynamic IP updates") {
 }
 
 System_Ext(smtp_srv, "smtp.gmail.com", "SMTP server", "Sends email (via Mailer Service)")
+System_Ext(stripe, "Stripe", "External payment platform providing hosted checkout and payment processing.")
 
 ' ==========================================
 ' HOME NETWORK
@@ -237,6 +238,9 @@ Rel_D(api_gateway, auth_svc,      "Routes requests to", "HTTP", $tags="http")
 Rel_U(visits_svc,  mailer_svc, "Submit manual and scheduled weekly schedule emails", "HTTP/REST", $tags="http")
 Rel_U(auth_svc,    mailer_svc, "Send email request", "HTTP/REST", $tags="http")
 Rel_U(billing_svc, mailer_svc, "Send email request", "HTTP/REST", $tags="http")
+Rel(cart_svc, stripe, "Create checkout session", "HTTPS/Stripe API", $tags="http")
+Rel(stripe, caddy, "Send payment webhook events", "HTTPS", $tags="https-client")
+Rel(browser, stripe, "Pay on Stripe hosted checkout page", "HTTPS", $tags="https-client")
 
 Rel(customers_svc, files_svc, "Store/Fetch profile pictures", "HTTP/REST", $tags="http")
 Rel(visits_svc,    files_svc, "Store/Fetch prescription PDFs", "HTTP/REST", $tags="http")
@@ -244,6 +248,9 @@ Rel(visits_svc,    files_svc, "Store/Fetch prescription PDFs", "HTTP/REST", $tag
 Rel(visits_svc,  auth_svc, "Validate tokens", "HTTP/REST", $tags="http")
 Rel(visits_svc,  vet_svc, "Look up vet profile, email and active recipients", "HTTP/REST", $tags="http")
 Rel(billing_svc, auth_svc, "Validate tokens", "HTTP/REST", $tags="http")
+
+Rel(cart_svc, stripe, "Create checkout session", "HTTP/Stripe API", $tags="http")
+Rel(stripe, cart_svc, "Send webhook events", "HTTP", $tags="http")
 
 ' Services -> Databases & Storage
 Rel_D(auth_svc,  mysql_auth,  "JDBC", "", $tags="jdbc-mysql")
