@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public interface OrderService {
+    Mono<OrderResponseModel> createOrder(Cart cart, String stripeSessionId, BillingRequestModel billing);
     Mono<OrderResponseModel> createOrder(Cart cart, BillingRequestModel billing);
     Mono<OrderResponseModel> getOrderByOrderId(String orderId);
     Flux<OrderResponseModel> getAllOrders();

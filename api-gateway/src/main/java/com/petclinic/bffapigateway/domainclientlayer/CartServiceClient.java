@@ -9,6 +9,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -332,6 +333,32 @@ public Mono<Void> deleteCartByCartId(String cartId) {
                 .bodyValue(billing)
                 .retrieve()
                 .bodyToMono(CartResponseDTO.class);
+    }
+
+    public Mono<StripeResponseDTO> createStripeCheckoutSession(String cartId, StripeProductRequestDTO requestDTO) {
+        return webClientBuilder.build()
+                .post()
+                .uri(cartServiceUrl + "/" + cartId + "/checkout/sessions")
+                .bodyValue(requestDTO)
+                .retrieve()
+                .bodyToMono(StripeResponseDTO.class);
+    }
+
+    public Mono<ResponseEntity<String>> forwardStripeWebhook(String payload, String signature) {
+
+        return webClientBuilder.build()
+                .post()
+                .uri(cartServiceUrl + "/webhook")
+                .headers(headers -> {
+                    if (signature != null) {
+                        headers.set("Stripe-Signature", signature);
+                    }
+                })
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload == null ? "" : payload)
+                .exchangeToMono(response -> response.bodyToMono(String.class)
+                        .defaultIfEmpty("")
+                        .map(body -> ResponseEntity.status(response.statusCode()).body(body)));
     }
 
 

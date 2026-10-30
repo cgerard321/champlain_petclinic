@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.extractProperty;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CartServiceClientTest {
@@ -1311,6 +1312,98 @@ public class CartServiceClientTest {
                                 .containsIgnoringCase("IllegalArgument"))
                 .verify();
     }
+
+    @Test
+    void testCreateStripeCheckoutSession_ValidCartId_Success200(){
+        String cartId = "cartid";
+
+        StripeResponseDTO response = new StripeResponseDTO();
+        response.setSessionId("testSession");
+        response.setSessionUrl("testUrl");
+
+        mockWebServer.enqueue(
+                new MockResponse()
+                        .setResponseCode(200)
+                        .setHeader("Content-Type", "application/json")
+                        .setBody("""
+                                {
+                                    "sessionId":"testSession",
+                                    "sessionUrl":"testUrl"
+                                }
+                                """)
+        );
+
+        StripeProductRequestDTO request = new  StripeProductRequestDTO();
+        request.setCartId(cartId);
+
+        Mono<StripeResponseDTO> result = mockCartServiceClient.createStripeCheckoutSession(cartId, request);
+
+        StepVerifier.create(result)
+                .expectNextMatches(expectedResponse -> response.getSessionId().equals("testSession") && response.getSessionUrl().equals("testUrl"))
+                .verifyComplete();
+
+    }
+
+    @Test
+    void testCreateStripeCheckoutSession_InvalidCartId_BadRequest400(){
+        prepareResponse(r -> r
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+        );
+
+        StepVerifier.create(mockCartServiceClient.createStripeCheckoutSession("cartId", StripeProductRequestDTO.builder().cartId("cartId").build()))
+                .expectErrorSatisfies(ex->org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName())
+                        .containsIgnoringCase("BadRequest"))
+                .verify();
+    }
+
+    @Test
+    void testCreateStripeCheckoutSession_NotFound404(){
+        prepareResponse(r -> r
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+        );
+
+        StepVerifier.create(mockCartServiceClient.createStripeCheckoutSession("cartId", StripeProductRequestDTO.builder().cartId("cartId").build()))
+                .expectErrorSatisfies(ex -> org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName())
+                        .containsIgnoringCase("NotFound"))
+                .verify();
+
+    }
+
+    @Test
+    void testCreateStripeCheckoutSession_ServerError500(){
+        prepareResponse(r -> r
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+        );
+
+        StepVerifier.create(mockCartServiceClient.createStripeCheckoutSession("cartId", StripeProductRequestDTO.builder().cartId("cartId").build()))
+                .expectErrorSatisfies(ex -> org.assertj.core.api.Assertions.assertThat(ex.getClass().getSimpleName())
+                        .containsIgnoringCase("InternalServerError"))
+                .verify();
+    }
+
+    @Test
+    void testForwardStripeWebhook_forwardsPayloadStatusAndSignature() throws InterruptedException {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader("Content-Type", "text/plain")
+                .setBody("Invalid Stripe signature"));
+
+        StepVerifier.create(mockCartServiceClient.forwardStripeWebhook("{\"id\":\"evt\"}", "t=1,v1=sig"))
+                .assertNext(response -> {
+                    assertEquals(400, response.getStatusCode().value());
+                    assertEquals("Invalid Stripe signature", response.getBody());
+                })
+                .verifyComplete();
+
+        okhttp3.mockwebserver.RecordedRequest request = mockWebServer.takeRequest();
+        assertEquals("/api/v1/carts/webhook", request.getPath());
+        assertEquals("t=1,v1=sig", request.getHeader("Stripe-Signature"));
+        assertEquals("{\"id\":\"evt\"}", request.getBody().readUtf8());
+    }
+
 
     @Test
         void testCreateWishlistTransfer_Success() {
