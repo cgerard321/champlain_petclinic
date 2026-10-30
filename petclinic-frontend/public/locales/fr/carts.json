@@ -1,4 +1,11 @@
 {
+  "automaticDiscount": {
+    "summaryLabel": "Réduction automatique ({{percent}} %) :",
+    "offer": "Achetez pour {{minimum}} de produits pour obtenir automatiquement {{percent}} % de réduction.",
+    "remaining": "Ajoutez encore {{amount}} de produits pour obtenir la réduction.",
+    "applied": "Réduction automatique appliquée. Vous économisez {{amount}}.",
+    "bestDiscount": "La meilleure réduction disponible est comprise dans votre total."
+  },
   "buttons": {
     "addToCart": "Ajouter au panier",
     "apply": "Appliquer",
