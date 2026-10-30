@@ -139,7 +139,6 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
             {successMessage}
           </div>
         )}
-
         <div className="d-flex align-items-center gap-2 my-3">
           <label htmlFor="customer-review-rating-filter">
             {t('reviews.filterByRating')}
@@ -162,7 +161,6 @@ const CustomerReviewsList: React.FC = (): JSX.Element => {
             ))}
           </select>
         </div>
-
         <table className="reviews-table">
           <thead>
             <tr>
