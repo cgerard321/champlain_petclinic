@@ -39,11 +39,14 @@ public class OrderReport {
     private String orderId;
     private String customerId;
     private String customerName;
+    private String customerEmail;
     private OrderReportReason reason;
     private List<AffectedItem> affectedItems;
     private String description;
     private OrderReportStatus status;
     private LocalDateTime submittedAt;
+    private String resolutionNote;
+    private LocalDateTime resolvedAt;
 
     @Data
     @Builder

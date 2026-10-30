@@ -2,7 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { of } from 'rxjs';
 
-import { ImageService } from '@features/prod/services/image.service';
 import { ProductService } from '@features/prod/services/product.service';
 
 import { ProductDetailsDialog } from './product-details-dialog';
@@ -17,7 +16,6 @@ describe('ProductDetailsDialog', () => {
           provide: ProductService,
           useValue: { getProduct: () => of({ productId: 'product-1' }) },
         },
-        { provide: ImageService, useValue: { getImage: () => of(null) } },
       ],
     }).compileComponents();
   });

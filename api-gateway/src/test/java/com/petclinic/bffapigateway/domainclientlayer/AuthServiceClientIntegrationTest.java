@@ -853,7 +853,7 @@ public class AuthServiceClientIntegrationTest {
         when(vetsServiceClient.addVet(any(Mono.class))).thenReturn(Mono.just(vetResponse));
         when(vetsServiceClient.deleteVet(any())).thenReturn(Mono.empty());
 
-        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN));
+        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN), "admin-token");
 
         StepVerifier.create(result)
                 .expectNextMatches(vet -> vet.getVetId().equals("vet123"))
@@ -1052,11 +1052,12 @@ public class AuthServiceClientIntegrationTest {
                 .setBody(userJson);
 
         server.enqueue(mockResponse);
+        server.enqueue(new MockResponse().setResponseCode(204));
 
         when(vetsServiceClient.addVet(any(Mono.class))).thenReturn(Mono.error(new RuntimeException("Service error")));
         when(vetsServiceClient.deleteVet(any())).thenReturn(Mono.empty());
 
-        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN));
+        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN), "admin-token");
 
         StepVerifier.create(result)
                 .verifyError(RuntimeException.class);
@@ -1390,7 +1391,7 @@ public class AuthServiceClientIntegrationTest {
 
         when(rethrower.rethrow(any(ClientResponse.class), any())).thenThrow(new GenericHttpException("Invalid vet registration data", HttpStatus.BAD_REQUEST));
 
-        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN));
+        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN), "admin-token");
 
         StepVerifier.create(result)
                 .verifyError(GenericHttpException.class);
@@ -1605,7 +1606,7 @@ public class AuthServiceClientIntegrationTest {
             return Mono.error(lambda.apply(errorMap));
         });
 
-        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN));
+        Mono<VetResponseDTO> result = authServiceClient.addVetUser(Mono.just(REGISTER_VETERINARIAN), "admin-token");
 
         StepVerifier.create(result)
                 .verifyError(GenericHttpException.class);

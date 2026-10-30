@@ -85,7 +85,7 @@ describe('ProductBundleList', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelector('[role="alert"]')?.textContent).toContain(
-      'Failed to load bundles.',
+      'Impossible de charger les ensembles.',
     );
 
     findButton(fixture.nativeElement, 'Try again')?.click();
@@ -98,7 +98,7 @@ describe('ProductBundleList', () => {
     const fixture = TestBed.createComponent(ProductBundleList);
     fixture.detectChanges();
 
-    expect(findButton(fixture.nativeElement, 'Add Bundle')).toBeTruthy();
+    expect(findButton(fixture.nativeElement, 'Ajouter un ensemble')).toBeTruthy();
     expect(findButton(fixture.nativeElement, 'Update')).toBeTruthy();
     expect(findButton(fixture.nativeElement, 'Delete')).toBeTruthy();
   });
@@ -108,7 +108,7 @@ describe('ProductBundleList', () => {
     const fixture = TestBed.createComponent(ProductBundleList);
     fixture.detectChanges();
 
-    expect(findButton(fixture.nativeElement, 'Add Bundle')).toBeUndefined();
+    expect(findButton(fixture.nativeElement, 'Ajouter un ensemble')).toBeUndefined();
     expect(findButton(fixture.nativeElement, 'Update')).toBeUndefined();
     expect(findButton(fixture.nativeElement, 'Delete')).toBeUndefined();
   });

@@ -244,7 +244,9 @@
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 
 .bill-table-button--outline {
@@ -489,4 +491,18 @@
   .bill-table-button:focus-visible {
     outline: 3px solid #8dbb8f;
   }
+}
+
+.bill-filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  grid-column: 1 / -1;
+}
+
+.bill-filter-tag {
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  cursor: pointer;
 }

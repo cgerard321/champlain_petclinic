@@ -1,4 +1,11 @@
 {
+  "automaticDiscount": {
+    "summaryLabel": "Réduction automatique ({{percent}} %) :",
+    "offer": "Achetez pour {{minimum}} de produits pour obtenir automatiquement {{percent}} % de réduction.",
+    "remaining": "Ajoutez encore {{amount}} de produits pour obtenir la réduction.",
+    "applied": "Réduction automatique appliquée. Vous économisez {{amount}}.",
+    "bestDiscount": "La meilleure réduction disponible est comprise dans votre total."
+  },
   "buttons": {
     "addToCart": "Ajouter au panier",
     "apply": "Appliquer",
@@ -210,7 +217,9 @@
     "submit": "Soumettre le signalement",
     "submitting": "Envoi en cours...",
     "success": "Votre signalement a été soumis. Notre équipe l'examine.",
-    "banner": "Problème signalé - Statut : {{status}} - Référence : {{reportId}}",
+    "bannerTitle": "Problème signalé",
+    "reference": "Référence",
+    "note": "Note de notre équipe",
     "reasons": {
       "DAMAGED_ITEM": "Article endommagé",
       "MISSING_ITEM": "Article manquant",

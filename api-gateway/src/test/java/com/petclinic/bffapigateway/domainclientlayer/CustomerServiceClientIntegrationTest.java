@@ -754,6 +754,49 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
+    void whenGetSoftDeletedCustomers_thenCallSoftDeletedEndpointAndReturnCustomers() throws Exception {
+        final String body = mapper.writeValueAsString(List.of(TEST_CUSTOMER_RESPONSE));
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        StepVerifier.create(customersServiceClient.getSoftDeletedCustomers())
+                .expectNextMatches(customer -> customer.getCustomerId().equals(CUSTOMER_ID))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/customers/soft-deleted", request.getPath());
+        assertEquals("GET", request.getMethod());
+    }
+
+    @Test
+    void whenReactivateCustomer_thenCallReactivateEndpointAndReturnCustomer() throws Exception {
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(TEST_CUSTOMER_RESPONSE)));
+
+        StepVerifier.create(customersServiceClient.reactivateCustomer(CUSTOMER_ID))
+                .expectNextMatches(customer -> customer.getCustomerId().equals(CUSTOMER_ID))
+                .verifyComplete();
+
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/customers/" + CUSTOMER_ID + "/reactivate", request.getPath());
+        assertEquals("PATCH", request.getMethod());
+    }
+
+    @Test
+    void whenReactivateCustomer_withCustomerNotFound_thenThrowNotFoundException() {
+        server.enqueue(new MockResponse().setResponseCode(404));
+
+        StepVerifier.create(customersServiceClient.reactivateCustomer(CUSTOMER_ID))
+                .expectErrorMatches(error -> error instanceof NotFoundException &&
+                        error.getMessage().equals("Soft-deleted customer not found: " + CUSTOMER_ID))
+                .verify();
+    }
+
+    @Test
     void whenGetPetByPetId_thenReturnPet() throws Exception {
         server.enqueue(new MockResponse()
                 .setResponseCode(200)

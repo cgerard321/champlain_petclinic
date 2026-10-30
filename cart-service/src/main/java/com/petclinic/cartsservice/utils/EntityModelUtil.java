@@ -115,10 +115,14 @@ public class EntityModelUtil {
             promoCode.setActive(promoCodeRequestModel.getActive());
         }
         PromoEligibility.setScope(promoCode, promoCodeRequestModel);
+        PromoEligibility.setAutomatic(promoCode, promoCodeRequestModel);
         return promoCode;
     }
 
     public static LocalDateTime validateExpirationDate(String stringDate){
+        if (!StringUtils.hasText(stringDate)) {
+            throw new ResponseStatusException(HttpStatusCode.valueOf(400), "Expiration date is required");
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
         try {
@@ -130,9 +134,12 @@ public class EntityModelUtil {
 
     public static PromoCodeResponseModel toPromoCodeResponseModel(PromoCode promoCode) {
         PromoCodeResponseModel responseModel = new PromoCodeResponseModel();
+        responseModel.setAutomatic(promoCode.isAutomatic());
+        responseModel.setMinimumPurchaseAmount(promoCode.getMinimumPurchaseAmount());
         responseModel.setScope(PromoEligibility.scope(promoCode));
         responseModel.setProductIds(promoCode.getProductIds());
         responseModel.setProductTypes(promoCode.getProductTypes());
+        responseModel.setImageId(promoCode.getImageId());
         responseModel.setId(promoCode.getId());
         responseModel.setName(promoCode.getName());
         responseModel.setCode(promoCode.getCode());
@@ -187,6 +194,7 @@ public class EntityModelUtil {
                 .orderId(orderId)
                 .customerId(customerId)
                 .customerName(order.getCustomerName())
+                .customerEmail(order.getEmail())
                 .reason(request.getReason())
                 .affectedItems(affectedItems)
                 .description(request.getDescription().trim())
@@ -214,11 +222,14 @@ public class EntityModelUtil {
                 .orderId(report.getOrderId())
                 .customerId(report.getCustomerId())
                 .customerName(report.getCustomerName())
+                .customerEmail(report.getCustomerEmail())
                 .reason(report.getReason())
                 .affectedItems(affectedItems)
                 .description(report.getDescription())
                 .status(report.getStatus())
                 .submittedAt(report.getSubmittedAt())
+                .resolutionNote(report.getResolutionNote())
+                .resolvedAt(report.getResolvedAt())
                 .build();
     }
 
@@ -238,17 +249,15 @@ public class EntityModelUtil {
     }
 
 
-    public static Cart storeCartOrder(Cart cart) {
+    public static Cart storeCartOrder(Cart cart, CartResponseModel calculatedCart) {
         Cart orderCart = new Cart();
         BeanUtils.copyProperties(cart, orderCart);
         List<CartProduct> products =
-                copyCartProducts(cart.getProducts());
+                copyCartProducts(calculatedCart.getProducts());
         orderCart.setProducts(products);
-        CartResponseModel calculatedCart =
-                toCartResponseModel(orderCart, products);
-        orderCart.setProducts(calculatedCart.getProducts());
         orderCart.setSubtotal(calculatedCart.getSubtotal());
-        orderCart.setPromoPercent(calculatedCart.getPromoPercent());
+        orderCart.setPromoPercent(calculatedCart.isAutomaticDiscountApplied()
+                ? Double.valueOf(calculatedCart.getAutomaticDiscountPercentage()) : calculatedCart.getPromoPercent());
         orderCart.setTvq(calculatedCart.getTvq());
         orderCart.setTvc(calculatedCart.getTvc());
         orderCart.setTotal(calculatedCart.getTotal());

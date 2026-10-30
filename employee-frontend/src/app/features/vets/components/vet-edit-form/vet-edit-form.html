@@ -43,16 +43,46 @@
     <section class="availability" aria-labelledby="availability-title">
       <h3 id="availability-title" tabindex="-1" i18n="@@vets.availability.title">Disponibilités</h3>
       <p class="hint" i18n="@@vets.availability.description">
-        Retirez une plage horaire ou une journée entière. Les retraits prennent effet à
-        l’enregistrement.
+        Ajoutez ou retirez des plages horaires. Les modifications prennent effet à l’enregistrement.
       </p>
+      <div class="availability-actions">
+        <button
+          type="button"
+          class="secondary toggle-button"
+          (click)="toggleShowAllAvailabilities()"
+        >
+          @if (showAllAvailabilities()) {
+            <span i18n="@@vets.availability.show_active_only"
+              >Afficher uniquement les créneaux actifs</span
+            >
+          } @else {
+            <span i18n="@@vets.availability.show_all">Afficher tous les créneaux</span>
+          }
+        </button>
+        <button
+          type="button"
+          class="secondary reset-button"
+          (click)="resetSchedule()"
+          [disabled]="saving()"
+          i18n="@@vets.availability.reset_button"
+        >
+          Réinitialiser l'horaire
+        </button>
+      </div>
       <p class="visually-hidden" role="status" aria-live="polite">{{ announcement() }}</p>
-      @if (availability().length) {
-        <ul class="day-list">
-          @for (entry of availability(); track entry.day) {
-            <li class="day">
-              <div class="day-header">
-                <span class="day-label">{{ entry.label }}</span>
+
+      <ul class="day-list">
+        @for (
+          entry of showAllAvailabilities() ? allAvailabilities() : availability();
+          track entry.day
+        ) {
+          <li
+            class="day"
+            [class.inactive]="!entry.selected && !entry.hours.some((h) => h.selected)"
+          >
+            <div class="day-header">
+              <span class="day-label">{{ entry.label }}</span>
+              @if (entry.selected) {
                 <button
                   class="remove-day"
                   type="button"
@@ -62,36 +92,57 @@
                   <span i18n="@@vets.availability.remove_day">Retirer la journée</span>
                   <span class="visually-hidden">{{ entry.label }}</span>
                 </button>
-              </div>
-              @if (entry.hours.length) {
-                <ul class="hour-list">
-                  @for (hour of entry.hours; track hour.value) {
-                    <li class="hour">
-                      <span>{{ hour.label }}</span>
-                      <button
-                        class="remove-hour"
-                        type="button"
-                        [id]="'remove-hour-' + entry.day + '-' + hour.value"
-                        (click)="removeHour(entry.day, hour.value)"
-                      >
-                        <span aria-hidden="true">×</span>
-                        <span class="visually-hidden" i18n="@@vets.availability.remove_hour"
-                          >Retirer</span
-                        >
-                        <span class="visually-hidden">{{ entry.label }} {{ hour.label }}</span>
-                      </button>
-                    </li>
-                  }
-                </ul>
               } @else {
-                <p class="hint" i18n="@@vets.availability.no_hours">Aucune heure précisée.</p>
+                <button
+                  class="add-day"
+                  type="button"
+                  [id]="'add-day-' + entry.day"
+                  (click)="addDay(entry.day)"
+                >
+                  <span aria-hidden="true"></span>
+                  <span i18n="@@vets.availability.add_day">Ajouter la journée</span>
+                  <span class="visually-hidden">{{ entry.label }}</span>
+                </button>
               }
-            </li>
-          }
-        </ul>
-      } @else {
-        <p role="status" i18n="@@vets.availability.empty">Aucune disponibilité au profil.</p>
-      }
+            </div>
+
+            <ul class="hour-list">
+              @for (hour of entry.hours; track hour.value) {
+                <li class="hour" [class.unselected]="!hour.selected">
+                  <span>{{ hour.label }}</span>
+                  @if (hour.selected) {
+                    <button
+                      class="remove-hour"
+                      type="button"
+                      [id]="'remove-hour-' + entry.day + '-' + hour.value"
+                      (click)="removeHour(entry.day, hour.value)"
+                    >
+                      <span aria-hidden="true">×</span>
+                      <span class="visually-hidden" i18n="@@vets.availability.remove_hour"
+                        >Retirer</span
+                      >
+                      <span class="visually-hidden">{{ entry.label }} {{ hour.label }}</span>
+                    </button>
+                  } @else {
+                    <button
+                      class="add-hour"
+                      type="button"
+                      [id]="'add-hour-' + entry.day + '-' + hour.value"
+                      (click)="addHour(entry.day, hour.value)"
+                    >
+                      <span aria-hidden="true">+ </span>
+                      <span class="visually-hidden" i18n="@@vets.availability.add_hour"
+                        >Ajouter</span
+                      >
+                      <span class="visually-hidden">{{ entry.label }} {{ hour.label }}</span>
+                    </button>
+                  }
+                </li>
+              }
+            </ul>
+          </li>
+        }
+      </ul>
     </section>
 
     <div class="specialty-section">
@@ -134,6 +185,105 @@
         </button>
       </div>
     </div>
+
+    <section class="education-section" aria-labelledby="education-title">
+      <h3 id="education-title" i18n="@@vets.education.education">Formation</h3>
+
+      <button
+        type="button"
+        [disabled]="saving()"
+        (click)="openEducationForm()"
+        [attr.aria-expanded]="showEducationForm"
+        aria-controls="education-form"
+        i18n="@@vets.education.add_education"
+      >
+        Ajouter une formation
+      </button>
+
+      <div id="education-form">
+        @if (showEducationForm) {
+          <fieldset [formGroup]="educationDraft">
+            <legend i18n="@@vets.education.new_education">Nouvelle formation</legend>
+
+            @for (field of educationFields; track field.key) {
+              <div class="field">
+                <label [for]="'education-draft-' + field.key">
+                  {{ field.label }}
+                </label>
+
+                <input
+                  [id]="'education-draft-' + field.key"
+                  [type]="field.type"
+                  [formControlName]="field.key"
+                  required
+                  (keydown.enter)="$event.preventDefault(); addEducation()"
+                  [attr.aria-invalid]="
+                    educationDraft.controls[field.key].touched &&
+                    educationDraft.controls[field.key].invalid
+                  "
+                  [attr.aria-describedby]="'education-draft-' + field.key + '-error'"
+                />
+
+                <p
+                  class="hint"
+                  [id]="'education-draft-' + field.key + '-error'"
+                  [class.invalid]="
+                    educationDraft.controls[field.key].touched &&
+                    educationDraft.controls[field.key].invalid
+                  "
+                  aria-live="polite"
+                >
+                  @if (
+                    educationDraft.controls[field.key].touched &&
+                    educationDraft.controls[field.key].invalid
+                  ) {
+                    <span i18n="@@vets.education.required_info">
+                      Veuillez renseigner ce champ avec une valeur valide.
+                    </span>
+                  }
+                </p>
+              </div>
+            }
+
+            @if (educationDateError) {
+              <p class="error" role="alert" i18n="@@vets.education.date_error">
+                La date de fin doit être égale ou postérieure à la date de début.
+              </p>
+            }
+
+            <button
+              type="button"
+              [disabled]="saving()"
+              (click)="addEducation()"
+              i18n="@@vets.edit.add"
+            >
+              Ajouter
+            </button>
+          </fieldset>
+        }
+      </div>
+
+      <ul class="education-list" aria-live="polite">
+        @for (entry of education.controls; track entry) {
+          <li>
+            <strong>{{ entry.controls.schoolName.value }}</strong>
+
+            <p>
+              {{ entry.controls.degree.value }}
+              — {{ entry.controls.fieldOfStudy.value }}
+            </p>
+
+            <p>
+              <span i18n="@@vets.education.from">Du</span>
+              {{ entry.controls.startDate.value }}
+
+              <span i18n="@@vets.education.to">Au</span>
+              {{ entry.controls.endDate.value }}
+            </p>
+          </li>
+        }
+      </ul>
+    </section>
 
     <div class="actions">
       <button type="submit" [disabled]="saving()">

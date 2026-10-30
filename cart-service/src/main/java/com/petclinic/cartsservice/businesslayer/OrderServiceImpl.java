@@ -13,6 +13,7 @@ import com.petclinic.cartsservice.presentationlayer.BillingRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CreateOrderReportRequestModel;
 import com.petclinic.cartsservice.presentationlayer.OrderReportResponseModel;
 import com.petclinic.cartsservice.presentationlayer.OrderResponseModel;
+import com.petclinic.cartsservice.presentationlayer.UpdateOrderReportStatusRequestModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
@@ -23,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -176,6 +178,83 @@ public class OrderServiceImpl implements OrderService {
                     )
                     .map(EntityModelUtil::toOrderReportResponseModel);
         });
+    }
+
+    @Override
+    public Flux<OrderReportResponseModel> getAllReports() {
+        return orderReportRepository.findAllByOrderBySubmittedAtDesc()
+                .map(EntityModelUtil::toOrderReportResponseModel);
+    }
+
+    @Override
+    public Mono<OrderReportResponseModel> updateReportStatus(
+            String reportId,
+            UpdateOrderReportStatusRequestModel request
+    ) {
+        return Mono.defer(() -> {
+            String validReportId = requireIdentifier(reportId, "reportId");
+            String note = validateStatusRequest(request);
+
+            return orderReportRepository.findByReportId(validReportId)
+                    .switchIfEmpty(Mono.error(new NotFoundException(
+                            "Report not found"
+                    )))
+                    .flatMap(report -> {
+                        if (!OPEN_STATUSES.contains(report.getStatus())) {
+                            return Mono.error(new ResponseStatusException(
+                                    HttpStatus.CONFLICT,
+                                    "This report is already closed"
+                            ));
+                        }
+
+                        report.setStatus(request.getStatus());
+                        if (request.getStatus() == OrderReportStatus.IN_REVIEW) {
+                            report.setResolutionNote(null);
+                            report.setResolvedAt(null);
+                        } else {
+                            report.setResolutionNote(note);
+                            report.setResolvedAt(LocalDateTime.now());
+                        }
+
+                        return orderReportRepository.save(report);
+                    })
+                    .map(EntityModelUtil::toOrderReportResponseModel);
+        });
+    }
+
+    // trimmed note or null
+    private String validateStatusRequest(
+            UpdateOrderReportStatusRequestModel request
+    ) {
+        if (request == null || request.getStatus() == null) {
+            throw new InvalidInputException("A status is required");
+        }
+
+        if (request.getStatus() == OrderReportStatus.NEW) {
+            throw new InvalidInputException(
+                    "A report cannot be moved back to NEW"
+            );
+        }
+
+        String note = null;
+        if (request.getResolutionNote() != null
+                && !request.getResolutionNote().trim().isEmpty()) {
+            note = request.getResolutionNote().trim();
+        }
+
+        if (note != null && note.length() > 500) {
+            throw new InvalidInputException(
+                    "Note must contain at most 500 characters"
+            );
+        }
+
+        if (request.getStatus() == OrderReportStatus.REJECTED && note == null) {
+            throw new InvalidInputException(
+                    "A reason is required to reject a report"
+            );
+        }
+
+        return note;
     }
 
     private List<String> validateRequest(

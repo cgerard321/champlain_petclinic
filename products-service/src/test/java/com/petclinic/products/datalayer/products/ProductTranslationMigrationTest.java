@@ -41,7 +41,7 @@ class ProductTranslationMigrationTest {
                     "r2dbc:postgresql://" + postgres.getUsername() + ":" + postgres.getPassword()
                             + "@" + postgres.getHost() + ":" + postgres.getMappedPort(5432) + "/" + postgres.getDatabaseName()));
             var repository = new R2dbcRepositoryFactory(template).getRepository(ProductRepository.class);
-            var loader = new DataLoaderService();
+            var loader = new DataLoaderService(true);
             ReflectionTestUtils.setField(loader, "productRepository", repository);
             // Schema only adds columns; the loader owns translation data.
             try (var rows = sql.executeQuery("SELECT product_name_fr FROM products WHERE product_name='Dog Food'")) {

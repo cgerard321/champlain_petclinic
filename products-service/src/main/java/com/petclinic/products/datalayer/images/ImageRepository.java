@@ -1,9 +1,10 @@
 package com.petclinic.products.datalayer.images;
 
-import org.springframework.data.r2dbc.repository.R2dbcRepository;
-import reactor.core.publisher.Mono;
+import org.springframework.data.repository.Repository;
+import reactor.core.publisher.Flux;
 
-public interface ImageRepository extends R2dbcRepository<Image, Long> {
+/** Read-only source retained solely for migration and recovery of original bytes. */
+public interface ImageRepository extends Repository<Image, Long> {
 
-    Mono<Image> findImageByImageId(String imageId);
+    Flux<Image> findAll();
 }

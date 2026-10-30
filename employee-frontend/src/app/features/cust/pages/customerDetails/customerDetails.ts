@@ -1,14 +1,16 @@
 import { DatePipe } from '@angular/common';
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
-import { catchError, mergeMap, of } from 'rxjs';
+import { catchError, mergeMap, of, toArray } from 'rxjs';
 
+import { AuthState } from '@core/services/auth-state';
 import { Pet, PetType } from '@features/cust/models/customer.model';
 import { CustomerResponseModel } from '@features/cust/models/customerResponseModel';
 import { CustomerService } from '@features/cust/services/customer-service';
+import { Roles } from '@shared/models/roles';
 
 @Component({
   selector: 'app-customer-details',
@@ -22,6 +24,7 @@ export class CustomerDetails implements OnInit {
   private readonly customerService = inject(CustomerService);
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthState);
   protected readonly form = this.fb.nonNullable.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
@@ -42,6 +45,14 @@ export class CustomerDetails implements OnInit {
   protected readonly customer = signal<CustomerResponseModel | null>(null);
   protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly isAdmin = computed(() => this.auth.hasRole(Roles.admin));
+  protected readonly isDeactivating = signal(false);
+  protected readonly deactivateErrorMessage = signal<string | null>(null);
+  // null while the status is not loaded yet
+  protected readonly isActive = signal<boolean | null>(null);
+  protected readonly isReactivating = signal(false);
+  protected readonly isReactivated = signal(false);
+  protected readonly reactivateErrorMessage = signal<string | null>(null);
   protected readonly notAvailable = $localize`:@@cust.notAvailable:Non disponible`;
   protected readonly provinces = [
     { value: 'Alberta', label: $localize`:@@cust.profile.provinces.alberta:Alberta` },
@@ -116,6 +127,10 @@ export class CustomerDetails implements OnInit {
         );
       },
     });
+
+    if (this.isAdmin()) {
+      this.loadStatus(customerId);
+    }
 
     this.customerService
       .getPetDetails(customerId)
@@ -227,6 +242,72 @@ export class CustomerDetails implements OnInit {
         },
       });
   }
+
+  protected handleDeactivateCustomer(): void {
+    const customer = this.customer();
+    if (!customer || !this.isAdmin() || this.isDeactivating()) return;
+
+    if (
+      !window.confirm(
+        $localize`:@@cust.profile.confirmDeactivate:Voulez-vous vraiment désactiver le compte de ce client ? Sa photo de profil sera définitivement supprimée.`,
+      )
+    )
+      return;
+
+    this.isDeactivating.set(true);
+    this.deactivateErrorMessage.set(null);
+    this.customerService.softDeleteCustomer(customer.customerId).subscribe({
+      next: () => {
+        this.isDeactivating.set(false);
+        this.router.navigate(['/cust']);
+      },
+      error: () => {
+        this.deactivateErrorMessage.set(
+          $localize`:@@cust.profile.errors.deactivate:Impossible de désactiver le compte du client. Veuillez réessayer.`,
+        );
+        this.isDeactivating.set(false);
+      },
+    });
+  }
+
+  private loadStatus(customerId: string): void {
+    // The customer response has no isActive field, so a customer is deactivated
+    // when it is in the soft-deleted list.
+    this.customerService
+      .getSoftDeletedCustomers()
+      .pipe(toArray(), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (deactivated) =>
+          this.isActive.set(!deactivated.some((c) => c.customerId === customerId)),
+        error: () =>
+          this.reactivateErrorMessage.set(
+            $localize`:@@cust.profile.errors.status:Impossible de charger le statut du compte.`,
+          ),
+      });
+  }
+
+  protected handleReactivateCustomer(): void {
+    const customer = this.customer();
+    if (!customer || !this.isAdmin() || this.isReactivating()) return;
+
+    this.isReactivating.set(true);
+    this.isReactivated.set(false);
+    this.reactivateErrorMessage.set(null);
+    this.customerService.reactivateCustomer(customer.customerId).subscribe({
+      next: () => {
+        this.isReactivating.set(false);
+        this.isActive.set(true);
+        this.isReactivated.set(true);
+      },
+      error: () => {
+        this.reactivateErrorMessage.set(
+          $localize`:@@cust.profile.errors.reactivate:Impossible de réactiver le compte du client. Veuillez réessayer.`,
+        );
+        this.isReactivating.set(false);
+      },
+    });
+  }
+
   protected backToList(): void {
     this.router.navigate(['/cust']);
   }

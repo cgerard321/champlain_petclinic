@@ -29,6 +29,35 @@
       }
     </section>
 
+    <section class="education">
+      <h3 i18n="@@vets.education.education">Formation</h3>
+
+      @if (educations().length) {
+        <ul class="education-list">
+          @for (education of educations(); track education.educationId) {
+            <li>
+              <strong>{{ education.schoolName }}</strong>
+
+              <p>
+                {{ education.degree }}
+                — {{ education.fieldOfStudy }}
+              </p>
+
+              <p>
+                <span i18n="@@vets.education.from">Du</span>
+                {{ education.startDate }}
+
+                <span i18n="@@vets.education.to">Au</span>
+                {{ education.endDate }}
+              </p>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="muted" i18n="@@vets.profile.no_education">Aucune formation renseignée.</p>
+      }
+    </section>
+
     <section>
       <h3 i18n="@@vets.profile.about">À propos</h3>
       @if (vet().biography) {

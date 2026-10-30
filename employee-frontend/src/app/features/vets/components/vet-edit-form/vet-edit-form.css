@@ -162,6 +162,48 @@ h3:focus-visible {
   background: #f4f7f2;
 }
 
+.hour.unselected {
+  opacity: 0.75;
+  background-color: #f5f5f5;
+  border-color: #b0c2b8;
+}
+
+.hour.unselected span {
+  color: #555;
+}
+
+.add-day {
+  padding: 8px 14px;
+  border-color: #254e3e;
+  background: #254e3e;
+  color: #fff;
+  font-size: 14px;
+  border-radius: 8px;
+}
+
+.add-hour {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #10b981;
+  border-radius: 50%;
+  background: #10b981;
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.availability-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
 .remove-day {
   padding: 8px 14px;
   border-color: #a12020;
@@ -292,9 +334,104 @@ h3:focus-visible {
   flex-shrink: 0;
 }
 
+.education-section {
+  margin-bottom: 24px;
+}
+
+.education-section h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.education-section > button {
+  padding: 8px 14px;
+}
+
+/* Draft education form */
+#education-form > fieldset {
+  margin: 20px 0 0;
+  padding: 16px;
+  border: 1px solid #dce3d8;
+  border-radius: 12px;
+  background: #f4f7f2;
+}
+
+#education-form legend {
+  padding: 0 8px;
+  font-weight: 600;
+}
+
+#education-form .field {
+  margin-bottom: 16px;
+}
+
+#education-form .hint:empty {
+  display: none;
+}
+
+#education-form > fieldset > button {
+  margin-top: 4px;
+}
+
+#education-form > fieldset > .hint {
+  margin-top: 12px;
+}
+
+#education-form .error {
+  margin: 0 0 16px;
+}
+
+/* Added education entries */
+.education-list {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.education-list:empty {
+  display: none;
+}
+
+.education-list > li {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #dce3d8;
+  border-radius: 12px;
+  background: #fff;
+  overflow-wrap: anywhere;
+}
+
+.education-list strong {
+  display: block;
+  font-weight: 600;
+}
+
+.education-list p {
+  margin: 8px 0 0;
+}
+
+.education-list p:last-child {
+  font-size: 13px;
+  color: #596c62;
+}
+
+
 @media (width <= 600px) {
   form {
     padding: 16px;
+  }
+
+  .education-section button {
+    width: 100%;
+    white-space: normal;
+  }
+
+  #education-form > fieldset,
+  .education-list > li {
+    padding: 12px;
   }
 }
 
@@ -372,9 +509,33 @@ h3:focus-visible {
     background: rgb(255 255 255 / 12%);
   }
 
-
   .empty-specialties,
   .specialty-section > p {
     color: #a3b8ac;
+  }
+
+
+  #education-form > fieldset,
+  .education-list > li {
+    background: var(--mat-sys-surface-container-high);
+    border-color: var(--mat-sys-surface-container-highest);
+  }
+
+  #education-form legend,
+  .education-list strong {
+    color: #fff;
+  }
+
+  .education-list p:last-child {
+    color: #a3b8ac;
+  }
+
+  .education-section .hint.invalid,
+  .education-section .error {
+   color: #ff9c9c !important;
+  }
+
+  .education-section input[aria-invalid='true'] {
+    border-color: #ff9c9c !important;
   }
 }

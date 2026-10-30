@@ -157,9 +157,6 @@
   "customers": "Customers",
   "customerList": "Customers List",
   "addCustomer": "Add Customer",
-  "users": "Users",
-  "userList": "Users List",
-  "roles": "Roles List",
   "schedule": "My Schedule",
   "inventories": "Inventories",
   "carts": "Carts",
@@ -222,5 +219,13 @@
   "clearReviewSearch": "Clear search",
   "reviewSearchCount": "Showing {{count}} of {{total}} review(s)",
   "noReviewsWithRating": "This item does not have any {{count}}-star reviews.",
-  "noReviewResults": "No results were found"
+  "noReviewResults": "No results were found",
+  "averageReview": {
+    "title": "Average Customer Ratings",
+    "empty": "No ratings yet",
+    "score": "{{value}} / 5",
+    "count_one": "{{count}} rating",
+    "count_other": "{{count}} ratings",
+    "error": "Ratings could not be loaded. Please try again."
+  }
 }

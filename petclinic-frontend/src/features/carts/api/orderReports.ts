@@ -30,6 +30,8 @@ export interface OrderReportSummary {
   description: string;
   status: OrderReportStatus;
   submittedAt: string;
+  resolutionNote?: string | null;
+  resolvedAt?: string | null;
 }
 
 export async function createOrderReport(

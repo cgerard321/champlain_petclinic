@@ -114,6 +114,7 @@
 
 .filter-footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -258,6 +259,19 @@
 
 .inventory-card-wrapper .inventory-card mat-card-header {
   padding-right: 3.5rem;
+}
+
+.inventory-photo {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--sage-50);
+  color: var(--forest-700);
+  font-size: 28px;
+  line-height: 48px;
+  text-align: center;
 }
 
 .inventory-card mat-card-title {
@@ -454,4 +468,8 @@
   box-shadow: var(--shadow-sm);
   font-size: 1rem;
   font-weight: 700;
+}
+
+.inventory-sort {
+  width: min(100%, 22rem);
 }

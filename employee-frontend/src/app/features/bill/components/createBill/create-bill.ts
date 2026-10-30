@@ -102,12 +102,22 @@ export class CreateBill implements OnInit {
   }
 
   protected readonly billRequestForm = form(this.billRequest, (schemaPath) => {
-    required(schemaPath.customerId, { message: 'Customer is required' });
-    required(schemaPath.visitType, { message: 'Visit Type is required' });
-    required(schemaPath.vetId, { message: 'Vet is required' });
-    required(schemaPath.date, { message: 'Date is required' });
-    required(schemaPath.amount, { message: 'Amount is required' });
-    min(schemaPath.amount, 0.01, { message: 'Amount must be greater than 0' });
+    required(schemaPath.customerId, {
+      message: $localize`:@@bill.message.custReq:Client(e) est requis(e)`,
+    });
+    required(schemaPath.visitType, {
+      message: $localize`:@@bill.message.vistReq:Type de visite est requis`,
+    });
+    required(schemaPath.vetId, {
+      message: $localize`:@@bill.message.vetReq:Vétérinaire est requis`,
+    });
+    required(schemaPath.date, { message: $localize`:@@bill.message.dateReq:La date est requise` });
+    required(schemaPath.amount, {
+      message: $localize`:@@bill.message.amtReq:Le montant est requis`,
+    });
+    min(schemaPath.amount, 0.01, {
+      message: $localize`:@@bill.message.greatAmtReq:Le montant doit être supérieur à 0`,
+    });
   });
 
   readonly dialogRef = inject(MatDialogRef<CreateBill>);
@@ -135,7 +145,7 @@ export class CreateBill implements OnInit {
     this.billService.createBill(this.billRequest(), this.sendEmail()).subscribe({
       next: (createdBill: BillRequestModel) => {
         this.dialogRef.close(createdBill);
-        this.showSnackbar('Bill created successfully!');
+        this.showSnackbar($localize`:@@bill.createBill.success:Facture créée avec succès`);
       },
       error: (error: HttpErrorResponse) => {
         this.isSubmitting = false;
@@ -152,7 +162,9 @@ export class CreateBill implements OnInit {
         next: (customer) => this.customers.update((customers) => [...customers, customer]),
         error: () => {
           this.isLoading.set(false);
-          this.errorMessage.set('Unable to load customers. Please try again later.');
+          this.errorMessage.set(
+            $localize`:@@bill.loading.unableCust:Impossible de charger la liste des clients. Veuillez réessayer plus tard.`,
+          );
           this.showSnackbar(`${this.errorMessage()}`);
         },
         complete: () => this.isLoading.set(false),
@@ -173,7 +185,9 @@ export class CreateBill implements OnInit {
         },
         error: () => {
           this.isLoading.set(false);
-          this.errorMessage.set('Unable to load veterinarians. Please try again later.');
+          this.errorMessage.set(
+            $localize`:@@bill.loading.unableVet:Impossible de charger la liste des vétérinaires. Veuillez réessayer plus tard`,
+          );
           this.showSnackbar(`${this.errorMessage()}`);
         },
         complete: () => this.isLoading.set(false),

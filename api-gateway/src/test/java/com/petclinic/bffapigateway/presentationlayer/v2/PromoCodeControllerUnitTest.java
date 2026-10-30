@@ -39,6 +39,28 @@ class PromoCodeControllerUnitTest {
         client = WebTestClient.bindToController(controller).build();
     }
 
+    @Test
+    void createAutomaticPromo_preservesEmployeeSettings() {
+        PromoCodeRequestDTO request = sampleRequest();
+        request.setAutomatic(true);
+        request.setMinimumPurchaseAmount(100.0);
+        PromoCodeResponseDTO response = samplePromo("automatic");
+        response.setAutomatic(true);
+        response.setMinimumPurchaseAmount(100.0);
+        when(cartServiceClient.createPromoCode(any(PromoCodeRequestDTO.class)))
+                .thenReturn(Mono.just(response));
+
+        client.post().uri(BASE_URL).contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request).exchange().expectStatus().isOk()
+                .expectBody().jsonPath("$.automatic").isEqualTo(true)
+                .jsonPath("$.minimumPurchaseAmount").isEqualTo(100.0);
+
+        var captured = org.mockito.ArgumentCaptor.forClass(PromoCodeRequestDTO.class);
+        verify(cartServiceClient).createPromoCode(captured.capture());
+        assertThat(captured.getValue().getAutomatic()).isTrue();
+        assertThat(captured.getValue().getMinimumPurchaseAmount()).isEqualTo(100.0);
+    }
+
     private PromoCodeResponseDTO samplePromo(String id) {
         PromoCodeResponseDTO response = new PromoCodeResponseDTO();
         response.setId(id);
@@ -222,4 +244,44 @@ class PromoCodeControllerUnitTest {
                 .exchange()
                 .expectStatus().isBadRequest();
     }
+    @Test
+    void imagePayloadIsForwardedAndReturned() {
+        var request = sampleRequest();
+        var image = com.petclinic.bffapigateway.dtos.Files.FileDetails.builder()
+                .fileName("offer.png").fileType("image/png").fileData(new byte[]{1, 2, 3}).build();
+        request.setImage(image);
+        var response = samplePromo("p-1");
+        response.setImage(image);
+        response.setImageId("image-1");
+        when(cartServiceClient.createPromoCode(any())).thenReturn(Mono.just(response));
+        client.post().uri(BASE_URL).contentType(MediaType.APPLICATION_JSON).bodyValue(request)
+                .exchange().expectStatus().isOk().expectBody()
+                .jsonPath("$.image.fileData").isEqualTo("AQID")
+                .jsonPath("$.imageId").isEqualTo("image-1");
+        var capture = org.mockito.ArgumentCaptor.forClass(PromoCodeRequestDTO.class);
+        verify(cartServiceClient).createPromoCode(capture.capture());
+        assertThat(capture.getValue().getImage().getFileData()).containsExactly((byte) 1, (byte) 2, (byte) 3);
+    }
+
+    @Test
+    void imageRemovalIsForwarded() {
+        var request = sampleRequest();
+        request.setRemoveImage(true);
+        when(cartServiceClient.updatePromoCode(eq("p-1"), any())).thenReturn(Mono.just(samplePromo("p-1")));
+        client.put().uri(BASE_URL + "/p-1").contentType(MediaType.APPLICATION_JSON).bodyValue(request)
+                .exchange().expectStatus().isOk();
+        var capture = org.mockito.ArgumentCaptor.forClass(PromoCodeRequestDTO.class);
+        verify(cartServiceClient).updatePromoCode(eq("p-1"), capture.capture());
+        assertThat(capture.getValue().isRemoveImage()).isTrue();
+    }
+
+    @Test
+    void rejectedImageKeepsBadRequestStatus() {
+        when(cartServiceClient.createPromoCode(any())).thenReturn(Mono.error(
+                org.springframework.web.reactive.function.client.WebClientResponseException.create(
+                        400, "Invalid image", org.springframework.http.HttpHeaders.EMPTY, new byte[0], null)));
+        client.post().uri(BASE_URL).contentType(MediaType.APPLICATION_JSON).bodyValue(sampleRequest())
+                .exchange().expectStatus().isBadRequest();
+    }
+
 }

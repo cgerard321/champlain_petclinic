@@ -47,5 +47,13 @@
       "CANCELLED": "Annulée",
       "ARCHIVED": "Archivée"
     }
+  },
+  "reviews": {
+    "filterByRating": "Filtrer par note :",
+    "allRatings": "Toutes les notes",
+    "stars_one": "{{count}} étoile",
+    "stars_other": "{{count}} étoiles",
+    "noReviews": "Aucun avis disponible",
+    "noMatchingReviews": "Aucun avis ne correspond à cette note."
   }
 }

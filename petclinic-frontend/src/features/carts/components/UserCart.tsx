@@ -50,6 +50,7 @@ import { useConfirmModal } from '@/shared/hooks/useConfirmModal';
 import { getCustomerOrders } from '../api/getCustomerOrders';
 import type { OrderModel } from '../models/OrderModel';
 import ReportOrderModal from './ReportOrderModal';
+import OrderReportBanner from './OrderReportBanner';
 import {
   getCustomerOrderReports,
   isOpenOrderReport,
@@ -120,6 +121,11 @@ const UserCart: React.FC = () => {
   const [reportingOrder, setReportingOrder] = useState<OrderModel | null>(null);
 
   const [promoPercent, setPromoPercent] = useState<number | null>(null);
+  const [automaticDiscount, setAutomaticDiscount] = useState({
+    minimumAmount: 0,
+    percentage: 0,
+    applied: false,
+  });
   const [shippingMethod, setShippingMethod] =
     useState<ShippingMethod>('PICKUP');
   const [shippingCost, setShippingCost] = useState<number>(0);
@@ -276,6 +282,11 @@ const UserCart: React.FC = () => {
       setPromoPercent(
         typeof cartData.promoPercent === 'number' ? cartData.promoPercent : null
       );
+      setAutomaticDiscount({
+        minimumAmount: cartData.automaticDiscountMinimumAmount ?? 0,
+        percentage: cartData.automaticDiscountPercentage ?? 0,
+        applied: cartData.automaticDiscountApplied ?? false,
+      });
       setShippingMethod(cartData.shippingMethod ?? 'PICKUP');
       setShippingCost(
         typeof cartData.shippingCost === 'number' ? cartData.shippingCost : 0
@@ -289,6 +300,17 @@ const UserCart: React.FC = () => {
       emitCartMessage(serverMessage, fallbackMessage);
     },
     [emitCartMessage, toProductModel]
+  );
+
+  const refreshCart = useCallback(
+    async (existingCartId: string): Promise<void> => {
+      const { data } = await axiosInstance.get<CartDetailsModel>(
+        `/carts/${existingCartId}`,
+        { useV2: false }
+      );
+      syncCartState(data);
+    },
+    [syncCartState]
   );
 
   // Recent purchases state
@@ -696,10 +718,7 @@ const UserCart: React.FC = () => {
     if (!existingCartId) return;
     try {
       await clearPromo(existingCartId);
-      setPromoPercent(null);
-      setCartItems(items =>
-        items.map(item => ({ ...item, discountAmount: 0 }))
-      );
+      await refreshCart(existingCartId);
       showToast(t('toasts.promoRemoved'), 'success');
     } catch (err: unknown) {
       showToast(apiErrorMessage(err, t('errors.removePromoFailed')), 'error');
@@ -760,6 +779,7 @@ const UserCart: React.FC = () => {
           notifyCartChanged();
           return next;
         });
+        await refreshCart(existingCartId);
         showToast(t('toasts.itemRemoved'), 'success');
       } catch (error) {
         console.error('Error deleting item: ', error);
@@ -769,7 +789,15 @@ const UserCart: React.FC = () => {
         );
       }
     },
-    [apiErrorMessage, blockIfReadOnly, confirm, ensureCartId, showToast, t]
+    [
+      apiErrorMessage,
+      blockIfReadOnly,
+      confirm,
+      ensureCartId,
+      refreshCart,
+      showToast,
+      t,
+    ]
   );
 
   const clearCart = async (): Promise<void> => {
@@ -791,6 +819,7 @@ const UserCart: React.FC = () => {
         useV2: false,
       });
       setCartItems([]);
+      setAutomaticDiscount(previous => ({ ...previous, applied: false }));
       setCartItemCount(0);
       setCartCountInLS(0);
       notifyCartChanged();
@@ -974,8 +1003,14 @@ const UserCart: React.FC = () => {
   };
 
   const handleViewOrderReceipt = (order: OrderModel): void => {
+    const itemsSubtotal = roundToCents(
+      order.products.reduce(
+        (sum, item) => sum + item.productSalePrice * item.quantityInCart,
+        0
+      )
+    );
     const discount = roundToCents(
-      order.subtotal * ((order.promoPercent ?? 0) / 100)
+      Math.max(0, itemsSubtotal + (order.shippingCost ?? 0) - order.subtotal)
     );
 
     const orderBilling = {
@@ -997,7 +1032,7 @@ const UserCart: React.FC = () => {
         productSalePrice: item.productSalePrice,
         quantity: item.quantityInCart,
       })),
-      subtotal: order.subtotal,
+      subtotal: itemsSubtotal,
       taxableSubtotal: roundToCents(order.total - order.tvq - order.tvc),
       tvq: order.tvq,
       tvc: order.tvc,
@@ -1045,15 +1080,19 @@ const UserCart: React.FC = () => {
         postalCode: usedBilling.postalCode,
       };
 
-      await axiosInstance.post(`/carts/${cartId}/checkout`, checkoutBilling, {
-        useV2: false,
-      });
+      const { data: checkout } = await axiosInstance.post<CartDetailsModel>(
+        `/carts/${cartId}/checkout`,
+        checkoutBilling,
+        {
+          useV2: false,
+        }
+      );
 
-      const invoiceItems: Invoice[] = cartItems.map(item => ({
+      const invoiceItems: Invoice[] = checkout.products.map(item => ({
         productId: item.productId,
         productName: item.productName,
         productSalePrice: item.productSalePrice,
-        quantity: item.quantity || 1,
+        quantity: item.quantityInCart,
       }));
 
       const invoiceItemsForFull: InvoiceItemType[] = invoiceItems.map(i => ({
@@ -1069,37 +1108,13 @@ const UserCart: React.FC = () => {
         0
       );
       const invoiceSubtotal = invoiceSubtotalCents / 100;
-      const shippingCents = Math.round(effectiveShippingCost * 100);
-      const discountCents = Math.round(effectiveDiscount * 100);
-      const invoiceTaxableSubtotalCents = Math.max(
-        0,
-        invoiceSubtotalCents - discountCents + shippingCents
-      );
-      const invoiceTaxableSubtotal = invoiceTaxableSubtotalCents / 100;
-
-      const invoiceTaxLines = computeTaxes(
-        invoiceTaxableSubtotal,
-        usedBilling?.province
-      ).map(line => ({
-        ...line,
-        amount: line.amount ?? roundToCents(invoiceTaxableSubtotal * line.rate),
-      }));
-      const invoiceTaxCents = invoiceTaxLines.map(line =>
-        Math.round((line.amount ?? 0) * 100)
-      );
-      const invoiceTaxTotalCents = invoiceTaxCents.reduce(
-        (sum, cents) => sum + cents,
-        0
-      );
-      const invoiceTotalCents =
-        invoiceTaxableSubtotalCents + invoiceTaxTotalCents;
-      const invoiceTvq = (invoiceTaxCents[0] ?? 0) / 100;
-      const invoiceTvc =
-        invoiceTaxCents.slice(1).reduce((sum, cents) => sum + cents, 0) / 100;
-      const invoiceTotal = invoiceTotalCents / 100;
+      const invoiceTaxableSubtotal = checkout.subtotal;
+      const invoiceTvq = checkout.tvq;
+      const invoiceTvc = checkout.tvc;
+      const invoiceTotal = checkout.total;
 
       const newInvoice: InvoiceFullType = {
-        invoiceId: `${Date.now()}`,
+        invoiceId: checkout.invoiceId ?? '',
         userId: user?.userId || 'anonymous',
         billing: usedBilling
           ? {
@@ -1117,15 +1132,16 @@ const UserCart: React.FC = () => {
         taxableSubtotal: invoiceTaxableSubtotal,
         tvq: invoiceTvq,
         tvc: invoiceTvc,
-        discount: effectiveDiscount,
-        shippingMethod,
-        shippingCost: effectiveShippingCost,
+        discount: checkout.discountAmount ?? 0,
+        shippingMethod: checkout.shippingMethod ?? 'PICKUP',
+        shippingCost: checkout.shippingCost ?? 0,
         total: invoiceTotal,
       };
       setLastInvoice(newInvoice);
       setShowInvoiceModal(true);
       setCheckoutMessage(t('toasts.checkoutSuccess'));
       setCartItems([]);
+      setAutomaticDiscount(previous => ({ ...previous, applied: false }));
       setCartItemCount(0);
       setShippingMethod('PICKUP');
       setShippingCost(0);
@@ -1405,15 +1421,44 @@ const UserCart: React.FC = () => {
 
               <div className="CartSummary">
                 <h3>{t('summary.title')}</h3>
+                {automaticDiscount.percentage > 0 && (
+                  <div className="alert alert-info" role="status">
+                    <p>
+                      {t('automaticDiscount.offer', {
+                        percent: automaticDiscount.percentage,
+                        minimum: formatPrice(automaticDiscount.minimumAmount),
+                      })}
+                    </p>
+                    <p>
+                      {automaticDiscount.applied
+                        ? t('automaticDiscount.applied', {
+                            amount: formatPrice(effectiveDiscount),
+                          })
+                        : subtotal < automaticDiscount.minimumAmount
+                          ? t('automaticDiscount.remaining', {
+                              amount: formatPrice(
+                                roundToCents(
+                                  automaticDiscount.minimumAmount - subtotal
+                                )
+                              ),
+                            })
+                          : t('automaticDiscount.bestDiscount')}
+                    </p>
+                  </div>
+                )}
                 <p className="summary-item">
                   {t('summary.itemsSubtotal')} {formatPrice(subtotal)}
                 </p>
                 <p className="summary-item">
-                  {promoPercent != null
-                    ? t('summary.discountWithPercent', {
-                        percent: promoPercent,
+                  {automaticDiscount.applied
+                    ? t('automaticDiscount.summaryLabel', {
+                        percent: automaticDiscount.percentage,
                       })
-                    : t('summary.discount')}{' '}
+                    : promoPercent != null
+                      ? t('summary.discountWithPercent', {
+                          percent: promoPercent,
+                        })
+                      : t('summary.discount')}{' '}
                   {formatPrice(effectiveDiscount)}
                 </p>
                 <p className="summary-item">
@@ -1504,14 +1549,9 @@ const UserCart: React.FC = () => {
                   </div>
 
                   {reportsByOrderId[order.orderId] && (
-                    <div className="order-report-banner" role="status">
-                      {t('reports.banner', {
-                        status: t(
-                          `reports.status.${reportsByOrderId[order.orderId].status}`
-                        ),
-                        reportId: reportsByOrderId[order.orderId].reportId,
-                      })}
-                    </div>
+                    <OrderReportBanner
+                      report={reportsByOrderId[order.orderId]}
+                    />
                   )}
 
                   <div className="order-products">

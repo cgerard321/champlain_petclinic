@@ -12,12 +12,22 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormArray,
+  FormControl,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 
 import {
+  ALL_WORK_HOURS,
+  STANDARD_SHIFT_HOURS,
   DAYS,
   emptySchedule,
+  hourRange,
   hourLabel,
   readSchedule,
   RemovedSlot,
@@ -37,6 +47,14 @@ import { ConfirmDialog } from '@shared/components/confirm-dialog/confirm-dialog'
 export interface VetSavePayload extends VetEditSubmission {
   readonly visitsToCancel: readonly Visit[];
 }
+
+type EducationFormGroup = FormGroup<{
+  schoolName: FormControl<string>;
+  degree: FormControl<string>;
+  fieldOfStudy: FormControl<string>;
+  startDate: FormControl<string>;
+  endDate: FormControl<string>;
+}>;
 
 @Component({
   selector: 'app-vet-edit-form',
@@ -58,6 +76,98 @@ export class VetEditForm {
   });
   protected readonly specialtyLabel = specialtyLabel;
   private readonly fb = inject(FormBuilder);
+
+  protected showEducationForm = false;
+  protected readonly educationDraft = this.createEducationGroup();
+  protected educationDateError = false;
+
+  protected readonly educationFields = [
+    {
+      key: 'schoolName',
+      label: $localize`:@@vets.education.school:École ou établissement`,
+      type: 'text',
+    },
+    {
+      key: 'degree',
+      label: $localize`:@@vets.education.degree:Diplôme ou qualification`,
+      type: 'text',
+    },
+    {
+      key: 'fieldOfStudy',
+      label: $localize`:@@vets.education.field:Domaine d’études`,
+      type: 'text',
+    },
+    {
+      key: 'startDate',
+      label: $localize`:@@vets.education.start_date:Date de début`,
+      type: 'date',
+    },
+    {
+      key: 'endDate',
+      label: $localize`:@@vets.education.end_date:Date de fin`,
+      type: 'date',
+    },
+  ] as const;
+  protected readonly education = new FormArray<EducationFormGroup>([]);
+  private createEducationGroup(): EducationFormGroup {
+    return this.fb.nonNullable.group({
+      schoolName: ['', [Validators.required, Validators.pattern(/\S/)]],
+      degree: ['', [Validators.required, Validators.pattern(/\S/)]],
+      fieldOfStudy: ['', [Validators.required, Validators.pattern(/\S/)]],
+      startDate: ['', Validators.required],
+      endDate: ['', Validators.required],
+    });
+  }
+
+  protected openEducationForm(): void {
+    if (this.saving()) return;
+
+    this.showEducationForm = true;
+  }
+
+  protected addEducation(): void {
+    if (this.saving()) return;
+
+    const values = this.educationDraft.getRawValue();
+
+    this.educationDraft.setValue({
+      schoolName: values.schoolName.trim(),
+      degree: values.degree.trim(),
+      fieldOfStudy: values.fieldOfStudy.trim(),
+      startDate: values.startDate,
+      endDate: values.endDate,
+    });
+
+    this.educationDraft.markAllAsTouched();
+    this.educationDateError = false;
+
+    if (this.educationDraft.invalid) return;
+
+    if (values.endDate < values.startDate) {
+      this.educationDateError = true;
+      return;
+    }
+
+    const entry = this.createEducationGroup();
+    entry.setValue(this.educationDraft.getRawValue());
+
+    this.education.push(entry);
+    this.education.markAsDirty();
+
+    this.educationDraft.reset();
+    this.showEducationForm = false;
+    this.educationDateError = false;
+  }
+
+  acknowledgeEducationSaved(): void {
+    if (!this.education.length) return;
+
+    this.education.removeAt(0);
+
+    if (!this.education.length) {
+      this.education.markAsPristine();
+    }
+  }
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
   private readonly labels = workdayLabels();
@@ -69,6 +179,12 @@ export class VetEditForm {
   private readonly injector = inject(Injector);
   protected readonly announcement = signal('');
   protected readonly pendingSpecialtyNames = signal<string[]>([]);
+  protected readonly showAllAvailabilities = signal(false);
+
+  protected toggleShowAllAvailabilities(): void {
+    this.showAllAvailabilities.update((value) => !value);
+  }
+
   protected readonly form = this.fb.nonNullable.group({
     firstName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
     lastName: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
@@ -120,15 +236,99 @@ export class VetEditForm {
       hint: $localize`:@@vets.edit.biography_hint:Au moins 10 caractères.`,
     },
   ] as const;
-  protected readonly availability = computed(() => {
+
+  protected readonly allAvailabilities = computed(() => {
     const days = this.days();
     const schedule = this.schedule();
-    return DAYS.filter((day) => days.includes(day) || schedule[day].length > 0).map((day) => ({
-      day,
-      label: this.labels[day],
-      hours: schedule[day].map((hour) => ({ value: hour, label: hourLabel(hour) })),
-    }));
+    const initialSchedule = this.initialSchedule();
+
+    const allHours = Array.from(
+      new Set([...ALL_WORK_HOURS, ...DAYS.flatMap((day) => initialSchedule[day] || [])]),
+    ).sort((a, b) => {
+      const rangeA = hourRange(a)?.[0] ?? 0;
+      const rangeB = hourRange(b)?.[0] ?? 0;
+      return rangeA - rangeB;
+    });
+
+    return DAYS.map((day) => {
+      const isDaySelected = days.includes(day);
+      const activeHours = schedule[day] || [];
+
+      return {
+        day,
+        label: this.labels[day],
+        selected: isDaySelected,
+        hours: allHours.map((hour) => ({
+          value: hour,
+          label: hourLabel(hour),
+          selected: activeHours.includes(hour),
+        })),
+      };
+    });
   });
+
+  protected addDay(day: Workday): void {
+    this.days.update((current) => (current.includes(day) ? current : [...current, day]));
+
+    const initialSchedule = this.initialSchedule();
+    const defaultHours = initialSchedule[day]?.length ? initialSchedule[day] : STANDARD_SHIFT_HOURS;
+
+    if (!this.schedule()[day]?.length) {
+      this.schedule.update((current) => ({ ...current, [day]: defaultHours }));
+    }
+    this.announcement.set(
+      $localize`:@@vets.availability.added_day:Journée ${this.labels[day]}:day: ajoutée.`,
+    );
+    this.restoreFocus(`#add-day-${day}`);
+  }
+
+  protected addHour(day: Workday, hour: string): void {
+    const currentHours = this.schedule()[day] || [];
+    if (!currentHours.includes(hour)) {
+      const updatedHours = [...currentHours, hour].sort();
+      this.schedule.update((current) => ({ ...current, [day]: updatedHours }));
+    }
+    if (!this.days().includes(day)) {
+      this.days.update((current) => [...current, day]);
+    }
+    this.announcement.set(
+      $localize`:@@vets.availability.added_hour:${this.labels[day]}:day: ${hourLabel(hour)}:hour: ajouté.`,
+    );
+    this.restoreFocus(`#add-hour-${day}-${hour}`);
+  }
+
+  protected readonly availability = computed(() => {
+    return this.allAvailabilities()
+      .filter((entry) => entry.selected && entry.hours.some((h) => h.selected))
+      .map((entry) => ({
+        ...entry,
+        hours: entry.hours.filter((h) => h.selected),
+      }));
+  });
+
+  protected resetSchedule(): void {
+    this.dialog
+      .open(ConfirmDialog, {
+        data: {
+          title: $localize`:@@vets.availability.reset_title:Réinitialiser les modifications ?`,
+          message: $localize`:@@vets.availability.reset_message:Voulez-vous restaurer les disponibilités initiales ? Cela annulera les modifications en cours, mais ne replanifiera pas les rendez-vous annulés.`,
+          confirmLabel: $localize`:@@vets.availability.reset_confirm:Réinitialiser`,
+          cancelLabel: $localize`:@@vets.actions.cancel:Annuler`,
+        },
+      })
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.days.set([...this.initialDays()]);
+          this.schedule.set(JSON.parse(JSON.stringify(this.initialSchedule())));
+          this.announcement.set(
+            $localize`:@@vets.availability.reset:Disponibilités réinitialisées.`,
+          );
+          this.restoreFocus('#availability-title');
+        }
+      });
+  }
   protected readonly removedSlots = computed<readonly RemovedSlot[]>(() => {
     const initialSchedule = this.initialSchedule();
     const schedule = this.schedule();
@@ -248,11 +448,29 @@ export class VetEditForm {
       this.announcement.set('');
       this.pendingSpecialtyNames.set([]);
       this.customSpecialty.reset();
+      this.education.clear();
+      this.education.markAsPristine();
+      this.education.markAsUntouched();
     });
   }
 
   hasUnsavedChanges(): boolean {
-    return this.form.dirty || this.removed().length > 0;
+    return (
+      this.form.dirty ||
+      this.education.dirty ||
+      this.educationDraft.dirty ||
+      this.removed().length > 0
+    );
+    const days = this.days();
+    const schedule = this.schedule();
+    const initialDays = this.initialDays();
+    const initialSchedule = this.initialSchedule();
+    const hasScheduleChanges = DAYS.some(
+      (day) =>
+        initialDays.includes(day) !== days.includes(day) ||
+        JSON.stringify(initialSchedule[day]) !== JSON.stringify(schedule[day]),
+    );
+    return this.form.dirty || hasScheduleChanges;
   }
 
   protected removeHour(day: Workday, hour: string): void {
@@ -291,7 +509,7 @@ export class VetEditForm {
           (preferred && root.querySelector<HTMLElement>(preferred)) ||
           root.querySelector<HTMLElement>('.remove-day') ||
           root.querySelector<HTMLElement>('#availability-title');
-        target?.focus();
+        target?.focus({ preventScroll: true });
       },
       { injector: this.injector },
     );
@@ -309,7 +527,8 @@ export class VetEditForm {
       specialties: values.specialties,
     });
     this.form.markAllAsTouched();
-    if (this.form.invalid) return;
+    this.education.markAllAsTouched();
+    if (this.form.invalid || this.education.invalid) return;
     const removed = this.removed();
     if (!removed.length) {
       this.emit();
@@ -350,7 +569,7 @@ export class VetEditForm {
       );
     }
     parts.push(
-      $localize`:@@vets.availability.confirm_final:Cette action est définitive une fois enregistrée.`,
+      $localize`:@@vets.availability.confirm_visits_cancel:--- AVIS : Cela annulera toutes les visites réservées pendant cette disponibilité.`,
     );
     return parts.join(' ');
   }
@@ -359,25 +578,42 @@ export class VetEditForm {
     const vet = this.vet();
     const days = this.days();
     const schedule = this.schedule();
-    const untouched = !this.removed().length;
+    const initialDays = this.initialDays();
+    const initialSchedule = this.initialSchedule();
+
+    const hasScheduleChanges = DAYS.some(
+      (day) =>
+        initialDays.includes(day) !== days.includes(day) ||
+        JSON.stringify(initialSchedule[day]) !== JSON.stringify(schedule[day]),
+    );
+
     const workHours: Record<string, readonly string[]> = {};
     for (const day of DAYS) {
       if (schedule[day].length) workHours[day] = schedule[day];
     }
+
     this.submitted.emit({
       visitsToCancel: this.affectedVisits(),
       request: {
         ...this.form.getRawValue(),
         vetId: vet.vetId,
         vetBillId: vet.vetBillId,
-        workday: untouched
+        workday: !hasScheduleChanges
           ? (vet.workday ?? [])
           : DAYS.filter((day) => days.includes(day) || schedule[day].length > 0),
-        workHoursJson: untouched ? vet.workHoursJson : JSON.stringify(workHours),
+        workHoursJson: !hasScheduleChanges ? vet.workHoursJson : JSON.stringify(workHours),
         active: vet.active,
         photoDefault: false,
       },
       newSpecialtyNames: [...this.pendingSpecialtyNames()],
+      newEducation: this.education.getRawValue().map((entry) => ({
+        vetId: vet.vetId,
+        schoolName: entry.schoolName.trim(),
+        degree: entry.degree.trim(),
+        fieldOfStudy: entry.fieldOfStudy.trim(),
+        startDate: entry.startDate,
+        endDate: entry.endDate,
+      })),
     });
   }
 }

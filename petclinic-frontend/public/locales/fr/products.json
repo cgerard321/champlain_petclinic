@@ -157,9 +157,6 @@
   "customers": "Clients",
   "customerList": "Liste des clients",
   "addCustomer": "Ajouter un client",
-  "users": "Utilisateurs",
-  "userList": "Liste des utilisateurs",
-  "roles": "Liste des rôles",
   "schedule": "Mon horaire",
   "inventories": "Inventaires",
   "carts": "Paniers",
@@ -222,5 +219,13 @@
   "clearReviewSearch": "Effacer la recherche",
   "reviewSearchCount": "{{count}} avis affiché(s) sur {{total}}",
   "noReviewsWithRating": "Ce produit ne possède aucun avis de {{count}} étoile(s).",
-  "noReviewResults": "Aucun résultat trouvé"
+  "noReviewResults": "Aucun résultat trouvé",
+  "averageReview": {
+    "title": "Notes moyennes des clients",
+    "empty": "Aucune note pour le moment",
+    "score": "{{value}} / 5",
+    "count_one": "{{count}} note",
+    "count_other": "{{count}} notes",
+    "error": "Impossible de charger les notes. Veuillez réessayer."
+  }
 }

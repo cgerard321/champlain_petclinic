@@ -85,6 +85,7 @@
           />
         </label>
       </div>
+
       <div class="filter-footer">
         <label class="important-filter">
           <input
@@ -94,6 +95,17 @@
             (change)="setImportantOnly($event)"
           />
           <span i18n="@@inventory.filters.favoritesOnly">Favoris seulement</span>
+        </label>
+        <label class="filter-field inventory-sort">
+          <span i18n="@@inventory.sort.label">Trier par</span>
+          <select [value]="sort()" (change)="setSort($event)">
+            <option value="name-asc" i18n="@@inventory.sort.nameAsc">Nom A–Z</option>
+            <option value="name-desc" i18n="@@inventory.sort.nameDesc">Nom Z–A</option>
+            <option value="type" i18n="@@inventory.sort.type">Type</option>
+            <option value="count-desc" i18n="@@inventory.sort.countDesc">
+              Nombre d'articles (le plus élevé d'abord)
+            </option>
+          </select>
         </label>
       </div>
     </section>
@@ -114,6 +126,26 @@
       <div class="state-container">
         <mat-icon color="warn">error_outline</mat-icon>
         <p>{{ err.message }}</p>
+      </div>
+    } @else if (countSortError()) {
+      <div class="state-container" role="alert">
+        <mat-icon color="warn">error_outline</mat-icon>
+        <p i18n="@@inventory.sort.countError">
+          Impossible de charger le nombre d'articles. Réessayez ou choisissez un autre tri.
+        </p>
+        <button
+          class="clear-filters-button"
+          type="button"
+          (click)="retryQuantities()"
+          i18n="@@inventory.sort.retry"
+        >
+          Réessayer
+        </button>
+      </div>
+    } @else if (countSortBlocked()) {
+      <div class="state-container" role="status">
+        <mat-spinner diameter="40" />
+        <p i18n="@@inventory.sort.loadingCounts">Chargement du nombre d'articles…</p>
       </div>
     } @else if (noResultsMessage(); as message) {
       <div class="state-container no-results-state" role="status">
@@ -140,15 +172,26 @@
             >
               <mat-card appearance="outlined" class="inventory-card">
                 <mat-card-header>
-                  <mat-card-title>{{
-                    localizedInventoryName(inventory.inventoryName)
-                  }}</mat-card-title>
+                  @if (inventoryPhotoUrl(inventory); as photo) {
+                    <img
+                      mat-card-avatar
+                      class="inventory-photo"
+                      [src]="photo"
+                      alt=""
+                      (error)="markPhotoBroken(photo)"
+                    />
+                  } @else {
+                    <mat-icon mat-card-avatar class="inventory-photo" aria-hidden="true"
+                      >inventory_2</mat-icon
+                    >
+                  }
+                  <mat-card-title>{{ localizedInventoryName(inventory) }}</mat-card-title>
                   <mat-card-subtitle>{{
                     localizedInventoryType(inventory.inventoryType)
                   }}</mat-card-subtitle>
                 </mat-card-header>
                 <mat-card-content>
-                  <p>{{ localizedInventoryDescription(inventory.inventoryDescription) }}</p>
+                  <p>{{ localizedInventoryDescription(inventory) }}</p>
                   <p class="quantity">
                     @if (quantityFor(inventory.inventoryId) !== null) {
                       {{ stockQuantityLabel(inventory.inventoryId) }}
@@ -221,7 +264,7 @@
         type="button"
         aria-label="Page précédente"
         i18n-aria-label="@@inventory.pagination.previous"
-        [disabled]="currentPage() === 0 || isLoading()"
+        [disabled]="currentPage() === 0 || isLoading() || countSortBlocked()"
         (click)="goToPreviousPage()"
       >
         &lt;
@@ -232,7 +275,7 @@
         type="button"
         aria-label="Page suivante"
         i18n-aria-label="@@inventory.pagination.next"
-        [disabled]="!canGoToNextPage() || isLoading()"
+        [disabled]="!canGoToNextPage() || isLoading() || countSortBlocked()"
         (click)="goToNextPage()"
       >
         &gt;

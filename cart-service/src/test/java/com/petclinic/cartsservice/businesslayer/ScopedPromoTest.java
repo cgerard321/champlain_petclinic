@@ -20,13 +20,17 @@ class ScopedPromoTest {
     private final CartRepository carts = mock(CartRepository.class);
     private final PromoRepository promos = mock(PromoRepository.class);
     private final ProductClient products = mock(ProductClient.class);
+    private final AutomaticDiscountService automaticDiscountService = mock(AutomaticDiscountService.class);
     private final CartServiceImpl service = new CartServiceImpl(carts, products, mock(CustomerClient.class),
-            mock(OrderServiceImpl.class), promos);
+            mock(OrderServiceImpl.class), promos, automaticDiscountService);
     private Cart cart;
     private PromoCode promo;
 
     @BeforeEach
     void setup() {
+        lenient().when(automaticDiscountService.apply(any(com.petclinic.cartsservice.presentationlayer.CartResponseModel.class)))
+                .thenAnswer(invocation -> Mono.just(invocation.getArgument(0)));
+
         cart = Cart.builder().cartId("cart").shippingMethod(ShippingMethod.STANDARD)
                 .products(new ArrayList<>(List.of(line("food", "FOOD", 20, 2), line("toy", "TOY", 60, 1)))).build();
         promo = PromoCode.builder().code("SAVE").discount(25).isActive(true)
@@ -63,7 +67,7 @@ class ScopedPromoTest {
         }).verifyComplete();
         assertSame(promo, cart.getAppliedPromo());
         assertEquals(0, cart.getProducts().get(0).getDiscountAmount(), "Response calculation must not mutate stored lines");
-        Cart order = EntityModelUtil.storeCartOrder(cart);
+        Cart order = EntityModelUtil.storeCartOrder(cart, EntityModelUtil.toCartResponseModel(cart, cart.getProducts()));
         assertEquals(100 - discount + ShippingMethod.STANDARD.getCost(), order.getSubtotal(), .001);
         assertEquals(foodDiscount, order.getProducts().get(0).getDiscountAmount());
     }
@@ -90,7 +94,7 @@ class ScopedPromoTest {
         var reloaded = EntityModelUtil.toCartResponseModel(cart, cart.getProducts());
         assertTrue(reloaded.getProducts().get(0).isPromoLookupFailed());
         assertEquals(15, reloaded.getDiscountAmount());
-        Cart checkout = EntityModelUtil.storeCartOrder(cart);
+        Cart checkout = EntityModelUtil.storeCartOrder(cart, reloaded);
         assertEquals(0, checkout.getProducts().get(0).getDiscountAmount());
         assertEquals(15, checkout.getProducts().get(1).getDiscountAmount());
 
@@ -194,7 +198,7 @@ class ScopedPromoTest {
                 .productTypes(List.of(" FOOD ", "FOOD")).build();
         when(promos.save(any())).thenAnswer(i -> Mono.just(i.getArgument(0)));
         when(promos.findById("id")).thenReturn(Mono.just(promo));
-        var management = new PromoCodeServiceImpl(promos);
+        var management = new PromoCodeServiceImpl(promos, mock(FilesServiceClient.class));
         var created = management.createPromo(request).block();
         var updated = management.updatePromoCodeById(request, "id").block();
         for (var result : List.of(created, updated)) {

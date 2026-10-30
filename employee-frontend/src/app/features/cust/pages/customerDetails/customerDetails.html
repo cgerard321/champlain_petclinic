@@ -15,6 +15,17 @@
   @if (errorMessage()) {
     <p class="error-message" role="alert">{{ errorMessage() }}</p>
   }
+  @if (deactivateErrorMessage()) {
+    <p class="error-message" role="alert">{{ deactivateErrorMessage() }}</p>
+  }
+  @if (reactivateErrorMessage()) {
+    <p class="error-message" role="alert">{{ reactivateErrorMessage() }}</p>
+  }
+  @if (isReactivated()) {
+    <p class="success-message" role="status" i18n="@@cust.profile.reactivateSuccess">
+      Le compte du client a été réactivé.
+    </p>
+  }
   @if (isSaved()) {
     <p class="success-message" role="status" i18n="@@cust.profile.updateSuccess">
       Le client a été mis à jour avec succès.
@@ -42,6 +53,9 @@
       <div class="profile-heading">
         <p class="eyebrow" i18n="@@cust.profile.profile">Profil du client</p>
         <h2>{{ details.firstName }} {{ details.lastName }}</h2>
+        @if (isAdmin() && isActive() === false) {
+          <p class="eyebrow" i18n="@@cust.profile.statusInactive">Compte désactivé</p>
+        }
         <p>
           {{ details.city }}<span aria-hidden="true"> · </span
           >{{ getProvinceLabel(details.province) }}
@@ -56,6 +70,35 @@
         >
           Modifier le client
         </button>
+      }
+      @if (isAdmin() && !isEditing() && isActive() !== null) {
+        @if (isActive()) {
+          <button
+            class="danger-button deactivate-button"
+            type="button"
+            (click)="handleDeactivateCustomer()"
+            [disabled]="isDeactivating()"
+          >
+            @if (isDeactivating()) {
+              <span i18n="@@cust.profile.deactivating">Désactivation...</span>
+            } @else {
+              <span i18n="@@cust.profile.deactivate">Désactiver le compte</span>
+            }
+          </button>
+        } @else {
+          <button
+            class="primary-button deactivate-button"
+            type="button"
+            (click)="handleReactivateCustomer()"
+            [disabled]="isReactivating()"
+          >
+            @if (isReactivating()) {
+              <span i18n="@@cust.profile.reactivating">Réactivation...</span>
+            } @else {
+              <span i18n="@@cust.profile.reactivate">Réactiver le compte</span>
+            }
+          </button>
+        }
       }
     </header>
 

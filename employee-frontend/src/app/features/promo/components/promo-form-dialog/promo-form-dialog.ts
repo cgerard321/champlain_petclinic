@@ -10,7 +10,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 
 import { isApiError } from '@core/models/api-error';
+import { FileDetails } from '@features/prod/models/image.model';
 import { Product, ProductType } from '@features/prod/models/product.model';
+import { ImageService } from '@features/prod/services/image.service';
 import { ProductService } from '@features/prod/services/product.service';
 import { Promo } from '@features/promo/models/promo.model';
 import { PromoService } from '@features/promo/services/promo.service';
@@ -28,6 +30,8 @@ interface PromoFormModel {
   scope: 'CART' | 'PRODUCT' | 'PRODUCT_TYPE';
   productIds: string[];
   productTypes: string[];
+  automatic: boolean;
+  minimumPurchaseAmount: number;
 }
 
 @Component({
@@ -48,6 +52,7 @@ interface PromoFormModel {
 })
 export class PromoFormDialog implements OnInit {
   private readonly productService = inject(ProductService);
+  private readonly imageService = inject(ImageService);
   protected readonly products = signal<Product[]>([]);
   protected readonly productTypes = signal<ProductType[]>([]);
 
@@ -80,36 +85,132 @@ export class PromoFormDialog implements OnInit {
 
   protected readonly promo = this.data.promo;
   protected readonly isSubmitting = signal(false);
+  protected readonly isReadingImage = signal(false);
+  protected readonly selectedImage = signal<FileDetails | null>(null);
+  protected readonly removeOriginalImage = signal(false);
+  protected readonly fileError = signal<string | null>(null);
+  protected readonly previewFailed = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
   protected readonly model = signal<PromoFormModel>({
     name: this.promo?.name ?? '',
-    code: this.promo?.code ?? '',
+    code: this.promo?.automatic ? '' : (this.promo?.code ?? ''),
     discount: this.promo?.discount ?? 0,
     expirationDate: this.promo?.expirationDate.slice(0, 10) ?? '',
     active: this.promo?.active ?? true,
     scope: this.promo?.scope ?? 'CART',
     productIds: this.promo?.productIds ?? [],
     productTypes: this.promo?.productTypes ?? [],
+    automatic: this.promo?.automatic ?? false,
+    minimumPurchaseAmount: this.promo?.minimumPurchaseAmount ?? 0,
   });
 
   protected readonly promoForm = form(this.model, (schemaPath) => {
     required(schemaPath.name, { message: 'Name is required' });
-    required(schemaPath.code, { message: 'Code is required' });
     required(schemaPath.expirationDate, { message: 'Expiration date is required' });
   });
+
+  protected get previewImage(): FileDetails | null {
+    return (
+      this.selectedImage() ?? (this.removeOriginalImage() ? null : (this.promo?.image ?? null))
+    );
+  }
+
+  protected async selectFile(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    input.value = '';
+    this.fileError.set(null);
+    if (!file) return;
+    if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+      this.fileError.set('Only JPEG, JPG, and PNG images are supported.');
+      return;
+    }
+    if (file.size === 0 || file.size > 1024 * 1024) {
+      this.fileError.set('Promotion images must be between 1 byte and 1 MB.');
+      return;
+    }
+    this.isReadingImage.set(true);
+    try {
+      const image = await this.imageService.toFileDetails(file);
+      this.selectedImage.set(image);
+      this.removeOriginalImage.set(false);
+      this.previewFailed.set(false);
+    } catch {
+      this.fileError.set('Could not read the selected image.');
+    } finally {
+      this.isReadingImage.set(false);
+    }
+  }
+
+  protected removeImage(): void {
+    this.selectedImage.set(null);
+    this.removeOriginalImage.set(true);
+    this.previewFailed.set(false);
+    this.fileError.set(null);
+  }
+
+  protected imageFailed(): void {
+    this.previewFailed.set(true);
+    if (this.selectedImage()) this.fileError.set('The selected image is invalid.');
+  }
 
   protected setActive(active: boolean): void {
     this.model.update((current) => ({ ...current, active }));
   }
 
+  protected setAutomatic(automatic: boolean): void {
+    this.model.update((current) => ({
+      ...current,
+      automatic,
+      code: '',
+      scope: automatic ? 'CART' : current.scope,
+      productIds: automatic ? [] : current.productIds,
+      productTypes: automatic ? [] : current.productTypes,
+    }));
+  }
+
   protected submit(event: Event): void {
     event.preventDefault();
-    if (this.promoForm().invalid()) {
+    if (
+      this.isSubmitting() ||
+      this.isReadingImage() ||
+      this.fileError() ||
+      this.promoForm().invalid()
+    ) {
       return;
     }
-    if (this.model().discount <= 0 || this.model().discount > 100) {
+    if (
+      !Number.isFinite(this.model().discount) ||
+      this.model().discount <= 0 ||
+      this.model().discount > 100
+    ) {
       this.errorMessage.set('Discount must be between 0 and 100.');
+      return;
+    }
+
+    const { automatic, minimumPurchaseAmount, code, expirationDate, active } = this.model();
+
+    if (!automatic && !code.trim()) {
+      this.errorMessage.set(
+        $localize`:@@promo.automatic.codeRequired:Un code promotionnel est requis.`,
+      );
+      return;
+    }
+
+    if (automatic && (!Number.isFinite(minimumPurchaseAmount) || minimumPurchaseAmount < 0)) {
+      this.errorMessage.set(
+        $localize`:@@promo.automatic.invalidMinimum:Le montant minimum doit être égal ou supérieur à zéro.`,
+      );
+      return;
+    }
+
+    const expiresAt = new Date(`${expirationDate}T23:59:59`);
+
+    if (automatic && active && (!Number.isFinite(expiresAt.getTime()) || expiresAt <= new Date())) {
+      this.errorMessage.set(
+        $localize`:@@promo.automatic.invalidExpiration:La date d'expiration doit être dans le futur.`,
+      );
       return;
     }
 
@@ -123,7 +224,13 @@ export class PromoFormDialog implements OnInit {
     }
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
-    const request = { ...this.model(), expirationDate: `${this.model().expirationDate}T23:59:59` };
+    const request = {
+      ...this.model(),
+      minimumPurchaseAmount: automatic ? minimumPurchaseAmount : null,
+      expirationDate: `${this.model().expirationDate}T23:59:59`,
+      ...(this.selectedImage() ? { image: this.selectedImage()! } : {}),
+      removeImage: this.removeOriginalImage(),
+    };
     const save = this.promo
       ? this.promoService.updatePromo(this.promo.id, request)
       : this.promoService.createPromo(request);
