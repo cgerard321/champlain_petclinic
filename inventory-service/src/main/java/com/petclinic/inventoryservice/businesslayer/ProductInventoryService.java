@@ -97,6 +97,9 @@ public interface ProductInventoryService {
     Flux<SupplyAuditEntry> getSupplyHistory(String inventoryId, String productId);
 
     Mono<byte[]> createSupplyPdf(String inventoryId);
+    default Mono<byte[]> createSupplyPdf(String inventoryId, String language) {
+        return createSupplyPdf(inventoryId);
+    }
 
     Mono<ProductResponseDTO> restockLowStockProduct(
             String inventoryId,

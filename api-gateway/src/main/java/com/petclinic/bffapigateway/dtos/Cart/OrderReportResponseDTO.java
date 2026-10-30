@@ -18,11 +18,14 @@ public class OrderReportResponseDTO {
     private String orderId;
     private String customerId;
     private String customerName;
+    private String customerEmail;
     private String reason;
     private List<AffectedItemDTO> affectedItems;
     private String description;
     private String status;
     private LocalDateTime submittedAt;
+    private String resolutionNote;
+    private LocalDateTime resolvedAt;
 
     @Data
     @Builder

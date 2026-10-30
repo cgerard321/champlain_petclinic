@@ -4,7 +4,13 @@ import { map, Observable, toArray } from 'rxjs';
 
 import { isApiError } from '@core/models/api-error';
 import { SseClient } from '@core/services/sse-client';
-import { VetResponse, VetUpdateRequest } from '@features/vets/models/vet-api.model';
+import {
+  VetResponse,
+  VetUpdateRequest,
+  VetCreateRequest,
+  VetEducationRequest,
+  VetEducationResponse,
+} from '@features/vets/models/vet-api.model';
 
 @Injectable({ providedIn: 'root' })
 export class VetService {
@@ -33,9 +39,28 @@ export class VetService {
     return this.http.put<VetResponse>(`${this.baseUrl}/${encodeURIComponent(vetId)}`, request);
   }
 
+  createVet(request: VetCreateRequest): Observable<VetResponse> {
+    return this.http.post<VetResponse>(`${this.baseUrl}/users/vets`, request);
+  }
+
+  addEducation(vetId: string, request: VetEducationRequest): Observable<VetEducationResponse> {
+    return this.http.post<VetEducationResponse>(
+      `${this.baseUrl}/${encodeURIComponent(vetId)}/educations`,
+      request,
+    );
+  }
+
   addSpecialty(vetId: string, name: string): Observable<VetResponse> {
     return this.http.post<VetResponse>(`${this.baseUrl}/${encodeURIComponent(vetId)}/specialties`, {
       name,
+    });
+  }
+
+  getEducations(vetId: string): Observable<VetEducationResponse[]> {
+    return this.http.get<VetEducationResponse[]>(`${this.baseUrl}/${vetId}/educations`, {
+      headers: {
+        Accept: 'application/json',
+      },
     });
   }
 }

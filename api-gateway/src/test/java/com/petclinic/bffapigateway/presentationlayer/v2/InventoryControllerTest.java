@@ -50,12 +50,78 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {
         InventoryControllerV1.class,
-        InventoryServiceClient.class
+        InventoryServiceClient.class,
+        com.petclinic.bffapigateway.config.GlobalExceptionHandler.class
 })
 @WebFluxTest(controllers = InventoryControllerV1.class)
 @AutoConfigureWebTestClient
 @Import(InventoryControllerTest.TestActorConfiguration.class)
 public class InventoryControllerTest {
+    @Test
+    void frenchSupplyPdf_shouldForwardLanguageAndReturnDownload() {
+        byte[] pdf = "%PDF-fr".getBytes(StandardCharsets.UTF_8);
+        when(inventoryServiceClient.createSupplyPdf("inv1", "fr")).thenReturn(Mono.just(pdf));
+
+        client.get().uri(baseInventoryURL + "/inv1/products/download?lang=fr")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Disposition", "attachment; filename=\"inventory_report.pdf\"")
+                .expectBody(byte[].class).isEqualTo(pdf);
+
+        verify(inventoryServiceClient).createSupplyPdf("inv1", "fr");
+    }
+
+    @Test
+    void inventorySearch_shouldUseDefaultPaginationAndPreserveFrenchQuery() {
+        when(inventoryServiceClient.searchInventory(Optional.of(0), Optional.of(10), null,
+                "Bandages français", null, "Soins des plaies", null))
+                .thenReturn(Flux.just(InventoryResponseDTO.builder()
+                        .inventoryId("inv1")
+                        .name(Map.of("en", "Bandages", "fr", "Bandages français"))
+                        .description(Map.of("en", "Wound care", "fr", "Soins des plaies"))
+                        .build()));
+
+        client.get().uri(uri -> uri.path(baseInventoryURL)
+                        .queryParam("inventoryName", "Bandages français")
+                        .queryParam("inventoryDescription", "Soins des plaies")
+                        .build())
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(1)
+                .consumeWith(response -> assertEquals("Bandages français",
+                        response.getResponseBody().get(0).getName().get("fr")));
+
+        verify(inventoryServiceClient).searchInventory(Optional.of(0), Optional.of(10), null,
+                "Bandages français", null, "Soins des plaies", null);
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"ADMIN", "INVENTORY_MANAGER", "VET", "CUST", "RECEPTIONIST"})
+    void restockRoleFilter_enforcesTheActualControllerAnnotation(String role) throws Exception {
+        com.petclinic.bffapigateway.utils.Utility utility = mock(com.petclinic.bffapigateway.utils.Utility.class);
+        var exchange = org.springframework.mock.web.server.MockServerWebExchange.from(
+                org.springframework.mock.http.server.reactive.MockServerHttpRequest.put(
+                        "/api/gateway/inventories/inventory/products/supply/restockProduct?productQuantity=1"));
+        var controller = new InventoryControllerV1(inventoryServiceClient);
+        when(utility.getHandler(exchange)).thenReturn(new org.springframework.web.method.HandlerMethod(
+                controller, InventoryControllerV1.class.getMethod("restockLowStockProduct",
+                String.class, String.class, Integer.class, org.springframework.web.server.ServerWebExchange.class)));
+        exchange.getAttributes().put("tokenValues", com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO
+                .builder().roles(java.util.List.of(role)).build());
+        org.springframework.web.server.WebFilterChain chain = mock(org.springframework.web.server.WebFilterChain.class);
+        when(chain.filter(exchange)).thenReturn(Mono.empty());
+        var result = new com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter(utility).filter(exchange, chain);
+        if (role.equals("ADMIN") || role.equals("INVENTORY_MANAGER")) {
+            reactor.test.StepVerifier.create(result).verifyComplete();
+            verify(chain).filter(exchange);
+        } else {
+            reactor.test.StepVerifier.create(result)
+                    .expectError(com.petclinic.bffapigateway.exceptions.ForbiddenAccessException.class).verify();
+            verify(chain, never()).filter(any());
+        }
+    }
     @TestConfiguration
     static class TestActorConfiguration {
         @Bean
@@ -1092,7 +1158,7 @@ public class InventoryControllerTest {
 
         // Verify that the service client was never called
         verify(inventoryServiceClient, never())
-                .restockLowStockProduct(eq(inventoryId), eq(productId), eq(productQuantity));
+                .restockLowStockProduct(eq(inventoryId), eq(productId), eq(productQuantity), eq("test-user"));
     }
 
     @Test

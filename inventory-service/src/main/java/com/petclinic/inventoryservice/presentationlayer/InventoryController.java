@@ -290,9 +290,11 @@ public class InventoryController {
 
     @GetMapping(value = "/{inventoryId}/products/download", produces = MediaType.APPLICATION_PDF_VALUE)
     public Mono<ResponseEntity<ByteArrayResource>> createSupplyPdf(
-            @PathVariable String inventoryId
+            @PathVariable String inventoryId,
+            @RequestParam(required = false) String lang
     ) {
-        return productInventoryService.createSupplyPdf(inventoryId)
+        return (lang == null ? productInventoryService.createSupplyPdf(inventoryId)
+                : productInventoryService.createSupplyPdf(inventoryId, lang))
                 .map(pdfContent -> {
                     ByteArrayResource resource = new ByteArrayResource(pdfContent);
                     HttpHeaders headers = new HttpHeaders();
@@ -317,7 +319,8 @@ public class InventoryController {
             @RequestHeader("X-Actor-Username") String changedBy
     ) {
         if (productQuantity == null || productQuantity <= 0) {
-            return Mono.just(ResponseEntity.badRequest().body(null));
+            return Mono.error(new com.petclinic.inventoryservice.utils.exceptions.InvalidInputException(
+                    "The restock quantity must be greater than 0."));
         }
 
         return productInventoryService

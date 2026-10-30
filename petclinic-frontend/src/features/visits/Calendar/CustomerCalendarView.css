@@ -1,0 +1,105 @@
+.customer-theme {
+  --emergency-clr: #d32f2f;
+}
+
+/* Time and pet on the first line, status and emergency badge on the second */
+.customer-visit-label {
+  flex-wrap: wrap;
+}
+
+.customer-visit-label .visit-pet {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.customer-visit-label .visit-status {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 2px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.calendar-emergency-badge {
+  flex-shrink: 0;
+  margin-left: 4px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--emergency-clr);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-transform: uppercase;
+}
+
+.customer-week-day {
+  cursor: pointer;
+}
+
+.week-visit-item .visit-status {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.legend-dot.legend-emergency {
+  background: var(--emergency-clr);
+}
+
+/* Other pages' global modal styles center the header and add space under the title */
+.customer-day-modal .modal-content {
+  align-items: stretch;
+}
+
+.customer-day-modal .modal-header {
+  margin-bottom: 0;
+}
+
+.customer-day-modal .modal-title {
+  margin-bottom: 0 !important;
+}
+
+.customer-day-modal .week-visit-item {
+  text-align: left;
+}
+
+/* Keep the day columns equal width even when a visit label is long */
+.customer-theme .calendar-week-row {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+/* Legend sits to the left of the calendar */
+.customer-calendar-body {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.customer-calendar-body .calendar-content {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.customer-calendar-body .calendar-legend {
+  flex-direction: column;
+  align-items: flex-start;
+  flex-shrink: 0;
+  order: -1;
+}
+
+@media (max-width: 768px) {
+  .customer-calendar-body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .customer-calendar-body .calendar-legend {
+    order: 0;
+    flex-direction: row;
+    justify-content: center;
+  }
+}

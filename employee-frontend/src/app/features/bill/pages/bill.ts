@@ -23,6 +23,7 @@ import { CreateBill } from '@features/bill/components/createBill/create-bill';
 import { CustomerBillLookup } from '@features/bill/components/customer-bill-lookup/customer-bill-lookup';
 import { BillRecord, PaymentRequest } from '@features/bill/models/bill.model';
 import { BillService } from '@features/bill/services/bill-service';
+import { translateBillStatus, translateVisitType } from '@features/bill/utils/bill-translations';
 import { ConfirmDialog } from '@shared/components/confirm-dialog/confirm-dialog';
 import { Roles } from '@shared/models/roles';
 
@@ -65,6 +66,9 @@ export class Bill implements OnInit {
   private detailsRequest?: Subscription;
   private paymentDialog?: MatDialogRef<unknown>;
 
+  protected readonly translateStatus = translateBillStatus;
+  protected readonly translateVisit = translateVisitType;
+
   protected readonly bills = signal<BillRecord[]>([]);
   protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
@@ -101,6 +105,26 @@ export class Bill implements OnInit {
   protected readonly billSearchQuery = signal('');
   protected readonly showBillSearchSuggestions = signal(false);
 
+  protected readonly savedFilters = signal<Record<keyof BillFilters, string[]>>({
+    customerId: [],
+    customerName: [],
+    vetName: [],
+    visitType: [],
+    status: [],
+    year: [],
+    month: [],
+  });
+
+  protected readonly filterFields: { key: keyof BillFilters; label: string }[] = [
+    { key: 'customerId', label: $localize`:@@bill.custId:N° du client(e)` },
+    { key: 'customerName', label: $localize`:@@bill.custName:Nom du client(e)` },
+    { key: 'vetName', label: $localize`:@@bill.vetName:Nom du vétérinaire` },
+    { key: 'visitType', label: $localize`:@@bill.visitType:Type de visite` },
+    { key: 'status', label: $localize`:@@bill.status:Statut` },
+    { key: 'year', label: $localize`:@@bill.creationYear:Année de création` },
+    { key: 'month', label: $localize`:@@bill.creationMonth:Mois de création` },
+  ];
+
   protected readonly updatingInterestId = signal<string | null>(null);
   protected readonly downloadingPdfId = signal<string | null>(null);
   protected readonly billActionError = signal<string | null>(null);
@@ -120,12 +144,12 @@ export class Bill implements OnInit {
     this.dialog
       .open(ConfirmDialog, {
         data: {
-          title: 'Confirm Interest Exemption',
+          title: $localize`:@@bill.exemption.title:Confirmer l'exemption de l'intérêt`,
           message: exempt
-            ? 'Exempt this overdue bill from interest? Interest will become $0.00.'
-            : 'Remove interest exemption and recalculate overdue interest?',
-          confirmLabel: 'Confirm',
-          cancelLabel: 'Cancel',
+            ? $localize`:@@bill.exemption.exempt:Exempter cette facture en retard des intérêts ? Les intérêts seront ramenés à 0,00 $.`
+            : $localize`:@@bill.exemption.remove:Retirer l'exemption d'intérêts et recalculer les intérêts?`,
+          confirmLabel: $localize`:@@bill.confirm:Confirmer`,
+          cancelLabel: $localize`:@@bill.cancel:Annuler`,
         },
       })
       .afterClosed()
@@ -165,15 +189,17 @@ export class Bill implements OnInit {
           );
 
           this.billActionSuccess.set(
-            exempt ? 'Interest exemption applied.' : 'Interest exemption removed.',
+            exempt
+              ? $localize`:@@bill.interestOpt.applied:Exemption des intérêts appliquée`
+              : $localize`:@@bill.interestOpt.removed:Exemption des intérêts retirée`,
           );
         },
 
         error: () => {
           this.billActionError.set(
             exemptionSaved
-              ? 'The exemption was saved, but the bill could not be refreshed. Reload the bill list.'
-              : 'Unable to update interest exemption. Please try again.',
+              ? $localize`:@@bill.interestOpt.savedErr:L'exonération a été enregistrée, mais la facture n'a pas pu être actualisée. Veuillez recharger la liste des factures`
+              : $localize`:@@bill.interestOpt.updateUnable:Impossible de modifier l'exonération des intérêts. Veuillez réessayer`,
           );
         },
       });
@@ -211,10 +237,14 @@ export class Bill implements OnInit {
             setTimeout(() => URL.revokeObjectURL(url), 1000);
           }
 
-          this.billActionSuccess.set('Bill PDF download started.');
+          this.billActionSuccess.set(
+            $localize`:@@bill.message.startDownload:Le téléchargement du PDF de la facture a commencé`,
+          );
         },
         error: () => {
-          this.billActionError.set('Unable to download the PDF. Please try again.');
+          this.billActionError.set(
+            $localize`:@@bill.message.downloadErr:Impossible de télécharger le PDF. Veuillez réessayer`,
+          );
         },
       });
   }
@@ -232,8 +262,40 @@ export class Bill implements OnInit {
     }));
   }
 
+  protected addFilter(key: keyof BillFilters): void {
+    const value = this.filters()[key].trim();
+
+    if (!value) {
+      return;
+    }
+
+    this.savedFilters.update((current) => {
+      const exists = current[key].some((item) => item.toLowerCase() === value.toLowerCase());
+
+      return exists ? current : { ...current, [key]: [...current[key], value] };
+    });
+
+    this.updateFilter(key, '');
+  }
+
+  protected removeFilter(key: keyof BillFilters, value: string): void {
+    this.savedFilters.update((current) => ({
+      ...current,
+      [key]: current[key].filter((item) => item !== value),
+    }));
+  }
+
   protected clearFilters(): void {
     this.filters.set({ ...emptyFilters });
+    this.savedFilters.set({
+      customerId: [],
+      customerName: [],
+      vetName: [],
+      visitType: [],
+      status: [],
+      year: [],
+      month: [],
+    });
   }
 
   protected updateBillSearch(value: string): void {
@@ -369,7 +431,9 @@ export class Bill implements OnInit {
       },
       error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set('Unable to load bills. Please try again.');
+        this.errorMessage.set(
+          $localize`:@@bill.lookup.loadBillUnable:Impossible de charger les factures. Veuillez réessayer`,
+        );
       },
       complete: () => {
         this.isLoading.set(false);
@@ -394,7 +458,9 @@ export class Bill implements OnInit {
 
     if (!trimmedId) {
       this.isDetailsLoading.set(false);
-      this.detailsError.set('Please enter a Bill ID.');
+      this.detailsError.set(
+        $localize`:@@bill.detailErr.enterBillId:Veuillez saisir le N° de la facture.`,
+      );
       return;
     }
 
@@ -432,17 +498,21 @@ export class Bill implements OnInit {
 
           if (error instanceof HttpErrorResponse) {
             if (error.status === 404) {
-              this.detailsError.set('Bill not found.');
+              this.detailsError.set($localize`:@@bill.updateBill.notFound:Facture introuvable`);
               return;
             }
 
             if (error.status === 401 || error.status === 403) {
-              this.detailsError.set('You do not have permission to view this bill.');
+              this.detailsError.set(
+                $localize`:@@bill.detailErr.noPerm:Vous n'êtes pas autorisé à consulter cette facture`,
+              );
               return;
             }
           }
 
-          this.detailsError.set('Unable to load bill details. Please try again.');
+          this.detailsError.set(
+            $localize`:@@bill.detailErr.unable:Impossible de charger les détails de la facture. Veuillez réessayer`,
+          );
         },
         complete: () => {
           this.isDetailsLoading.set(false);
@@ -528,14 +598,14 @@ export class Bill implements OnInit {
           this.bills.set(refreshedBills);
 
           this.archiveSuccess.set(
-            'Archive check completed. All eligible bills have been processed.',
+            $localize`:@@bill.archiveErr.completed:Vérification de l'archivage terminée. Toutes les factures admissibles ont été traitées.`,
           );
         },
         error: () => {
           this.archiveError.set(
             archiveCompleted
-              ? 'The archive request succeeded, but the bill list could not be refreshed. Reload the page to check the results.'
-              : 'Unable to archive bills. Please try again.',
+              ? $localize`:@@bill.archiveErr.listErr:La demande 'archivage a réussi, mais la liste des factures n'a pas pu être actualisée. Rechargez la page pour vérifier les résultats.`
+              : $localize`:@@bill.archiveErr.unable:Impossible d'archiver les factures. Veuillez réessayer`,
           );
         },
       });
@@ -544,11 +614,12 @@ export class Bill implements OnInit {
   protected readonly showArchivedBills = signal(false);
 
   protected readonly displayedBills = computed(() => {
-    const filters = this.filters();
+    const filters = this.savedFilters();
     const searchQuery = this.billSearchQuery();
 
-    const matchesText = (value: string | null, search: string): boolean =>
-      (value ?? '').toLowerCase().includes(search.trim().toLowerCase());
+    const matchesText = (value: string | null, searches: string[]): boolean =>
+      searches.length === 0 ||
+      searches.some((search) => (value ?? '').toLowerCase().includes(search.toLowerCase()));
 
     return this.bills().filter((bill) => {
       const matchesArchive = !this.canViewBills()
@@ -563,15 +634,17 @@ export class Bill implements OnInit {
 
       return (
         matchesArchive &&
-        (matchesText(customerName, searchQuery) || matchesText(vetName, searchQuery)) &&
+        (customerName.toLowerCase().includes(searchQuery.trim().toLowerCase()) ||
+          vetName.toLowerCase().includes(searchQuery.trim().toLowerCase())) &&
         (!this.canViewBills() ||
           (matchesText(bill.customerId, filters.customerId) &&
             matchesText(customerName, filters.customerName) &&
             matchesText(vetName, filters.vetName) &&
-            (!filters.visitType || bill.visitType === filters.visitType) &&
-            (!filters.status || bill.billStatus === filters.status) &&
-            (!filters.year || bill.date.getFullYear() === Number(filters.year)) &&
-            (!filters.month || bill.date.getMonth() + 1 === Number(filters.month))))
+            (filters.visitType.length === 0 || filters.visitType.includes(bill.visitType)) &&
+            (filters.status.length === 0 || filters.status.includes(bill.billStatus)) &&
+            (filters.year.length === 0 || filters.year.includes(String(bill.date.getFullYear()))) &&
+            (filters.month.length === 0 ||
+              filters.month.includes(String(bill.date.getMonth() + 1)))))
       );
     });
   });
@@ -623,11 +696,15 @@ export class Bill implements OnInit {
           );
 
           this.closePayment();
-          this.paymentMessage.set('Payment successful. The bill is now PAID.');
+          this.paymentMessage.set(
+            $localize`:@@bill.payment.success:Paiement réussi. La facture est maintenant PAYÉE`,
+          );
         },
         error: (error: unknown) => {
           this.paymentError.set(
-            isApiError(error) ? error.message : 'Payment failed. Please try again.',
+            isApiError(error)
+              ? error.message
+              : $localize`:@@bill.payment.fail:Le paiement a échoué. Veuillez réessayer.`,
           );
         },
       });

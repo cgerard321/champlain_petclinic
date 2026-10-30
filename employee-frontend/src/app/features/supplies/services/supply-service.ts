@@ -50,9 +50,18 @@ export class SupplyService {
     );
   }
 
-  downloadSupplyPdf(inventoryId: string): Observable<Blob> {
+  restockSupply(inventoryId: string, productId: string, quantity: number): Observable<Supply> {
+    return this.http.put<Supply>(
+      `/api/gateway/inventories/${inventoryId}/products/${productId}/restockProduct`,
+      null,
+      { params: { productQuantity: quantity } },
+    );
+  }
+
+  downloadSupplyPdf(inventoryId: string, language = 'en'): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/${inventoryId}/products/download`, {
       responseType: 'blob',
+      params: { lang: language },
     });
   }
 }

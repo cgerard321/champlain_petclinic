@@ -1,153 +1,171 @@
 <section class="product-page">
-  <div class="product-header">
-    <div>
-      <h1>Products</h1>
-      <p>Manage products available to the clinic.</p>
-    </div>
-    @if (canManageProducts()) {
-      <button mat-flat-button color="primary" type="button" (click)="openAddProduct()">
-        Add Product
-      </button>
-    }
-  </div>
-
-  @if (isAdmin()) {
-    <mat-card class="review-settings-card">
-      <mat-card-header>
-        <mat-card-title>Review Settings</mat-card-title>
-        <mat-card-subtitle> Set how long customers can edit their reviews. </mat-card-subtitle>
-      </mat-card-header>
-
-      <mat-card-content>
-        <mat-form-field appearance="outline">
-          <mat-label>Review edit period</mat-label>
-          <input
-            matInput
-            type="number"
-            min="0"
-            step="1"
-            [ngModel]="reviewEditPeriodHours()"
-            (ngModelChange)="setReviewEditPeriodHours($event)"
-          />
-          <span matTextSuffix>hours</span>
-        </mat-form-field>
-        @if (settingsMessage()) {
-          <p class="settings-success">{{ settingsMessage() }}</p>
+  <mat-tab-group
+    selectedIndex="{{ selectedTabIndex() }}"
+    (selectedTabChange)="handleSelectedTabChange($event)"
+  >
+    <mat-tab label="Produits" i18n-label="@@products.tabs.products">
+      <div class="product-header">
+        <div>
+          <h1 i18n="@@products.title">Produits</h1>
+          <p i18n="@@products.description">Gérez les produits offerts par la clinique.</p>
+        </div>
+        @if (canManageProducts()) {
+          <button mat-flat-button color="primary" type="button" (click)="openAddProduct()">
+            <ng-container i18n="@@products.actions.add">Ajouter un produit</ng-container>
+          </button>
         }
+      </div>
+      <mat-form-field class="product-search" appearance="outline">
+        <mat-label i18n="@@products.search.label">Rechercher des produits par nom</mat-label>
+        <input
+          matInput
+          type="search"
+          placeholder="Entrez un nom de produit"
+          i18n-placeholder="@@products.search.placeholder"
+          (input)="searchProducts($any($event.target).value)"
+        />
+      </mat-form-field>
 
-        @if (settingsError()) {
-          <p class="settings-error">{{ settingsError() }}</p>
-        }
-      </mat-card-content>
-
-      <mat-card-actions>
-        <button
-          mat-flat-button
-          color="primary"
-          type="button"
-          [disabled]="isSavingSettings()"
-          (click)="saveReviewSettings()"
-        >
-          Save Review Settings
-        </button>
-      </mat-card-actions>
-    </mat-card>
-  }
-
-  <mat-form-field class="product-search" appearance="outline">
-    <mat-label>Search products by name</mat-label>
-    <input
-      matInput
-      type="search"
-      placeholder="Enter a product name"
-      (input)="searchProducts($any($event.target).value)"
-    />
-  </mat-form-field>
-
-  @if (deleteErrorMessage()) {
-    <div class="delete-error-message" role="alert">
-      {{ deleteErrorMessage() }}
-    </div>
-  }
-
-  @if (isLoading()) {
-    <div class="state-container" role="status">
-      <mat-progress-spinner mode="indeterminate" diameter="40" />
-      <span>Loading products...</span>
-    </div>
-  } @else if (errorMessage()) {
-    <div class="state-container error-message" role="alert">
-      <p>{{ errorMessage() }}</p>
-      <button mat-stroked-button type="button" (click)="loadProducts()">Try again</button>
-    </div>
-  } @else if (products().length === 0) {
-    <div class="state-container">
-      <p>No products found.</p>
-    </div>
-  } @else {
-    <div class="product-grid">
-      @for (product of products(); track product.productId) {
-        <mat-card class="product-card">
-          <app-product-thumbnail
-            [image]="product.image"
-            [imageId]="product.imageId"
-            [alt]="product.productName"
-          />
+      @if (deleteErrorMessage()) {
+        <div class="delete-error-message" role="alert">
+          {{ deleteErrorMessage() }}
+        </div>
+      }
+      @if (isLoading()) {
+        <div class="state-container" role="status">
+          <mat-progress-spinner mode="indeterminate" diameter="40" />
+          <span i18n="@@products.loading">Chargement des produits...</span>
+        </div>
+      } @else if (errorMessage()) {
+        <div class="state-container error-message" role="alert">
+          <p>{{ errorMessage() }}</p>
+          <button mat-stroked-button type="button" (click)="loadProducts()">
+            <ng-container i18n="@@products.actions.retry">Réessayer</ng-container>
+          </button>
+        </div>
+      } @else if (products().length === 0) {
+        <div class="state-container">
+          <p i18n="@@products.empty">Aucun produit trouvé.</p>
+        </div>
+      } @else {
+        <div class="product-grid">
+          @for (product of products(); track product.productId) {
+            <mat-card class="product-card">
+              <app-product-thumbnail
+                [image]="product.image"
+                [imageId]="product.imageId"
+                [alt]="productName(product)"
+              />
+              <mat-card-header>
+                <mat-card-title>{{ productName(product) }}</mat-card-title>
+                <mat-card-subtitle>{{ productType(product.productType) }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <p>{{ productDescription(product) }}</p>
+                <dl>
+                  <div>
+                    <dt i18n="@@products.fields.price">Prix</dt>
+                    <dd>{{ product.productSalePrice | currency }}</dd>
+                  </div>
+                  <div>
+                    <dt i18n="@@products.fields.quantity">Quantité</dt>
+                    <dd>{{ product.productQuantity }}</dd>
+                  </div>
+                  <div>
+                    <dt i18n="@@products.fields.status">État</dt>
+                    <dd>{{ productStatus(product.productStatus) }}</dd>
+                  </div>
+                  <div>
+                    <dt i18n="@@products.fields.delivery">Livraison</dt>
+                    <dd>{{ deliveryType(product.deliveryType) }}</dd>
+                  </div>
+                </dl>
+              </mat-card-content>
+              <mat-card-actions class="product-card-actions" align="end">
+                <button
+                  mat-stroked-button
+                  type="button"
+                  (click)="openProductDetails(product.productId)"
+                >
+                  <ng-container i18n="@@products.actions.details">Détails</ng-container>
+                </button>
+                @if (canManageProducts()) {
+                  <button
+                    mat-flat-button
+                    color="primary"
+                    type="button"
+                    (click)="openProductUpdate(product)"
+                  >
+                    <ng-container i18n="@@products.actions.update">Modifier</ng-container>
+                  </button>
+                  <button
+                    mat-stroked-button
+                    class="delete-button"
+                    type="button"
+                    [disabled]="deletingProductId() === product.productId"
+                    (click)="openProductDelete(product)"
+                  >
+                    <ng-container i18n="@@products.actions.delete">Supprimer</ng-container>
+                  </button>
+                }
+              </mat-card-actions>
+            </mat-card>
+          }
+        </div>
+      }
+    </mat-tab>
+    <mat-tab label="Ensembles" i18n-label="@@products.tabs.bundles">
+      <app-product-bundle-list />
+    </mat-tab>
+    <mat-tab label="Paramètres" i18n-label="@@products.tabs.settings">
+      @if (isAdmin()) {
+        <mat-card class="review-settings-card">
           <mat-card-header>
-            <mat-card-title>{{ product.productName }}</mat-card-title>
-            <mat-card-subtitle>{{ product.productType }}</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <p>{{ product.productDescription }}</p>
-            <dl>
-              <div>
-                <dt>Price</dt>
-                <dd>{{ product.productSalePrice | currency }}</dd>
-              </div>
-              <div>
-                <dt>Quantity</dt>
-                <dd>{{ product.productQuantity }}</dd>
-              </div>
-              <div>
-                <dt>Status</dt>
-                <dd>{{ product.productStatus }}</dd>
-              </div>
-              <div>
-                <dt>Delivery</dt>
-                <dd>{{ product.deliveryType.replace('_', ' ') }}</dd>
-              </div>
-            </dl>
-          </mat-card-content>
-          <mat-card-actions class="product-card-actions" align="end">
-            <button
-              mat-stroked-button
-              type="button"
-              (click)="openProductDetails(product.productId)"
+            <mat-card-title i18n="@@products.reviewSettings.title"
+              >Paramètres des avis</mat-card-title
             >
-              Details
-            </button>
-            @if (canManageProducts()) {
-              <button
-                mat-flat-button
-                color="primary"
-                type="button"
-                (click)="openProductUpdate(product)"
-              >
-                Update
-              </button>
-              <button
-                mat-stroked-button
-                class="delete-button"
-                type="button"
-                [disabled]="deletingProductId() === product.productId"
-                (click)="openProductDelete(product)"
-              >
-                Delete
-              </button>
+            <mat-card-subtitle i18n="@@products.reviewSettings.description">
+              Définissez combien de temps les clients peuvent modifier leurs avis.
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <mat-form-field appearance="outline">
+              <mat-label i18n="@@products.reviewSettings.period">Période de modification</mat-label>
+              <input
+                matInput
+                type="number"
+                min="0"
+                step="1"
+                [ngModel]="reviewEditPeriodHours()"
+                (ngModelChange)="setReviewEditPeriodHours($event)"
+              />
+              <span matTextSuffix i18n="@@products.reviewSettings.hours">heures</span>
+            </mat-form-field>
+            @if (settingsMessage()) {
+              <p class="settings-success">{{ settingsMessage() }}</p>
             }
+
+            @if (settingsError()) {
+              <p class="settings-error">{{ settingsError() }}</p>
+            }
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button
+              mat-flat-button
+              color="primary"
+              type="button"
+              [disabled]="isSavingSettings()"
+              (click)="saveReviewSettings()"
+            >
+              <ng-container i18n="@@products.reviewSettings.save">
+                Enregistrer les paramètres
+              </ng-container>
+            </button>
           </mat-card-actions>
         </mat-card>
       }
-    </div>
-  }
+    </mat-tab>
+  </mat-tab-group>
 </section>

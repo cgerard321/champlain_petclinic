@@ -19,5 +19,41 @@
     "slotsError": "Impossible de charger les heures disponibles.",
     "dateRequired": "La date est requise",
     "timeRequired": "L'heure est requise"
+  },
+  "calendar": {
+    "backToList": "Retour à mes visites",
+    "title": "Mes rendez-vous",
+    "year": "Année",
+    "month": "Mois",
+    "week": "Semaine",
+    "today": "Aujourd’hui",
+    "loading": "Chargement de vos rendez-vous...",
+    "retry": "Réessayer",
+    "userNotFound": "Utilisateur introuvable. Veuillez vous connecter.",
+    "loadError": "Impossible de charger vos visites. Veuillez réessayer.",
+    "visitCount_one": "{{count}} visite",
+    "visitCount_other": "{{count}} visites",
+    "more_one": "+{{count}} autre",
+    "more_other": "+{{count}} autres",
+    "noAppointments": "Aucun rendez-vous",
+    "unknownPet": "Animal inconnu",
+    "vetName": "Dr {{firstName}} {{lastName}}",
+    "emergency": "Urgence",
+    "vetNote": "Note du vétérinaire :",
+    "status": {
+      "UPCOMING": "À venir",
+      "CONFIRMED": "Confirmée",
+      "COMPLETED": "Terminée",
+      "CANCELLED": "Annulée",
+      "ARCHIVED": "Archivée"
+    }
+  },
+  "reviews": {
+    "filterByRating": "Filtrer par note :",
+    "allRatings": "Toutes les notes",
+    "stars_one": "{{count}} étoile",
+    "stars_other": "{{count}} étoiles",
+    "noReviews": "Aucun avis disponible",
+    "noMatchingReviews": "Aucun avis ne correspond à cette note."
   }
 }

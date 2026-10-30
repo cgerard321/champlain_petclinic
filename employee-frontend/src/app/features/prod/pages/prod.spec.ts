@@ -2,6 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTabChangeEvent } from '@angular/material/tabs';
 import { of, Subject, throwError } from 'rxjs';
 import { vi } from 'vitest';
 
@@ -34,6 +35,7 @@ describe('Prod', () => {
 
   beforeEach(async () => {
     vi.useFakeTimers();
+    sessionStorage.clear();
     getProducts = vi.fn().mockReturnValue(of([product]));
     deleteProduct = vi.fn().mockReturnValue(of(product));
     getReviewSettings = vi.fn().mockReturnValue(of({ editPeriodHours: 48 }));
@@ -156,7 +158,7 @@ describe('Prod', () => {
       'button',
     ) as NodeListOf<HTMLButtonElement>;
     const deleteButton = Array.from(buttons).find(
-      (button) => button.textContent?.trim() === 'Delete',
+      (button) => button.textContent?.trim() === 'Supprimer',
     );
 
     expect(deleteButton).toBeTruthy();
@@ -171,7 +173,7 @@ describe('Prod', () => {
       'button',
     ) as NodeListOf<HTMLButtonElement>;
     const deleteButton = Array.from(buttons).find(
-      (button) => button.textContent?.trim() === 'Delete',
+      (button) => button.textContent?.trim() === 'Supprimer',
     );
 
     expect(deleteButton).toBeUndefined();
@@ -255,11 +257,35 @@ describe('Prod', () => {
   });
 
   it('loads review settings for an admin', () => {
+    sessionStorage.setItem('productSelectedTabIndex', '2');
     const fixture = TestBed.createComponent(Prod);
+    fixture.detectChanges();
+    vi.runAllTimers();
     fixture.detectChanges();
 
     expect(getReviewSettings).toHaveBeenCalled();
     expect(fixture.nativeElement.textContent).toContain('Review Settings');
+  });
+
+  it('opens on the Products tab by default', () => {
+    const fixture = TestBed.createComponent(Prod);
+
+    expect(fixture.componentInstance['selectedTabIndex']()).toBe(0);
+  });
+
+  it('restores the last selected tab from the session', () => {
+    sessionStorage.setItem('productSelectedTabIndex', '1');
+    const fixture = TestBed.createComponent(Prod);
+
+    expect(fixture.componentInstance['selectedTabIndex']()).toBe(1);
+  });
+
+  it('remembers the selected tab in the session', () => {
+    const fixture = TestBed.createComponent(Prod);
+
+    fixture.componentInstance['handleSelectedTabChange']({ index: 2 } as MatTabChangeEvent);
+
+    expect(sessionStorage.getItem('productSelectedTabIndex')).toBe('2');
   });
 
   it('saves the review edit period', () => {

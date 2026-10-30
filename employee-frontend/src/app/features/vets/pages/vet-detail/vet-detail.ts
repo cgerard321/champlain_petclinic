@@ -14,12 +14,13 @@ import {
   Subject,
   switchMap,
   toArray,
+  tap,
 } from 'rxjs';
 
 import { AuthState } from '@core/services/auth-state';
 import { VetEditForm, VetSavePayload } from '@features/vets/components/vet-edit-form/vet-edit-form';
 import { VetProfileCard } from '@features/vets/components/vet-profile-card/vet-profile-card';
-import { VetResponse } from '@features/vets/models/vet-api.model';
+import { VetResponse, VetEducationResponse } from '@features/vets/models/vet-api.model';
 import { toVetProfile } from '@features/vets/models/vet-profile.mapper';
 import { VetService, vetErrorMessage } from '@features/vets/services/vet.service';
 import { Visit } from '@features/vist/models/Visit';
@@ -47,6 +48,7 @@ export class VetDetail {
     'general',
   ];
   protected readonly vet = signal<VetResponse | null>(null);
+  protected readonly educations = signal<VetEducationResponse[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
   protected readonly saveError = signal('');
@@ -81,24 +83,40 @@ export class VetDetail {
           this.loading.set(true);
           this.error.set('');
           this.vet.set(null);
+          this.educations.set([]);
           this.editing.set(false);
           this.saved.set(false);
           this.saveError.set('');
           if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
             return of({
               vet: null,
+              educations: [] as VetEducationResponse[],
               error: $localize`:@@vets.errors.not_found:Ce profil vétérinaire est introuvable.`,
             });
           }
-          return this.service.getVetById(id).pipe(
-            map((vet) => ({ vet, error: '' })),
-            catchError((error: unknown) => of({ vet: null, error: vetErrorMessage(error) })),
+          return forkJoin({
+            vet: this.service.getVetById(id),
+            educations: this.service.getEducations(id),
+          }).pipe(
+            map(({ vet, educations }) => ({
+              vet,
+              educations,
+              error: '',
+            })),
+            catchError((error: unknown) =>
+              of({
+                vet: null,
+                educations: [] as VetEducationResponse[],
+                error: vetErrorMessage(error),
+              }),
+            ),
           );
         }),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((result) => {
         this.vet.set(result.vet);
+        this.educations.set(result.educations);
         this.error.set(result.error);
         this.loading.set(false);
       });
@@ -185,6 +203,26 @@ export class VetDetail {
             reduce((_previous: VetResponse, latest: VetResponse) => latest, updatedVet),
           );
         }),
+        concatMap((updatedVet) =>
+          from(payload.newEducation).pipe(
+            concatMap((entry) =>
+              this.service
+                .addEducation(vet.vetId, {
+                  ...entry,
+                  vetId: vet.vetId,
+                })
+                .pipe(
+                  tap((created) => {
+                    this.educations.update((entries) => [...entries, created]);
+
+                    this.editForm()?.acknowledgeEducationSaved();
+                  }),
+                ),
+            ),
+            toArray(),
+            map(() => updatedVet),
+          ),
+        ),
         switchMap((updated) =>
           this.cancelVisits(payload.visitsToCancel).pipe(map((failed) => ({ updated, failed }))),
         ),

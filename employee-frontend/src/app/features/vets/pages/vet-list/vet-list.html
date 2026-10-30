@@ -9,6 +9,23 @@
     </p>
   </header>
 
+  @if (canCreate()) {
+    @if (adding()) {
+      <app-vet-create-form (completed)="created()" (cancelled)="adding.set(false)" />
+    } @else {
+      <button
+        class="add-vet-button"
+        type="button"
+        (click)="adding.set(true); added.set(false)"
+        i18n="@@vets.create.title"
+      >
+        Ajouter un vétérinaire
+      </button>
+    }
+  }
+  @if (added()) {
+    <p role="status" i18n="@@vets.create.success">Le vétérinaire a été ajouté.</p>
+  }
   @if (loading()) {
     <p role="status" i18n="@@vets.list.loading">Chargement des vétérinaires…</p>
   } @else if (error()) {
@@ -51,7 +68,7 @@
     >
       @for (vet of filteredVets(); track vet.vetId) {
         <li>
-          <app-vet-profile-card [vet]="vet" />
+          <app-vet-profile-card [vet]="vet" [educations]="educationsByVet()[vet.vetId] ?? []" />
           <a
             class="profile-link"
             [routerLink]="['/vets', vet.vetId]"

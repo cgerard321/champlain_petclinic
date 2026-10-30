@@ -1,0 +1,91 @@
+<div class="dialog-header">
+  <div class="header-text">
+    <span class="eyebrow" i18n="@@orderReports.orderDialog.eyebrow">Détails de la commande</span>
+    @if (order(); as order) {
+      <h2 mat-dialog-title>{{ order.customerName }}</h2>
+    } @else {
+      <h2 mat-dialog-title i18n="@@orderReports.orderDialog.title">Commande</h2>
+    }
+    <span class="order-id">{{ orderId }}</span>
+  </div>
+  <button
+    mat-icon-button
+    mat-dialog-close
+    type="button"
+    aria-label="Fermer la commande"
+    i18n-aria-label="@@orderReports.orderDialog.closeAria"
+  >
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content>
+  @if (isLoading()) {
+    <div class="state-container" role="status">
+      <mat-progress-spinner mode="indeterminate" diameter="32" />
+      <span i18n="@@orderReports.orderDialog.loading">Chargement de la commande...</span>
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <p class="error-message" role="alert">{{ errorMessage() }}</p>
+  }
+
+  @if (order(); as order) {
+    <section class="card">
+      <h3 i18n="@@orderReports.orderDialog.customerDelivery">Client et livraison</h3>
+      <dl class="fields">
+        <div class="field">
+          <dt i18n="@@orderReports.fields.date">Date</dt>
+          <dd>{{ order.orderDate | date: 'medium' }}</dd>
+        </div>
+        <div class="field">
+          <dt i18n="@@orderReports.fields.shipping">Livraison</dt>
+          <dd>{{ order.shippingMethod }}</dd>
+        </div>
+        <div class="field">
+          <dt i18n="@@orderReports.fields.email">Courriel</dt>
+          <dd>{{ order.email }}</dd>
+        </div>
+        <div class="field">
+          <dt i18n="@@orderReports.fields.address">Adresse</dt>
+          <dd>
+            {{ order.address }}, {{ order.city }}, {{ order.province }} {{ order.postalCode }}
+          </dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h3 i18n="@@orderReports.orderDialog.items">Articles</h3>
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th scope="col" i18n="@@orderReports.orderDialog.product">Produit</th>
+            <th scope="col" class="number" i18n="@@orderReports.orderDialog.quantity">Quantité</th>
+            <th scope="col" class="number" i18n="@@orderReports.orderDialog.price">Prix</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of order.products; track product.productId) {
+            <tr>
+              <td>{{ productNames.name(product.productId, product.productName) }}</td>
+              <td class="number">{{ product.quantityInCart }}</td>
+              <td class="number">{{ product.productSalePrice | currency }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row" colspan="2" i18n="@@orderReports.orderDialog.total">Total</th>
+            <td class="number">{{ order.total | currency }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close type="button" i18n="@@orderReports.close">Fermer</button>
+</mat-dialog-actions>

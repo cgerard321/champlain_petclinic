@@ -706,15 +706,90 @@
 }
 
 .order-report-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   width: 100%;
   margin-bottom: 14px;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border: 1px solid #93c5fd;
+  border-left: 4px solid #2563eb;
   border-radius: 6px;
   background: #eff6ff;
   color: #1e3a8a;
-  font-weight: 600;
   overflow-wrap: anywhere;
+}
+
+.order-report-banner-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-report-banner-title {
+  font-weight: 700;
+}
+
+.order-report-status {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1e40af;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.order-report-reference {
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.order-report-reference span {
+  font-family: monospace;
+}
+
+.order-report-note {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #334155;
+}
+
+/* status colors */
+.order-report-banner.report-status-IN_REVIEW {
+  border-color: #fdba74;
+  border-left-color: #ea580c;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.report-status-IN_REVIEW .order-report-status {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.order-report-banner.report-status-RESOLVED {
+  border-color: #86efac;
+  border-left-color: #16a34a;
+  background: #f0fdf4;
+  color: #14532d;
+}
+
+.report-status-RESOLVED .order-report-status {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.order-report-banner.report-status-REJECTED {
+  border-color: #fca5a5;
+  border-left-color: #dc2626;
+  background: #fef2f2;
+  color: #7f1d1d;
+}
+
+.report-status-REJECTED .order-report-status {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 .report-order-backdrop {

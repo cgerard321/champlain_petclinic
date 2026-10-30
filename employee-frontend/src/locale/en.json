@@ -48,6 +48,7 @@
       "inventory": "Inventory",
       "products": "Products",
       "promos": "Promos",
+      "orderReports": "Order Reports",
       "users": "Users",
       "settings": "Settings",
       "logout": "Logout"
@@ -189,9 +190,9 @@
       "statusMenuLabel": "Visit statuses",
       "listLabel": "Visit list",
       "title": "List of Visits",
-    "searchVisits": "Search visits",
-    "searchPlaceholder": "Search by pet name, description or visit ID",
-    "noVisitsFound": "No visits found.",
+      "searchVisits": "Search visits",
+      "searchPlaceholder": "Search by pet name, description or visit ID",
+      "noVisitsFound": "No visits found.",
       "nextAppointmentTitle": "Next appointment",
       "upcomingAppointmentNotification": "Your next appointment for {$petName} is on {$appointmentDate}.",
       "nextAppointmentLoading": "Loading next appointment...",
@@ -280,6 +281,47 @@
       }
     },
     "vets": {
+      "create": {
+        "title": "Add Veterinarian",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "nameHint": "Between 2 and 30 characters.",
+        "email": "Email",
+        "emailHint": "Enter a valid email address.",
+        "username": "Username",
+        "usernameHint": "Required, without spaces.",
+        "password": "Password",
+        "passwordHint": "At least 8 characters: uppercase, lowercase, digit and special character (@#$%^&+=*!()_.<>,{}), without spaces.",
+        "phone": "Phone",
+        "phoneHint": "Example: (514) 555-0123, optional extension #1234.",
+        "resume": "About",
+        "resumeHint": "At least 10 characters.",
+        "school": "School",
+        "degree": "Degree",
+        "study": "Field of study",
+        "start": "Start date",
+        "end": "End date",
+        "partial": "The veterinarian was created. Retry saving education or return to the list.",
+        "details": "Profile and account — required fields",
+        "specialties": "Specialties (at least one)",
+        "specialtyRequired": "Select at least one specialty.",
+        "days": "Working days (optional)",
+        "active": "Active",
+        "education": "Education (optional — complete all fields if provided)",
+        "educationInvalid": "Complete all education fields. The end date must be on or after the start date.",
+        "save": "Save",
+        "return": "Return to list",
+        "cancel": "Cancel",
+        "saving": "Saving…",
+        "success": "The veterinarian was added.",
+        "Monday": "Monday",
+        "Tuesday": "Tuesday",
+        "Wednesday": "Wednesday",
+        "Thursday": "Thursday",
+        "Friday": "Friday",
+        "Saturday": "Saturday",
+        "Sunday": "Sunday"
+      },
       "eyebrow": "Veterinary team",
       "title": "Veterinarians",
       "description": "The people behind every healthy pet.",
@@ -323,7 +365,8 @@
         "no_email": "Email not provided",
         "no_phone": "Phone number not provided",
         "hours": "Working hours",
-        "no_hours": "No working hours provided."
+        "no_hours": "No working hours provided.",
+        "no_education": "Education not provided"
       },
       "preview": {
         "general_medicine": "General medicine",
@@ -393,6 +436,10 @@
         "title": "Availability",
         "description": "Remove a time slot or a whole day. Removals take effect when you save.",
         "remove_day": "Remove this day",
+        "add_day": "Add this day",
+        "add_hour": "Add",
+        "added_day": "{$day} added.",
+        "added_hour": "{$day} {$hour} added.",
         "remove_hour": "Remove",
         "removed_hour": "{$day} {$hour} removed.",
         "removed_day": "{$day} removed.",
@@ -406,7 +453,15 @@
         "visits_many": "{$count} visits booked in these slots will be cancelled.",
         "visits_unknown": "Booked visits for these slots could not be checked.",
         "cancel_failed_one": "The profile was saved, but one visit could not be cancelled: it is still active. Report it to an administrator.",
-        "cancel_failed_many": "The profile was saved, but {$count} visits could not be cancelled: they are still active. Report them to an administrator."
+        "cancel_failed_many": "The profile was saved, but {$count} visits could not be cancelled: they are still active. Report them to an administrator.",
+        "reset_title": "Reset modifications?",
+        "reset_message": "Do you want to restore the initial availabilities? This will cancel current modifications, but will not reschedule cancelled appointments.",
+        "reset_confirm": "Reset",
+        "reset": "Availabilities reset.",
+        "show_active_only": "Show active slots only",
+        "show_all": "Show all slots",
+        "reset_button": "Reset schedule",
+        "confirm_visits_cancel": "--- NOTICE: This will cancel all visits booked during this availability."
       },
       "detail": {
         "back": "Back to directory",
@@ -414,14 +469,108 @@
         "loading": "Loading profile…",
         "saved": "The profile has been saved."
       },
-      "specialty":{
+      "specialty": {
         "radiology": "Radiology",
         "surgery": "Surgery",
         "dentistry": "Dentistry",
         "general": "General"
+      },
+      "education":{
+        "education": "Education",
+        "school": "School or institution",
+        "degree": "DegreeDiploma or qualification;",
+        "field": "Field of study",
+        "start_date": "Start date",
+        "end_date": "End date",
+        "add_education": "Add education",
+        "new_education": "New education",
+        "required_info": "Please enter a valid value in this field.",
+        "date_error": "The end date must be equal to or later than the start date.",
+        "from": "From",
+        "to": "To"
       }
     },
     "cust": {
+      "notAvailable": "Not available",
+      "profile": {
+        "title": "Customer Details",
+        "subtitle": "Contact information and registered pets",
+        "loading": "Loading customer...",
+        "profile": "Customer profile",
+        "edit": "Edit Customer",
+        "infoTitle": "Customer Info",
+        "editTitle": "Edit customer information",
+        "infoSubtitle": "Personal details and contact information",
+        "editSubtitle": "Update the details below, then save your changes.",
+        "fields": {
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "address": "Address",
+          "city": "City",
+          "province": "Province",
+          "telephone": "Telephone"
+        },
+        "validation": {
+          "firstNameRequired": "First name is required",
+          "lastNameRequired": "Last name is required",
+          "addressRequired": "Address is required",
+          "cityRequired": "City is required",
+          "provinceRequired": "Province is required",
+          "telephoneRequired": "Telephone is required",
+          "telephoneTenDigits": "Telephone must be exactly 10 digits (numbers only)"
+        },
+        "selectProvince": "Select Province",
+        "telephoneHint": "Enter a 10-digit telephone number.",
+        "cancel": "Cancel",
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "petsTitle": "Registered pets",
+        "petsSubtitle": "Animals linked to this customer",
+        "loadingPets": "Loading pets...",
+        "birthDate": "Birth Date",
+        "weight": "Weight",
+        "noPets": "No pets registered",
+        "noPetsHint": "This customer's pets will appear here.",
+        "back": "Back to All Customers",
+        "photoAlt": "{$INTERPOLATION}'s profile photo",
+        "noPhoto": "No customer profile photo",
+        "petCount": "{$INTERPOLATION} registered pets",
+        "noPetPhoto": "No profile photo for {$INTERPOLATION}",
+        "confirmSave": "Are you sure you want to save these changes?",
+        "updateSuccess": "Customer has been successfully updated.",
+        "deactivate": "Deactivate account",
+        "deactivating": "Deactivating...",
+        "confirmDeactivate": "Are you sure you want to deactivate this customer's account? Their profile photo will be permanently deleted.",
+        "reactivate": "Reactivate account",
+        "reactivating": "Reactivating...",
+        "reactivateSuccess": "The customer account has been reactivated.",
+        "statusInactive": "Deactivated account",
+        "errors": {
+          "noId": "No customer ID provided.",
+          "load": "Could not load customer details.",
+          "pets": "Could not load pets. Please try again later.",
+          "petTypes": "Could not load pet types.",
+          "update": "Could not update customer. Please try again.",
+          "deactivate": "Failed to deactivate the customer's account. Please try again.",
+          "reactivate": "Failed to reactivate the customer's account. Please try again.",
+          "status": "Could not load the account status."
+        },
+        "provinces": {
+          "alberta": "Alberta",
+          "britishColumbia": "British Columbia",
+          "manitoba": "Manitoba",
+          "newBrunswick": "New Brunswick",
+          "newfoundlandAndLabrador": "Newfoundland and Labrador",
+          "novaScotia": "Nova Scotia",
+          "ontario": "Ontario",
+          "princeEdwardIsland": "Prince Edward Island",
+          "quebec": "Quebec",
+          "saskatchewan": "Saskatchewan",
+          "northwestTerritories": "Northwest Territories",
+          "nunavut": "Nunavut",
+          "yukon": "Yukon"
+        }
+      },
       "customerList": "Customer List",
       "customerListLoading": "Loading customers...",
       "noCustomers": "No customers registered.",
@@ -441,6 +590,12 @@
       "petsButton": "Registered Pets",
       "noCustFound": "No customers found.",
       "tryAgain": "Try a different name, ID, or phone number.",
+      "deactivated": {
+        "button": "Deactivated accounts",
+        "title": "Deactivated customer accounts",
+        "none": "No deactivated accounts.",
+        "loadError": "Unable to load deactivated accounts."
+      },
 
       "addCustomer": {
         "title": "Add a Client",
@@ -452,7 +607,7 @@
           "lastName": "Last Name: ",
           "address": "Address: ",
           "city": "City: ",
-          "phone":"Phone Number: ",
+          "phone": "Phone Number: ",
           "province": "Province: "
         },
         "error": {
@@ -460,7 +615,7 @@
           "lastName": "Last name is required.",
           "address": "Address is required.",
           "city": "City is required.",
-          "phoneM":"Telephone is required.",
+          "phoneM": "Telephone is required.",
           "phoneL": "Telephone must contain exactly 10 digits.",
           "province": "Province is required."
         }
@@ -479,17 +634,17 @@
         "quebec": "Quebec",
         "saskatchewan": "Saskatchewan",
         "yukon": "Yukon"
-      }
-
+      },
+      "allPetsButton": "All pets"
     },
     "pet": {
-      "petAddTitle" : "Add a new Pet",
+      "petAddTitle": "Add a new Pet",
       "petDetailsTitle": "Pet Details",
       "petDetailsSubtitle": "Registered pets and their information",
       "closeButton": "Close",
       "loadingPets": "Loading pets...",
       "noPetsFound": "No registered found for this customer.",
-      "button":{
+      "button": {
         "add": "Add",
         "addAnimal": "Add an animal"
       },
@@ -518,6 +673,233 @@
         "date": "Date of Birth is required",
         "weightR": "Weight is required",
         "weightP": "Weight should be a valid number"
+      }
+    },
+    "products": {
+      "title": "Products",
+      "description": "Manage products available to the clinic.",
+      "loading": "Loading products...",
+      "empty": "No products found.",
+      "actions": {
+        "add": "Add Product",
+        "retry": "Try again",
+        "details": "Details",
+        "update": "Update",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "save": "Save Product",
+        "close": "Close"
+      },
+      "search": {
+        "label": "Search products by name",
+        "placeholder": "Enter a product name"
+      },
+      "tabs": {
+        "products": "Products",
+        "bundles": "Bundles",
+        "settings": "Settings"
+      },
+      "bundles": {
+        "title": "Bundles",
+        "description": "Manage bundles available to the clinic.",
+        "loading": "Loading bundles...",
+        "itemCount": "{$INTERPOLATION} items",
+        "actions": {
+          "add": "Add Bundle",
+          "update": "Update Bundle",
+          "addItems": "Add items",
+          "removeItem": "Remove item"
+        },
+        "fields": {
+          "name": "Bundle name",
+          "description": "Description",
+          "items": "Bundle items",
+          "originalPrice": "Original price",
+          "bundlePrice": "Bundle price"
+        },
+        "names": {
+          "dog": "Dog Bundle",
+          "fish": "Fish Bundle",
+          "accessory": "Accessory Bundle",
+          "saddle": "Saddle Special",
+          "aquarium": "Aquarium Starter Kit",
+          "kitten": "New Kitten Bundle",
+          "dogCare": "Dog Walk & Care Bundle",
+          "senior": "Senior Pet Comfort Bundle",
+          "smallAnimal": "Small Animal & Bird Bundle",
+          "homeCare": "Home Vet Care Bundle",
+          "ultimate": "Ultimate Pet Owner Bundle"
+        },
+        "descriptions": {
+          "dog": "Dog Food & Flea Collar",
+          "fish": "Cat Litter & Fish Tank Heater",
+          "accessory": "All Accessories",
+          "saddle": "Horse Saddle on sale",
+          "aquarium": "Filter, heater & fish flakes for a new tank",
+          "kitten": "Everything a new kitten needs at home",
+          "dogCare": "Food, walking gear and grooming for dogs",
+          "senior": "Comfort, health and monitoring for aging pets",
+          "smallAnimal": "Housing, food and accessories for rabbits and birds",
+          "homeCare": "Treatments and tools for at-home pet health care",
+          "ultimate": "Our biggest bundle: food, gear and equipment for every pet"
+        },
+        "discount": {
+          "title": "Bundle discount",
+          "percentage": "Percentage",
+          "percentageLabel": "Discount percentage",
+          "manual": "Manual",
+          "enter": "Enter a discount",
+          "savings": "Customer saves"
+        },
+        "add": {
+          "title": "Add Bundle",
+          "close": "Close Add Bundle dialog"
+        },
+        "update": {
+          "title": "Update Bundle",
+          "close": "Close Update Bundle dialog"
+        },
+        "delete": {
+          "title": "Delete bundle?",
+          "confirm": "Are you sure you want to delete {$name}? This cannot be undone."
+        },
+        "selector": {
+          "selected": "{$INTERPOLATION} product(s) selected",
+          "clear": "Clear",
+          "addAll": "Add all",
+          "empty": "No products match your search.",
+          "confirm": "OK"
+        },
+        "validation": {
+          "nameRequired": "Bundle name is required.",
+          "descriptionRequired": "Bundle description is required.",
+          "priceRequired": "Bundle price is required.",
+          "itemRequired": "Bundle needs at least one item.",
+          "percentageRequired": "Discount percentage is required.",
+          "percentageMinimum": "Discount must be at least 1%.",
+          "percentageMaximum": "Discount cannot be more than 100%.",
+          "pricePositive": "Bundle price must be greater than zero.",
+          "priceBelowOriginal": "Bundle price must be less than {$price}.",
+          "priceNumber": "Bundle price must be a valid number.",
+          "priceBelowOriginalGeneric": "Bundle price must be less than the original price."
+        },
+        "errors": {
+          "load": "Failed to load bundles.",
+          "save": "Could not save the bundle."
+        }
+      },
+      "reviewSettings": {
+        "title": "Review Settings",
+        "description": "Set how long customers can edit their reviews.",
+        "period": "Review edit period",
+        "hours": "hours",
+        "save": "Save Review Settings",
+        "saved": "Review edit period saved.",
+        "errors": {
+          "load": "Could not load review settings.",
+          "minimum": "The edit period must be zero or greater.",
+          "save": "Could not save review settings."
+        }
+      },
+      "fields": {
+        "name": "Product name (English)",
+        "description": "Description (English)",
+        "nameFrench": "Product name (French)",
+        "descriptionFrench": "Description (French)",
+        "frenchHint": "Optional. English is displayed when empty.",
+        "price": "Price",
+        "salePrice": "Sale price",
+        "quantity": "Quantity",
+        "type": "Product type",
+        "status": "Status",
+        "delivery": "Delivery",
+        "deliveryType": "Delivery type",
+        "releaseDate": "Release date",
+        "image": "Product image",
+        "replaceImage": "Replace product image",
+        "listed": "Listed",
+        "averageRating": "Average rating"
+      },
+      "add": {
+        "title": "Add Product",
+        "close": "Close Add Product dialog"
+      },
+      "update": {
+        "title": "Update Product",
+        "close": "Close Update Product dialog"
+      },
+      "details": {
+        "title": "Product Details",
+        "close": "Close Product Details dialog",
+        "loading": "Loading product..."
+      },
+      "delete": {
+        "title": "Delete product?",
+        "confirm": "Are you sure you want to delete {$name}? This cannot be undone.",
+        "close": "Close delete confirmation dialog",
+        "bundleTitle": "Product is in a bundle",
+        "bundleConfirm": "{$name} is part of one or more product bundles. Deleting it will also permanently delete those bundles. Do you want to continue?",
+        "productAndBundles": "Delete product and bundles"
+      },
+      "validation": {
+        "nameRequired": "Product name is required.",
+        "descriptionRequired": "Product description is required.",
+        "priceRequired": "Sale price is required.",
+        "quantityRequired": "Quantity is required.",
+        "typeRequired": "Product type is required.",
+        "imageType": "Only JPEG, JPG, and PNG images are supported.",
+        "pricePositive": "Sale price must be greater than zero.",
+        "quantityNonNegative": "Quantity cannot be negative."
+      },
+      "errors": {
+        "load": "Could not load products.",
+        "save": "Could not save the product.",
+        "update": "Could not update the product.",
+        "delete": "Could not delete the product.",
+        "details": "Could not load product details."
+      },
+      "types": {
+        "medication": "Medication",
+        "accessory": "Accessory",
+        "food": "Food",
+        "equipment": "Equipment"
+      },
+      "status": {
+        "available": "Available",
+        "preOrder": "Pre-order",
+        "outOfStock": "Out of stock"
+      },
+      "delivery": {
+        "delivery": "Delivery",
+        "pickup": "Pickup",
+        "deliveryAndPickup": "Delivery and pickup",
+        "none": "No delivery option"
+      },
+      "common": {
+        "yes": "Yes",
+        "no": "No"
+      },
+      "image": {
+        "alt": "Product image",
+        "unavailable": "No product image available",
+        "none": "No image"
+      }
+    },
+    "petList": {
+      "title": "Pets",
+      "loadingLabel": "Loading",
+      "loading": "Loading pets...",
+      "loadError": "Unable to load pets. Please try again later.",
+      "empty": "No pets registered.",
+      "caption": "Pets registered at the clinic",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "noResults": "No pets match the filters.",
+      "filters": {
+        "petType": "Pet type",
+        "petTypePlaceholder": "e.g. dog",
+        "name": "Pet name"
       }
     },
     "modal": {
@@ -620,10 +1002,14 @@
       "supplier": { "notRecorded": "Not recorded" },
       "fields": {
         "name": "Name",
+        "nameEn": "Name (English)",
+        "nameFr": "Name (French)",
         "supplyName": "Supply name",
         "supplier": "Supplier",
         "supplierName": "Supplier name",
         "description": "Description",
+        "descriptionEn": "Description (English)",
+        "descriptionFr": "Description (French)",
         "costPrice": "Cost Price (CAD)",
         "salePrice": "Sale Price (CAD)",
         "quantity": "Quantity",
@@ -652,6 +1038,7 @@
       "expiration": { "expired": "Expired", "soon": "Expiring soon", "none": "No expiration" },
       "actions": {
         "add": "Add Supply",
+        "restock": "Restock",
         "edit": "Edit",
         "history": "History",
         "delete": "Delete",
@@ -669,6 +1056,22 @@
         "summary": "Info",
         "cannotConsumeStock": "Cannot consume - out of stock",
         "cannotConsumeExpired": "Cannot consume - expired"
+      },
+      "restock": {
+        "quantityRequired": "Quantity is required.",
+        "quantityPositive": "Enter an integer greater than 0.",
+        "quantityMax": "Quantity must not exceed 2147483647.",
+        "permission": "You no longer have permission to restock this supply.",
+        "quantityInteger": "Enter an integer between 1 and 2147483647.",
+        "uncertain": "Unable to confirm restock. Stock may have changed. Reload the page to check quantities before trying again.",
+        "failed": "Unable to restock supply.",
+        "ariaLabel": "Restock {$name}",
+        "adding": "Adding stock...",
+        "add": "Add stock",
+        "title": "Restock supply",
+        "cancel": "Cancel",
+        "currentQuantity": "{$INTERPOLATION} — Current quantity: {$INTERPOLATION_1}",
+        "quantity": "Quantity to add"
       },
       "summary": {
         "ariaLabel": "Summary for {$name}",
@@ -711,6 +1114,16 @@
     },
     "inventory": {
       "title": "Inventory",
+      "sort": {
+        "label": "Sort by",
+        "nameAsc": "Name A–Z",
+        "nameDesc": "Name Z–A",
+        "type": "Type",
+        "countDesc": "Number of supplies (most first)",
+        "countError": "Could not load supply counts. Try again or choose another sort.",
+        "retry": "Try again",
+        "loadingCounts": "Loading supply counts…"
+      },
       "data": {
         "names": {
           "medicalEquipment": "Medical equipment",
@@ -746,8 +1159,12 @@
       },
       "fields": {
         "name": "Inventory name",
+        "nameEn": "Inventory name (English)",
+        "nameFr": "Inventory name (French)",
         "type": "Inventory type",
-        "description": "Description"
+        "description": "Description",
+        "descriptionEn": "Description (English)",
+        "descriptionFr": "Description (French)"
       },
       "filters": {
         "aria": "Filter inventories",
@@ -812,6 +1229,315 @@
         "nameRequired": "Inventory name is required.",
         "typeRequired": "Inventory type is required.",
         "descriptionRequired": "Description is required."
+      }
+    },
+
+    "orderReports": {
+      "title": "Order Reports",
+      "subtitle": "View the issues customers reported on their orders.",
+      "loading": "Loading order reports...",
+      "empty": "No order reports found.",
+      "close": "Close",
+      "columns": {
+        "report": "Report",
+        "order": "Order Number",
+        "customer": "Customer",
+        "category": "Category",
+        "status": "Status"
+      },
+      "fields": {
+        "submitted": "Submitted",
+        "category": "Category",
+        "email": "Email",
+        "order": "Order",
+        "date": "Date",
+        "shipping": "Shipping",
+        "address": "Address",
+        "resolvedAt": "Closed on"
+      },
+      "status": {
+        "NEW": "New",
+        "IN_REVIEW": "In Review",
+        "RESOLVED": "Resolved",
+        "REJECTED": "Rejected"
+      },
+      "reasons": {
+        "DAMAGED_ITEM": "Damaged Item(s)",
+        "MISSING_ITEM": "Missing Item(s)",
+        "WRONG_ITEM": "Wrong Item Received",
+        "PACKAGE_NOT_RECEIVED": "Package Did Not Arrive",
+        "OTHER": "Other"
+      },
+      "reportDialog": {
+        "eyebrow": "Order report",
+        "closeAria": "Close report dialog",
+        "details": "Details",
+        "description": "Description",
+        "affectedItems": "Affected items",
+        "noItems": "No specific items were selected.",
+        "viewOrder": "View order",
+        "resolution": "Resolution",
+        "noNote": "No note added.",
+        "markInReview": "Mark In Review",
+        "reject": "Reject",
+        "resolve": "Resolve"
+      },
+      "statusDialog": {
+        "resolveTitle": "Resolve report",
+        "resolveMessage": "The report will be closed as resolved. You can add a resolution note.",
+        "resolveNote": "Resolution note (optional)",
+        "resolveConfirm": "Resolve",
+        "rejectTitle": "Reject report",
+        "rejectMessage": "The report will be closed as rejected. Give the reason for the rejection.",
+        "rejectNote": "Rejection reason",
+        "rejectConfirm": "Reject",
+        "noteRequired": "A reason is required to reject a report.",
+        "cancel": "Cancel"
+      },
+      "orderDialog": {
+        "eyebrow": "Order details",
+        "title": "Order",
+        "closeAria": "Close order dialog",
+        "loading": "Loading order...",
+        "customerDelivery": "Customer & delivery",
+        "items": "Items",
+        "product": "Product",
+        "quantity": "Quantity",
+        "price": "Price",
+        "total": "Total"
+      },
+      "errors": {
+        "loadFailed": "Could not load order reports.",
+        "orderLoadFailed": "Could not load the order.",
+        "updateFailed": "Could not update the report status."
+      },
+      "paginator": {
+        "itemsPerPage": "Items per page:",
+        "next": "Next page",
+        "previous": "Previous page",
+        "first": "First page",
+        "last": "Last page",
+        "empty": "0 of 0",
+        "range": "{$START} – {$END} of {$LENGTH}"
+      }
+    },
+
+    "bill": {
+      "header": "Billing",
+      "subheader": "Bills",
+      "description": "Review and manage billing records",
+      "createBillButton": "Create Bill",
+      "findBillById": "Find a bill By ID",
+      "searchButton": "Find Bill",
+      "searchPlaceholder": "Enter Bill ID",
+      "myBills": "My Bills",
+      "adminBills": "Bill Overview",
+      "vetViewBills": "View bills associated with your veterinarian account",
+      "adminViewBills": "View, update, and archive billing records",
+      "selectUnpaidBill": "Select an unpaid bill to process a payment",
+      "archiving": "Archiving...",
+      "archiveBill": "Archive Eligible Bills",
+      "activeButton": "Active Bills",
+      "archivedButton": "Archived Bills",
+      "hideFilter": "Hide Filters",
+      "showFilter": "Show Filters",
+
+      "custId": "Customer ID",
+      "custName": "Customer Name",
+      "vetName": "Veterinarian Name",
+      "visitType": "Visit Type",
+      "status": "Status",
+      "statusTypes": {
+        "allStatus": "All statuses",
+        "paid": "PAID",
+        "unpaid": "UNPAID",
+        "overdue": "OVERDUE"
+      },
+      "creationYear": "Creation Year",
+      "creationMonth": "Creation Month",
+      "creationDate": "Creation Date",
+      "currency": "Currency",
+      "clearFilters": "Clear Filters",
+      "notAvailable": "Not Available",
+      "exempt": "Exempt",
+      "detailButton": "Details",
+      "downloading": "Downloading...",
+      "download": "Download PDF",
+      "updateButton": "Update",
+      "noArchive": "No archived bills",
+      "noActive": "No active bills",
+      "noArchiveRecord": "There are no archived billing records",
+      "noActiveRecord": "There are no active billing records",
+      "noBillsFound": "No bills found",
+      "noBills": "There are no bills to display",
+      "noVetBills": "There are no bills associated with your veterinarian account",
+      "notPermitted": "You do not have permission to access billing records",
+      "detailLoading": "Loading bill details...",
+
+      "add": "Add",
+      "confirm": "Confirm",
+      "update": "Save Changes",
+      "submit": "Submit",
+      "cancel": "Cancel",
+
+      "detail": {
+        "details": "Bill Details",
+        "desc": "Billing information and payment details",
+        "info": "Bill Information",
+        "paySummary": "Payment Summary",
+        "ogAmount": "Original Amount",
+        "GST": "GST",
+        "QST": "QST",
+        "taxes": "Total Taxes",
+        "totalAmt": "Total Amount",
+        "infoAdd": "Additional Information",
+        "payStat": "Payment Status",
+        "interestExempt": "Interest Exempt",
+        "timeRem": "Time Remaining",
+        "paid": "Bill Paid",
+        "days": "days",
+        "notAvail": "Not available"
+      },
+
+      "detailErr": {
+        "noPerm": "You do not have permission to view this bill",
+        "unable": "Unable to load bill details. Please try again",
+        "enterBillId": "Please enter a Bill Id"
+      },
+
+      "archiveErr": {
+        "completed": "Archive check completed. All eligible bills have been processed",
+        "unable": "Unable to archive bills. Please try again",
+        "listErr": "The archive request succeeded, but the bill list could not be refreshed. Reload the page to check the results"
+      },
+
+      "month": {
+        "months": "All months",
+        "jan": "January",
+        "feb": "February",
+        "mar": "March",
+        "apr": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "aug": "August",
+        "sept": "September",
+        "oct": "October",
+        "nov": "November",
+        "dec": "December"
+      },
+
+      "tableBill": {
+        "billId": "Bill ID",
+        "custId": "Customer ID",
+        "cust": "Customer",
+        "vetId": "Veterinarian ID",
+        "vet": "Veterinarian",
+        "amount": "Amount",
+        "interest": "Interest",
+        "status": "Status",
+        "archived": "Archived",
+        "actions": "Actions",
+        "active": "Active",
+        "dueDate": "Due Date"
+      },
+
+      "interestOpt": {
+        "saving": "Saving...",
+        "remove": "Remove Interest Exemption",
+        "exempt": "Exempt Interest",
+        "applied": "Interest exemption applied",
+        "removed": "Interest exemption removed",
+        "savedErr": "The exemption was saved, but the bill could not be refreshed. Reload the bill list.",
+        "updateUnable": "Unable to update interest exemption. Please try again"
+      },
+
+      "payment": {
+        "payBill": "Pay Bill",
+        "cardNumber": "Card Number",
+        "cvv": "CVV",
+        "expDate": "Expiration Date (MM/YY)",
+        "process": "Processing...",
+        "confirm": "Confirm Payment",
+
+        "success": "Payment successful. The bill is now PAID",
+        "fail": "Payment failed. Please try again"
+      },
+
+      "createBill": {
+        "welcome": "Welcome",
+        "success": "Bill created successfully",
+        "emailBill": "Email this bill to the customer"
+      },
+
+      "message": {
+        "custReq": "Customer is required",
+        "vistReq": "Visit Type is required",
+        "vetReq": "Vet is required",
+        "dateReq": "Date is required",
+        "amtReq": "Amount is required",
+        "greatAmtReq": "Amount must be greater than 0",
+        "dueDateReq": "Due date is required",
+        "saving": "Saving...",
+        "selectVist": "Please select a valid visit type",
+        "completeForm": "Please complete the required fields",
+        "dueDateInvariant": "Due date cannot be before the creation date",
+        "startDownload": "Bill PDF download started",
+        "downloadErr": "Unable to download PDF. Please try again"
+      },
+
+      "loading": {
+        "unableCust": "Unable to load customers. Please try again later",
+        "unableVet": "Unable to load veterinarians. Please try again later"
+      },
+
+      "updateBill": {
+        "title": "Update Bill",
+        "noPerm": "You do not have permission to update this bill",
+        "notFound": "Bill not found",
+        "reject": "The update was rejected. Cjeck the bill information",
+        "unable": "Unable to update the bill. Please try again"
+      },
+
+      "yes": "Yes",
+      "no": "No",
+
+      "archiveDialog": {
+        "title": "Archive Eligible Bills",
+        "content": "This action will archive all eligible paid bills created more than one year ago.",
+        "note": "Unpaid bills, overdue bills, and new bills will remain unchanged.",
+        "prompt": "Do you want to continue?",
+        "confirm": "Confirm Archive"
+      },
+
+      "visitTypes": {
+        "allTypes": "All visit types",
+        "dental": "Dental",
+        "surgery": "Surgery",
+        "checkup": "Check-up",
+        "vaccine": "Vaccine",
+        "regular": "Regular",
+        "emergency": "Emergency",
+        "CHECKUP": "CHECKUP"
+      },
+
+      "lookup": {
+        "billByCust": "Bills by Customer",
+        "select": "Select a customer to view their bills",
+        "loadCust": "Loading customers...",
+        "loadUnable": "Unable to load customers. Please try again",
+        "try": "Try Again",
+        "noCust": "No customers available",
+        "selectCust": "Select a customer",
+        "loadBill": "Loading bills...",
+        "loadBillUnable": "Unable to load bills. Please try again",
+        "custNoBills": "This customer has no bills"
+      },
+
+      "exemption": {
+        "title": "Confirm Interest Exemption",
+        "exempt": "Exempt this overdue bill from interest? Interest will become $0.00",
+        "remove": "Remove interest exemption and recalculate overdue interest?"
       }
     },
 

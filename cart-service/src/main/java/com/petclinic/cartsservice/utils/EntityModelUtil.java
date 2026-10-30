@@ -133,6 +133,7 @@ public class EntityModelUtil {
         responseModel.setScope(PromoEligibility.scope(promoCode));
         responseModel.setProductIds(promoCode.getProductIds());
         responseModel.setProductTypes(promoCode.getProductTypes());
+        responseModel.setImageId(promoCode.getImageId());
         responseModel.setId(promoCode.getId());
         responseModel.setName(promoCode.getName());
         responseModel.setCode(promoCode.getCode());
@@ -187,6 +188,7 @@ public class EntityModelUtil {
                 .orderId(orderId)
                 .customerId(customerId)
                 .customerName(order.getCustomerName())
+                .customerEmail(order.getEmail())
                 .reason(request.getReason())
                 .affectedItems(affectedItems)
                 .description(request.getDescription().trim())
@@ -214,11 +216,14 @@ public class EntityModelUtil {
                 .orderId(report.getOrderId())
                 .customerId(report.getCustomerId())
                 .customerName(report.getCustomerName())
+                .customerEmail(report.getCustomerEmail())
                 .reason(report.getReason())
                 .affectedItems(affectedItems)
                 .description(report.getDescription())
                 .status(report.getStatus())
                 .submittedAt(report.getSubmittedAt())
+                .resolutionNote(report.getResolutionNote())
+                .resolvedAt(report.getResolvedAt())
                 .build();
     }
 

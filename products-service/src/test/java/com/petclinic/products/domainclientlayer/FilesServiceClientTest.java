@@ -32,6 +32,26 @@ class FilesServiceClientTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private FilesServiceClient filesServiceClient;
 
+    @Test
+    void startupWaitIsBoundedWhenFilesNeverResponds() {
+        var unavailable = new FilesServiceClient(
+                WebClient.builder().exchangeFunction(request -> reactor.core.publisher.Mono.never()),
+                "localhost", "8000");
+        StepVerifier.withVirtualTime(unavailable::awaitStartup)
+                .thenAwait(java.time.Duration.ofMinutes(2))
+                .expectError(java.util.concurrent.TimeoutException.class)
+                .verify();
+    }
+
+    @Test
+    void startupWaitRetriesUntilFilesServerIsReady() throws InterruptedException {
+        mockBackEnd.enqueue(new MockResponse().setResponseCode(503));
+        mockBackEnd.enqueue(new MockResponse().setResponseCode(200));
+        StepVerifier.create(filesServiceClient.awaitStartup()).verifyComplete();
+        assertEquals("/metrics", mockBackEnd.takeRequest(5, TimeUnit.SECONDS).getPath());
+        assertEquals("/metrics", mockBackEnd.takeRequest(5, TimeUnit.SECONDS).getPath());
+    }
+
     @BeforeAll
     static void setUpServer() throws IOException {
         mockBackEnd = new MockWebServer();

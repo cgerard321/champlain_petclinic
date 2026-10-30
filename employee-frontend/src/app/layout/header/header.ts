@@ -47,6 +47,7 @@ export class Header {
       { label: $localize`:@@navbar.inventory:Inventaire`, route: '/invt' },
       { label: $localize`:@@navbar.products:Produits`, route: '/prod' },
       { label: $localize`:@@navbar.promos:Promotions`, route: '/promo' },
+      { label: $localize`:@@navbar.orderReports:Signalements`, route: '/order-reports' },
     ];
 
     if (this.isAdmin()) {
