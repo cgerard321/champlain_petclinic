@@ -234,8 +234,7 @@ public class VisitsControllerV1 {
         return ResponseEntity.ok().body(visitsServiceClient.getAllReviews());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @IsUserSpecific(idToMatch = {"reviewId"})
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ReviewResponseDTO>> getReviewByReviewId(
             @PathVariable String reviewId) {
@@ -310,18 +309,40 @@ public class VisitsControllerV1 {
 
 
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @IsUserSpecific(idToMatch = {"reviewId"})
+    @SecuredEndpoint(allowedRoles = {Roles.CUST, Roles.ADMIN})
     @PutMapping(value = "/reviews/{reviewId}")
     public Mono<ResponseEntity<ReviewResponseDTO>> updateReview(
             @PathVariable String reviewId,
-            @RequestBody Mono<ReviewRequestDTO> reviewRequestDTO) {
+            @RequestBody Mono<ReviewRequestDTO> reviewRequestDTO,
+            ServerWebExchange exchange) {
 
-        return Mono.just(reviewId)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided review ID is invalid: " + reviewId)))
-                .flatMap(id -> visitsServiceClient.updateReview(id, reviewRequestDTO)) // Assuming `updateReview` method exists in `visitsServiceClient`
+        TokenResponseDTO user = exchange.getAttribute("tokenValues");
+
+        return visitsServiceClient.getReviewByReviewId(reviewId)
+                .flatMap(existing -> {
+                    if (!isAdmin(user) && !isReviewAuthor(existing, user)) {
+                        return Mono.error(new ForbiddenAccessException("You can only edit your own reviews."));
+                    }
+                    // The author never changes on an edit, whatever the body says
+                    return visitsServiceClient.updateReview(reviewId, reviewRequestDTO
+                            .doOnNext(review -> {
+                                review.setOwnerId(existing.getOwnerId());
+                                review.setReviewerId(existing.getReviewerId());
+                            }));
+                })
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    private boolean isAdmin(TokenResponseDTO user) {
+        return user != null && user.getRoles() != null
+                && user.getRoles().stream().anyMatch(role -> role.contains(Roles.ADMIN.toString()));
+    }
+
+    // Seeded reviews only have a reviewerId, reviews posted through the gateway also have the ownerId
+    private boolean isReviewAuthor(ReviewResponseDTO review, TokenResponseDTO user) {
+        return user != null && user.getUserId() != null
+                && (user.getUserId().equals(review.getReviewerId()) || user.getUserId().equals(review.getOwnerId()));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.CUST, Roles.ADMIN})

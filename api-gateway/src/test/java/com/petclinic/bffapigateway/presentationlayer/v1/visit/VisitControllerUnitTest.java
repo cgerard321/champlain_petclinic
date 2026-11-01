@@ -382,11 +382,18 @@ public class VisitControllerUnitTest {
     @Test
     void updateReview_whenValidRequest_thenReturnOkResponse() {
         // Arrange
+        ReviewResponseDTO existingReview = ReviewResponseDTO.builder()
+                .reviewId("R001")
+                .ownerId("owner-1")
+                .reviewerId("owner-1")
+                .build();
+        when(visitsServiceClient.getReviewByReviewId("R001"))
+                .thenReturn(Mono.just(existingReview));
         when(visitsServiceClient.updateReview(eq("R001"), any(Mono.class)))
                 .thenReturn(Mono.just(reviewResponseDTO));
 
         // Act
-        webTestClient.put()
+        reviewClientForOwner("owner-1").put()
                 .uri(REVIEWS_URL + "/{reviewId}", "R001")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(reviewRequestDTO)

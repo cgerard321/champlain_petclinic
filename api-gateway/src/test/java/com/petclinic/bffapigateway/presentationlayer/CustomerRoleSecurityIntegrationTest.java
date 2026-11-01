@@ -38,6 +38,8 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -127,6 +129,48 @@ class CustomerRoleSecurityIntegrationTest {
     }
 
     @Test
+    void customerCanEditOwnReview() {
+        validatedRole("CUST");
+        when(visits.getReviewByReviewId("review-one")).thenReturn(Mono.just(reviewBy(USER_ID)));
+        when(visits.updateReview(eq("review-one"), any())).thenReturn(Mono.just(reviewBy(USER_ID)));
+
+        updateReview().exchange().expectStatus().isOk();
+
+        verify(visits).updateReview(eq("review-one"), any());
+    }
+
+    @Test
+    void customerCannotEditAnotherUsersReview() {
+        validatedRole("CUST");
+        when(visits.getReviewByReviewId("review-one")).thenReturn(Mono.just(reviewBy("another-customer")));
+
+        updateReview().exchange().expectStatus().isForbidden();
+
+        verify(visits, never()).updateReview(any(), any());
+    }
+
+    @Test
+    void administratorCanEditAnyReview() {
+        validatedRole("ADMIN");
+        when(visits.getReviewByReviewId("review-one")).thenReturn(Mono.just(reviewBy("another-customer")));
+        when(visits.updateReview(eq("review-one"), any())).thenReturn(Mono.just(reviewBy("another-customer")));
+
+        updateReview().exchange().expectStatus().isOk();
+
+        verify(visits).updateReview(eq("review-one"), any());
+    }
+
+    @Test
+    void customerCanReadReviewById() {
+        validatedRole("CUST");
+        when(visits.getReviewByReviewId("review-one")).thenReturn(Mono.just(reviewBy("another-customer")));
+
+        client.get().uri("/api/gateway/visits/reviews/review-one").accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", TOKEN).exchange().expectStatus().isOk()
+                .expectBody().jsonPath("$.reviewId").isEqualTo("review-one");
+    }
+
+    @Test
     void missingTokenStillRejected() {
         client.get().uri(CARTS + "/cart-one").accept(MediaType.APPLICATION_JSON)
                 .exchange().expectStatus().isUnauthorized();
@@ -209,6 +253,17 @@ class CustomerRoleSecurityIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON).cookie("Bearer", TOKEN)
                 .cookie("XSRF-TOKEN", CSRF).header("X-XSRF-TOKEN", CSRF)
                 .bodyValue("{\"customerId\":\"" + USER_ID + "\"}");
+    }
+
+    private ReviewResponseDTO reviewBy(String reviewerId) {
+        return ReviewResponseDTO.builder().reviewId("review-one").ownerId(reviewerId).reviewerId(reviewerId).build();
+    }
+
+    private WebTestClient.RequestHeadersSpec<?> updateReview() {
+        return client.put().uri("/api/gateway/visits/reviews/review-one")
+                .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", TOKEN).cookie("XSRF-TOKEN", CSRF).header("X-XSRF-TOKEN", CSRF)
+                .bodyValue("{\"rating\":4,\"review\":\"Updated review\"}");
     }
 
     private WebTestClient.RequestHeadersSpec<?> deleteReview(String ownerId) {

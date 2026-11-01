@@ -181,7 +181,6 @@ public class VisitController {
     @GetMapping(value = "/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ReviewResponseDTO>> getReviewByReviewId(@PathVariable String reviewId) {
         return Mono.just(reviewId)
-                .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("the provided review id is invalid: " + reviewId)))
                 .flatMap(reviewService::GetReviewByReviewId)
                 .map(ResponseEntity::ok)
@@ -198,7 +197,6 @@ public class VisitController {
     @PutMapping(value = "/reviews/{reviewId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ReviewResponseDTO>> UpdateReview(@RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono, @PathVariable String reviewId) {
         return Mono.just(reviewId)
-                .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("the provided review id is invalid: " + reviewId)))
                 .flatMap(id -> reviewService.UpdateReview(reviewRequestDTOMono, reviewId))
                 .map(ResponseEntity::ok)
